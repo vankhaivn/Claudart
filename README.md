@@ -27,17 +27,14 @@ Whether you are building a small side project or an enterprise-grade application
 
 ## Getting Started
 
-Start using CLAUDART in your local environment by cloning this template and initiating it.
+To equip your project with CLAUDART's intelligence, you do **not** need to clone this entire repository. You only need to drop the core logic into your project.
 
-```bash
-# 1. Clone the CLAUDART template into your new project directory
-git clone https://github.com/vankhaivn/Claudart.git my-awesome-project
-cd my-awesome-project
+1. Navigate to the [Claudart repository](https://github.com/vankhaivn/Claudart).
+2. Copy the `.claude` directory into the root of your own project.
+3. Open your project in your AI-enabled IDE (like Claude Code or Cursor).
+4. Run the initialization command `> /init` to get started.
 
-# 2. Reinitialize git for your own project
-rm -rf .git
-git init
-```
+By only copying the `.claude` folder, you keep your project free from this template's original documentation and license files.
 
 ## Core Commands & Workflow
 
