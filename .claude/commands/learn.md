@@ -25,5 +25,5 @@ Based on the "Agent Self-Evolution & Context Maintenance" section in `CLAUDE.md`
 
 **Output Standard:**
 - Write rules concisely. Treat them as rigid constraints.
-- If applicable, provide a short "Do not" and "Do" code block representing the standard.
+- NO CODE SNIPPETS in rule files. Instead of copy-pasting code blocks, reference the source file directly (e.g., `app/services/foo.py:45`) so the context never goes stale.
 - Execute the file changes autonomously without asking for permission, and generate a brief summary of what memory and rules were updated.
