@@ -20,8 +20,11 @@ Please execute the following steps systematically without losing any essential p
         paths: ["src/models/**/*.py", "src/repositories/**/*.py"]
         ---
         ```
-    - **NO CODE SNIPPETS RULE: Do NOT copy-paste code blocks into these rule files. Instead, use plain path references (e.g., `app/services/embedding_service.py:45`) so the context never gets outdated.**
-    - **PLAIN PATH RULE: Write file references as plain backtick paths — e.g., `app/services/foo.py` or `app/services/foo.py:45`. Do NOT use markdown link syntax `[label](../../relative/path)`. Relative `../../` links break when rules are read from different contexts.**
+    - **NO CODE SNIPPETS RULE: Do NOT copy-paste code blocks into these rule files. Instead, use file and line references (e.g., `See src/core/db.ts:45 for the database connection pattern`) so the context never gets outdated.**
+    - **RULE QUALITY CHECKLIST**: For each rule written, verify:
+        1. Is it **verifiable**? A reader must be able to check whether it was followed by reading the code.
+        2. Does it have a **loophole**? If yes, add `NEVER X, even when Y` to close the rationalization path.
+        3. Is it **critical**? If yes, prefix with `NEVER`, `YOU MUST`, or `IMPORTANT` — emphasis keywords increase adherence for high-priority constraints.
 
 4. **Refactor the Root `CLAUDE.md`**:
    Truncate the original `CLAUDE.md` so it ONLY contains: Project Overview, Core CLI Commands, Path Aliases, and Global Naming Conventions.

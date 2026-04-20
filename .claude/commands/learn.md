@@ -7,12 +7,14 @@ Please execute a Retrospective & Learning Protocol on the work you just complete
 Based on the "Agent Self-Evolution & Context Maintenance" section in `CLAUDE.md`, you must perform a 2-step protocol:
 
 **Phase 1: Rule Refinement (Retrospective)**
-1. Did you violate any rules, or require human intervention/corrections during this session?
-2. Did you encounter any contradictory statements within `.claude/rules/` vs `CLAUDE.md`, or interpret existing rules too literally/incorrectly?
-3. If yes to either, structurally list the root causes of the misinterpretation.
-4. If the existing rules are contradictory or misleading, immediately fix those existing rules in `.claude/rules/` or `CLAUDE.md` to prevent future bias.
+
+1. List every moment the human corrected you or you deviated from a rule. For each one, answer: _"What rationalization did I use to justify the deviation?"_ — do not just say "I missed the rule".
+2. Did any rule fail because it only described the happy path without closing obvious loopholes?
+3. For each identified gap, update the rule using this pattern: `NEVER do X, even when Y seems like a good reason` — explicitly name the rationalization so future runs cannot reuse it.
+4. If rules contradict each other, resolve the contradiction immediately in `.claude/rules/` or `CLAUDE.md`.
 
 **Phase 2: New Knowledge Integration (Self-Evolution)**
+
 1. Identify any core bug root-causes, architectural decisions, or new design patterns successfully validated in this session.
 2. Use Chain of Thought logically before updating files:
     - First, list all existing files in `.claude/rules/`.
@@ -24,6 +26,8 @@ Based on the "Agent Self-Evolution & Context Maintenance" section in `CLAUDE.md`
       => Global standard (Applies universally) => Update root `CLAUDE.md`.
 
 **Output Standard:**
-- Write rules concisely. Treat them as rigid constraints.
-- NO CODE SNIPPETS in rule files. Instead of copy-pasting code blocks, reference the source file directly (e.g., `app/services/foo.py:45`) so the context never goes stale.
-- Execute the file changes autonomously without asking for permission, and generate a brief summary of what memory and rules were updated.
+
+- Rules must be **verifiable**: a reader must be able to check whether the rule was followed by reading the code. If you cannot verify it, rewrite it.
+- Use `NEVER`, `YOU MUST`, or `IMPORTANT` emphasis for rules that have been violated before — this signals priority to future runs.
+- **NO CODE SNIPPETS** in rule files. Reference the source file and line (e.g., `src/services/foo.ts:45`) so context never goes stale. Code in rule files rots.
+- Execute file changes autonomously without asking for permission, then generate a brief summary of what was updated and why.
