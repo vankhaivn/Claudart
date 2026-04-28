@@ -1,5 +1,5 @@
 ---
-description: Update .claude/CONTEXT.md to reflect the CURRENT state of work (declarative overwrite). Append graduated items to JOURNAL.md. Run at the end of meaningful sessions.
+description: Update .claude/CONTEXT.md to reflect the CURRENT state of work (declarative overwrite). Append graduated items to .claude/JOURNAL.md. Run at the end of meaningful sessions.
 ---
 
 You are about to write a session checkpoint. The output is **not a log of what happened** — it is a **declarative snapshot of what is true right now**. Lifelong append is the failure mode this command exists to prevent.
@@ -8,7 +8,7 @@ You are about to write a session checkpoint. The output is **not a log of what h
 
 1. **.claude/CONTEXT.md is overwritten, not appended.** Anything not still true *right now* must be removed.
 2. **.claude/CONTEXT.md hard ceiling: 150 lines, target < 100.** If your draft exceeds 150, STOP and ask the user to trim manually or run `/refactor-memory`.
-3. **JOURNAL.md is append-only.** Never edit or delete prior entries. Each new entry is a single line.
+3. **.claude/JOURNAL.md is append-only.** Never edit or delete prior entries. Each new entry is a single line.
 4. **NEVER add `@.claude/JOURNAL.md` to `CLAUDE.md`.** JOURNAL is intentionally outside the loaded context to save tokens. If you find such an import, remove it and warn the user.
 5. **Skip JOURNAL entirely when there is nothing meaningful to record.** Empty entries pollute the file.
 
@@ -63,7 +63,7 @@ Use this skeleton; **omit any section that has nothing to say**:
 
 Count lines. If > 150, STOP and report to the user; do not write the file.
 
-### Step 5 — Append to JOURNAL.md
+### Step 5 — Append to .claude/JOURNAL.md
 
 For every item that was DROPPED in Step 2 because it was *done/decided/pivoted*, write **one line** to `.claude/JOURNAL.md` in this format:
 

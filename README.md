@@ -22,7 +22,7 @@ It scales from a small side project to a large team repo, acting as your intelli
 
 - **Modular Rules System** — root `CLAUDE.md` stays a lightweight index; domain rules live in path-scoped files under `.claude/rules/`.
 - **Built-in Review Agents** — `clean-code-reviewer` (scope discipline + Clean Code + project conventions) and `secure-reviewer` (read-only OWASP audit). Both ship with persistent `memory: user` so they accumulate stack-specific knowledge across sessions.
-- **Session Handoff via `CONTEXT.md` + `JOURNAL.md`** — declarative current-state file (auto-pruned) plus an append-only audit log that is intentionally NOT loaded into sessions (no token cost).
+- **Session Handoff via `.claude/CONTEXT.md` + `.claude/JOURNAL.md`** — declarative current-state file (auto-pruned) plus an append-only audit log that is intentionally NOT loaded into sessions (no token cost).
 - **Continuous Self-Learning** — `/learn` re-reads the rule set, runs a retrospective on the just-completed work, and promotes recurring patterns from JOURNAL into rules.
 - **Health Check Built In** — `/doctor` validates that your installation is wired correctly: YAML frontmatter, rule path coverage, AI-behavior import, CONTEXT/JOURNAL hygiene, agent overlap.
 
@@ -89,7 +89,7 @@ CLAUDART uses **four files** plus Claude Code's native auto memory:
 | `.claude/JOURNAL.md` | **Never** (intentional) | `/checkpoint` (append) | Forever (git history) |
 | `~/.claude/projects/<hash>/memory/` | First 200 lines | Claude itself | Per-machine |
 
-**Why no vector DB?** For a single-developer or small-team project, native markdown + git + path-scoped rules cover 90% of the value. Vector DB adds infrastructure overhead, sync costs, and lock-in — for marginal benefit on codebases under ~100k LOC. CLAUDART's `JOURNAL.md` is grep-friendly, plain text, and survives every tool transition.
+**Why no vector DB?** For a single-developer or small-team project, native markdown + git + path-scoped rules cover 90% of the value. Vector DB adds infrastructure overhead, sync costs, and lock-in — for marginal benefit on codebases under ~100k LOC. CLAUDART's `.claude/JOURNAL.md` is grep-friendly, plain text, and survives every tool transition.
 
 ## Recommended Workflow
 
@@ -150,7 +150,7 @@ ephemeral              medium-lived           permanent
 
 A tactical note lives in `.claude/CONTEXT.md`. When `/checkpoint` retires it (decision settled, work merged), one line goes to `.claude/JOURNAL.md`. When `/learn` later spots the same decision recurring in the JOURNAL tail, it promotes the underlying principle into `.claude/rules/` — where it becomes loaded into every future session.
 
-This pipeline keeps each layer small and on-purpose: `CONTEXT.md` doesn't bloat, `JOURNAL.md` stays grep-friendly, and `.claude/rules/` only contains principles that have proven their value.
+This pipeline keeps each layer small and on-purpose: `.claude/CONTEXT.md` doesn't bloat, `.claude/JOURNAL.md` stays grep-friendly, and `.claude/rules/` only contains principles that have proven their value.
 
 ## Contributing
 

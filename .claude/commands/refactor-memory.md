@@ -101,7 +101,7 @@ For `.claude/JOURNAL.md`:
 - **CRITICAL**: search `CLAUDE.md` and every file in `.claude/rules/` for any `@.claude/JOURNAL.md` reference. If found, REMOVE it — JOURNAL must never be loaded into session context. Warn the user that this was fixed.
 - Do NOT prune or rewrite JOURNAL entries. The file is append-only by contract.
 
-Report all proposed audit changes in a clear bulleted list before applying them. Apply the safe ones (frontmatter fixes, snippet removal, missing `@CONTEXT.md` import, JOURNAL @import removal); ask the user before merging or deleting agents/rules.
+Report all proposed audit changes in a clear bulleted list before applying them. Apply the safe ones (frontmatter fixes, snippet removal, missing `@.claude/CONTEXT.md` import, JOURNAL @import removal); ask the user before merging or deleting agents/rules.
 
 ## 8. Append Agent Self-Evolution Section
 

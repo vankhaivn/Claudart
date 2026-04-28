@@ -45,7 +45,7 @@ Walk the conversation chronologically, comparing each assistant turn against the
       - New domain (no strong match) → Create a new `.md` file in `.claude/rules/` with proper YAML `paths: [...]` frontmatter and append the `@` import to `CLAUDE.md`.
       - Global standard (applies universally) → Update root `CLAUDE.md` (or `.claude/rules/ai-behavior.md` if it's a behavioral rather than structural rule).
 
-**Boundary**: `/learn` updates **rules and CLAUDE.md only**. Do NOT modify `CONTEXT.md` (that's `/checkpoint`'s job) and do NOT rewrite `JOURNAL.md` entries (it's append-only). You may *read* both as evidence.
+**Boundary**: `/learn` updates **rules and CLAUDE.md only**. Do NOT modify `.claude/CONTEXT.md` (that's `/checkpoint`'s job) and do NOT rewrite `.claude/JOURNAL.md` entries (it's append-only). You may *read* both as evidence.
 
 ## Output Standard
 
