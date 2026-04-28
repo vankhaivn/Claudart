@@ -10,10 +10,16 @@ CLAUDART keeps the Claude-specific operating layer inside `.claude/`, while shar
 - `/checkpoint` rewrites `.claudart/CONTEXT.md` as the current state and appends meaningful retired items to `.claudart/JOURNAL.md`.
 - `/learn` promotes validated recurring decisions into `.claude/rules/`.
 - `/doctor` runs a read-only health check on the CLAUDART installation.
+- `/sync codex` reads the current Codex snapshot and updates the Claude side.
+
+## Base Template Maintenance
+
+This repository is the CLAUDART base template. Maintain `.claude` and `.codex/.agents` manually as peer source templates. Sync is for downstream user projects after installation, not for authoring this template.
 
 ## Domain Rules
 
 See @.claudart/CONTEXT.md for the current state of work (updated by /checkpoint).
+See @.claudart/sync-map.md for Claude/Codex sync rules.
 See @.claude/rules/ai-behavior.md for universal AI behavior guidelines.
 
 ## Agent Self-Evolution & Context Maintenance

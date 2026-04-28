@@ -14,15 +14,16 @@
 
 ## Overview
 
-**CLAUDART** (a portmanteau of **CLAUDE** and **SMART**) is a universal project template that supercharges your AI-assisted workflow from day one. Instead of starting from scratch, CLAUDART gives every project a "brain" — a Modular Rules System, opinionated review agents, a session-handoff convention, and a built-in self-learning loop tuned to your codebase.
+**CLAUDART** (a portmanteau of **CLAUDE** and **SMART**) is a universal project template that supercharges your AI-assisted workflow from day one. Instead of starting from scratch, CLAUDART gives every project a "brain" — a Modular Rules System, opinionated review agents, a session-handoff convention, a sync contract for Claude/Codex, and a built-in self-learning loop tuned to your codebase.
 
 It scales from a small side project to a large team repo, acting as your intelligent pair programmer and project memory — with **zero external dependencies, no vector DBs, no plugins**. Just markdown files and slash commands.
 
 ## Key Features
 
-- **Modular Rules System** — `.claude/CLAUDE.md` stays a lightweight index; domain rules live in path-scoped files under `.claude/rules/`.
-- **Built-in Review Agents** — `clean-code-reviewer` (scope discipline + Clean Code + project conventions) and `secure-reviewer` (read-only OWASP audit). Both ship with persistent `memory: user` so they accumulate stack-specific knowledge across sessions.
-- **Session Handoff via `.claudart/CONTEXT.md` + `.claudart/JOURNAL.md`** — declarative current-state file (auto-pruned) plus an append-only audit log that is intentionally NOT loaded into sessions (no token cost).
+- **Modular Rules System** — `.claude/CLAUDE.md` and `.codex/CODEX.md` stay lightweight indexes; domain rules live in path-scoped files under `.claude/rules/` and `.codex/guidelines/`.
+- **Built-in Review Agents** — `clean-code-reviewer` (scope discipline + Clean Code + project conventions) and `secure-reviewer` (read-only OWASP audit). Claude agents use `memory: user`; Codex agents ship as native TOML definitions with read-only sandboxing.
+- **Shared Session Handoff via `.claudart/CONTEXT.md` + `.claudart/JOURNAL.md`** — declarative current-state file (auto-pruned) plus an append-only audit log shared by Claude and Codex.
+- **Claude/Codex Sync** — `/sync codex` and `$sync claude` translate rules, commands, skills, and agents between tool-native formats in your downstream project without duplicating shared state.
 - **Continuous Self-Learning** — `/learn` re-reads the rule set, runs a retrospective on the just-completed work, and promotes recurring patterns from JOURNAL into rules.
 - **Health Check Built In** — `/doctor` validates that your installation is wired correctly: YAML frontmatter, rule path coverage, AI-behavior import, CONTEXT/JOURNAL hygiene, agent overlap.
 
@@ -30,14 +31,20 @@ It scales from a small side project to a large team repo, acting as your intelli
 
 To equip your project with CLAUDART, copy the relevant files into your repo — no installation, no dependencies.
 
-1. From a fresh CLAUDART checkout, copy `.claude/` into the root of your project. That's it — everything CLAUDART ships lives inside this single directory.
-2. Open the project in Claude Code (or any compatible AI IDE).
+1. From a fresh CLAUDART checkout, copy the AI layer you use into the root of your project:
+   - Claude Code: copy `.claude/` and `.claudart/`.
+   - Codex: copy `AGENTS.md`, `.codex/`, `.agents/`, and `.claudart/`.
+   - Both: copy all of the above.
+2. Open the project in Claude Code, Codex, or both.
 3. (Optional) Run the built-in `/init` to let Claude Code generate a starter `CLAUDE.md` from your codebase.
-4. Copy the generated `CLAUDE.md` content into `.claude/CLAUDE.md`. CLAUDART keeps project memory inside `.claude/` so the whole AI layer stays self-contained.
+4. If `/init` created a root `CLAUDE.md`, copy its generated project content into `.claude/CLAUDE.md`. CLAUDART keeps Claude memory inside `.claude/` so the AI layer stays versioned.
 5. Run `/refactor-memory` to extract domain rules into `.claude/rules/` and wire up `@.claudart/CONTEXT.md` + AI-behavior guardrails.
 6. Run `/doctor` to verify the installation is healthy.
+7. If you also use Codex, copy the Codex-native files from this template rather than generating them from sync. Use `$sync claude` later only when your project-specific Claude side has changed and Codex should receive those changes.
 
 ## Core Commands & Workflow
+
+Claude Code uses slash commands from `.claude/commands/`. Codex uses repo skills in `.agents/skills/` backed by full command specs in `.codex/commands/`: `$codex-refactor-memory`, `$codex-checkpoint`, `$codex-learn`, `$codex-doctor`, and `$sync claude`.
 
 ### `/init` *(built-in to Claude Code, not CLAUDART)*
 
@@ -78,14 +85,24 @@ Run this after completing a complex feature, fixing a tricky bug, or adopting a 
 
 A read-only health check. Reports broken YAML frontmatter, dead rule paths (globs matching zero files), missing AI-behavior wiring, isolated rule files, inlined code snippets, agent overlap, oversized `.claudart/CONTEXT.md`, and any accidental `@.claudart/JOURNAL.md` imports. Uses spot-checks (`head`/`tail`/`wc -l`/`grep`) — never full-reads JOURNAL. Diagnostic only; never modifies files.
 
+### `/sync codex` and `$sync claude`
+
+Directional snapshot sync between Claude Code and Codex. The argument is the source side:
+
+- Claude Code: `/sync codex` reads Codex files and updates `.claude/`.
+- Codex: `$sync claude` reads `.claude/` and updates `AGENTS.md`, `.codex/`, and `.agents/skills/`.
+- Sync never uses `git diff` or commit history. It reads the current filesystem snapshot.
+- Sync never copies `.claudart/CONTEXT.md` or `.claudart/JOURNAL.md`; both tools already share those files.
+- In this CLAUDART base template, sync is not the authoring workflow. Maintainers update `.claude` and `.codex/.agents` manually so both shipped layers remain first-class.
+
 ## Memory Architecture
 
 CLAUDART uses **four files** plus Claude Code's native auto memory:
 
 | File | Loaded? | Who writes | Lifetime |
 |---|---|---|---|
-| `.claude/CLAUDE.md` | Always | You | Project lifetime |
-| `.claude/rules/*.md` | Always (or on path match) | You + `/learn` | Project lifetime |
+| `.claude/CLAUDE.md` / `.codex/CODEX.md` / `AGENTS.md` | Always | You + learn/refactor; sync in downstream projects | Project lifetime |
+| `.claude/rules/*.md` / `.codex/guidelines/*.md` | Always (or on path match) | You + learn/refactor; sync in downstream projects | Project lifetime |
 | `.claudart/CONTEXT.md` | Always (via `@import`) | `/checkpoint` | Live, declarative |
 | `.claudart/JOURNAL.md` | **Never** (intentional) | `/checkpoint` (append) | Forever (git history) |
 | `~/.claude/projects/<hash>/memory/` | First 200 lines | Claude itself | Per-machine |
@@ -113,9 +130,19 @@ copy CLAUDE.md ->         /checkpoint   (end of session — update CONTEXT, log 
 
 ```text
 your-project/
+├── AGENTS.md                       # Codex root instructions
+├── .agents/
+│   └── skills/                     # Codex repo skills, including $sync
 ├── .claudart/
 │   ├── CONTEXT.md                  # Shared live state, declarative, ≤ 150 lines, @imported in .claude/CLAUDE.md
-│   └── JOURNAL.md                  # Shared append-only audit log — NEVER @imported
+│   ├── JOURNAL.md                  # Shared append-only audit log — NEVER @imported
+│   └── sync-map.md                 # Runtime sync contract for downstream projects
+├── .codex/
+│   ├── CODEX.md                    # Codex-native lightweight index
+│   ├── agents/                     # Codex TOML subagents
+│   ├── commands/                   # Codex command specs used by skills
+│   ├── config.toml                 # Codex project defaults
+│   └── guidelines/                 # Codex-native semantic rules
 └── .claude/
     ├── CLAUDE.md                   # Lightweight index (< 100 lines after /refactor-memory)
     ├── agents/
@@ -125,12 +152,13 @@ your-project/
     │   ├── checkpoint.md           # /checkpoint — declarative state update + JOURNAL append
     │   ├── doctor.md               # /doctor — read-only health check
     │   ├── learn.md                # /learn — retrospective + rule promotion
-    │   └── refactor-memory.md      # /refactor-memory — consolidate .claude/CLAUDE.md + rules + agents
+    │   ├── refactor-memory.md      # /refactor-memory — consolidate .claude/CLAUDE.md + rules + agents
+    │   └── sync.md                 # /sync codex — update Claude from Codex
     └── rules/
         └── ai-behavior.md          # Universal Karpathy-derived behavior guardrails
 ```
 
-CLAUDART ships a Claude-specific layer in `.claude/` plus a shared memory core in `.claudart/`. If `/init` creates a root `CLAUDE.md`, copy its content into `.claude/CLAUDE.md` so project memory stays versioned with the CLAUDART layer.
+CLAUDART ships a Claude-specific layer in `.claude/`, a Codex-specific layer in `.codex/` plus `.agents/skills/`, and a shared memory core in `.claudart/`. If `/init` creates a root `CLAUDE.md`, copy its content into `.claude/CLAUDE.md` so project memory stays versioned with the CLAUDART layer.
 
 By keeping all AI assets version-controlled alongside your code, the entire team shares one standard of AI assistance.
 

@@ -1,0 +1,7 @@
+model = "gpt-5.5"
+model_reasoning_effort = "xhigh"
+sandbox_mode = "workspace-write"
+
+[agents]
+max_threads = 4
+max_depth = 1

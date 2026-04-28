@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Initial public release of the **CLAUDART** foundation template.
-- Core AI workflows mapped into `.claude/commands` (`/refactor-memory`, `/learn`, `/checkpoint`, `/doctor`).
+- Core AI workflows mapped into `.claude/commands` (`/refactor-memory`, `/learn`, `/checkpoint`, `/doctor`, `/sync`) and Codex-native `.codex/commands` plus `.agents/skills`.
 - Initial structural support for `.claude/agents`.
+- Shared `.claudart/` memory core, Codex-native template layer, and downstream Claude/Codex sync contract.
 - Documentation foundation: `README.md`, `CONTRIBUTING.md`, and `LICENSE`.

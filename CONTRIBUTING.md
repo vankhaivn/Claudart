@@ -18,7 +18,7 @@ This section guides you through submitting an enhancement suggestion, including 
 - Explain why this enhancement would be useful to most CLAUDART users.
 
 ### 3. Contributing Code & Agents
-We welcome new AI commands and highly specialized agents! If you have built an awesome agent inside `.claude/agents/` or a new command, we would love to see it.
+We welcome new AI commands and highly specialized agents. If you add a durable Claude-side rule, command, or agent, maintain the Codex-native equivalent too when the concept applies to both tools.
 
 **To submit your code:**
 
@@ -26,7 +26,7 @@ We welcome new AI commands and highly specialized agents! If you have built an a
     ```bash
     git checkout -b feature/my-awesome-agent
     ```
-2. **Add or modify files** within the `.claude/` directory. Ensure your prompt engineering is clean, structured, and robust across different models.
+2. **Add or modify files** within the relevant AI layer: `.claude/` for Claude Code, `.codex/` plus `.agents/skills/` for Codex, and `.claudart/` for shared memory contracts.
 3. If you've changed APIs or commands, **update the documentation** (e.g., `README.md`).
 4. **Commit your changes**. Write clear, concise commit messages.
     ```bash
@@ -41,8 +41,10 @@ We welcome new AI commands and highly specialized agents! If you have built an a
 ## Understanding the Architecture Structure
 
 If you're contributing new logic, please adhere to our directory structure:
-- `.claude/commands/`: CLAUDART slash commands (`/learn`, `/checkpoint`, etc.). Your command files here should detail the steps the AI takes.
+- `.claude/commands/`: CLAUDART slash commands (`/learn`, `/checkpoint`, `/sync`, etc.). Your command files here should detail the steps the AI takes.
 - `.claude/agents/`: Highly specialized role-based instruction sets (`reviewer.md`, `architect.md`, etc.). Make sure agent prompts are self-contained and heavily instruct the AI on its specific persona and constraints.
+- `.codex/` and `.agents/skills/`: Codex-native source templates. They should preserve the same intent and quality as the Claude side, not act as lossy generated artifacts.
+- `.claudart/sync-map.md`: Runtime sync contract for downstream user projects. Do not use sync as the authoring workflow for this base template.
 
 ## Pull Request Process
 

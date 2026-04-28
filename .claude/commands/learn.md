@@ -47,6 +47,8 @@ Walk the conversation chronologically, comparing each assistant turn against the
 
 **Boundary**: `/learn` updates **rules and `.claude/CLAUDE.md` only**. Do NOT modify `.claudart/CONTEXT.md` (that's `/checkpoint`'s job) and do NOT rewrite `.claudart/JOURNAL.md` entries (it's append-only). You may *read* both as evidence.
 
+**CLAUDART base template exception**: if this repository is the CLAUDART template itself and the learned rule applies to both Claude and Codex, update the matching Codex-native file manually too. Do not use sync as the authoring shortcut for the base template.
+
 ## Output Standard
 
 - Rules must be **verifiable**: a reader must be able to check whether the rule was followed by reading the code. If you cannot verify it, rewrite it.
