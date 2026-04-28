@@ -3,6 +3,7 @@ name: secure-reviewer
 description: Security-focused code review specialist with minimal permissions. Read-only access ensures safe security audits.
 tools: Read, Grep
 model: inherit
+memory: user
 ---
 
 # Secure Code Reviewer

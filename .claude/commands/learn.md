@@ -13,7 +13,8 @@ Before any retrospective:
 1. Read root `CLAUDE.md` in full.
 2. Read every file in `.claude/rules/*.md` in full (use Glob first if you don't already know what exists).
 3. Read every file in `.claude/agents/*.md` whose tools you used during this session.
-4. Build a short mental index: rule name → core constraint → loophole keyword (if any).
+4. Read `.claude/CONTEXT.md` to know what state the work was in when this session started.
+5. Build a short mental index: rule name → core constraint → loophole keyword (if any).
 
 You cannot judge deviations against rules you haven't re-read. If `.claude/rules/` is empty or missing, note that and continue with `CLAUDE.md` only.
 
@@ -30,7 +31,12 @@ Walk the conversation chronologically, comparing each assistant turn against the
 ## Phase 2: New Knowledge Integration (Self-Evolution)
 
 1. Identify any core bug root-causes, architectural decisions, or new design patterns successfully validated in this session.
-2. Use Chain of Thought before updating files:
+2. **Pattern check via JOURNAL** — `.claude/JOURNAL.md` can grow to thousands of lines, so NEVER full-read it. Use this token-efficient strategy:
+    - **Tail first**: read only the last ~200 lines via `tail -n 200 .claude/JOURNAL.md` (Bash) or `Read` with an `offset` near EOF.
+    - **Grep when targeted**: if you suspect a specific pattern is recurring, use `grep '| decision |' .claude/JOURNAL.md` (or `pivot`) to surface only matching lines without loading the rest.
+    - Look for the same `decision` or `pivot` recurring 2+ times in what you read. A repeating decision is a strong signal that the underlying principle should graduate from CONTEXT/JOURNAL into `.claude/rules/`. Surface these candidates explicitly.
+    - Skip this step entirely if `.claude/JOURNAL.md` doesn't exist or has fewer than 5 entries.
+3. Use Chain of Thought before updating files:
     - First, list all existing files in `.claude/rules/` (already done in Phase 0).
     - Compare the new knowledge with the scope of these existing files.
     - **CRITICAL CONSTRAINT**: DO NOT shoehorn or force new concepts into an existing file if the match is less than 80%. It is strictly PREFERRED to create a new domain file rather than polluting existing specific rules.
@@ -38,6 +44,8 @@ Walk the conversation chronologically, comparing each assistant turn against the
       - Existing domain (perfect match) → Update the exact file in `.claude/rules/`.
       - New domain (no strong match) → Create a new `.md` file in `.claude/rules/` with proper YAML `paths: [...]` frontmatter and append the `@` import to `CLAUDE.md`.
       - Global standard (applies universally) → Update root `CLAUDE.md` (or `.claude/rules/ai-behavior.md` if it's a behavioral rather than structural rule).
+
+**Boundary**: `/learn` updates **rules and CLAUDE.md only**. Do NOT modify `CONTEXT.md` (that's `/checkpoint`'s job) and do NOT rewrite `JOURNAL.md` entries (it's append-only). You may *read* both as evidence.
 
 ## Output Standard
 

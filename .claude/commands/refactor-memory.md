@@ -52,12 +52,15 @@ Trim `CLAUDE.md` so it ONLY contains:
 
 ## 5. Cross-Link the Rules
 
-Under a `## Domain Rules` heading near the bottom of the trimmed `CLAUDE.md`, add semantic imports for every rule file:
+Under a `## Domain Rules` heading near the bottom of the trimmed `CLAUDE.md`, add semantic imports for every rule file, plus the live-state CONTEXT file:
 
 ```markdown
+See @.claude/CONTEXT.md for the current state of work (updated by /checkpoint).
 See @.claude/rules/architecture.md for global boundaries.
 See @.claude/rules/db-rules.md for database patterns.
 ```
+
+**NEVER add `@.claude/JOURNAL.md`** — JOURNAL is intentionally excluded from session context to save tokens. If you find such an import already in `CLAUDE.md`, remove it and warn the user in your final summary.
 
 ## 6. Wire Up AI Behavior Guidelines (file-based, not inlined)
 
@@ -88,7 +91,17 @@ For every file in `.claude/agents/`:
 - Replace hardcoded `grep`/shell pattern lists with guidance ("scan the codebase for hardcoded secrets using the project's security tooling").
 - Confirm the agent's responsibilities don't overlap >50% with another agent — if they do, propose a merge.
 
-Report all proposed audit changes in a clear bulleted list before applying them. Apply the safe ones (frontmatter fixes, snippet removal); ask the user before merging or deleting agents/rules.
+For `.claude/CONTEXT.md`:
+- Confirm it exists. If not, create it from the CLAUDART template (declarative state file maintained by `/checkpoint`).
+- Verify line count ≤ 150. If exceeded, flag for user review — propose either trimming or graduating long-lived items into `.claude/rules/`.
+- Confirm `@.claude/CONTEXT.md` is imported in `CLAUDE.md` (Domain Rules section). If missing, add it.
+
+For `.claude/JOURNAL.md`:
+- Confirm it exists. If not, create it from the CLAUDART template.
+- **CRITICAL**: search `CLAUDE.md` and every file in `.claude/rules/` for any `@.claude/JOURNAL.md` reference. If found, REMOVE it — JOURNAL must never be loaded into session context. Warn the user that this was fixed.
+- Do NOT prune or rewrite JOURNAL entries. The file is append-only by contract.
+
+Report all proposed audit changes in a clear bulleted list before applying them. Apply the safe ones (frontmatter fixes, snippet removal, missing `@CONTEXT.md` import, JOURNAL @import removal); ask the user before merging or deleting agents/rules.
 
 ## 8. Append Agent Self-Evolution Section
 

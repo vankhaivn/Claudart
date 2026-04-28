@@ -9,10 +9,12 @@ Please run a health check on this repository's CLAUDART installation. Your job i
 ### 1. Required Structure
 
 - `.claude/` exists at the repository root
-- `.claude/commands/` exists and contains at least: `learn.md`, `refactor-memory.md`, `doctor.md`
+- `.claude/commands/` exists and contains at least: `learn.md`, `refactor-memory.md`, `doctor.md`, `checkpoint.md`
 - `.claude/agents/` exists (may be empty if user removed shipped agents)
 - `.claude/rules/` exists (may be empty before the user runs `/refactor-memory`)
 - Root `CLAUDE.md` exists
+- `.claude/CONTEXT.md` exists (warn if missing — the user may not have run `/checkpoint` yet)
+- `.claude/JOURNAL.md` exists (warn if missing)
 
 For each missing path, report which command would create it (e.g., "missing → run `/refactor-memory`").
 
@@ -45,6 +47,17 @@ For every rule file in `.claude/rules/*.md`:
 
 - Confirm `.claude/rules/ai-behavior.md` exists.
 - Confirm root `CLAUDE.md` has `@.claude/rules/ai-behavior.md` (or equivalent reference) under Domain Rules. If missing, the universal behavior guidelines are not loaded — flag as **High** severity.
+
+### 5b. CONTEXT/JOURNAL Wiring (token hygiene)
+
+- Confirm `@.claude/CONTEXT.md` is referenced in `CLAUDE.md` Domain Rules. If missing, current-state handoff isn't loaded — flag as **Medium**.
+- `.claude/CONTEXT.md` line count must be ≤ 150 (use `wc -l`, do NOT full-read the file). If exceeded, flag as **High** — past the declarative ceiling, needs trimming or graduation via `/learn`.
+- **CRITICAL**: search `CLAUDE.md` AND every file in `.claude/rules/` for any `@.claude/JOURNAL.md` reference (use `grep -r '@.claude/JOURNAL.md' CLAUDE.md .claude/rules/`). If found, flag as **Critical** — JOURNAL must NEVER be loaded into session context (defeats the entire token-saving purpose). Recommend immediate removal.
+- For `.claude/JOURNAL.md` integrity, use spot-checks rather than full reads (the file may be large):
+    - `head -n 20 .claude/JOURNAL.md` — verify the canonical header is intact.
+    - `wc -l .claude/JOURNAL.md` — report total entry count for the user.
+    - `tail -n 5 .claude/JOURNAL.md` — sample-check the most recent lines match the `YYYY-MM-DD | <type> | <summary>` format.
+    - Skip deeper validation. If a malformed line is suspected, ask the user; do not slurp the whole file just to verify format.
 
 ### 6. Anti-Patterns Inside Rules and Agents
 

@@ -14,28 +14,27 @@
 
 ## Overview
 
-**CLAUDART** (a portmanteau of **CLAUDE** and **SMART**) is a universal project template that supercharges your AI-assisted workflow from day one. Instead of starting from scratch, CLAUDART gives every project a "brain" — a Modular Rules System, opinionated review agents, and a built-in self-learning loop tuned to your codebase.
+**CLAUDART** (a portmanteau of **CLAUDE** and **SMART**) is a universal project template that supercharges your AI-assisted workflow from day one. Instead of starting from scratch, CLAUDART gives every project a "brain" — a Modular Rules System, opinionated review agents, a session-handoff convention, and a built-in self-learning loop tuned to your codebase.
 
-It scales from a small side project to a large team repo, acting as your intelligent pair programmer and project memory.
+It scales from a small side project to a large team repo, acting as your intelligent pair programmer and project memory — with **zero external dependencies, no vector DBs, no plugins**. Just markdown files and slash commands.
 
 ## Key Features
 
 - **Modular Rules System** — root `CLAUDE.md` stays a lightweight index; domain rules live in path-scoped files under `.claude/rules/`.
-- **Built-in Review Agents** — `clean-code-reviewer` (scope discipline + Clean Code + project conventions) and `secure-reviewer` (read-only OWASP audit) ship out of the box.
-- **Continuous Self-Learning** — `/learn` re-reads the rule set, runs a retrospective on the just-completed work, and updates the rules so the same mistake never repeats.
-- **Health Check Built In** — `/doctor` validates that your installation is wired correctly: YAML frontmatter, rule path coverage, AI-behavior import, agent overlap.
+- **Built-in Review Agents** — `clean-code-reviewer` (scope discipline + Clean Code + project conventions) and `secure-reviewer` (read-only OWASP audit). Both ship with persistent `memory: user` so they accumulate stack-specific knowledge across sessions.
+- **Session Handoff via `CONTEXT.md` + `JOURNAL.md`** — declarative current-state file (auto-pruned) plus an append-only audit log that is intentionally NOT loaded into sessions (no token cost).
+- **Continuous Self-Learning** — `/learn` re-reads the rule set, runs a retrospective on the just-completed work, and promotes recurring patterns from JOURNAL into rules.
+- **Health Check Built In** — `/doctor` validates that your installation is wired correctly: YAML frontmatter, rule path coverage, AI-behavior import, CONTEXT/JOURNAL hygiene, agent overlap.
 
 ## Getting Started
 
-To equip your project with CLAUDART, you do **not** need to clone this entire repository — only the `.claude/` directory.
+To equip your project with CLAUDART, copy the relevant files into your repo — no installation, no dependencies.
 
-1. From a fresh CLAUDART checkout, copy `.claude/` into the root of your project.
+1. From a fresh CLAUDART checkout, copy `.claude/` into the root of your project. That's it — everything CLAUDART ships lives inside this single directory.
 2. Open the project in Claude Code (or any compatible AI IDE).
 3. (Optional) Run the built-in `/init` to let Claude Code generate a starter `CLAUDE.md` from your codebase.
-4. Run `/refactor-memory` to extract domain rules into `.claude/rules/` and wire up the universal AI-behavior guidelines.
+4. Run `/refactor-memory` to extract domain rules into `.claude/rules/` and wire up `@.claude/CONTEXT.md` + AI-behavior guardrails.
 5. Run `/doctor` to verify the installation is healthy.
-
-By copying only `.claude/`, your project stays free of CLAUDART's own README, license, and changelog.
 
 ## Core Commands & Workflow
 
@@ -49,53 +48,109 @@ The CLAUDART-specific consolidator. Run this any time `CLAUDE.md`, `.claude/rule
 
 - Extracts domain-specific logic from a bloated `CLAUDE.md` into 2–4 path-scoped files in `.claude/rules/`.
 - Trims root `CLAUDE.md` to a < 100-line index.
-- Wires in `.claude/rules/ai-behavior.md` (universal Karpathy-derived guardrails) via `@` import.
-- **Audits existing rule files and agents** to enforce the same standards: valid YAML frontmatter, no inlined code snippets, no stale metadata, no >50% overlap between agents.
+- Wires in `@.claude/CONTEXT.md` and `@.claude/rules/ai-behavior.md`. Strips any accidental `@.claude/JOURNAL.md` import (JOURNAL must never be loaded).
+- **Audits existing rule files and agents** to enforce the same standards: valid YAML frontmatter, no inlined code snippets, no stale metadata, no >50% overlap between agents, CONTEXT.md within its 150-line ceiling.
 - Relies on git for rollback — CLAUDART intentionally creates no separate backup files. Commit before running.
+
+### `/checkpoint`
+
+End-of-session command. Updates `.claude/CONTEXT.md` to reflect the **current** state of work and appends graduated items to `.claude/JOURNAL.md`. Designed to prevent unbounded growth:
+
+- **Declarative overwrite** — `.claude/CONTEXT.md` is rebuilt each run, not appended. Anything no longer true is removed.
+- **Hard 150-line ceiling** — the command refuses to write a CONTEXT.md that exceeds 150 lines, forcing you to trim or graduate.
+- **Append to JOURNAL on graduation** — when an item is dropped because it was *decided/completed/pivoted*, one line goes to JOURNAL: `YYYY-MM-DD | <type> | <summary>`.
+- **Skip JOURNAL when nothing meaningful happened** — no empty entries.
 
 ### `/learn`
 
 Run this after completing a complex feature, fixing a tricky bug, or adopting a new pattern. The agent will:
 
-1. **Re-read** the entire rule set (`CLAUDE.md` + `.claude/rules/*.md` + relevant agents).
+1. **Re-read** the entire rule set (`CLAUDE.md` + `.claude/rules/*.md` + `.claude/CONTEXT.md` + relevant agents).
 2. Run a retrospective: name every deviation and the rationalization that justified it.
-3. Patch the rules with `NEVER X, even when Y` framing to close the loophole.
-4. Save quiet confirmations too — when the human accepted an unusual judgment call, that's a validated approach worth recording.
+3. Scan the **tail** of `.claude/JOURNAL.md` (last ~200 lines) for recurring decisions/pivots — repeating patterns are strong signals to **graduate** principles into `.claude/rules/`. JOURNAL is never full-read; that would burn tokens for no benefit.
+4. Patch the rules with `NEVER X, even when Y` framing to close loopholes.
+5. Save quiet confirmations too — when the human accepted an unusual judgment call, that's a validated approach worth recording.
+
+`/learn` only writes to **rules and CLAUDE.md**. It never touches `.claude/CONTEXT.md` (that's `/checkpoint`'s job) or rewrites `JOURNAL.md` entries (append-only).
 
 ### `/doctor`
 
-A read-only health check. Reports broken YAML frontmatter, dead rule paths (globs matching zero files), missing AI-behavior wiring, isolated rule files (not cross-linked from `CLAUDE.md`), inlined code snippets in rules, and overlapping agent triggers. Never modifies files — diagnostic only.
+A read-only health check. Reports broken YAML frontmatter, dead rule paths (globs matching zero files), missing AI-behavior wiring, isolated rule files, inlined code snippets, agent overlap, oversized `.claude/CONTEXT.md`, and any accidental `@.claude/JOURNAL.md` imports. Uses spot-checks (`head`/`tail`/`wc -l`/`grep`) — never full-reads JOURNAL. Diagnostic only; never modifies files.
+
+## Memory Architecture
+
+CLAUDART uses **four files** plus Claude Code's native auto memory:
+
+| File | Loaded? | Who writes | Lifetime |
+|---|---|---|---|
+| `CLAUDE.md` | Always | You | Project lifetime |
+| `.claude/rules/*.md` | Always (or on path match) | You + `/learn` | Project lifetime |
+| `.claude/CONTEXT.md` | Always (via `@import`) | `/checkpoint` | Live, declarative |
+| `.claude/JOURNAL.md` | **Never** (intentional) | `/checkpoint` (append) | Forever (git history) |
+| `~/.claude/projects/<hash>/memory/` | First 200 lines | Claude itself | Per-machine |
+
+**Why no vector DB?** For a single-developer or small-team project, native markdown + git + path-scoped rules cover 90% of the value. Vector DB adds infrastructure overhead, sync costs, and lock-in — for marginal benefit on codebases under ~100k LOC. CLAUDART's `JOURNAL.md` is grep-friendly, plain text, and survives every tool transition.
 
 ## Recommended Workflow
 
 ```text
-new project              maintenance loop
-─────────────            ────────────────
-/init                    work on a feature/bug
+new project              daily loop
+─────────────            ──────────
+/init                    work on feature/bug
   ↓                        ↓
-copy .claude/            /learn   (capture new patterns)
+copy .claude/            /checkpoint   (end of session — update CONTEXT, log to JOURNAL)
   ↓                        ↓
-/refactor-memory         /refactor-memory   (occasionally, to consolidate)
+/refactor-memory         /learn         (after meaningful changes — refine rules)
   ↓                        ↓
-/doctor                  /doctor   (whenever something feels off)
+/doctor                  /refactor-memory   (occasionally — consolidate)
+                           ↓
+                         /doctor       (whenever something feels off)
 ```
 
 ## Directory Layout
 
 ```text
-.claude/
-├── agents/
-│   ├── clean-code-reviewer.md   # PROACTIVE: scope + Clean Code + project conventions
-│   └── secure-reviewer.md       # PROACTIVE: read-only OWASP-focused audit
-├── commands/
-│   ├── doctor.md                # /doctor — read-only health check
-│   ├── learn.md                 # /learn — retrospective + rule refinement
-│   └── refactor-memory.md       # /refactor-memory — consolidate CLAUDE.md + rules + agents
-└── rules/
-    └── ai-behavior.md           # Universal Karpathy-derived behavior guardrails
+your-project/
+├── CLAUDE.md                       # Lightweight index (< 100 lines after /refactor-memory)
+└── .claude/
+    ├── CONTEXT.md                  # Live state, declarative, ≤ 150 lines, @imported in CLAUDE.md
+    ├── JOURNAL.md                  # Append-only audit log — NEVER @imported
+    ├── agents/
+    │   ├── clean-code-reviewer.md  # PROACTIVE: scope + Clean Code + project conventions
+    │   └── secure-reviewer.md      # PROACTIVE: read-only OWASP-focused audit
+    ├── commands/
+    │   ├── checkpoint.md           # /checkpoint — declarative state update + JOURNAL append
+    │   ├── doctor.md               # /doctor — read-only health check
+    │   ├── learn.md                # /learn — retrospective + rule promotion
+    │   └── refactor-memory.md      # /refactor-memory — consolidate CLAUDE.md + rules + agents
+    └── rules/
+        └── ai-behavior.md          # Universal Karpathy-derived behavior guardrails
 ```
 
+Everything CLAUDART ships lives inside `.claude/` — copying that single directory bootstraps a new project entirely. The only file that lives at the repo root is `CLAUDE.md` (Claude Code's convention).
+
 By keeping all AI assets version-controlled alongside your code, the entire team shares one standard of AI assistance.
+
+## The Graduation Pipeline
+
+CLAUDART's three knowledge stores serve different lifetimes:
+
+```
+ephemeral              medium-lived           permanent
+─────────              ────────────           ─────────
+.claude/CONTEXT.md  →  .claude/JOURNAL.md  →  .claude/rules/
+("now")                ("happened")           ("always true")
+
+   ↑                       ↑                       ↑
+/checkpoint           /checkpoint              /learn
+                                          (when JOURNAL tail
+                                           shows the same
+                                           decision ≥ 2 times)
+```
+
+A tactical note lives in `.claude/CONTEXT.md`. When `/checkpoint` retires it (decision settled, work merged), one line goes to `.claude/JOURNAL.md`. When `/learn` later spots the same decision recurring in the JOURNAL tail, it promotes the underlying principle into `.claude/rules/` — where it becomes loaded into every future session.
+
+This pipeline keeps each layer small and on-purpose: `CONTEXT.md` doesn't bloat, `JOURNAL.md` stays grep-friendly, and `.claude/rules/` only contains principles that have proven their value.
 
 ## Contributing
 

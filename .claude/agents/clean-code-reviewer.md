@@ -3,6 +3,7 @@ name: clean-code-reviewer
 description: Senior code reviewer enforcing Change Scope discipline, Clean Code principles, and project-specific conventions. Use PROACTIVELY after writing or modifying code.
 tools: Read, Grep, Glob, Bash
 model: inherit
+memory: user
 ---
 
 # Clean Code Reviewer Agent
