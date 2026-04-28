@@ -9,7 +9,7 @@ You are about to write a session checkpoint. The output is **not a log of what h
 1. **.claude/CONTEXT.md is overwritten, not appended.** Anything not still true *right now* must be removed.
 2. **.claude/CONTEXT.md hard ceiling: 150 lines, target < 100.** If your draft exceeds 150, STOP and ask the user to trim manually or run `/refactor-memory`.
 3. **.claude/JOURNAL.md is append-only.** Never edit or delete prior entries. Each new entry is a single line.
-4. **NEVER add `@.claude/JOURNAL.md` to `CLAUDE.md`.** JOURNAL is intentionally outside the loaded context to save tokens. If you find such an import, remove it and warn the user.
+4. **NEVER add `@.claude/JOURNAL.md` to `.claude/CLAUDE.md`.** JOURNAL is intentionally outside the loaded context to save tokens. If you find such an import, remove it and warn the user.
 5. **Skip JOURNAL entirely when there is nothing meaningful to record.** Empty entries pollute the file.
 
 ## Procedure

@@ -4,19 +4,19 @@ description: Force the Agent to reflect on rules and self-learn after completing
 
 Please execute a Retrospective & Learning Protocol on the work you just completed.
 
-Based on the "Agent Self-Evolution & Context Maintenance" section in `CLAUDE.md`, you must perform a 3-phase protocol. **Do not skip Phase 0** — without re-reading the rules, you cannot reliably detect what was violated.
+Based on the "Agent Self-Evolution & Context Maintenance" section in `.claude/CLAUDE.md`, you must perform a 3-phase protocol. **Do not skip Phase 0** — without re-reading the rules, you cannot reliably detect what was violated.
 
 ## Phase 0: Re-Ground in the Rule Set (MANDATORY first step)
 
 Before any retrospective:
 
-1. Read root `CLAUDE.md` in full.
+1. Read `.claude/CLAUDE.md` in full.
 2. Read every file in `.claude/rules/*.md` in full (use Glob first if you don't already know what exists).
 3. Read every file in `.claude/agents/*.md` whose tools you used during this session.
 4. Read `.claude/CONTEXT.md` to know what state the work was in when this session started.
 5. Build a short mental index: rule name → core constraint → loophole keyword (if any).
 
-You cannot judge deviations against rules you haven't re-read. If `.claude/rules/` is empty or missing, note that and continue with `CLAUDE.md` only.
+You cannot judge deviations against rules you haven't re-read. If `.claude/rules/` is empty or missing, note that and continue with `.claude/CLAUDE.md` only.
 
 ## Phase 1: Rule Refinement (Retrospective)
 
@@ -25,7 +25,7 @@ Walk the conversation chronologically, comparing each assistant turn against the
 1. List every moment the human corrected you OR you deviated from a rule. For each one, answer: *"What rationalization did I use to justify the deviation?"* — do not just say "I missed the rule".
 2. Did any rule fail because it only described the happy path without closing obvious loopholes?
 3. For each identified gap, update the rule using this pattern: `NEVER do X, even when Y seems like a good reason` — explicitly name the rationalization so future runs cannot reuse it.
-4. If rules contradict each other, resolve the contradiction immediately in `.claude/rules/` or `CLAUDE.md`.
+4. If rules contradict each other, resolve the contradiction immediately in `.claude/rules/` or `.claude/CLAUDE.md`.
 5. Also save quiet *confirmations*: if the human accepted an unusual judgment call without pushback, that's a validated approach — record it so you don't drift away from it next time.
 
 ## Phase 2: New Knowledge Integration (Self-Evolution)
@@ -42,10 +42,10 @@ Walk the conversation chronologically, comparing each assistant turn against the
     - **CRITICAL CONSTRAINT**: DO NOT shoehorn or force new concepts into an existing file if the match is less than 80%. It is strictly PREFERRED to create a new domain file rather than polluting existing specific rules.
     - Then, decide:
       - Existing domain (perfect match) → Update the exact file in `.claude/rules/`.
-      - New domain (no strong match) → Create a new `.md` file in `.claude/rules/` with proper YAML `paths: [...]` frontmatter and append the `@` import to `CLAUDE.md`.
-      - Global standard (applies universally) → Update root `CLAUDE.md` (or `.claude/rules/ai-behavior.md` if it's a behavioral rather than structural rule).
+      - New domain (no strong match) → Create a new `.md` file in `.claude/rules/` with proper YAML `paths: [...]` frontmatter and append the `@` import to `.claude/CLAUDE.md`.
+      - Global standard (applies universally) → Update `.claude/CLAUDE.md` (or `.claude/rules/ai-behavior.md` if it's a behavioral rather than structural rule).
 
-**Boundary**: `/learn` updates **rules and CLAUDE.md only**. Do NOT modify `.claude/CONTEXT.md` (that's `/checkpoint`'s job) and do NOT rewrite `.claude/JOURNAL.md` entries (it's append-only). You may *read* both as evidence.
+**Boundary**: `/learn` updates **rules and `.claude/CLAUDE.md` only**. Do NOT modify `.claude/CONTEXT.md` (that's `/checkpoint`'s job) and do NOT rewrite `.claude/JOURNAL.md` entries (it's append-only). You may *read* both as evidence.
 
 ## Output Standard
 

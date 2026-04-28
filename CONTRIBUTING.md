@@ -41,7 +41,7 @@ We welcome new AI commands and highly specialized agents! If you have built an a
 ## Understanding the Architecture Structure
 
 If you're contributing new logic, please adhere to our directory structure:
-- `.claude/commands/`: Core slash commands (`/init`, `/learn`, etc.). Your command files here should detail the steps the AI takes.
+- `.claude/commands/`: CLAUDART slash commands (`/learn`, `/checkpoint`, etc.). Your command files here should detail the steps the AI takes.
 - `.claude/agents/`: Highly specialized role-based instruction sets (`reviewer.md`, `architect.md`, etc.). Make sure agent prompts are self-contained and heavily instruct the AI on its specific persona and constraints.
 
 ## Pull Request Process

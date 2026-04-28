@@ -1,6 +1,6 @@
 ---
 name: secure-reviewer
-description: Security-focused code review specialist with minimal permissions. Read-only access ensures safe security audits.
+description: Security-focused code review specialist with minimal permissions. Use PROACTIVELY for security-sensitive code changes or audits. Read-only access ensures safe security audits.
 tools: Read, Grep
 model: inherit
 memory: user

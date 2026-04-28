@@ -1,8 +1,8 @@
 ---
-description: Auto-refactor CLAUDE.md, rules, and agents into a coherent Modular Rules System
+description: Auto-refactor .claude/CLAUDE.md, rules, and agents into a coherent Modular Rules System
 ---
 
-Please analyze the existing `CLAUDE.md` (if any), `.claude/rules/*.md`, and `.claude/agents/*.md` in this repository and refactor everything into a coherent **Modular Rules System**. The goal is a lightweight root `CLAUDE.md` (< 100 lines) acting purely as an index, with all domain knowledge extracted into path-scoped files inside `.claude/rules/`. Agents must also be audited so they stay on-pattern.
+Please analyze the existing `.claude/CLAUDE.md` (if any), `.claude/rules/*.md`, and `.claude/agents/*.md` in this repository and refactor everything into a coherent **Modular Rules System**. The goal is a lightweight `.claude/CLAUDE.md` (< 100 lines) acting purely as an index, with all domain knowledge extracted into path-scoped files inside `.claude/rules/`. Agents must also be audited so they stay on-pattern.
 
 > **Pre-flight check (the user relies on git for rollback)**: confirm `git status` is clean or that the user has committed in-progress work before you begin. Refuse to proceed if the working tree has unrelated uncommitted changes that this refactor could swallow.
 
@@ -10,17 +10,17 @@ Execute the following steps systematically, without losing essential project con
 
 ## 1. Analyze the Project
 
-- Determine the main framework, language, and architectural layers based on `CLAUDE.md` and the project structure.
+- Determine the main framework, language, and architectural layers based on `.claude/CLAUDE.md` and the project structure.
 - Identify the core logical layers (e.g., Database/Repositories, API/Controllers, UI/Components, Background Jobs).
-- Note linters/formatters/test runners detected — you will delegate styling rules to them rather than encoding into CLAUDE.md.
+- Note linters/formatters/test runners detected — you will delegate styling rules to them rather than encoding into `.claude/CLAUDE.md`.
 
 ## 2. Ensure the Rules Directory Exists
 
 Create `.claude/rules/` if it doesn't already exist.
 
-## 3. Extract Domain-Specific Rules from CLAUDE.md
+## 3. Extract Domain-Specific Rules from .claude/CLAUDE.md
 
-Group detailed coding rules, boundaries, and validation requirements from `CLAUDE.md` into 2–4 logical domain files inside `.claude/rules/` (e.g., `db-rules.md`, `api-routers.md`, `ui-components.md`).
+Group detailed coding rules, boundaries, and validation requirements from `.claude/CLAUDE.md` into 2–4 logical domain files inside `.claude/rules/` (e.g., `db-rules.md`, `api-routers.md`, `ui-components.md`).
 
 **Required for each rule file:**
 
@@ -37,9 +37,9 @@ Group detailed coding rules, boundaries, and validation requirements from `CLAUD
   2. **Loophole-closed**: if the rule has an obvious bypass, add `NEVER X, even when Y` to name the rationalization.
   3. **Critical-tagged**: prefix high-priority constraints with `NEVER`, `YOU MUST`, or `IMPORTANT`. Emphasis raises adherence.
 
-## 4. Refactor the Root CLAUDE.md
+## 4. Refactor .claude/CLAUDE.md
 
-Trim `CLAUDE.md` so it ONLY contains:
+Trim `.claude/CLAUDE.md` so it ONLY contains:
 - Project Overview
 - Core CLI Commands
 - Path Aliases
@@ -52,7 +52,7 @@ Trim `CLAUDE.md` so it ONLY contains:
 
 ## 5. Cross-Link the Rules
 
-Under a `## Domain Rules` heading near the bottom of the trimmed `CLAUDE.md`, add semantic imports for every rule file, plus the live-state CONTEXT file:
+Under a `## Domain Rules` heading near the bottom of the trimmed `.claude/CLAUDE.md`, add semantic imports for every rule file, plus the live-state CONTEXT file:
 
 ```markdown
 See @.claude/CONTEXT.md for the current state of work (updated by /checkpoint).
@@ -60,14 +60,14 @@ See @.claude/rules/architecture.md for global boundaries.
 See @.claude/rules/db-rules.md for database patterns.
 ```
 
-**NEVER add `@.claude/JOURNAL.md`** — JOURNAL is intentionally excluded from session context to save tokens. If you find such an import already in `CLAUDE.md`, remove it and warn the user in your final summary.
+**NEVER add `@.claude/JOURNAL.md`** — JOURNAL is intentionally excluded from session context to save tokens. If you find such an import already in `.claude/CLAUDE.md`, remove it and warn the user in your final summary.
 
 ## 6. Wire Up AI Behavior Guidelines (file-based, not inlined)
 
 CLAUDART ships `.claude/rules/ai-behavior.md` as the canonical universal behavior guideline (Karpathy-derived).
 
 - If `.claude/rules/ai-behavior.md` does NOT exist, create it from the CLAUDART template (see https://github.com/vankhaivn/Claudart) or copy from a fresh CLAUDART checkout.
-- Do NOT inline the guidelines into `CLAUDE.md`. Instead, add this single line under the `## Domain Rules` heading:
+- Do NOT inline the guidelines into `.claude/CLAUDE.md`. Instead, add this single line under the `## Domain Rules` heading:
   ```markdown
   See @.claude/rules/ai-behavior.md for universal AI behavior guidelines.
   ```
@@ -75,7 +75,7 @@ CLAUDART ships `.claude/rules/ai-behavior.md` as the canonical universal behavio
 
 ## 7. Audit Existing Rules and Agents (keep the whole system on-pattern)
 
-Refactor isn't only about CLAUDE.md. Sweep through `.claude/rules/*.md` and `.claude/agents/*.md` and enforce the same standards.
+Refactor isn't only about `.claude/CLAUDE.md`. Sweep through `.claude/rules/*.md` and `.claude/agents/*.md` and enforce the same standards.
 
 For every file in `.claude/rules/`:
 - Verify YAML frontmatter exists with a valid `paths:` glob and a `description:`.
@@ -94,30 +94,30 @@ For every file in `.claude/agents/`:
 For `.claude/CONTEXT.md`:
 - Confirm it exists. If not, create it from the CLAUDART template (declarative state file maintained by `/checkpoint`).
 - Verify line count ≤ 150. If exceeded, flag for user review — propose either trimming or graduating long-lived items into `.claude/rules/`.
-- Confirm `@.claude/CONTEXT.md` is imported in `CLAUDE.md` (Domain Rules section). If missing, add it.
+- Confirm `@.claude/CONTEXT.md` is imported in `.claude/CLAUDE.md` (Domain Rules section). If missing, add it.
 
 For `.claude/JOURNAL.md`:
 - Confirm it exists. If not, create it from the CLAUDART template.
-- **CRITICAL**: search `CLAUDE.md` and every file in `.claude/rules/` for any `@.claude/JOURNAL.md` reference. If found, REMOVE it — JOURNAL must never be loaded into session context. Warn the user that this was fixed.
+- **CRITICAL**: search `.claude/CLAUDE.md` and every file in `.claude/rules/` for any `@.claude/JOURNAL.md` reference. If found, REMOVE it — JOURNAL must never be loaded into session context. Warn the user that this was fixed.
 - Do NOT prune or rewrite JOURNAL entries. The file is append-only by contract.
 
 Report all proposed audit changes in a clear bulleted list before applying them. Apply the safe ones (frontmatter fixes, snippet removal, missing `@.claude/CONTEXT.md` import, JOURNAL @import removal); ask the user before merging or deleting agents/rules.
 
 ## 8. Append Agent Self-Evolution Section
 
-At the very end of the root `CLAUDE.md`, APPEND `## Agent Self-Evolution & Context Maintenance` (skip if it already exists). Include these rules verbatim:
+At the very end of `.claude/CLAUDE.md`, APPEND `## Agent Self-Evolution & Context Maintenance` (skip if it already exists). Include these rules verbatim:
 
 - "Do not assume a human will document your code patterns. If you build it, document it."
 - Existing rules change → update the relevant file in `.claude/rules/`.
-- New domains/layers → CREATE a new rule file in `.claude/rules/` (with `paths: [...]` frontmatter) AND APPEND its `@` import to `CLAUDE.md`'s Domain Rules section.
-- Global changes → update `CLAUDE.md` directly.
+- New domains/layers → CREATE a new rule file in `.claude/rules/` (with `paths: [...]` frontmatter) AND APPEND its `@` import to `.claude/CLAUDE.md`'s Domain Rules section.
+- Global changes → update `.claude/CLAUDE.md` directly.
 
 ## 9. Final Summary
 
 Output a concise summary covering:
 1. Domain rule files created/updated in step 3.
 2. Audit findings from step 7 (what was auto-fixed vs. what needs user decision).
-3. Final root `CLAUDE.md` line count (should be < 100).
+3. Final `.claude/CLAUDE.md` line count (should be < 100).
 4. Suggest the user run `git diff` to review every change before committing.
 
 Confirm only after every step has been completed.

@@ -12,7 +12,7 @@ Please run a health check on this repository's CLAUDART installation. Your job i
 - `.claude/commands/` exists and contains at least: `learn.md`, `refactor-memory.md`, `doctor.md`, `checkpoint.md`
 - `.claude/agents/` exists (may be empty if user removed shipped agents)
 - `.claude/rules/` exists (may be empty before the user runs `/refactor-memory`)
-- Root `CLAUDE.md` exists
+- `.claude/CLAUDE.md` exists
 - `.claude/CONTEXT.md` exists (warn if missing — the user may not have run `/checkpoint` yet)
 - `.claude/JOURNAL.md` exists (warn if missing)
 
@@ -36,23 +36,23 @@ For every rule file in `.claude/rules/*.md`:
 - Use Glob to verify each pattern matches at least one real file in the repo.
 - Patterns matching zero files → flag as **possibly dead rule**: either the codebase moved or the rule was scoped wrong. Suggest re-scoping or removal.
 
-### 4. CLAUDE.md ↔ Rules Cross-Linking
+### 4. .claude/CLAUDE.md ↔ Rules Cross-Linking
 
-- Read root `CLAUDE.md`.
+- Read `.claude/CLAUDE.md`.
 - Find the `## Domain Rules` section.
 - For every `@.claude/rules/*.md` import there, confirm the target file exists.
-- For every file under `.claude/rules/`, confirm there is a matching `@` import in `CLAUDE.md`. Files without an import are loaded only when their `paths:` glob fires — flag this as **isolated rule** so the user knows it won't be globally visible.
+- For every file under `.claude/rules/`, confirm there is a matching `@` import in `.claude/CLAUDE.md`. Files without an import are loaded only when their `paths:` glob fires — flag this as **isolated rule** so the user knows it won't be globally visible.
 
 ### 5. AI Behavior Wiring
 
 - Confirm `.claude/rules/ai-behavior.md` exists.
-- Confirm root `CLAUDE.md` has `@.claude/rules/ai-behavior.md` (or equivalent reference) under Domain Rules. If missing, the universal behavior guidelines are not loaded — flag as **High** severity.
+- Confirm `.claude/CLAUDE.md` has `@.claude/rules/ai-behavior.md` (or equivalent reference) under Domain Rules. If missing, the universal behavior guidelines are not loaded — flag as **High** severity.
 
 ### 5b. CONTEXT/JOURNAL Wiring (token hygiene)
 
-- Confirm `@.claude/CONTEXT.md` is referenced in `CLAUDE.md` Domain Rules. If missing, current-state handoff isn't loaded — flag as **Medium**.
+- Confirm `@.claude/CONTEXT.md` is referenced in `.claude/CLAUDE.md` Domain Rules. If missing, current-state handoff isn't loaded — flag as **Medium**.
 - `.claude/CONTEXT.md` line count must be ≤ 150 (use `wc -l`, do NOT full-read the file). If exceeded, flag as **High** — past the declarative ceiling, needs trimming or graduation via `/learn`.
-- **CRITICAL**: search `CLAUDE.md` AND every file in `.claude/rules/` for any `@.claude/JOURNAL.md` reference (use `grep -r '@.claude/JOURNAL.md' CLAUDE.md .claude/rules/`). If found, flag as **Critical** — JOURNAL must NEVER be loaded into session context (defeats the entire token-saving purpose). Recommend immediate removal.
+- **CRITICAL**: search `.claude/CLAUDE.md` AND every file in `.claude/rules/` for any `@.claude/JOURNAL.md` reference (use `grep -r '@.claude/JOURNAL.md' .claude/CLAUDE.md .claude/rules/`). If found, flag as **Critical** — JOURNAL must NEVER be loaded into session context (defeats the entire token-saving purpose). Recommend immediate removal.
 - For `.claude/JOURNAL.md` integrity, use spot-checks rather than full reads (the file may be large):
     - `head -n 20 .claude/JOURNAL.md` — verify the canonical header is intact.
     - `wc -l .claude/JOURNAL.md` — report total entry count for the user.
@@ -65,9 +65,9 @@ For every rule file in `.claude/rules/*.md`:
 - **Stale metadata**: lines like `Last Updated: <date>` rot quickly. Flag for removal.
 - **Hardcoded shell patterns** (e.g., long `grep -r` lists) inside agent files. Flag — these belong in the project's tooling, not the agent prompt.
 
-### 7. CLAUDE.md Size Sanity
+### 7. .claude/CLAUDE.md Size Sanity
 
-- Count lines of root `CLAUDE.md`. The target is < 100 lines.
+- Count lines of `.claude/CLAUDE.md`. The target is < 100 lines.
 - If significantly larger, recommend running `/refactor-memory` to extract domains.
 
 ### 8. Agent Overlap

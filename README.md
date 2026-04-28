@@ -20,7 +20,7 @@ It scales from a small side project to a large team repo, acting as your intelli
 
 ## Key Features
 
-- **Modular Rules System** — root `CLAUDE.md` stays a lightweight index; domain rules live in path-scoped files under `.claude/rules/`.
+- **Modular Rules System** — `.claude/CLAUDE.md` stays a lightweight index; domain rules live in path-scoped files under `.claude/rules/`.
 - **Built-in Review Agents** — `clean-code-reviewer` (scope discipline + Clean Code + project conventions) and `secure-reviewer` (read-only OWASP audit). Both ship with persistent `memory: user` so they accumulate stack-specific knowledge across sessions.
 - **Session Handoff via `.claude/CONTEXT.md` + `.claude/JOURNAL.md`** — declarative current-state file (auto-pruned) plus an append-only audit log that is intentionally NOT loaded into sessions (no token cost).
 - **Continuous Self-Learning** — `/learn` re-reads the rule set, runs a retrospective on the just-completed work, and promotes recurring patterns from JOURNAL into rules.
@@ -33,21 +33,22 @@ To equip your project with CLAUDART, copy the relevant files into your repo — 
 1. From a fresh CLAUDART checkout, copy `.claude/` into the root of your project. That's it — everything CLAUDART ships lives inside this single directory.
 2. Open the project in Claude Code (or any compatible AI IDE).
 3. (Optional) Run the built-in `/init` to let Claude Code generate a starter `CLAUDE.md` from your codebase.
-4. Run `/refactor-memory` to extract domain rules into `.claude/rules/` and wire up `@.claude/CONTEXT.md` + AI-behavior guardrails.
-5. Run `/doctor` to verify the installation is healthy.
+4. Copy the generated `CLAUDE.md` content into `.claude/CLAUDE.md`. CLAUDART keeps project memory inside `.claude/` so the whole AI layer stays self-contained.
+5. Run `/refactor-memory` to extract domain rules into `.claude/rules/` and wire up `@.claude/CONTEXT.md` + AI-behavior guardrails.
+6. Run `/doctor` to verify the installation is healthy.
 
 ## Core Commands & Workflow
 
 ### `/init` *(built-in to Claude Code, not CLAUDART)*
 
-The standard Claude Code command. Scans the repo and generates a starter `CLAUDE.md`. CLAUDART does **not** override this — we deliberately reuse the built-in so you stay aligned with upstream Claude Code defaults. After running it, hand off to `/refactor-memory`.
+The standard Claude Code command. Scans the repo and generates a starter `CLAUDE.md`. CLAUDART does **not** override this — we deliberately reuse the built-in so you stay aligned with upstream Claude Code defaults. After running it, copy the generated content into `.claude/CLAUDE.md`, then hand off to `/refactor-memory`.
 
 ### `/refactor-memory`
 
-The CLAUDART-specific consolidator. Run this any time `CLAUDE.md`, `.claude/rules/`, or `.claude/agents/` need a sweep.
+The CLAUDART-specific consolidator. Run this any time `.claude/CLAUDE.md`, `.claude/rules/`, or `.claude/agents/` need a sweep.
 
-- Extracts domain-specific logic from a bloated `CLAUDE.md` into 2–4 path-scoped files in `.claude/rules/`.
-- Trims root `CLAUDE.md` to a < 100-line index.
+- Extracts domain-specific logic from a bloated `.claude/CLAUDE.md` into 2–4 path-scoped files in `.claude/rules/`.
+- Trims `.claude/CLAUDE.md` to a < 100-line index.
 - Wires in `@.claude/CONTEXT.md` and `@.claude/rules/ai-behavior.md`. Strips any accidental `@.claude/JOURNAL.md` import (JOURNAL must never be loaded).
 - **Audits existing rule files and agents** to enforce the same standards: valid YAML frontmatter, no inlined code snippets, no stale metadata, no >50% overlap between agents, CONTEXT.md within its 150-line ceiling.
 - Relies on git for rollback — CLAUDART intentionally creates no separate backup files. Commit before running.
@@ -65,13 +66,13 @@ End-of-session command. Updates `.claude/CONTEXT.md` to reflect the **current** 
 
 Run this after completing a complex feature, fixing a tricky bug, or adopting a new pattern. The agent will:
 
-1. **Re-read** the entire rule set (`CLAUDE.md` + `.claude/rules/*.md` + `.claude/CONTEXT.md` + relevant agents).
+1. **Re-read** the entire rule set (`.claude/CLAUDE.md` + `.claude/rules/*.md` + `.claude/CONTEXT.md` + relevant agents).
 2. Run a retrospective: name every deviation and the rationalization that justified it.
 3. Scan the **tail** of `.claude/JOURNAL.md` (last ~200 lines) for recurring decisions/pivots — repeating patterns are strong signals to **graduate** principles into `.claude/rules/`. JOURNAL is never full-read; that would burn tokens for no benefit.
 4. Patch the rules with `NEVER X, even when Y` framing to close loopholes.
 5. Save quiet confirmations too — when the human accepted an unusual judgment call, that's a validated approach worth recording.
 
-`/learn` only writes to **rules and CLAUDE.md**. It never touches `.claude/CONTEXT.md` (that's `/checkpoint`'s job) or rewrites `JOURNAL.md` entries (append-only).
+`/learn` only writes to **rules and `.claude/CLAUDE.md`**. It never touches `.claude/CONTEXT.md` (that's `/checkpoint`'s job) or rewrites `JOURNAL.md` entries (append-only).
 
 ### `/doctor`
 
@@ -83,7 +84,7 @@ CLAUDART uses **four files** plus Claude Code's native auto memory:
 
 | File | Loaded? | Who writes | Lifetime |
 |---|---|---|---|
-| `CLAUDE.md` | Always | You | Project lifetime |
+| `.claude/CLAUDE.md` | Always | You | Project lifetime |
 | `.claude/rules/*.md` | Always (or on path match) | You + `/learn` | Project lifetime |
 | `.claude/CONTEXT.md` | Always (via `@import`) | `/checkpoint` | Live, declarative |
 | `.claude/JOURNAL.md` | **Never** (intentional) | `/checkpoint` (append) | Forever (git history) |
@@ -98,7 +99,8 @@ new project              daily loop
 ─────────────            ──────────
 /init                    work on feature/bug
   ↓                        ↓
-copy .claude/            /checkpoint   (end of session — update CONTEXT, log to JOURNAL)
+copy CLAUDE.md ->         /checkpoint   (end of session — update CONTEXT, log to JOURNAL)
+.claude/CLAUDE.md
   ↓                        ↓
 /refactor-memory         /learn         (after meaningful changes — refine rules)
   ↓                        ↓
@@ -111,9 +113,9 @@ copy .claude/            /checkpoint   (end of session — update CONTEXT, log t
 
 ```text
 your-project/
-├── CLAUDE.md                       # Lightweight index (< 100 lines after /refactor-memory)
 └── .claude/
-    ├── CONTEXT.md                  # Live state, declarative, ≤ 150 lines, @imported in CLAUDE.md
+    ├── CLAUDE.md                   # Lightweight index (< 100 lines after /refactor-memory)
+    ├── CONTEXT.md                  # Live state, declarative, ≤ 150 lines, @imported in .claude/CLAUDE.md
     ├── JOURNAL.md                  # Append-only audit log — NEVER @imported
     ├── agents/
     │   ├── clean-code-reviewer.md  # PROACTIVE: scope + Clean Code + project conventions
@@ -122,12 +124,12 @@ your-project/
     │   ├── checkpoint.md           # /checkpoint — declarative state update + JOURNAL append
     │   ├── doctor.md               # /doctor — read-only health check
     │   ├── learn.md                # /learn — retrospective + rule promotion
-    │   └── refactor-memory.md      # /refactor-memory — consolidate CLAUDE.md + rules + agents
+    │   └── refactor-memory.md      # /refactor-memory — consolidate .claude/CLAUDE.md + rules + agents
     └── rules/
         └── ai-behavior.md          # Universal Karpathy-derived behavior guardrails
 ```
 
-Everything CLAUDART ships lives inside `.claude/` — copying that single directory bootstraps a new project entirely. The only file that lives at the repo root is `CLAUDE.md` (Claude Code's convention).
+Everything CLAUDART ships lives inside `.claude/` — copying that single directory bootstraps a new project entirely. If `/init` creates a root `CLAUDE.md`, copy its content into `.claude/CLAUDE.md` so project memory stays with the rest of the CLAUDART layer.
 
 By keeping all AI assets version-controlled alongside your code, the entire team shares one standard of AI assistance.
 

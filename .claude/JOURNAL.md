@@ -2,7 +2,7 @@
 
 Append-only history of decisions, completions, pivots, and resolved blockers. Maintained by `/checkpoint`.
 
-> **DO NOT add `@.claude/JOURNAL.md` to `CLAUDE.md`.** This file is intentionally excluded from session context to save tokens. Claude reads it only on explicit user request (e.g., "why did we choose X last month?") or during `/learn` to detect recurring patterns that should be promoted to rules.
+> **DO NOT add `@.claude/JOURNAL.md` to `.claude/CLAUDE.md`.** This file is intentionally excluded from session context to save tokens. Claude reads it only on explicit user request (e.g., "why did we choose X last month?") or during `/learn` to detect recurring patterns that should be promoted to rules.
 
 ## Format
 
