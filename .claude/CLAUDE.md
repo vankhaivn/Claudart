@@ -2,18 +2,18 @@
 
 ## Project Overview
 
-CLAUDART keeps the AI operating layer inside `.claude/`: project memory, domain rules, live context, journal, commands, and agents. If Claude Code `/init` generates a root `CLAUDE.md`, copy its useful project-specific content into this file before running `/refactor-memory`.
+CLAUDART keeps the Claude-specific operating layer inside `.claude/`, while shared session state lives in `.claudart/`. If Claude Code `/init` generates a root `CLAUDE.md`, copy its useful project-specific content into this file before running `/refactor-memory`.
 
 ## Core Commands
 
 - `/refactor-memory` consolidates this file, `.claude/rules/`, and `.claude/agents/` into a coherent Modular Rules System.
-- `/checkpoint` rewrites `.claude/CONTEXT.md` as the current state and appends meaningful retired items to `.claude/JOURNAL.md`.
+- `/checkpoint` rewrites `.claudart/CONTEXT.md` as the current state and appends meaningful retired items to `.claudart/JOURNAL.md`.
 - `/learn` promotes validated recurring decisions into `.claude/rules/`.
 - `/doctor` runs a read-only health check on the CLAUDART installation.
 
 ## Domain Rules
 
-See @.claude/CONTEXT.md for the current state of work (updated by /checkpoint).
+See @.claudart/CONTEXT.md for the current state of work (updated by /checkpoint).
 See @.claude/rules/ai-behavior.md for universal AI behavior guidelines.
 
 ## Agent Self-Evolution & Context Maintenance
