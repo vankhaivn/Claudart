@@ -42,6 +42,13 @@ To equip your project with CLAUDART, copy the relevant files into your repo — 
 6. Run `/doctor` to verify the installation is healthy.
 7. If you also use Codex, copy the Codex-native files from this template rather than generating them from sync. Use `$sync claude` later only when your project-specific Claude side has changed and Codex should receive those changes.
 
+For an older Claude-only project migrating to Codex for the first time, the intended flow is:
+
+1. Keep the project's existing `.claude/` as-is.
+2. Add `AGENTS.md`, `.codex/`, `.agents/`, and any missing `.claudart/` files from the new CLAUDART template.
+3. Open Codex in that project and run `$sync claude`.
+4. The first sync may overwrite the freshly copied generic Codex scaffold. That is expected bootstrap behavior, not a conflict.
+
 ## Core Commands & Workflow
 
 Claude Code uses slash commands from `.claude/commands/`. Codex uses repo skills in `.agents/skills/` backed by full command specs in `.codex/commands/`: `$codex-refactor-memory`, `$codex-checkpoint`, `$codex-learn`, `$codex-doctor`, and `$sync claude`.
@@ -93,6 +100,7 @@ Directional snapshot sync between Claude Code and Codex. The argument is the sou
 - Codex: `$sync claude` reads `.claude/` and updates `AGENTS.md`, `.codex/`, and `.agents/skills/`.
 - Sync never uses `git diff` or commit history. It reads the current filesystem snapshot.
 - Sync never copies `.claudart/CONTEXT.md` or `.claudart/JOURNAL.md`; both tools already share those files.
+- First migration exception: if the Codex side is still just the generic CLAUDART scaffold you copied into an older Claude-only project, `$sync claude` should overwrite that scaffold and promote it into sync-managed Codex files.
 - In this CLAUDART base template, sync is not the authoring workflow. Maintainers update `.claude` and `.codex/.agents` manually so both shipped layers remain first-class.
 
 ## Memory Architecture
