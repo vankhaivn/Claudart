@@ -18,3 +18,6 @@ Thumbs.db
 # General temp files
 tmp/
 temp/
+
+# Claude Code per-user state
+.claude/settings.local.json

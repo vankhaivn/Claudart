@@ -1,83 +1,110 @@
 ---
-description: Auto-refactor CLAUDE.md into a Modular Rules System with Behavioral Guidelines using Best Practices
+description: Auto-refactor CLAUDE.md, rules, and agents into a coherent Modular Rules System
 ---
 
-Please analyze the existing `CLAUDE.md` file (if any) in this repository and refactor it to follow the "Modular Rules System" best practices. Our goal is to keep the root `CLAUDE.md` strictly as a lightweight index (ideally < 100 lines) and extract domain-specific context into path-scoped rules inside the `.claude/rules/` directory.
+Please analyze the existing `CLAUDE.md` (if any), `.claude/rules/*.md`, and `.claude/agents/*.md` in this repository and refactor everything into a coherent **Modular Rules System**. The goal is a lightweight root `CLAUDE.md` (< 100 lines) acting purely as an index, with all domain knowledge extracted into path-scoped files inside `.claude/rules/`. Agents must also be audited so they stay on-pattern.
 
-Please execute the following steps systematically without losing any essential project context:
+> **Pre-flight check (the user relies on git for rollback)**: confirm `git status` is clean or that the user has committed in-progress work before you begin. Refuse to proceed if the working tree has unrelated uncommitted changes that this refactor could swallow.
 
-1. **Analyze the Tech Stack & Architecture**:
-   Determine the main framework and language used based on `CLAUDE.md` and the project structure. Identify the core logical layers (e.g., Database/Repositories, API/Controllers, UI/Components).
+Execute the following steps systematically, without losing essential project context.
 
-2. **Create the Rules Directory**:
-   Create `.claude/rules/` if it doesn't already exist.
+## 1. Analyze the Project
 
-3. **Extract Domain-Specific Rules**:
-   Group the detailed coding rules, boundaries, and validation requirements from `CLAUDE.md` into 2-4 logical domains logically based on the project type. For each domain, create a markdown file in `.claude/rules/` (e.g., `db-rules.md`, `api-routers.md`).
-    - IMPORTANT YAML RULE: Every rule file MUST start with a YAML frontmatter specifying target paths to prevent VSCode YAML lint errors. Example:
-        ```yaml
-        ---
-        paths: ["src/models/**/*.py", "src/repositories/**/*.py"]
-        ---
-        ```
-    - **NO CODE SNIPPETS RULE: Do NOT copy-paste code blocks into these rule files. Instead, use file and line references (e.g., `See src/core/db.ts:45 for the database connection pattern`) so the context never gets outdated.**
-    - **RULE QUALITY CHECKLIST**: For each rule written, verify:
-        1. Is it **verifiable**? A reader must be able to check whether it was followed by reading the code.
-        2. Does it have a **loophole**? If yes, add `NEVER X, even when Y` to close the rationalization path.
-        3. Is it **critical**? If yes, prefix with `NEVER`, `YOU MUST`, or `IMPORTANT` — emphasis keywords increase adherence for high-priority constraints.
+- Determine the main framework, language, and architectural layers based on `CLAUDE.md` and the project structure.
+- Identify the core logical layers (e.g., Database/Repositories, API/Controllers, UI/Components, Background Jobs).
+- Note linters/formatters/test runners detected — you will delegate styling rules to them rather than encoding into CLAUDE.md.
 
-4. **Refactor the Root `CLAUDE.md`**:
-   Truncate the original `CLAUDE.md` so it ONLY contains: Project Overview, Core CLI Commands, Path Aliases, and Global Naming Conventions.
-    - **CRITICAL: PURGE all domain-specific logic AND style/formatting rules (delegate styling to standard tools like Prettier/Eslint/Ruff). Do not keep redundant info already available in `package.json` or `README.md`. Less is more.**
+## 2. Ensure the Rules Directory Exists
 
-5. **Cross-Link the Rules**:
-   At the bottom of the newly trimmed `CLAUDE.md` (under a "Domain Rules" heading), add semantic imports for all newly created rule files. Example:
-   See @.claude/rules/architecture.md for global boundaries.
-   See @.claude/rules/db-rules.md for database patterns.
+Create `.claude/rules/` if it doesn't already exist.
 
-6. **Inject AI Behavior Guidelines**:
-   Check if `CLAUDE.md` already contains a section titled `## AI Behavior Guidelines`. If it does NOT exist, APPEND the following section verbatim after the "Domain Rules" cross-links and before the Self-Evolution section:
+## 3. Extract Domain-Specific Rules from CLAUDE.md
 
-   ```markdown
-   ## AI Behavior Guidelines
+Group detailed coding rules, boundaries, and validation requirements from `CLAUDE.md` into 2–4 logical domain files inside `.claude/rules/` (e.g., `db-rules.md`, `api-routers.md`, `ui-components.md`).
 
-   Derived from Andrej Karpathy's observations on systematic LLM coding failure modes.
-   These apply universally, regardless of project type.
+**Required for each rule file:**
 
-   ### 1. Think Before Coding
-   - State assumptions explicitly before implementing. If uncertain, ASK — never guess silently.
-   - If multiple interpretations exist, present them. Do NOT pick one without disclosing.
-   - If a simpler approach exists, say so and push back.
-   - NEVER proceed when confused. Name what is unclear and stop until resolved.
+- **YAML frontmatter** with `paths:` glob to scope the rule (prevents VSCode YAML lint errors). Example:
+  ```yaml
+  ---
+  paths: ["src/models/**/*.py", "src/repositories/**/*.py"]
+  description: One-line summary of what this domain covers.
+  ---
+  ```
+- **NO CODE SNIPPETS**. Do NOT copy-paste code blocks. Use file:line references (e.g., `See src/core/db.ts:45 for the connection pattern`) so context never gets stale.
+- **Rule Quality Checklist** — for every rule written, verify:
+  1. **Verifiable**: a reader can check whether it was followed by reading the code. If you can't verify it, rewrite it.
+  2. **Loophole-closed**: if the rule has an obvious bypass, add `NEVER X, even when Y` to name the rationalization.
+  3. **Critical-tagged**: prefix high-priority constraints with `NEVER`, `YOU MUST`, or `IMPORTANT`. Emphasis raises adherence.
 
-   ### 2. Simplicity First
-   - Write the minimum code that solves the problem. Nothing speculative.
-   - No abstractions for single-use code. No unrequested "flexibility" or "configurability".
-   - NEVER add error handling for impossible scenarios.
-   - YOU MUST rewrite if 200 lines could be 50. Ask: "Would a senior engineer call this overcomplicated?"
+## 4. Refactor the Root CLAUDE.md
 
-   ### 3. Surgical Changes
-   - Touch ONLY what the user's request requires. Do NOT "improve" adjacent code, comments, or formatting.
-   - Match existing style, even if you would do it differently.
-   - If you notice unrelated dead code, MENTION it — never delete it unprompted.
-   - YOU MUST remove imports/variables/functions that YOUR changes made unused, but NEVER touch pre-existing dead code unless explicitly asked.
-   - The test: every changed line must trace directly to the user's request.
+Trim `CLAUDE.md` so it ONLY contains:
+- Project Overview
+- Core CLI Commands
+- Path Aliases
+- Global Naming Conventions
+- Domain Rules cross-links (step 5)
+- AI Behavior Guidelines reference (step 6)
+- Agent Self-Evolution section (step 8)
 
-   ### 4. Goal-Driven Execution
-   - Transform tasks into verifiable success criteria before starting:
-     - "Fix the bug" → "Write a test that reproduces it, then make it pass."
-     - "Add validation" → "Write tests for invalid inputs, then make them pass."
-   - For multi-step tasks, state a brief plan with a `verify:` checkpoint for each step.
-   - Strong success criteria allow autonomous looping. Weak criteria ("make it work") require constant clarification.
-   ```
+**CRITICAL**: PURGE all domain-specific logic AND style/formatting rules — delegate styling to standard tools (Prettier, ESLint, Ruff, gofmt). Do not duplicate info already in `package.json` or `README.md`. Less is more.
 
-   If the section already exists, skip this step — do not overwrite user customizations.
+## 5. Cross-Link the Rules
 
-7. **Add "Agent Self-Evolution" Guidelines**:
-   At the very end of the root `CLAUDE.md`, you MUST APPEND a section titled "## Agent Self-Evolution & Context Maintenance". This section must explicitly grant you the authority to autonomously update memory. Include these exact rules:
-    - "Do not assume a human will document your code patterns. If you build it, document it."
-    - Existing rules change: Update the relevant file in `.claude/rules/`.
-    - NEW domains/layers: CREATE a new rule file in `.claude/rules/` (with `paths: [...]` frontmatter) AND APPEND its `@` import to `CLAUDE.md`'s Domain Rules section.
-    - Global changes: Update `CLAUDE.md` directly.
+Under a `## Domain Rules` heading near the bottom of the trimmed `CLAUDE.md`, add semantic imports for every rule file:
 
-Please confirm when you've successfully analyzed the stack, enforced the No Code Snippets rule, injected the AI Behavior Guidelines, and added the Self-Evolution section!
+```markdown
+See @.claude/rules/architecture.md for global boundaries.
+See @.claude/rules/db-rules.md for database patterns.
+```
+
+## 6. Wire Up AI Behavior Guidelines (file-based, not inlined)
+
+CLAUDART ships `.claude/rules/ai-behavior.md` as the canonical universal behavior guideline (Karpathy-derived).
+
+- If `.claude/rules/ai-behavior.md` does NOT exist, create it from the CLAUDART template (see https://github.com/vankhaivn/Claudart) or copy from a fresh CLAUDART checkout.
+- Do NOT inline the guidelines into `CLAUDE.md`. Instead, add this single line under the `## Domain Rules` heading:
+  ```markdown
+  See @.claude/rules/ai-behavior.md for universal AI behavior guidelines.
+  ```
+- If the user has customized `ai-behavior.md`, leave their content alone — only ensure the `@` import exists.
+
+## 7. Audit Existing Rules and Agents (keep the whole system on-pattern)
+
+Refactor isn't only about CLAUDE.md. Sweep through `.claude/rules/*.md` and `.claude/agents/*.md` and enforce the same standards.
+
+For every file in `.claude/rules/`:
+- Verify YAML frontmatter exists with a valid `paths:` glob and a `description:`.
+- Run a Glob check on each `paths:` entry — if it matches **zero** files, flag the rule as potentially dead and ask the user whether to remove or rescope it.
+- **NO CODE SNIPPETS**: replace any inlined code with `file:line` references.
+- Apply the Rule Quality Checklist (verifiable, loophole-closed, critical-tagged).
+- Merge near-duplicates: if two rules cover ≥80% the same scope, propose a consolidation (do not execute without user confirmation).
+
+For every file in `.claude/agents/`:
+- Verify YAML frontmatter has `name`, `description` (with `PROACTIVELY` if it should auto-trigger), `tools`, and `model`.
+- Strip stale metadata like hardcoded `Last Updated: <date>` lines.
+- Replace example code blocks with references to a real file in the project, OR remove them.
+- Replace hardcoded `grep`/shell pattern lists with guidance ("scan the codebase for hardcoded secrets using the project's security tooling").
+- Confirm the agent's responsibilities don't overlap >50% with another agent — if they do, propose a merge.
+
+Report all proposed audit changes in a clear bulleted list before applying them. Apply the safe ones (frontmatter fixes, snippet removal); ask the user before merging or deleting agents/rules.
+
+## 8. Append Agent Self-Evolution Section
+
+At the very end of the root `CLAUDE.md`, APPEND `## Agent Self-Evolution & Context Maintenance` (skip if it already exists). Include these rules verbatim:
+
+- "Do not assume a human will document your code patterns. If you build it, document it."
+- Existing rules change → update the relevant file in `.claude/rules/`.
+- New domains/layers → CREATE a new rule file in `.claude/rules/` (with `paths: [...]` frontmatter) AND APPEND its `@` import to `CLAUDE.md`'s Domain Rules section.
+- Global changes → update `CLAUDE.md` directly.
+
+## 9. Final Summary
+
+Output a concise summary covering:
+1. Domain rule files created/updated in step 3.
+2. Audit findings from step 7 (what was auto-fixed vs. what needs user decision).
+3. Final root `CLAUDE.md` line count (should be < 100).
+4. Suggest the user run `git diff` to review every change before committing.
+
+Confirm only after every step has been completed.
