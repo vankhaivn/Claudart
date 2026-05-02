@@ -7,6 +7,7 @@ CLAUDART keeps the Claude-specific operating layer inside `.claude/`, while shar
 ## Core Commands
 
 - `/refactor-memory` consolidates this file, `.claude/rules/`, and `.claude/agents/` into a coherent Modular Rules System.
+- `/project-discovery` interviews the user about a rough project idea and creates a raw synthesis plus structured project docs.
 - `/checkpoint` rewrites `.claudart/CONTEXT.md` as the current state and appends meaningful retired items to `.claudart/JOURNAL.md`.
 - `/learn` promotes validated recurring decisions into `.claude/rules/`.
 - `/doctor` runs a read-only health check on the CLAUDART installation.

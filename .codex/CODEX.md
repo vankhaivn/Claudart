@@ -7,6 +7,7 @@ CLAUDART keeps shared session state in `.claudart/` and tool-specific operating 
 ## Core Commands
 
 - `$sync claude` reads the current Claude snapshot and updates the Codex side.
+- `$project-discovery` interviews the user about a rough project idea and creates a raw synthesis plus structured project docs.
 - `$codex-checkpoint` updates `.claudart/CONTEXT.md` and appends meaningful retired items to `.claudart/JOURNAL.md`.
 - `$codex-learn` promotes validated recurring decisions into Codex guidelines.
 - `$codex-doctor` runs a read-only health check.

@@ -22,6 +22,7 @@ It scales from a small side project to a large team repo, acting as your intelli
 
 - **Modular Rules System** — `.claude/CLAUDE.md` and `.codex/CODEX.md` stay lightweight indexes; domain rules live in path-scoped files under `.claude/rules/` and `.codex/guidelines/`.
 - **Built-in Review Agents** — `clean-code-reviewer` (scope discipline + Clean Code + project conventions) and `secure-reviewer` (read-only OWASP audit). Claude agents use `memory: user`; Codex agents ship as native TOML definitions with read-only sandboxing.
+- **Project Discovery Interview** — `/project-discovery` and `$project-discovery` turn rough ideas into raw discovery notes plus a presentation-ready project documentation pack before any code is written.
 - **Shared Session Handoff via `.claudart/CONTEXT.md` + `.claudart/JOURNAL.md`** — declarative current-state file (auto-pruned) plus an append-only audit log shared by Claude and Codex.
 - **Claude/Codex Sync** — `/sync codex` and `$sync claude` translate rules, commands, skills, and agents between tool-native formats in your downstream project without duplicating shared state.
 - **Continuous Self-Learning** — `/learn` re-reads the rule set, runs a retrospective on the just-completed work, and promotes recurring patterns from JOURNAL into rules.
@@ -36,11 +37,12 @@ To equip your project with CLAUDART, copy the relevant files into your repo — 
    - Codex: copy `AGENTS.md`, `.codex/`, `.agents/`, and `.claudart/`.
    - Both: copy all of the above.
 2. Open the project in Claude Code, Codex, or both.
-3. (Optional) Run the built-in `/init` to let Claude Code generate a starter `CLAUDE.md` from your codebase.
-4. If `/init` created a root `CLAUDE.md`, copy its generated project content into `.claude/CLAUDE.md`. CLAUDART keeps Claude memory inside `.claude/` so the AI layer stays versioned.
-5. Run `/refactor-memory` to extract domain rules into `.claude/rules/` and wire up `@.claudart/CONTEXT.md` + AI-behavior guardrails.
-6. Run `/doctor` to verify the installation is healthy.
-7. If you also use Codex, copy the Codex-native files from this template rather than generating them from sync. Use `$sync claude` later only when your project-specific Claude side has changed and Codex should receive those changes.
+3. If the idea is still vague, run `/project-discovery` or `$project-discovery` before writing code to create a raw discovery file and structured project docs.
+4. (Optional) Run the built-in `/init` to let Claude Code generate a starter `CLAUDE.md` from your codebase.
+5. If `/init` created a root `CLAUDE.md`, copy its generated project content into `.claude/CLAUDE.md`. CLAUDART keeps Claude memory inside `.claude/` so the AI layer stays versioned.
+6. Run `/refactor-memory` to extract domain rules into `.claude/rules/` and wire up `@.claudart/CONTEXT.md` + AI-behavior guardrails.
+7. Run `/doctor` to verify the installation is healthy.
+8. If you also use Codex, copy the Codex-native files from this template rather than generating them from sync. Use `$sync claude` later only when your project-specific Claude side has changed and Codex should receive those changes.
 
 For an older Claude-only project migrating to Codex for the first time, the intended flow is:
 
@@ -51,7 +53,18 @@ For an older Claude-only project migrating to Codex for the first time, the inte
 
 ## Core Commands & Workflow
 
-Claude Code uses slash commands from `.claude/commands/`. Codex uses repo skills in `.agents/skills/` backed by full command specs in `.codex/commands/`: `$codex-refactor-memory`, `$codex-checkpoint`, `$codex-learn`, `$codex-doctor`, and `$sync claude`.
+Claude Code uses slash commands from `.claude/commands/`. Codex uses repo skills in `.agents/skills/` backed by full command specs in `.codex/commands/`: `$project-discovery`, `$codex-refactor-memory`, `$codex-checkpoint`, `$codex-learn`, `$codex-doctor`, and `$sync claude`.
+
+### `/project-discovery` and `$project-discovery`
+
+An interview-first planning command for the moment before a project has a real spec.
+
+- Asks one high-leverage question at a time instead of dumping a long questionnaire.
+- Keeps confirmed facts, assumptions, rejected options, open questions, domain language, and scope boundaries separate.
+- Adapts depth: Lite for personal/local/family projects, Standard for internal or serious solo tools, Full for stakeholder handoff or public publishing.
+- Writes `docs/project/00-raw-discovery.md` first, then creates the smallest useful structured documentation pack under `docs/project/`.
+- Produces stakeholder-friendly docs such as an executive brief, product requirements, user journeys, domain language, technical brief, roadmap, risk register, presentation outline, and implementation-readiness gate.
+- Does not start implementation code.
 
 ### `/init` *(built-in to Claude Code, not CLAUDART)*
 
@@ -122,16 +135,16 @@ CLAUDART uses **four files** plus Claude Code's native auto memory:
 ```text
 new project              daily loop
 ─────────────            ──────────
-/init                    work on feature/bug
+/project-discovery       work on feature/bug
   ↓                        ↓
-copy CLAUDE.md ->         /checkpoint   (end of session — update CONTEXT, log to JOURNAL)
+/init                    /checkpoint   (end of session — update CONTEXT, log to JOURNAL)
+  ↓                        ↓
+copy CLAUDE.md ->         /learn         (after meaningful changes — refine rules)
 .claude/CLAUDE.md
   ↓                        ↓
-/refactor-memory         /learn         (after meaningful changes — refine rules)
+/refactor-memory         /refactor-memory   (occasionally — consolidate)
   ↓                        ↓
-/doctor                  /refactor-memory   (occasionally — consolidate)
-                           ↓
-                         /doctor       (whenever something feels off)
+/doctor                  /doctor       (whenever something feels off)
 ```
 
 ## Directory Layout
@@ -160,6 +173,7 @@ your-project/
     │   ├── checkpoint.md           # /checkpoint — declarative state update + JOURNAL append
     │   ├── doctor.md               # /doctor — read-only health check
     │   ├── learn.md                # /learn — retrospective + rule promotion
+    │   ├── project-discovery.md    # /project-discovery — interview rough ideas into project docs
     │   ├── refactor-memory.md      # /refactor-memory — consolidate .claude/CLAUDE.md + rules + agents
     │   └── sync.md                 # /sync codex — update Claude from Codex
     └── rules/
