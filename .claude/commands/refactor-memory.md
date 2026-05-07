@@ -10,7 +10,7 @@ Execute the following steps systematically, without losing essential project con
 
 ## Base Template Note
 
-If this command is running inside the CLAUDART base template, `.claude` and `.codex/.agents` are peer source templates. Do not use sync to generate one side from the other. If you improve a rule, command, or agent that applies to both Claude and Codex, update the matching Codex-native file manually before reporting completion.
+This repository is the CLAUDART base template. `.claude`, `.codex`, and `.agents` are peer source templates. If you improve a rule, command, or agent that applies to both Claude and Codex, update the matching Codex-native file manually before reporting completion.
 
 ## 1. Analyze the Project
 
@@ -59,12 +59,12 @@ Trim `.claude/CLAUDE.md` so it ONLY contains:
 Under a `## Domain Rules` heading near the bottom of the trimmed `.claude/CLAUDE.md`, add semantic imports for every rule file, plus the live-state CONTEXT file:
 
 ```markdown
-See @.claudart/CONTEXT.md for the current state of work (updated by /checkpoint).
+See @.claude/CONTEXT.md for the current state of work (updated by /checkpoint).
 See @.claude/rules/architecture.md for global boundaries.
 See @.claude/rules/db-rules.md for database patterns.
 ```
 
-**NEVER add `@.claudart/JOURNAL.md`** — JOURNAL is intentionally excluded from session context to save tokens. If you find such an import already in `.claude/CLAUDE.md`, remove it and warn the user in your final summary.
+**NEVER add `@.claude/JOURNAL.md`** — JOURNAL is intentionally excluded from session context to save tokens. If you find such an import already in `.claude/CLAUDE.md`, remove it and warn the user in your final summary.
 
 ## 6. Wire Up AI Behavior Guidelines (file-based, not inlined)
 
@@ -95,17 +95,17 @@ For every file in `.claude/agents/`:
 - Replace hardcoded `grep`/shell pattern lists with guidance ("scan the codebase for hardcoded secrets using the project's security tooling").
 - Confirm the agent's responsibilities don't overlap >50% with another agent — if they do, propose a merge.
 
-For `.claudart/CONTEXT.md`:
+For `.claude/CONTEXT.md`:
 - Confirm it exists. If not, create it from the CLAUDART template (declarative state file maintained by `/checkpoint`).
 - Verify line count ≤ 150. If exceeded, flag for user review — propose either trimming or graduating long-lived items into `.claude/rules/`.
-- Confirm `@.claudart/CONTEXT.md` is imported in `.claude/CLAUDE.md` (Domain Rules section). If missing, add it.
+- Confirm `@.claude/CONTEXT.md` is imported in `.claude/CLAUDE.md` (Domain Rules section). If missing, add it.
 
-For `.claudart/JOURNAL.md`:
+For `.claude/JOURNAL.md`:
 - Confirm it exists. If not, create it from the CLAUDART template.
-- **CRITICAL**: search `.claude/CLAUDE.md` and every file in `.claude/rules/` for any `@.claudart/JOURNAL.md` reference. If found, REMOVE it — JOURNAL must never be loaded into session context. Warn the user that this was fixed.
+- **CRITICAL**: search `.claude/CLAUDE.md` and every file in `.claude/rules/` for any `@.claude/JOURNAL.md` reference. If found, REMOVE it — JOURNAL must never be loaded into session context. Warn the user that this was fixed.
 - Do NOT prune or rewrite JOURNAL entries. The file is append-only by contract.
 
-Report all proposed audit changes in a clear bulleted list before applying them. Apply the safe ones (frontmatter fixes, snippet removal, missing `@.claudart/CONTEXT.md` import, JOURNAL @import removal); ask the user before merging or deleting agents/rules.
+Report all proposed audit changes in a clear bulleted list before applying them. Apply the safe ones (frontmatter fixes, snippet removal, missing `@.claude/CONTEXT.md` import, JOURNAL @import removal); ask the user before merging or deleting agents/rules.
 
 ## 8. Append Agent Self-Evolution Section
 

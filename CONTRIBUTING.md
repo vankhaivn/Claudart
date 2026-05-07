@@ -26,7 +26,7 @@ We welcome new AI commands and highly specialized agents. If you add a durable C
     ```bash
     git checkout -b feature/my-awesome-agent
     ```
-2. **Add or modify files** within the relevant AI layer: `.claude/` for Claude Code, `.codex/` plus `.agents/skills/` for Codex, and `.claudart/` for shared memory contracts.
+2. **Add or modify files** within the relevant AI layer: `.claude/` for Claude Code, `.codex/` plus `.agents/skills/` for Codex. Session state now lives inside each layer (`.claude/CONTEXT.md`, `.claude/JOURNAL.md`, `.codex/CONTEXT.md`, `.codex/JOURNAL.md`).
 3. If you've changed APIs or commands, **update the documentation** (e.g., `README.md`).
 4. **Commit your changes**. Write clear, concise commit messages.
     ```bash
@@ -41,10 +41,10 @@ We welcome new AI commands and highly specialized agents. If you add a durable C
 ## Understanding the Architecture Structure
 
 If you're contributing new logic, please adhere to our directory structure:
-- `.claude/commands/`: CLAUDART slash commands (`/learn`, `/checkpoint`, `/sync`, etc.). Your command files here should detail the steps the AI takes.
+- `.claude/commands/`: CLAUDART slash commands (`/learn`, `/checkpoint`, etc.). Your command files here should detail the steps the AI takes.
 - `.claude/agents/`: Highly specialized role-based instruction sets (`reviewer.md`, `architect.md`, etc.). Make sure agent prompts are self-contained and heavily instruct the AI on its specific persona and constraints.
 - `.codex/` and `.agents/skills/`: Codex-native source templates. They should preserve the same intent and quality as the Claude side, not act as lossy generated artifacts.
-- `.claudart/sync-map.md`: Runtime sync contract for downstream user projects. Do not use sync as the authoring workflow for this base template.
+- `.codex/AGENTS.md`: The Codex root-loader source template. The installer copies it to `AGENTS.md` at the project root.
 
 ## Pull Request Process
 

@@ -1,6 +1,6 @@
 ---
 name: codex-refactor-memory
-description: Consolidate Codex project memory, guidelines, skills, and agents while preserving the shared CLAUDART memory core.
+description: Consolidate Codex project memory, guidelines, skills, and agents.
 ---
 
 # Codex Refactor Memory
@@ -11,13 +11,12 @@ Read `.codex/commands/refactor-memory.md` for the full Codex consolidation stand
 
 Apply the standards to:
 
-- `AGENTS.md`
+- `AGENTS.md` (at project root, sourced from `.codex/AGENTS.md`)
 - `.codex/CODEX.md`
+- `.codex/CONTEXT.md`
 - `.codex/guidelines/*.md`
 - `.codex/commands/*.md`
 - `.codex/agents/*.toml`
 - `.agents/skills/*/SKILL.md`
 
-Do not move, duplicate, or rewrite `.claudart/CONTEXT.md` and `.claudart/JOURNAL.md` except where the checkpoint or learn protocols explicitly allow it.
-
-In this CLAUDART base template, `.claude` and `.codex/.agents` are peer source templates. Do not use sync as a shortcut for this refactor.
+Do not move, duplicate, or rewrite `.codex/JOURNAL.md` except where the checkpoint protocol explicitly allows it.

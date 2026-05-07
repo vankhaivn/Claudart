@@ -1,6 +1,6 @@
 ---
 name: codex-doctor
-description: Run a read-only health check for the shared CLAUDART/Codex installation.
+description: Run a read-only health check for the Codex installation.
 ---
 
 # Codex Doctor
@@ -9,10 +9,9 @@ Use this skill as the Codex-native equivalent of Claude Code `/doctor`.
 
 Read `.codex/commands/doctor.md`, then report health for:
 
-- Shared memory files in `.claudart/`
-- Claude files in `.claude/`
-- Codex files in `.codex/`
-- Codex repo skills in `.agents/skills/`
-- Root `AGENTS.md`
+- Codex session files: `.codex/CONTEXT.md`, `.codex/JOURNAL.md`
+- Codex config: `.codex/CODEX.md`, `.codex/guidelines/`, `.codex/commands/`, `.codex/agents/`
+- Codex repo skills: `.agents/skills/`
+- Root `AGENTS.md` (copied from `.codex/AGENTS.md` by installer)
 
 This skill is diagnostic only. Do not modify files.

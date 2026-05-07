@@ -9,14 +9,13 @@ Please run a health check on this repository's CLAUDART installation. Your job i
 ### 1. Required Structure
 
 - `.claude/` exists at the repository root
-- `.claude/commands/` exists and contains at least: `learn.md`, `refactor-memory.md`, `doctor.md`, `checkpoint.md`, `sync.md`
+- `.claude/commands/` exists and contains at least: `learn.md`, `refactor-memory.md`, `doctor.md`, `checkpoint.md`
 - `.claude/agents/` exists (may be empty if user removed shipped agents)
 - `.claude/rules/` exists (may be empty before the user runs `/refactor-memory`)
 - `.claude/CLAUDE.md` exists
-- `.claudart/CONTEXT.md` exists (warn if missing — the user may not have run `/checkpoint` yet)
-- `.claudart/JOURNAL.md` exists (warn if missing)
-- `.claudart/sync-map.md` exists
-- If Codex support is enabled, `AGENTS.md`, `.codex/CODEX.md`, `.codex/commands/`, `.codex/agents/`, `.codex/guidelines/`, and `.agents/skills/` exist
+- `.claude/CONTEXT.md` exists (warn if missing — the user may not have run `/checkpoint` yet)
+- `.claude/JOURNAL.md` exists (warn if missing)
+- If Codex support is enabled, `AGENTS.md` exists at the project root (copied from `.codex/AGENTS.md` by the installer), `.codex/AGENTS.md`, `.codex/CODEX.md`, `.codex/CONTEXT.md`, `.codex/JOURNAL.md`, `.codex/commands/`, `.codex/agents/`, `.codex/guidelines/`, and `.agents/skills/` exist
 
 For each missing path, report which command would create it (e.g., "missing → run `/refactor-memory`").
 
@@ -25,7 +24,7 @@ For each missing path, report which command would create it (e.g., "missing → 
 For every `.md` file under `.claude/commands/`, `.claude/agents/`, `.claude/rules/`:
 
 - Verify the file starts with a YAML frontmatter block delimited by `---`.
-- For agents: confirm `name`, `description`, `tools`, `model` keys are present. If `description` should auto-trigger the agent, confirm it contains `PROACTIVELY` (note when missing — may be intentional).
+- For agents: confirm `name`, `description`, `tools`, and `model` keys are present. If `description` should auto-trigger the agent, confirm it contains `PROACTIVELY` (note when missing — may be intentional).
 - For rules: confirm `paths:` (a list of glob patterns) and `description:` keys are present.
 - For commands: confirm `description:` is present.
 - Report any malformed YAML, missing required keys, or obviously broken frontmatter.
@@ -37,7 +36,7 @@ For every `.agents/skills/*/SKILL.md` file:
 
 For every `.codex/agents/*.toml` file:
 
-- Confirm `name`, `description`, `model`, `sandbox_mode`, and `developer_instructions` keys are present.
+- Confirm `name`, `description`, `model`, `model_reasoning_effort`, `sandbox_mode`, and `developer_instructions` keys are present.
 
 ### 3. Rule Path Coverage
 
@@ -61,24 +60,14 @@ For every rule file in `.claude/rules/*.md`:
 
 ### 5b. CONTEXT/JOURNAL Wiring (token hygiene)
 
-- Confirm `@.claudart/CONTEXT.md` is referenced in `.claude/CLAUDE.md` Domain Rules. If missing, current-state handoff isn't loaded — flag as **Medium**.
-- `.claudart/CONTEXT.md` line count must be ≤ 150 (use `wc -l`, do NOT full-read the file). If exceeded, flag as **High** — past the declarative ceiling, needs trimming or graduation via `/learn`.
-- **CRITICAL**: search `.claude/CLAUDE.md` AND every file in `.claude/rules/` for any `@.claudart/JOURNAL.md` reference (use `grep -r '@.claudart/JOURNAL.md' .claude/CLAUDE.md .claude/rules/`). If found, flag as **Critical** — JOURNAL must NEVER be loaded into session context (defeats the entire token-saving purpose). Recommend immediate removal.
-- For `.claudart/JOURNAL.md` integrity, use spot-checks rather than full reads (the file may be large):
-    - `head -n 20 .claudart/JOURNAL.md` — verify the canonical header is intact.
-    - `wc -l .claudart/JOURNAL.md` — report total entry count for the user.
-    - `tail -n 5 .claudart/JOURNAL.md` — sample-check the most recent lines match the `YYYY-MM-DD | <type> | <summary>` format.
+- Confirm `@.claude/CONTEXT.md` is referenced in `.claude/CLAUDE.md` Domain Rules. If missing, current-state handoff isn't loaded — flag as **Medium**.
+- `.claude/CONTEXT.md` line count must be ≤ 150 (use `wc -l`, do NOT full-read the file). If exceeded, flag as **High** — past the declarative ceiling, needs trimming or graduation via `/learn`.
+- **CRITICAL**: search `.claude/CLAUDE.md` AND every file in `.claude/rules/` for any `@.claude/JOURNAL.md` reference (use `grep -r '@.claude/JOURNAL.md' .claude/CLAUDE.md .claude/rules/`). If found, flag as **Critical** — JOURNAL must NEVER be loaded into session context (defeats the entire token-saving purpose). Recommend immediate removal.
+- For `.claude/JOURNAL.md` integrity, use spot-checks rather than full reads (the file may be large):
+    - `head -n 20 .claude/JOURNAL.md` — verify the canonical header is intact.
+    - `wc -l .claude/JOURNAL.md` — report total entry count for the user.
+    - `tail -n 5 .claude/JOURNAL.md` — sample-check the most recent lines match the `YYYY-MM-DD | <type> | <summary>` format.
     - Skip deeper validation. If a malformed line is suspected, ask the user; do not slurp the whole file just to verify format.
-
-### 5c. Claude/Codex Sync Wiring
-
-- Confirm `.claudart/sync-map.md` defines both `claude` and `codex` directions.
-- Confirm `.claude/commands/sync.md` exists and documents `/sync codex`.
-- Confirm `.agents/skills/sync/SKILL.md` exists and documents `$sync claude`.
-- Confirm `AGENTS.md` points Codex to `.codex/CODEX.md`, `.claudart/CONTEXT.md`, and `.codex/guidelines/*.md`.
-- Confirm `.codex/CODEX.md` points to `.claudart/CONTEXT.md` and does NOT import `.claudart/JOURNAL.md`.
-- Confirm `.claudart/sync-map.md` says sync is for downstream user projects, while this base template maintains `.claude` and `.codex/.agents` manually as peer source templates.
-- Confirm base template files do NOT contain `Generated by CLAUDART sync` marker comments outside sync policy/command examples.
 
 ### 6. Anti-Patterns Inside Rules and Agents
 

@@ -4,12 +4,11 @@
 #   curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash
 #
 # Options (pass after --):
-#   --claude-only   Install only the Claude Code layer (.claude/ + .claudart/)
-#   --codex-only    Install only the Codex layer (AGENTS.md + .codex/ + .agents/ + .claudart/)
-#   --force         Overwrite existing files
-#   --help          Show this help text
-#
-# Default (no flags): install both layers.
+#   (no flags)   Install the Claude Code layer (.claude/)
+#   --codex      Install the Codex layer (.codex/ + .agents/ + AGENTS.md at root)
+#   --both       Install both Claude and Codex layers
+#   --force      Overwrite existing files
+#   --help       Show this help text
 
 set -euo pipefail
 
@@ -18,7 +17,7 @@ BRANCH="main"
 TARBALL_URL="https://github.com/${REPO}/archive/refs/heads/${BRANCH}.tar.gz"
 
 INSTALL_CLAUDE=true
-INSTALL_CODEX=true
+INSTALL_CODEX=false
 FORCE=false
 
 # ── helpers ──────────────────────────────────────────────────────────────────
@@ -29,7 +28,7 @@ yellow(){ printf '\033[33m%s\033[0m' "$*"; }
 red()   { printf '\033[31m%s\033[0m' "$*"; }
 
 show_help() {
-  cat <<EOF
+  cat <<EOF2
 $(bold "CLAUDART Installer")
 
 USAGE
@@ -38,34 +37,30 @@ USAGE
   bash install.sh [OPTIONS]
 
 OPTIONS
-  --claude-only   Install only the Claude Code layer
-  --codex-only    Install only the Codex layer
-  --force         Overwrite files that already exist
-  --help          Show this help text
+  (no flags)   Install the Claude Code layer (default)
+  --codex      Install the Codex layer instead
+  --both       Install both Claude Code and Codex layers
+  --force      Overwrite files that already exist
+  --help       Show this help text
 
 LAYERS
-  Claude Code   .claude/  +  .claudart/
-  Codex         AGENTS.md  +  .codex/  +  .agents/  +  .claudart/
-  Both (default) all of the above
-EOF
+  Claude Code (default)   .claude/
+  Codex                   .codex/  +  .agents/  +  AGENTS.md at project root
+  Both                    all of the above
+EOF2
 }
 
 # ── arg parsing ───────────────────────────────────────────────────────────────
 
 for arg in "$@"; do
   case "$arg" in
-    --claude-only) INSTALL_CODEX=false ;;
-    --codex-only)  INSTALL_CLAUDE=false ;;
-    --force)       FORCE=true ;;
-    --help|-h)     show_help; exit 0 ;;
+    --codex)  INSTALL_CLAUDE=false; INSTALL_CODEX=true ;;
+    --both)   INSTALL_CLAUDE=true;  INSTALL_CODEX=true ;;
+    --force)  FORCE=true ;;
+    --help|-h) show_help; exit 0 ;;
     *) printf '%s Unknown option: %s\n' "$(red "error")" "$arg" >&2; exit 1 ;;
   esac
 done
-
-if [[ "$INSTALL_CLAUDE" == false && "$INSTALL_CODEX" == false ]]; then
-  printf '%s --claude-only and --codex-only cannot both be set.\n' "$(red "error")" >&2
-  exit 1
-fi
 
 # ── download ──────────────────────────────────────────────────────────────────
 
@@ -107,6 +102,25 @@ copy_file() {
   (( COPIED++ )) || true
 }
 
+# Copy a file from an arbitrary src path to an arbitrary dst path (different rel names).
+copy_file_from_src() {
+  local src_rel="$1"
+  local dst_rel="$2"
+  local src="$TMPDIR/$src_rel"
+  local dst="$DEST/$dst_rel"
+
+  if [[ -f "$dst" && "$FORCE" == false ]]; then
+    printf '  %s  %s\n' "$(yellow "skip")" "$dst_rel"
+    (( SKIPPED++ )) || true
+    return
+  fi
+
+  mkdir -p "$(dirname "$dst")"
+  cp "$src" "$dst"
+  printf '  %s  %s\n' "$(green "copy")" "$dst_rel"
+  (( COPIED++ )) || true
+}
+
 # Walk every file inside a source tree and call copy_file for each one.
 copy_tree() {
   local root="$1"         # e.g. ".claude"
@@ -126,10 +140,6 @@ copy_tree() {
 
 printf '\n%s  Installing into %s\n' "$(bold "→")" "$DEST"
 
-# Shared memory core — always installed
-printf '\n%s\n' "$(bold "Shared core (.claudart/)")"
-copy_tree ".claudart"
-
 if [[ "$INSTALL_CLAUDE" == true ]]; then
   printf '\n%s\n' "$(bold "Claude Code layer (.claude/)")"
   copy_tree ".claude"
@@ -137,9 +147,10 @@ fi
 
 if [[ "$INSTALL_CODEX" == true ]]; then
   printf '\n%s\n' "$(bold "Codex layer")"
-  copy_file "AGENTS.md"
   copy_tree ".codex"
   copy_tree ".agents"
+  # AGENTS.md must live at project root for Codex to auto-load it
+  copy_file_from_src ".codex/AGENTS.md" "AGENTS.md"
 fi
 
 # ── summary ───────────────────────────────────────────────────────────────────
