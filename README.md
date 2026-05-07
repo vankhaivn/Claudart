@@ -12,6 +12,33 @@
 
 ---
 
+## Quick Install
+
+Run this one-liner inside your project root — no clone needed:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash
+```
+
+This copies `.claudart/`, `.claude/`, `AGENTS.md`, `.codex/`, and `.agents/` into the current directory and prints next steps.
+
+**Install only the layer you need:**
+
+```bash
+# Claude Code only
+curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --claude-only
+
+# Codex only
+curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --codex-only
+
+# Overwrite existing files
+curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --force
+```
+
+> Existing files are skipped by default. Pass `--force` to overwrite.
+
+---
+
 ## Overview
 
 **CLAUDART** (a portmanteau of **CLAUDE** and **SMART**) is a universal project template that supercharges your AI-assisted workflow from day one. Instead of starting from scratch, CLAUDART gives every project a "brain" — a Modular Rules System, opinionated review agents, a session-handoff convention, a sync contract for Claude/Codex, and a built-in self-learning loop tuned to your codebase.
@@ -30,26 +57,41 @@ It scales from a small side project to a large team repo, acting as your intelli
 
 ## Getting Started
 
-To equip your project with CLAUDART, copy the relevant files into your repo — no installation, no dependencies.
+The fastest path is the **Quick Install** one-liner above. Once the files are in your project:
 
-1. From a fresh CLAUDART checkout, copy the AI layer you use into the root of your project:
-   - Claude Code: copy `.claude/` and `.claudart/`.
-   - Codex: copy `AGENTS.md`, `.codex/`, `.agents/`, and `.claudart/`.
-   - Both: copy all of the above.
-2. Open the project in Claude Code, Codex, or both.
-3. If the idea is still vague, run `/project-discovery` or `$project-discovery` before writing code to create a raw discovery file and structured project docs.
-4. (Optional) Run the built-in `/init` to let Claude Code generate a starter `CLAUDE.md` from your codebase.
-5. If `/init` created a root `CLAUDE.md`, copy its generated project content into `.claude/CLAUDE.md`. CLAUDART keeps Claude memory inside `.claude/` so the AI layer stays versioned.
-6. Run `/refactor-memory` to extract domain rules into `.claude/rules/` and wire up `@.claudart/CONTEXT.md` + AI-behavior guardrails.
-7. Run `/doctor` to verify the installation is healthy.
-8. If you also use Codex, copy the Codex-native files from this template rather than generating them from sync. Use `$sync claude` later only when your project-specific Claude side has changed and Codex should receive those changes.
+1. Open the project in Claude Code, Codex, or both.
+2. If the idea is still vague, run `/project-discovery` or `$project-discovery` before writing code to create a raw discovery file and structured project docs.
+3. (Optional) Run the built-in `/init` to let Claude Code generate a starter `CLAUDE.md` from your codebase.
+4. If `/init` created a root `CLAUDE.md`, copy its generated project content into `.claude/CLAUDE.md`. CLAUDART keeps Claude memory inside `.claude/` so the AI layer stays versioned.
+5. Run `/refactor-memory` to extract domain rules into `.claude/rules/` and wire up `@.claudart/CONTEXT.md` + AI-behavior guardrails.
+6. Run `/doctor` to verify the installation is healthy.
+7. If you also use Codex, use `$sync claude` later only when your project-specific Claude side has changed and Codex should receive those changes.
 
-For an older Claude-only project migrating to Codex for the first time, the intended flow is:
+For an older Claude-only project migrating to Codex for the first time:
 
 1. Keep the project's existing `.claude/` as-is.
-2. Add `AGENTS.md`, `.codex/`, `.agents/`, and any missing `.claudart/` files from the new CLAUDART template.
+2. Run `curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --codex-only` to add the Codex layer.
 3. Open Codex in that project and run `$sync claude`.
 4. The first sync may overwrite the freshly copied generic Codex scaffold. That is expected bootstrap behavior, not a conflict.
+
+### Manual Installation
+
+If you prefer not to use the installer, clone the repo and copy what you need:
+
+```bash
+git clone https://github.com/vankhaivn/Claudart.git claudart-tmp
+
+# Claude Code
+cp -r claudart-tmp/.claude  your-project/
+cp -r claudart-tmp/.claudart  your-project/
+
+# Codex (add to the above or standalone)
+cp    claudart-tmp/AGENTS.md   your-project/
+cp -r claudart-tmp/.codex      your-project/
+cp -r claudart-tmp/.agents     your-project/
+
+rm -rf claudart-tmp
+```
 
 ## Core Commands & Workflow
 
