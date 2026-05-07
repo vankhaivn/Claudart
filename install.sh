@@ -5,6 +5,7 @@
 #
 # Options (pass after --):
 #   (no flags)   Install the Claude Code layer (.claude/)
+#   --claude     Install the Claude Code layer (explicit, same as default)
 #   --codex      Install the Codex layer (.codex/ + .agents/ + AGENTS.md at root)
 #   --both       Install both Claude and Codex layers
 #   --force      Overwrite existing files
@@ -38,6 +39,7 @@ USAGE
 
 OPTIONS
   (no flags)   Install the Claude Code layer (default)
+  --claude     Install the Claude Code layer (explicit)
   --codex      Install the Codex layer instead
   --both       Install both Claude Code and Codex layers
   --force      Overwrite files that already exist
@@ -54,6 +56,7 @@ EOF2
 
 for arg in "$@"; do
   case "$arg" in
+    --claude) INSTALL_CLAUDE=true;  INSTALL_CODEX=false ;;
     --codex)  INSTALL_CLAUDE=false; INSTALL_CODEX=true ;;
     --both)   INSTALL_CLAUDE=true;  INSTALL_CODEX=true ;;
     --force)  FORCE=true ;;

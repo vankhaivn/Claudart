@@ -22,10 +22,11 @@ curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh 
 
 The installer merges CLAUDART into your project **file by file**. Files you already have are never touched — only missing files are created. Pass `--force` to overwrite.
 
-The default installs the **Claude Code layer** (`.claude/`). Add flags for other layers:
-
 ```bash
-# Codex layer (AGENTS.md + .codex/ + .agents/)
+# Claude Code layer (.claude/)  ← default
+curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --claude
+
+# Codex layer (.codex/ + .agents/ + AGENTS.md)
 curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --codex
 
 # Both layers
