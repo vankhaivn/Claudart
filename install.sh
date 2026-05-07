@@ -89,31 +89,37 @@ fi
 SKIPPED=0
 COPIED=0
 
-copy_item() {
-  local src="$1"   # relative path inside TMPDIR
-  local dst="$DEST/$src"
+# Copy a single file, skipping if it already exists (unless --force).
+copy_file() {
+  local rel="$1"          # path relative to repo root, e.g. ".claude/CLAUDE.md"
+  local src="$TMPDIR/$rel"
+  local dst="$DEST/$rel"
 
-  if [[ ! -e "$TMPDIR/$src" ]]; then
-    return
-  fi
-
-  if [[ -e "$dst" && "$FORCE" == false ]]; then
-    printf '  %s  %s (already exists — use --force to overwrite)\n' "$(yellow "skip")" "$src"
+  if [[ -f "$dst" && "$FORCE" == false ]]; then
+    printf '  %s  %s\n' "$(yellow "skip")" "$rel"
     (( SKIPPED++ )) || true
     return
   fi
 
-  if [[ -d "$TMPDIR/$src" ]]; then
-    mkdir -p "$dst"
-    # cp -r would merge; use rsync-style copy to stay portable
-    cp -r "$TMPDIR/$src/." "$dst/"
-  else
-    mkdir -p "$(dirname "$dst")"
-    cp "$TMPDIR/$src" "$dst"
+  mkdir -p "$(dirname "$dst")"
+  cp "$src" "$dst"
+  printf '  %s  %s\n' "$(green "copy")" "$rel"
+  (( COPIED++ )) || true
+}
+
+# Walk every file inside a source tree and call copy_file for each one.
+copy_tree() {
+  local root="$1"         # e.g. ".claude"
+  local src_root="$TMPDIR/$root"
+
+  if [[ ! -d "$src_root" ]]; then
+    return
   fi
 
-  printf '  %s  %s\n' "$(green "copy")" "$src"
-  (( COPIED++ )) || true
+  while IFS= read -r src_file; do
+    local rel="${src_file#"$TMPDIR/"}"
+    copy_file "$rel"
+  done < <(find "$src_root" -type f | sort)
 }
 
 # ── install ───────────────────────────────────────────────────────────────────
@@ -121,18 +127,19 @@ copy_item() {
 printf '\n%s  Installing into %s\n' "$(bold "→")" "$DEST"
 
 # Shared memory core — always installed
-copy_item ".claudart"
+printf '\n%s\n' "$(bold "Shared core (.claudart/)")"
+copy_tree ".claudart"
 
 if [[ "$INSTALL_CLAUDE" == true ]]; then
-  printf '\n%s\n' "$(bold "Claude Code layer")"
-  copy_item ".claude"
+  printf '\n%s\n' "$(bold "Claude Code layer (.claude/)")"
+  copy_tree ".claude"
 fi
 
 if [[ "$INSTALL_CODEX" == true ]]; then
   printf '\n%s\n' "$(bold "Codex layer")"
-  copy_item "AGENTS.md"
-  copy_item ".codex"
-  copy_item ".agents"
+  copy_file "AGENTS.md"
+  copy_tree ".codex"
+  copy_tree ".agents"
 fi
 
 # ── summary ───────────────────────────────────────────────────────────────────
@@ -140,7 +147,7 @@ fi
 printf '\n%s  Done. %d copied, %d skipped.\n\n' "$(bold "✓")" "$COPIED" "$SKIPPED"
 
 if [[ "$SKIPPED" -gt 0 ]]; then
-  printf '%s  Some files were skipped. Run with --force to overwrite existing files.\n\n' "$(yellow "note")"
+  printf '%s  Skipped files already exist in your project. Run with --force to overwrite them.\n\n' "$(yellow "note")"
 fi
 
 printf '%s\n' "$(bold "Next steps:")"

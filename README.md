@@ -20,22 +20,20 @@ Run this one-liner inside your project root — no clone needed:
 curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash
 ```
 
-This copies `.claudart/`, `.claude/`, `AGENTS.md`, `.codex/`, and `.agents/` into the current directory and prints next steps.
+The installer merges CLAUDART into your project **file by file**. Files you already have are never touched — only missing files are created. Pass `--force` to overwrite.
 
 **Install only the layer you need:**
 
 ```bash
-# Claude Code only
+# Claude Code only (.claude/ + .claudart/)
 curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --claude-only
 
-# Codex only
+# Codex only (AGENTS.md + .codex/ + .agents/ + .claudart/)
 curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --codex-only
 
 # Overwrite existing files
 curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --force
 ```
-
-> Existing files are skipped by default. Pass `--force` to overwrite.
 
 ---
 
@@ -73,25 +71,6 @@ For an older Claude-only project migrating to Codex for the first time:
 2. Run `curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --codex-only` to add the Codex layer.
 3. Open Codex in that project and run `$sync claude`.
 4. The first sync may overwrite the freshly copied generic Codex scaffold. That is expected bootstrap behavior, not a conflict.
-
-### Manual Installation
-
-If you prefer not to use the installer, clone the repo and copy what you need:
-
-```bash
-git clone https://github.com/vankhaivn/Claudart.git claudart-tmp
-
-# Claude Code
-cp -r claudart-tmp/.claude  your-project/
-cp -r claudart-tmp/.claudart  your-project/
-
-# Codex (add to the above or standalone)
-cp    claudart-tmp/AGENTS.md   your-project/
-cp -r claudart-tmp/.codex      your-project/
-cp -r claudart-tmp/.agents     your-project/
-
-rm -rf claudart-tmp
-```
 
 ## Core Commands & Workflow
 
