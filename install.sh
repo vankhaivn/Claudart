@@ -150,10 +150,31 @@ fi
 
 if [[ "$INSTALL_CODEX" == true ]]; then
   printf '\n%s\n' "$(bold "Codex layer")"
+
+  # Snapshot AGENTS.md state BEFORE copying so we know what the user already had.
+  AGENTS_AT_ROOT=false
+  AGENTS_IN_CODEX=false
+  [[ -f "$DEST/AGENTS.md" ]]        && AGENTS_AT_ROOT=true
+  [[ -f "$DEST/.codex/AGENTS.md" ]] && AGENTS_IN_CODEX=true
+
   copy_tree ".codex"
   copy_tree ".agents"
-  # AGENTS.md must live at project root for Codex to auto-load it
-  copy_file_from_src ".codex/AGENTS.md" "AGENTS.md"
+
+  # AGENTS.md must live at project root for Codex to auto-load it.
+  # • User already had it at root OR in .codex/ → leave everything untouched.
+  # • Neither existed → install at root and remove the .codex/ copy that
+  #   copy_tree just created (avoid having two conflicting copies).
+  if [[ "$AGENTS_AT_ROOT" == false && "$AGENTS_IN_CODEX" == false ]]; then
+    copy_file_from_src ".codex/AGENTS.md" "AGENTS.md"
+    if [[ -f "$DEST/.codex/AGENTS.md" ]]; then
+      rm "$DEST/.codex/AGENTS.md"
+      printf '  %s  .codex/AGENTS.md (removed; canonical copy is at root)\n' "$(green "clean")"
+    fi
+  else
+    location="$( [[ "$AGENTS_AT_ROOT" == true ]] && echo "root" || echo ".codex/" )"
+    printf '  %s  AGENTS.md (already present at %s, skipping)\n' "$(yellow "skip")" "$location"
+    (( SKIPPED++ )) || true
+  fi
 fi
 
 # ── summary ───────────────────────────────────────────────────────────────────
