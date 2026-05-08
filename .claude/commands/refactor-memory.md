@@ -8,10 +8,6 @@ Please analyze the existing `.claude/CLAUDE.md` (if any), `.claude/rules/*.md`, 
 
 Execute the following steps systematically, without losing essential project context.
 
-## Base Template Note
-
-This repository is the CLAUDART base template. `.claude`, `.codex`, and `.agents` are peer source templates. If you improve a rule, command, or agent that applies to both Claude and Codex, update the matching Codex-native file manually before reporting completion.
-
 ## 1. Analyze the Project
 
 - Determine the main framework, language, and architectural layers based on `.claude/CLAUDE.md` and the project structure.

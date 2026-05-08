@@ -15,7 +15,6 @@ Please run a health check on this repository's CLAUDART installation. Your job i
 - `.claude/CLAUDE.md` exists
 - `.claude/CONTEXT.md` exists (warn if missing — the user may not have run `/checkpoint` yet)
 - `.claude/JOURNAL.md` exists (warn if missing)
-- If Codex support is enabled, `AGENTS.md` exists at the project root (copied from `.codex/AGENTS.md` by the installer), `.codex/AGENTS.md`, `.codex/CODEX.md`, `.codex/CONTEXT.md`, `.codex/JOURNAL.md`, `.codex/commands/`, `.codex/agents/`, `.codex/guidelines/`, and `.agents/skills/` exist
 
 For each missing path, report which command would create it (e.g., "missing → run `/refactor-memory`").
 
@@ -33,10 +32,6 @@ For every `.agents/skills/*/SKILL.md` file:
 
 - Verify the file starts with YAML frontmatter.
 - Confirm `name:` and `description:` are present.
-
-For every `.codex/agents/*.toml` file:
-
-- Confirm `name`, `description`, `model`, `model_reasoning_effort`, `sandbox_mode`, and `developer_instructions` keys are present.
 
 ### 3. Rule Path Coverage
 
