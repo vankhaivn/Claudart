@@ -7,7 +7,6 @@ Run a read-only health check on this repository's CLAUDART installation from the
 ### 1. Required Structure
 
 - `AGENTS.md` exists at the repository root (copied from `.codex/AGENTS.md` by the installer).
-- `.codex/CODEX.md` exists.
 - `.codex/CONTEXT.md` exists. Warn if missing because the user may not have run checkpoint yet.
 - `.codex/JOURNAL.md` exists. Warn if missing.
 - `.codex/commands/` exists and contains at least `learn.md`, `refactor-memory.md`, `doctor.md`, and `checkpoint.md`.
@@ -55,23 +54,22 @@ For every guideline file in `.codex/guidelines/*.md`:
 ### 4. Codex Memory Cross-Linking
 
 - Read `AGENTS.md`.
-- Confirm it points Codex to `.codex/CODEX.md`, `.codex/CONTEXT.md`, and `.codex/guidelines/*.md`.
-- Read `.codex/CODEX.md`.
-- Find the guideline section.
+- Confirm it points Codex to `.codex/CONTEXT.md` and `.codex/guidelines/*.md`.
+- Find the guideline section in `AGENTS.md`.
 - For every `.codex/guidelines/*.md` reference there, confirm the target file exists.
-- For every file under `.codex/guidelines/`, confirm there is a matching reference in `.codex/CODEX.md`. Files without a reference may not be loaded consistently; flag them as isolated guidelines.
+- For every file under `.codex/guidelines/`, confirm there is a matching reference in `AGENTS.md`. Files without a reference may not be loaded consistently; flag them as isolated guidelines.
 
 ### 5. AI Behavior Wiring
 
 - Confirm `.codex/guidelines/ai-behavior.md` exists.
-- Confirm `.codex/CODEX.md` or `AGENTS.md` references `.codex/guidelines/ai-behavior.md`.
+- Confirm `AGENTS.md` references `.codex/guidelines/ai-behavior.md`.
 - If missing, flag as High severity because universal behavior guidelines are not loaded.
 
 ### 6. CONTEXT/JOURNAL Wiring
 
-- Confirm `.codex/CONTEXT.md` is referenced in `AGENTS.md` and `.codex/CODEX.md`.
+- Confirm `.codex/CONTEXT.md` is referenced in `AGENTS.md`.
 - `.codex/CONTEXT.md` line count must be at most 150. Use `wc -l`; do not full-read the file just to count.
-- Search `AGENTS.md`, `.codex/CODEX.md`, and `.codex/guidelines/` for any operational auto-load instruction for `.codex/JOURNAL.md`. If found, flag as Critical.
+- Search `AGENTS.md` and `.codex/guidelines/` for any operational auto-load instruction for `.codex/JOURNAL.md`. If found, flag as Critical.
 - For `.codex/JOURNAL.md` integrity, use spot-checks rather than full reads:
   - `head -n 20 .codex/JOURNAL.md`
   - `wc -l .codex/JOURNAL.md`
@@ -88,9 +86,8 @@ For every guideline file in `.codex/guidelines/*.md`:
 
 ### 8. Size Sanity
 
-- Count lines in `AGENTS.md`. It should stay concise.
-- Count lines in `.codex/CODEX.md`. Target is under 100 lines.
-- If either file is bloated, recommend `$codex-refactor-memory`.
+- Count lines in `AGENTS.md`. Target is under 100 lines.
+- If bloated, recommend `$codex-refactor-memory`.
 
 ### 9. Agent Overlap
 

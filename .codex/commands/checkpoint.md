@@ -9,7 +9,7 @@ The output is not a log of what happened. It is a declarative snapshot of what i
 1. `.codex/CONTEXT.md` is overwritten, not appended. Anything not still true right now must be removed.
 2. `.codex/CONTEXT.md` hard ceiling: 150 lines, target under 100. If your draft exceeds 150, stop and ask the user to trim manually or run `$codex-refactor-memory`.
 3. `.codex/JOURNAL.md` is append-only. Never edit or delete prior entries. Each new entry is a single line.
-4. Never add `.codex/JOURNAL.md` as auto-loaded context in `AGENTS.md`, `.codex/CODEX.md`, or `.codex/guidelines/`.
+4. Never add `.codex/JOURNAL.md` as auto-loaded context in `AGENTS.md` or `.codex/guidelines/`.
 5. Skip JOURNAL entirely when there is nothing meaningful to record. Empty entries pollute the file.
 
 ## Procedure

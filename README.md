@@ -46,7 +46,7 @@ It scales from a solo project to a large team repo with **zero external dependen
 
 ## Key Features
 
-- **Modular Rules System** — `.claude/CLAUDE.md` and `.codex/CODEX.md` stay lightweight indexes; durable guidance lives in `.claude/rules/` and `.codex/guidelines/`.
+- **Modular Rules System** — `.claude/CLAUDE.md` stays a lightweight index for Claude; durable guidance lives in `.claude/rules/` and `.codex/guidelines/`. `AGENTS.md` is the sole Codex memory index.
 - **Agent-Local Session State** — Claude uses `.claude/CONTEXT.md` + `.claude/JOURNAL.md`; Codex uses `.codex/CONTEXT.md` + `.codex/JOURNAL.md`.
 - **Built-in Review Agents** — `clean-code-reviewer` for scope discipline and clean-code review, plus `secure-reviewer` for read-only security audits.
 - **Project Discovery Interview** — `/project-discovery` and `$project-discovery` turn rough ideas into usable project documentation before implementation starts.
@@ -124,7 +124,7 @@ CLAUDART uses agent-local memory files plus each tool's native operating layer:
 | `.claude/CLAUDE.md` | Always | You + `/learn` + `/refactor-memory` | Project lifetime |
 | `.claude/CONTEXT.md` | Always (via `@import`) | `/checkpoint` | Live, declarative |
 | `.claude/JOURNAL.md` | **Never** auto-loaded | `/checkpoint` (append) | Forever |
-| `AGENTS.md` + `.codex/AGENTS.md` + `.codex/CODEX.md` | Always | You + `$codex-learn` + `$codex-refactor-memory` | Project lifetime |
+| `AGENTS.md` + `.codex/AGENTS.md` | Always | You + `$codex-learn` + `$codex-refactor-memory` | Project lifetime |
 | `.codex/CONTEXT.md` | Always | `$codex-checkpoint` | Live, declarative |
 | `.codex/JOURNAL.md` | **Never** auto-loaded | `$codex-checkpoint` (append) | Forever |
 | `~/.claude/projects/<hash>/memory/` | First 200 lines | Claude Code | Per machine |
@@ -158,7 +158,6 @@ your-project/
 │   └── skills/                     # Codex repo skills
 ├── .codex/
 │   ├── AGENTS.md                   # Source template copied to root AGENTS.md during install
-│   ├── CODEX.md                    # Codex-native lightweight index
 │   ├── CONTEXT.md                  # Codex live state, declarative, ≤ 150 lines
 │   ├── JOURNAL.md                  # Codex append-only audit log — never auto-loaded
 │   ├── agents/                     # Codex TOML subagents

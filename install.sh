@@ -175,6 +175,13 @@ if [[ "$INSTALL_CODEX" == true ]]; then
     printf '  %s  AGENTS.md (already present at %s, skipping)\n' "$(yellow "skip")" "$location"
     (( SKIPPED++ )) || true
   fi
+
+  # .codex/CODEX.md was removed in a prior CLAUDART release; AGENTS.md is now
+  # the sole Codex memory index. Remove the stale file if still present.
+  if [[ -f "$DEST/.codex/CODEX.md" ]]; then
+    rm "$DEST/.codex/CODEX.md"
+    printf '  %s  .codex/CODEX.md (deprecated; content consolidated into AGENTS.md)\n' "$(green "clean")"
+  fi
 fi
 
 # ── summary ───────────────────────────────────────────────────────────────────

@@ -9,4 +9,4 @@ Use this skill to run the Codex learning and retrospective workflow.
 
 Read `.codex/commands/learn.md` for the Codex learning protocol.
 
-Codex-side learning should update `.codex/guidelines/`, `.codex/CODEX.md`, `.codex/agents/`, or `.agents/skills/` when those files are the correct home for the lesson.
+Codex-side learning should update `.codex/guidelines/`, `.codex/agents/`, or `.agents/skills/` when those files are the correct home for the lesson.

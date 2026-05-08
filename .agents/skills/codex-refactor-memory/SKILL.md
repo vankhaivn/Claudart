@@ -12,7 +12,6 @@ Read `.codex/commands/refactor-memory.md` for the full Codex consolidation stand
 Apply the standards to:
 
 - `AGENTS.md` (at project root, sourced from `.codex/AGENTS.md`)
-- `.codex/CODEX.md`
 - `.codex/CONTEXT.md`
 - `.codex/guidelines/*.md`
 - `.codex/commands/*.md`

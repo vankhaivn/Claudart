@@ -2,21 +2,20 @@
 
 Run a Retrospective & Learning Protocol on the work you just completed.
 
-Based on the "Agent Self-Evolution & Context Maintenance" section in `.codex/CODEX.md`, perform this 3-phase protocol. Do not skip Phase 0. Without re-reading the active rules, you cannot reliably detect what was violated.
+Based on the "Agent Self-Evolution & Context Maintenance" section in `AGENTS.md`, perform this 3-phase protocol. Do not skip Phase 0. Without re-reading the active rules, you cannot reliably detect what was violated.
 
 ## Phase 0: Re-Ground in the Rule Set
 
 Before any retrospective:
 
 1. Read `AGENTS.md` in full.
-2. Read `.codex/CODEX.md` in full.
-3. Read every file in `.codex/guidelines/*.md` in full. Use `rg --files .codex/guidelines` first if you do not already know what exists.
-4. Read every `.codex/agents/*.toml` file whose role or instructions mattered during this session.
-5. Read every `.agents/skills/*/SKILL.md` file whose skill you used during this session.
-6. Read `.codex/CONTEXT.md` to know the current shared state.
-7. Build a short mental index: guideline name -> core constraint -> loophole keyword if any.
+2. Read every file in `.codex/guidelines/*.md` in full. Use `rg --files .codex/guidelines` first if you do not already know what exists.
+3. Read every `.codex/agents/*.toml` file whose role or instructions mattered during this session.
+4. Read every `.agents/skills/*/SKILL.md` file whose skill you used during this session.
+5. Read `.codex/CONTEXT.md` to know the current shared state.
+6. Build a short mental index: guideline name -> core constraint -> loophole keyword if any.
 
-You cannot judge deviations against rules you have not re-read. If `.codex/guidelines/` is empty or missing, note that and continue with `AGENTS.md` and `.codex/CODEX.md` only.
+You cannot judge deviations against rules you have not re-read. If `.codex/guidelines/` is empty or missing, note that and continue with `AGENTS.md` only.
 
 ## Phase 1: Rule Refinement
 
@@ -25,7 +24,7 @@ Walk the conversation chronologically, comparing each assistant turn against the
 1. List every moment the human corrected you or you deviated from a rule. For each one, answer: "What rationalization did I use to justify the deviation?" Do not just say "I missed the rule".
 2. Did any rule fail because it only described the happy path without closing obvious loopholes?
 3. For each identified gap, update the relevant guideline using this pattern: `NEVER do X, even when Y seems like a good reason`.
-4. If rules contradict each other, resolve the contradiction immediately in `.codex/guidelines/`, `.codex/CODEX.md`, or `AGENTS.md`.
+4. If rules contradict each other, resolve the contradiction immediately in `.codex/guidelines/` or `AGENTS.md`.
 5. Save quiet confirmations. If the human accepted an unusual judgment call without pushback, record it when it should repeat in future sessions.
 
 ## Phase 2: New Knowledge Integration
@@ -39,14 +38,14 @@ Walk the conversation chronologically, comparing each assistant turn against the
    - Skip this step if `.codex/JOURNAL.md` does not exist or has fewer than 5 entries.
 3. Decide where new knowledge belongs:
    - Existing domain with a strong match -> update the exact file in `.codex/guidelines/`.
-   - New domain with no strong match -> create a new guideline file in `.codex/guidelines/` with proper `paths: [...]` and `description:` frontmatter, then reference it from `.codex/CODEX.md`.
-   - Global Codex standard -> update `.codex/CODEX.md` or `AGENTS.md`.
+   - New domain with no strong match -> create a new guideline file in `.codex/guidelines/` with proper `paths: [...]` and `description:` frontmatter, then reference it from `AGENTS.md`.
+   - Global Codex standard -> update `AGENTS.md` directly.
 
 Critical constraint: do not shoehorn a new concept into an existing guideline if the match is weaker than 80%. Prefer creating a new domain file over polluting a specific guideline.
 
 ## Boundary
 
-`$codex-learn` updates rules, guidelines, skills, agents, `AGENTS.md`, and `.codex/CODEX.md`.
+`$codex-learn` updates rules, guidelines, skills, agents, and `AGENTS.md`.
 
 It does not modify `.codex/CONTEXT.md`; checkpoint owns that file.
 
