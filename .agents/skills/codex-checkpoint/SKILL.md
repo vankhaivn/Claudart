@@ -5,7 +5,7 @@ description: Update Codex current state by rewriting .codex/CONTEXT.md and appen
 
 # Codex Checkpoint
 
-Use this skill as the Codex-native equivalent of Claude Code `/checkpoint`.
+Use this skill to run the Codex checkpoint workflow.
 
 Read `.codex/commands/checkpoint.md` for the Codex checkpoint protocol.
 

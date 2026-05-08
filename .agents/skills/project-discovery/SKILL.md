@@ -5,7 +5,7 @@ description: Interview a user with a rough project idea, synthesize raw discover
 
 # Project Discovery
 
-Use this skill as the Codex-native equivalent of Claude Code `/project-discovery`.
+Use this skill to run the project discovery interview workflow.
 
 Read `.codex/commands/project-discovery.md` for the full discovery interview protocol.
 

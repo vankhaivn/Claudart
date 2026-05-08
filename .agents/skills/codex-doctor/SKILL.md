@@ -5,7 +5,7 @@ description: Run a read-only health check for the Codex installation.
 
 # Codex Doctor
 
-Use this skill as the Codex-native equivalent of Claude Code `/doctor`.
+Use this skill to run the Codex health check workflow.
 
 Read `.codex/commands/doctor.md`, then report health for:
 

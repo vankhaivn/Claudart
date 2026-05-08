@@ -2,7 +2,7 @@
 
 Analyze the existing Codex memory layer in this repository and refactor it into a coherent Codex-native Modular Rules System. The goal is a lightweight `AGENTS.md` (sourced from `.codex/AGENTS.md` in this template) plus `.codex/CODEX.md` acting as indexes, with durable domain knowledge extracted into scoped files inside `.codex/guidelines/`. Codex skills and agents must also be audited so they stay on-pattern.
 
-This is the Codex-native equivalent of Claude Code `/refactor-memory`. It must preserve the same quality bar as `.claude/commands/refactor-memory.md`, adapted to Codex paths and skill mechanics.
+This command consolidates the Codex memory layer in this repository into a coherent Codex-native Modular Rules System, adapted to Codex paths and skill mechanics.
 
 > Pre-flight check: confirm `git status` is clean or that the user has committed in-progress work before you begin. Refuse to proceed if the working tree has unrelated uncommitted changes that this refactor could swallow.
 
@@ -13,7 +13,6 @@ Execute the following steps systematically, without losing essential project con
 - Determine the main framework, language, and architectural layers based on `AGENTS.md`, `.codex/CODEX.md`, and the project structure.
 - Identify the core logical layers, such as database/repositories, API/controllers, UI/components, or background jobs.
 - Note linters, formatters, and test runners detected. Delegate styling rules to those tools rather than encoding them into `AGENTS.md` or `.codex/CODEX.md`.
-- If this repository also has `.claude/`, read it for parity checks, but do not treat `.claude/` as the source of truth.
 
 ## 2. Ensure the Guideline Directory Exists
 
@@ -129,12 +128,10 @@ For `.codex/JOURNAL.md`:
 
 Report proposed audit changes in a clear list before applying them. Apply safe fixes such as frontmatter fixes, snippet removal, missing `.codex/CONTEXT.md` references, and JOURNAL auto-load removal. Ask before merging or deleting agents/guidelines/skills.
 
-## 8. Preserve Base Template Parity
+## 8. Base Template Notes
 
-This CLAUDART repository is a base template. Users copy `.claude/`, `.codex/`, and `.agents/` into their own projects. The installer also copies `.codex/AGENTS.md` to `AGENTS.md` at the project root.
+This CLAUDART repository is a base template. Users install `.codex/` and `.agents/` into their own projects. The installer also copies `.codex/AGENTS.md` to `AGENTS.md` at the project root.
 
-- In this base repository, `.claude` and `.codex` are peer source templates.
-- If you improve a durable rule, command, skill, or agent here, update both native sides manually so neither tool becomes lower quality.
 - Do not add generated-marker comments to base template files.
 
 ## 9. Append Agent Self-Evolution Section
@@ -154,7 +151,6 @@ Output a concise summary covering:
 1. Guideline files created or updated.
 2. Audit findings from step 7, separated into auto-fixed and needs user decision.
 3. Final `AGENTS.md` and `.codex/CODEX.md` line counts.
-4. Whether base template parity with `.claude/` was preserved.
-5. Suggest the user run `git diff` to review every change before committing.
+4. Suggest the user run `git diff` to review every change before committing.
 
 Confirm only after every step has been completed.

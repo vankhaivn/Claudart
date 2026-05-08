@@ -5,7 +5,7 @@ description: Consolidate Codex project memory, guidelines, skills, and agents.
 
 # Codex Refactor Memory
 
-Use this skill as the Codex-native equivalent of Claude Code `/refactor-memory`.
+Use this skill to run the Codex memory consolidation workflow.
 
 Read `.codex/commands/refactor-memory.md` for the full Codex consolidation standards.
 

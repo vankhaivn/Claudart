@@ -5,7 +5,7 @@ description: Run a Codex retrospective and promote recurring decisions into Code
 
 # Codex Learn
 
-Use this skill as the Codex-native equivalent of Claude Code `/learn`.
+Use this skill to run the Codex learning and retrospective workflow.
 
 Read `.codex/commands/learn.md` for the Codex learning protocol.
 

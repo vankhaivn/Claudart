@@ -14,7 +14,6 @@ Run a read-only health check on this repository's CLAUDART installation from the
 - `.codex/guidelines/` exists and contains at least `ai-behavior.md`.
 - `.codex/agents/` exists, even if the user removed shipped agents.
 - `.agents/skills/` exists and contains `codex-checkpoint`, `codex-learn`, `codex-doctor`, and `codex-refactor-memory`.
-- If Claude support is enabled, `.claude/CLAUDE.md`, `.claude/commands/`, `.claude/agents/`, and `.claude/rules/` exist.
 
 For each missing path, report which workflow would create or repair it.
 
@@ -23,8 +22,8 @@ For each missing path, report which workflow would create or repair it.
 For every `.md` file under `.codex/commands/`:
 
 - Confirm the command has a clear top-level title.
-- Confirm the file contains enough procedure detail to run without relying on Claude command files.
-- Flag commands that are only thin summaries when the Claude equivalent is materially richer.
+- Confirm the file contains enough procedure detail to run as a standalone Codex workflow.
+- Flag commands that are only thin summaries with insufficient detail to execute.
 
 For every `.md` file under `.codex/guidelines/`:
 
@@ -72,7 +71,7 @@ For every guideline file in `.codex/guidelines/*.md`:
 
 - Confirm `.codex/CONTEXT.md` is referenced in `AGENTS.md` and `.codex/CODEX.md`.
 - `.codex/CONTEXT.md` line count must be at most 150. Use `wc -l`; do not full-read the file just to count.
-- Search `AGENTS.md`, `.codex/CODEX.md`, `.codex/guidelines/`, `.claude/CLAUDE.md`, and `.claude/rules/` for any operational auto-load instruction for `.codex/JOURNAL.md`. If found, flag as Critical.
+- Search `AGENTS.md`, `.codex/CODEX.md`, and `.codex/guidelines/` for any operational auto-load instruction for `.codex/JOURNAL.md`. If found, flag as Critical.
 - For `.codex/JOURNAL.md` integrity, use spot-checks rather than full reads:
   - `head -n 20 .codex/JOURNAL.md`
   - `wc -l .codex/JOURNAL.md`
@@ -85,7 +84,7 @@ For every guideline file in `.codex/guidelines/*.md`:
 - Stale metadata such as `Last Updated: <date>`.
 - Hardcoded shell pattern lists inside agent instructions. Agents should use repository tooling or discover patterns from the codebase.
 - Vague Codex skills that do not point to the full command protocol.
-- Codex commands that tell the user to read Claude commands to know what to do. Codex must be usable without Claude as the active agent.
+- Codex commands that delegate their logic to an external agent or tool instead of providing standalone procedure.
 
 ### 8. Size Sanity
 

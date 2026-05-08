@@ -1,6 +1,6 @@
 # Codex Checkpoint Command
 
-Update `.codex/CONTEXT.md` to reflect the current state of work from a Codex session. Append meaningful retired items to `.codex/JOURNAL.md`. Run this at the end of meaningful sessions or before handing work back to Claude Code.
+Update `.codex/CONTEXT.md` to reflect the current state of work from a Codex session. Append meaningful retired items to `.codex/JOURNAL.md`. Run this at the end of meaningful sessions.
 
 The output is not a log of what happened. It is a declarative snapshot of what is true right now. Lifelong append is the failure mode this command exists to prevent.
 
@@ -9,7 +9,7 @@ The output is not a log of what happened. It is a declarative snapshot of what i
 1. `.codex/CONTEXT.md` is overwritten, not appended. Anything not still true right now must be removed.
 2. `.codex/CONTEXT.md` hard ceiling: 150 lines, target under 100. If your draft exceeds 150, stop and ask the user to trim manually or run `$codex-refactor-memory`.
 3. `.codex/JOURNAL.md` is append-only. Never edit or delete prior entries. Each new entry is a single line.
-4. Never add `.codex/JOURNAL.md` as auto-loaded context in `AGENTS.md`, `.codex/CODEX.md`, `.claude/CLAUDE.md`, `.codex/guidelines/`, or `.claude/rules/`.
+4. Never add `.codex/JOURNAL.md` as auto-loaded context in `AGENTS.md`, `.codex/CODEX.md`, or `.codex/guidelines/`.
 5. Skip JOURNAL entirely when there is nothing meaningful to record. Empty entries pollute the file.
 
 ## Procedure
@@ -117,7 +117,6 @@ Good triggers:
 - End of a significant Codex work session.
 - Before `/compact` or equivalent context compaction.
 - Before switching to a different feature or branch.
-- Before handing work back to Claude Code.
 - When the user says they will pick this up later.
 
 Bad triggers:
