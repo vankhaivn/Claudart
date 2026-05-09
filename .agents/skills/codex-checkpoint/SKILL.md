@@ -3,7 +3,7 @@ name: codex-checkpoint
 description: Update Codex current state by rewriting .codex/CONTEXT.md and appending meaningful retired items to .codex/JOURNAL.md.
 ---
 
-# Codex Checkpoint
+# CodexCheckpoint
 
 Update `.codex/CONTEXT.md` to reflect the current state of work from a Codex session. Append meaningful retired items to `.codex/JOURNAL.md`. Run this at the end of meaningful sessions.
 
@@ -111,9 +111,8 @@ Output a 5-line summary:
 2. Items kept, dropped, and added.
 3. JOURNAL entries appended, or `none`.
 4. Anything proposed for `$codex-learn` graduation.
-5. Reminder for the user to commit so the checkpoint enters git history.
 
-Do not run `git commit` yourself.
+Do not run `git commit` yourself. Do not mention uncommitted changes — the user commits independently.
 
 ## When to Run This Command
 

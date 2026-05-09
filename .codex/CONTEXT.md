@@ -6,6 +6,9 @@ Old work is removed, not archived. Permanent decisions graduate to .codex/guidel
 History lives in git log + .codex/JOURNAL.md (the latter is NOT auto-loaded into Codex sessions).
 
 Hard ceiling: 150 lines. Target: under 100.
+
+DO NOT track git commit status here. The user commits independently.
+Never mention "uncommitted changes" or reference git status — it will be stale immediately.
 -->
 
 ## In Progress
