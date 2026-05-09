@@ -66,7 +66,7 @@ The fastest path is the **Quick Install** one-liner above. Once the files are in
 
 ## Core Commands & Workflow
 
-Claude Code uses slash commands from `.claude/commands/`. Codex uses repo skills in `.agents/skills/` backed by full command specs in `.codex/commands/`: `$project-discovery`, `$codex-refactor-memory`, `$codex-checkpoint`, `$codex-learn`, and `$codex-doctor`.
+Claude Code uses slash commands from `.claude/commands/`. Codex uses repo skills in `.agents/skills/`: `$project-discovery`, `$codex-refactor-memory`, `$codex-checkpoint`, `$codex-learn`, and `$codex-doctor`.
 
 ### `/project-discovery` and `$project-discovery`
 
@@ -89,7 +89,7 @@ The consolidation pass for each AI layer.
 - Trims the top-level memory file into a lightweight index.
 - Extracts durable, scoped guidance into `.claude/rules/` or `.codex/guidelines/`.
 - Ensures CONTEXT and AI-behavior references are wired correctly.
-- Audits existing rules, skills, commands, and agents for stale structure or missing metadata.
+- Audits existing rules, skills, and agents for stale structure or missing metadata.
 - Relies on git for rollback, so commit before running it on a large refactor.
 
 ### `/checkpoint` and `$codex-checkpoint`
@@ -161,7 +161,6 @@ your-project/
 │   ├── CONTEXT.md                  # Codex live state, declarative, ≤ 150 lines
 │   ├── JOURNAL.md                  # Codex append-only audit log — never auto-loaded
 │   ├── agents/                     # Codex TOML subagents
-│   ├── commands/                   # Codex command specs used by skills
 │   ├── config.toml                 # Codex project defaults
 │   └── guidelines/                 # Codex-native semantic guidance
 └── .claude/

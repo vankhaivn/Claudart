@@ -14,7 +14,7 @@ This repository contains CLAUDART, a markdown-based operating layer for AI codin
 - `$codex-checkpoint` — updates `.codex/CONTEXT.md` and appends meaningful retired items to `.codex/JOURNAL.md`.
 - `$codex-learn` — promotes validated recurring decisions into Codex guidelines.
 - `$codex-doctor` — runs a read-only health check.
-- `$codex-refactor-memory` — consolidates Codex memory, commands, skills, guidelines, and agents.
+- `$codex-refactor-memory` — consolidates Codex memory, skills, guidelines, and agents.
 
 ## Working Style
 
