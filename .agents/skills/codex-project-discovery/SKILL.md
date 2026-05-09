@@ -1,5 +1,5 @@
 ---
-name: project-discovery
+name: codex-project-discovery
 description: Interview a user with a rough project idea, synthesize raw discovery notes, and create presentation-ready project documentation. Use when the user wants to clarify a new project before coding, define a product spec from vague ideas, or prepare project docs for stakeholders.
 ---
 

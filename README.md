@@ -49,7 +49,7 @@ It scales from a solo project to a large team repo with **zero external dependen
 - **Modular Rules System** — `.claude/CLAUDE.md` stays a lightweight index for Claude; durable guidance lives in `.claude/rules/` and `.codex/guidelines/`. `AGENTS.md` is the sole Codex memory index.
 - **Agent-Local Session State** — Claude uses `.claude/CONTEXT.md` + `.claude/JOURNAL.md`; Codex uses `.codex/CONTEXT.md` + `.codex/JOURNAL.md`.
 - **Built-in Review Agents** — `clean-code-reviewer` for scope discipline and clean-code review, plus `secure-reviewer` for read-only security audits.
-- **Project Discovery Interview** — `/project-discovery` and `$project-discovery` turn rough ideas into usable project documentation before implementation starts.
+- **Project Discovery Interview** — `/project-discovery` and `$codex-project-discovery` turn rough ideas into usable project documentation before implementation starts.
 - **Continuous Self-Learning** — `/learn` and `$codex-learn` re-read the active rule set, run a retrospective, and promote recurring lessons into durable guidance.
 - **Health Checks Included** — `/doctor` and `$codex-doctor` validate structure, frontmatter, wiring, and token hygiene.
 
@@ -58,7 +58,7 @@ It scales from a solo project to a large team repo with **zero external dependen
 The fastest path is the **Quick Install** one-liner above. Once the files are in your project:
 
 1. Open the project in Claude Code, Codex, or both.
-2. If the idea is still vague, run `/project-discovery` or `$project-discovery` before writing code.
+2. If the idea is still vague, run `/project-discovery` or `$codex-project-discovery` before writing code.
 3. If you use Claude Code, you can optionally run the built-in `/init` first. If it generates a root `CLAUDE.md`, copy the useful project-specific content into `.claude/CLAUDE.md`.
 4. Run `/refactor-memory` for the Claude layer and/or `$codex-refactor-memory` for the Codex layer to consolidate the installed scaffold into project-specific guidance.
 5. Run `/doctor` and/or `$codex-doctor` to verify the installation.
@@ -66,9 +66,9 @@ The fastest path is the **Quick Install** one-liner above. Once the files are in
 
 ## Core Commands & Workflow
 
-Claude Code uses slash commands from `.claude/commands/`. Codex uses repo skills in `.agents/skills/`: `$project-discovery`, `$codex-refactor-memory`, `$codex-checkpoint`, `$codex-learn`, and `$codex-doctor`.
+Claude Code uses slash commands from `.claude/commands/`. Codex uses repo skills in `.agents/skills/`: `$codex-project-discovery`, `$codex-refactor-memory`, `$codex-checkpoint`, `$codex-learn`, and `$codex-doctor`.
 
-### `/project-discovery` and `$project-discovery`
+### `/project-discovery` and `$codex-project-discovery`
 
 An interview-first planning workflow for the moment before a project has a real spec.
 

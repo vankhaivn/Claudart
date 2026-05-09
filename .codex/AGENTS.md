@@ -10,7 +10,7 @@ This repository contains CLAUDART, a markdown-based operating layer for AI codin
 
 ## Core Commands
 
-- `$project-discovery` — interviews the user about a rough project idea and creates a raw synthesis plus structured project docs.
+- `$codex-project-discovery` — interviews the user about a rough project idea and creates a raw synthesis plus structured project docs.
 - `$codex-checkpoint` — updates `.codex/CONTEXT.md` and appends meaningful retired items to `.codex/JOURNAL.md`.
 - `$codex-learn` — promotes validated recurring decisions into Codex guidelines.
 - `$codex-doctor` — runs a read-only health check.
