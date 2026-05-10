@@ -63,8 +63,10 @@ Required for each guideline file:
 
 - YAML frontmatter with `paths:`, `description:`, `when_to_use:`, and `tags:`.
 - `paths:` must be a glob or list of globs scoped to the files the guideline governs.
+- `paths:` must use YAML flow sequence style, e.g. `paths: ["src/**/*.ts", "test/**/*.ts"]`. Never use block-list style (`paths:` followed by `- item`).
 - `description:` must say what domain the guideline controls.
 - `when_to_use:` must say when future agents should consult the guideline.
+- `tags:` must be an inline YAML array on one line, e.g. `tags: [architecture, nestjs, boundaries]`. Never use block-list style (`tags:` followed by `- item`) because tag indexing depends on single-line frontmatter.
 - `tags:` must contain 1-5 lowercase kebab-case values that describe the guideline domain or scope.
 - No long code snippets. Prefer `file:line` references and behavior-level rules so context does not go stale.
 - No secrets, tokens, private keys, production credentials, or real `.env` values.
@@ -123,6 +125,8 @@ Report proposed audit changes in a clear list before applying risky changes. App
 For every file in `.codex/guidelines/`:
 
 - Verify YAML frontmatter exists with valid `paths:`, `description:`, `when_to_use:`, and `tags:`.
+- Flag block-list `paths:`; guidelines must use flow-style `paths: ["glob-a", "glob-b"]`.
+- Flag block-list `tags:`; guidelines must use inline `tags: [tag-a, tag-b]` style.
 - Run a glob check on each `paths:` entry. `paths: ["**/*"]` is valid for universal guidelines.
 - If a glob matches zero files, flag the guideline as potentially dead and ask whether to remove or rescope it.
 - Replace long inlined code with `file:line` references.
@@ -177,7 +181,7 @@ Include these rules, adapted to Codex paths:
 
 - "Do not assume a human will document your code patterns. If you build it, document it."
 - Existing guidelines change -> update the relevant file in `.codex/guidelines/`.
-- New domains/layers -> create a new guideline file in `.codex/guidelines/` with `paths:`, `description:`, `when_to_use:`, and `tags:` frontmatter and append its reference to `AGENTS.md`.
+- New domains/layers -> create a new guideline file in `.codex/guidelines/` with flow-style `paths: [...]`, `description:`, `when_to_use:`, and inline `tags: [...]` frontmatter and append its reference to `AGENTS.md`.
 - Global Codex changes -> update `AGENTS.md` directly.
 - Shared live state -> update `.codex/CONTEXT.md` through `$codex-checkpoint`, not through refactor-memory.
 

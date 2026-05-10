@@ -31,5 +31,5 @@ See `.codex/guidelines/ai-behavior.md` for universal AI behavior guidelines.
 
 - "Do not assume a human will document your code patterns. If you build it, document it."
 - Existing Codex guidelines change → update the relevant file in `.codex/guidelines/`.
-- New domains/layers → create a new guideline file with `paths:`, `description:`, `when_to_use:`, and `tags:` frontmatter, then ensure `AGENTS.md` points to it when globally relevant.
+- New domains/layers → create a new guideline file with flow-style `paths: [...]`, `description:`, `when_to_use:`, and inline `tags: [...]` frontmatter, then ensure `AGENTS.md` points to it when globally relevant.
 - Live state → update `.codex/CONTEXT.md` through `$codex-checkpoint`.

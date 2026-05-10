@@ -22,5 +22,5 @@ See @.claude/rules/ai-behavior.md for universal AI behavior guidelines.
 
 - "Do not assume a human will document your code patterns. If you build it, document it."
 - Existing rules change -> update the relevant file in `.claude/rules/`.
-- New domains/layers -> CREATE a new rule file in `.claude/rules/` (with `paths: [...]`, `description:`, `when_to_use:`, and `tags:` frontmatter) AND APPEND its `@` import to `.claude/CLAUDE.md`'s Domain Rules section.
+- New domains/layers -> CREATE a new rule file in `.claude/rules/` (with flow-style `paths: [...]`, `description:`, `when_to_use:`, and inline `tags: [...]` frontmatter) AND APPEND its `@` import to `.claude/CLAUDE.md`'s Domain Rules section.
 - Global changes -> update `.claude/CLAUDE.md` directly.

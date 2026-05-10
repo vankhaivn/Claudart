@@ -25,7 +25,9 @@ For every `.md` file under `.claude/commands/`, `.claude/agents/`, `.claude/rule
 - Verify the file starts with a YAML frontmatter block delimited by `---`.
 - For agents: confirm `name`, `description`, `tools`, and `model` keys are present. If `description` should auto-trigger the agent, confirm it contains `PROACTIVELY` (note when missing — may be intentional).
 - For rules: confirm `paths:` (a list of glob patterns), `description:`, `when_to_use:`, and `tags:` keys are present.
-- For rule `tags:`, confirm there are 1-5 lowercase kebab-case tags describing domain or scope.
+- For rule `paths:`, confirm paths use YAML flow sequence style, e.g. `paths: ["src/**/*.ts", "test/**/*.ts"]`. Flag block-list style (`paths:` followed by `- item`) because frontmatter conventions should stay compact and grep-friendly.
+- For rule `tags:`, confirm tags use inline YAML array style on one line, e.g. `tags: [architecture, nestjs, boundaries]`. Flag block-list style (`tags:` followed by `- item`) because tag indexing depends on single-line frontmatter.
+- Confirm there are 1-5 lowercase kebab-case tags describing domain or scope.
 - For commands: confirm `description:` is present.
 - Report any malformed YAML, missing required keys, or obviously broken frontmatter.
 
@@ -84,7 +86,7 @@ For every rule file in `.claude/rules/*.md`:
 ### 8. Rule Tag Index And Overlap
 
 - Build a tag index from rule frontmatter only, e.g. `grep -h '^tags:' .claude/rules/*.md | sort -u`.
-- Flag rules missing `tags:` or using vague/non-domain tags.
+- Flag rules missing `tags:`, using block-list tags, or using vague/non-domain tags.
 - Use overlapping tags as an initial signal for possible duplicate rules; read bodies only when tags or paths suggest overlap.
 
 ### 9. Agent Overlap

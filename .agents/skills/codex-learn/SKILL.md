@@ -59,7 +59,7 @@ It does not rewrite `.codex/JOURNAL.md`; JOURNAL is append-only. You may read it
 ## Output Standard
 
 - Rules must be verifiable from the codebase. If a reader cannot check whether the rule was followed, rewrite it.
-- New or updated guideline files must include frontmatter with `paths:`, `description:`, `when_to_use:`, and `tags:`. Use 1-5 lowercase kebab-case tags that describe the domain or scope.
+- New or updated guideline files must include frontmatter with `paths:`, `description:`, `when_to_use:`, and `tags:`. Write `paths:` as a YAML flow sequence, e.g. `paths: ["src/**/*.ts", "test/**/*.ts"]`; never use block-list style. Write `tags:` as an inline YAML array on one line, e.g. `tags: [architecture, nestjs, boundaries]`; never use block-list style. Use 1-5 lowercase kebab-case tags that describe the domain or scope.
 - Use `NEVER`, `YOU MUST`, or `IMPORTANT` for constraints that have been violated before.
 - Do not paste long code snippets into guideline files. Cite source file paths and line numbers instead.
 - Execute safe file changes autonomously, then summarize each file touched and why.

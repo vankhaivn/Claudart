@@ -24,7 +24,7 @@ Group detailed coding rules, boundaries, and validation requirements from `.clau
 
 **Required for each rule file:**
 
-- **YAML frontmatter** with `paths:` glob to scope the rule (prevents VSCode YAML lint errors). Example:
+- **YAML frontmatter** with `paths:` glob to scope the rule (prevents VSCode YAML lint errors). `paths:` must use YAML flow sequence style (`[...]`), not block-list style. Example:
   ```yaml
   ---
   paths: ["src/models/**/*.py", "src/repositories/**/*.py"]
@@ -81,7 +81,9 @@ Refactor isn't only about `.claude/CLAUDE.md`. Sweep through `.claude/rules/*.md
 
 For every file in `.claude/rules/`:
 - Verify YAML frontmatter exists with a valid `paths:` glob, `description:`, `when_to_use:`, and `tags:`.
-- Tags must be 1-5 lowercase kebab-case values that describe the rule domain or scope.
+- Paths must use YAML flow sequence style, e.g. `paths: ["src/**/*.ts", "test/**/*.ts"]`. Never use block-list style (`paths:` followed by `- item`).
+- Tags must be an inline YAML array on one line, e.g. `tags: [architecture, nestjs, boundaries]`. Never use block-list style (`tags:` followed by `- item`) because tag indexing depends on single-line frontmatter.
+- Tags must contain 1-5 lowercase kebab-case values that describe the rule domain or scope.
 - Run a Glob check on each `paths:` entry — if it matches **zero** files, flag the rule as potentially dead and ask the user whether to remove or rescope it.
 - **NO CODE SNIPPETS**: replace any inlined code with `file:line` references.
 - Apply the Rule Quality Checklist (verifiable, loophole-closed, critical-tagged).
@@ -112,7 +114,7 @@ At the very end of `.claude/CLAUDE.md`, APPEND `## Agent Self-Evolution & Contex
 
 - "Do not assume a human will document your code patterns. If you build it, document it."
 - Existing rules change → update the relevant file in `.claude/rules/`.
-- New domains/layers → CREATE a new rule file in `.claude/rules/` (with `paths: [...]`, `description:`, `when_to_use:`, and `tags:` frontmatter) AND APPEND its `@` import to `.claude/CLAUDE.md`'s Domain Rules section.
+- New domains/layers → CREATE a new rule file in `.claude/rules/` (with flow-style `paths: [...]`, `description:`, `when_to_use:`, and inline `tags: [...]` frontmatter) AND APPEND its `@` import to `.claude/CLAUDE.md`'s Domain Rules section.
 - Global changes → update `.claude/CLAUDE.md` directly.
 
 ## 9. Final Summary

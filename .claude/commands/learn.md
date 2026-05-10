@@ -51,7 +51,7 @@ Walk the conversation chronologically, comparing each assistant turn against the
 ## Output Standard
 
 - Rules must be **verifiable**: a reader must be able to check whether the rule was followed by reading the code. If you cannot verify it, rewrite it.
-- New or updated rule files must include frontmatter with `paths:`, `description:`, `when_to_use:`, and `tags:`. Use 1-5 lowercase kebab-case tags that describe the domain or scope.
+- New or updated rule files must include frontmatter with `paths:`, `description:`, `when_to_use:`, and `tags:`. Write `paths:` as a YAML flow sequence, e.g. `paths: ["src/**/*.ts", "test/**/*.ts"]`; never use block-list style. Write `tags:` as an inline YAML array on one line, e.g. `tags: [architecture, nestjs, boundaries]`; never use block-list style. Use 1-5 lowercase kebab-case tags that describe the domain or scope.
 - Use `NEVER`, `YOU MUST`, or `IMPORTANT` emphasis for rules that have been violated before — this signals priority to future runs.
 - **NO CODE SNIPPETS** in rule files. Reference the source file and line (e.g., `src/services/foo.ts:45`) so context never goes stale. Code in rule files rots.
 - Execute file changes autonomously without asking for permission, then generate a brief summary listing each file touched and the reason.

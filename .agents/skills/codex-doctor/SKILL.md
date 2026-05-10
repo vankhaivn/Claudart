@@ -26,6 +26,8 @@ For every `.md` file under `.codex/guidelines/`:
 
 - Verify the file starts with YAML frontmatter delimited by `---`.
 - Confirm `paths:`, `description:`, `when_to_use:`, and `tags:` are present.
+- Confirm `paths:` uses YAML flow sequence style, e.g. `paths: ["src/**/*.ts", "test/**/*.ts"]`. Flag block-list style (`paths:` followed by `- item`) because frontmatter conventions should stay compact and grep-friendly.
+- Confirm `tags:` uses inline YAML array style on one line, e.g. `tags: [architecture, nestjs, boundaries]`. Flag block-list style (`tags:` followed by `- item`) because tag indexing depends on single-line frontmatter.
 - Confirm `tags:` contains 1-5 lowercase kebab-case tags describing domain or scope.
 - Report malformed YAML, missing required keys, or obviously broken frontmatter.
 
@@ -97,7 +99,7 @@ For every guideline file in `.codex/guidelines/*.md`:
 ### 9. Guideline Tag Index And Overlap
 
 - Build a tag index from guideline frontmatter only, e.g. `grep -h '^tags:' .codex/guidelines/*.md | sort -u`.
-- Flag guidelines missing `tags:` or using vague/non-domain tags.
+- Flag guidelines missing `tags:`, using block-list tags, or using vague/non-domain tags.
 - Use overlapping tags as an initial signal for possible duplicate guidelines; read bodies only when tags or paths suggest overlap.
 
 ### 10. Agent Overlap
