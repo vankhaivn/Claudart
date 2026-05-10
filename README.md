@@ -23,13 +23,13 @@ The installer merges files **non-destructively**: existing files are never touch
 
 ```bash
 # Claude Code layer only (.claude/)  ← default
-curl … | bash -s -- --claude
+curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --claude
 
 # Codex CLI layer only (.codex/ + .agents/ + AGENTS.md)
-curl … | bash -s -- --codex
+curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --codex
 
 # Both layers
-curl … | bash -s -- --both
+curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --both
 ```
 
 ---
@@ -38,13 +38,13 @@ curl … | bash -s -- --both
 
 Modern agent memory frameworks require real infrastructure:
 
-| | CLAUDART | Mem0 | Zep | LangMem |
-|---|:---:|:---:|:---:|:---:|
-| **Setup** | `curl \| bash` | vector DB + Docker + OpenAI key | Neo4j + managed cloud | PostgreSQL + pgvector |
-| **Human-readable** | ✅ | ❌ | ❌ | ❌ |
-| **Works offline / air-gapped** | ✅ | ❌ | ❌ | ❌ |
-| **PR-reviewable memory** | ✅ | ❌ | ❌ | ❌ |
-| **Tool support** | Claude Code, Codex CLI, Cursor, Windsurf | API only | API only | LangGraph only |
+|                                |                 CLAUDART                 |              Mem0               |          Zep          |        LangMem        |
+| ------------------------------ | :--------------------------------------: | :-----------------------------: | :-------------------: | :-------------------: |
+| **Setup**                      |              `curl \| bash`              | vector DB + Docker + OpenAI key | Neo4j + managed cloud | PostgreSQL + pgvector |
+| **Human-readable**             |                    ✅                    |               ❌                |          ❌           |          ❌           |
+| **Works offline / air-gapped** |                    ✅                    |               ❌                |          ❌           |          ❌           |
+| **PR-reviewable memory**       |                    ✅                    |               ❌                |          ❌           |          ❌           |
+| **Tool support**               | Claude Code, Codex CLI, Cursor, Windsurf |            API only             |       API only        |    LangGraph only     |
 
 Every major coding tool converged independently on plain markdown files in the repo — AGENTS.md appears in ~20k public GitHub repos. CLAUDART just makes it structured.
 
@@ -66,13 +66,13 @@ A note starts in `CONTEXT.md`. When it's settled, one line goes to `JOURNAL.md`.
 
 ## Commands & Skills
 
-| Claude Code | Codex CLI | What it does |
-|---|---|---|
-| `/project-discovery` | `$codex-project-discovery` | Interview-first planning — turns rough ideas into project docs before any code |
-| `/refactor-memory` | `$codex-refactor-memory` | Trims CLAUDE.md/AGENTS.md into a lightweight index; extracts durable guidance into rules/guidelines |
-| `/checkpoint` | `$codex-checkpoint` | Declarative CONTEXT rebuild + JOURNAL append (hard 150-line ceiling) |
-| `/learn` | `$codex-learn` | Retrospective — promotes recurring lessons into rules/guidelines with loophole-closing language |
-| `/doctor` | `$codex-doctor` | Read-only health check: structure, frontmatter, token hygiene, wiring |
+| Claude Code          | Codex CLI                  | What it does                                                                                        |
+| -------------------- | -------------------------- | --------------------------------------------------------------------------------------------------- |
+| `/project-discovery` | `$codex-project-discovery` | Interview-first planning — turns rough ideas into project docs before any code                      |
+| `/refactor-memory`   | `$codex-refactor-memory`   | Trims CLAUDE.md/AGENTS.md into a lightweight index; extracts durable guidance into rules/guidelines |
+| `/checkpoint`        | `$codex-checkpoint`        | Declarative CONTEXT rebuild + JOURNAL append (hard 150-line ceiling)                                |
+| `/learn`             | `$codex-learn`             | Retrospective — promotes recurring lessons into rules/guidelines with loophole-closing language     |
+| `/doctor`            | `$codex-doctor`            | Read-only health check: structure, frontmatter, token hygiene, wiring                               |
 
 Two review agents are always available: `clean-code-reviewer` (scope + Clean Code discipline) and `secure-reviewer` (read-only OWASP audit).
 
@@ -113,6 +113,7 @@ Contributions, issues, and feature requests are welcome.
 MIT. See `LICENSE`.
 
 ---
+
 <div align="center">
   <i>Built for the future of AI-assisted development.</i>
 </div>
