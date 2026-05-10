@@ -38,13 +38,13 @@ curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh 
 
 Modern agent memory frameworks require real infrastructure:
 
-|                                |                 CLAUDART                 |              Mem0               |          Zep          |        LangMem        |
-| ------------------------------ | :--------------------------------------: | :-----------------------------: | :-------------------: | :-------------------: |
-| **Setup**                      |              `curl \| bash`              | vector DB + Docker + OpenAI key | Neo4j + managed cloud | PostgreSQL + pgvector |
-| **Human-readable**             |                    ✅                    |               ❌                |          ❌           |          ❌           |
-| **Works offline / air-gapped** |                    ✅                    |               ❌                |          ❌           |          ❌           |
-| **PR-reviewable memory**       |                    ✅                    |               ❌                |          ❌           |          ❌           |
-| **Tool support**               | Claude Code, Codex CLI, Cursor, Windsurf |            API only             |       API only        |    LangGraph only     |
+|                                |                 CLAUDART                 |              Mem0               |          Zep          |        LangMem        |       Understand-Anything        |             MemPalace              |
+| ------------------------------ | :--------------------------------------: | :-----------------------------: | :-------------------: | :-------------------: | :------------------------------: | :--------------------------------: |
+| **Setup**                      |              `curl \| bash`              | vector DB + Docker + OpenAI key | Neo4j + managed cloud | PostgreSQL + pgvector |      `curl \| bash` or plugin     |   `pip install` + 300 MB model    |
+| **Human-readable**             |                    ✅                    |               ❌                |          ❌           |          ❌           |       ⚠️ JSON + dashboard        |    ⚠️ verbatim text, binary DB    |
+| **Works offline / air-gapped** |                    ✅                    |               ❌                |          ❌           |          ❌           |      ❌ LLM required             |               ✅                   |
+| **PR-reviewable memory**       |                    ✅                    |               ❌                |          ❌           |          ❌           |      ✅ JSON committed to git    |    ❌ ChromaDB + SQLite binary     |
+| **Tool support**               | Claude Code, Codex CLI, Cursor, Windsurf |            API only             |       API only        |    LangGraph only     | Claude Code, Codex, Cursor, Copilot, Gemini CLI + 6 more | Claude Code, Codex CLI, Gemini CLI, MCP-compatible |
 
 Every major coding tool converged independently on plain markdown files in the repo — AGENTS.md appears in ~20k public GitHub repos. CLAUDART just makes it structured.
 
