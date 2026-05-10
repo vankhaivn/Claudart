@@ -61,9 +61,11 @@ Do not create guidelines just to create files. A small docs repo may only need o
 
 Required for each guideline file:
 
-- YAML frontmatter with `paths:` and `description:`.
+- YAML frontmatter with `paths:`, `description:`, `when_to_use:`, and `tags:`.
 - `paths:` must be a glob or list of globs scoped to the files the guideline governs.
 - `description:` must say what domain the guideline controls.
+- `when_to_use:` must say when future agents should consult the guideline.
+- `tags:` must contain 1-5 lowercase kebab-case values that describe the guideline domain or scope.
 - No long code snippets. Prefer `file:line` references and behavior-level rules so context does not go stale.
 - No secrets, tokens, private keys, production credentials, or real `.env` values.
 
@@ -109,7 +111,7 @@ NEVER add `.codex/JOURNAL.md` as a loaded context reference. JOURNAL is intentio
 
 `ai-behavior.md` is the universal behavior guideline for Codex work.
 
-- If `.codex/guidelines/ai-behavior.md` does not exist, create a concise version with scoped frontmatter and durable behavior rules.
+- If `.codex/guidelines/ai-behavior.md` does not exist, create a concise version with complete frontmatter and durable behavior rules.
 - If the user has customized `ai-behavior.md`, leave their content alone and only ensure the reference exists.
 - Do not inline `ai-behavior.md` into `AGENTS.md`.
 - Add a single reference under `## Guidelines`.
@@ -120,12 +122,12 @@ Report proposed audit changes in a clear list before applying risky changes. App
 
 For every file in `.codex/guidelines/`:
 
-- Verify YAML frontmatter exists with valid `paths:` and `description:`.
+- Verify YAML frontmatter exists with valid `paths:`, `description:`, `when_to_use:`, and `tags:`.
 - Run a glob check on each `paths:` entry. `paths: ["**/*"]` is valid for universal guidelines.
 - If a glob matches zero files, flag the guideline as potentially dead and ask whether to remove or rescope it.
 - Replace long inlined code with `file:line` references.
 - Apply the Rule Quality Checklist.
-- Merge near-duplicates only after user confirmation.
+- Use tag overlap as an initial signal for near-duplicates; read bodies only when tags or paths suggest overlap. Merge near-duplicates only after user confirmation.
 
 For every file in `.agents/skills/*/SKILL.md`:
 
@@ -175,7 +177,7 @@ Include these rules, adapted to Codex paths:
 
 - "Do not assume a human will document your code patterns. If you build it, document it."
 - Existing guidelines change -> update the relevant file in `.codex/guidelines/`.
-- New domains/layers -> create a new guideline file in `.codex/guidelines/` with `paths: [...]` frontmatter and append its reference to `AGENTS.md`.
+- New domains/layers -> create a new guideline file in `.codex/guidelines/` with `paths:`, `description:`, `when_to_use:`, and `tags:` frontmatter and append its reference to `AGENTS.md`.
 - Global Codex changes -> update `AGENTS.md` directly.
 - Shared live state -> update `.codex/CONTEXT.md` through `$codex-checkpoint`, not through refactor-memory.
 

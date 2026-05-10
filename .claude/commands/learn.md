@@ -42,7 +42,7 @@ Walk the conversation chronologically, comparing each assistant turn against the
     - **CRITICAL CONSTRAINT**: DO NOT shoehorn or force new concepts into an existing file if the match is less than 80%. It is strictly PREFERRED to create a new domain file rather than polluting existing specific rules.
     - Then, decide:
       - Existing domain (perfect match) → Update the exact file in `.claude/rules/`.
-      - New domain (no strong match) → Create a new `.md` file in `.claude/rules/` with proper YAML `paths: [...]` frontmatter and append the `@` import to `.claude/CLAUDE.md`.
+      - New domain (no strong match) → Create a new `.md` file in `.claude/rules/` with complete YAML frontmatter and append the `@` import to `.claude/CLAUDE.md`.
       - Global standard (applies universally) → Update `.claude/CLAUDE.md` (or `.claude/rules/ai-behavior.md` if it's a behavioral rather than structural rule).
 
 **Boundary**: `/learn` updates **rules and `.claude/CLAUDE.md` only**. Do NOT modify `.claude/CONTEXT.md` (that's `/checkpoint`'s job) and do NOT rewrite `.claude/JOURNAL.md` entries (it's append-only). You may *read* both as evidence.
@@ -51,6 +51,7 @@ Walk the conversation chronologically, comparing each assistant turn against the
 ## Output Standard
 
 - Rules must be **verifiable**: a reader must be able to check whether the rule was followed by reading the code. If you cannot verify it, rewrite it.
+- New or updated rule files must include frontmatter with `paths:`, `description:`, `when_to_use:`, and `tags:`. Use 1-5 lowercase kebab-case tags that describe the domain or scope.
 - Use `NEVER`, `YOU MUST`, or `IMPORTANT` emphasis for rules that have been violated before — this signals priority to future runs.
 - **NO CODE SNIPPETS** in rule files. Reference the source file and line (e.g., `src/services/foo.ts:45`) so context never goes stale. Code in rule files rots.
 - Execute file changes autonomously without asking for permission, then generate a brief summary listing each file touched and the reason.

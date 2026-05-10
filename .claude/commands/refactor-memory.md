@@ -29,6 +29,8 @@ Group detailed coding rules, boundaries, and validation requirements from `.clau
   ---
   paths: ["src/models/**/*.py", "src/repositories/**/*.py"]
   description: One-line summary of what this domain covers.
+  when_to_use: When reading or writing model, repository, migration, or schema files.
+  tags: [database, repositories]
   ---
   ```
 - **NO CODE SNIPPETS**. Do NOT copy-paste code blocks. Use file:line references (e.g., `See src/core/db.ts:45 for the connection pattern`) so context never gets stale.
@@ -78,11 +80,12 @@ CLAUDART ships `.claude/rules/ai-behavior.md` as the canonical universal behavio
 Refactor isn't only about `.claude/CLAUDE.md`. Sweep through `.claude/rules/*.md` and `.claude/agents/*.md` and enforce the same standards.
 
 For every file in `.claude/rules/`:
-- Verify YAML frontmatter exists with a valid `paths:` glob and a `description:`.
+- Verify YAML frontmatter exists with a valid `paths:` glob, `description:`, `when_to_use:`, and `tags:`.
+- Tags must be 1-5 lowercase kebab-case values that describe the rule domain or scope.
 - Run a Glob check on each `paths:` entry — if it matches **zero** files, flag the rule as potentially dead and ask the user whether to remove or rescope it.
 - **NO CODE SNIPPETS**: replace any inlined code with `file:line` references.
 - Apply the Rule Quality Checklist (verifiable, loophole-closed, critical-tagged).
-- Merge near-duplicates: if two rules cover ≥80% the same scope, propose a consolidation (do not execute without user confirmation).
+- Use tag overlap as an initial signal for near-duplicates; read bodies only when tags or paths suggest overlap. Merge near-duplicates: if two rules cover ≥80% the same scope, propose a consolidation (do not execute without user confirmation).
 
 For every file in `.claude/agents/`:
 - Verify YAML frontmatter has `name`, `description` (with `PROACTIVELY` if it should auto-trigger), `tools`, and `model`.
@@ -109,7 +112,7 @@ At the very end of `.claude/CLAUDE.md`, APPEND `## Agent Self-Evolution & Contex
 
 - "Do not assume a human will document your code patterns. If you build it, document it."
 - Existing rules change → update the relevant file in `.claude/rules/`.
-- New domains/layers → CREATE a new rule file in `.claude/rules/` (with `paths: [...]` frontmatter) AND APPEND its `@` import to `.claude/CLAUDE.md`'s Domain Rules section.
+- New domains/layers → CREATE a new rule file in `.claude/rules/` (with `paths: [...]`, `description:`, `when_to_use:`, and `tags:` frontmatter) AND APPEND its `@` import to `.claude/CLAUDE.md`'s Domain Rules section.
 - Global changes → update `.claude/CLAUDE.md` directly.
 
 ## 9. Final Summary

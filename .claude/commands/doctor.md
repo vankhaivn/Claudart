@@ -9,7 +9,7 @@ Please run a health check on this repository's CLAUDART installation. Your job i
 ### 1. Required Structure
 
 - `.claude/` exists at the repository root
-- `.claude/commands/` exists and contains at least: `learn.md`, `refactor-memory.md`, `doctor.md`, `checkpoint.md`
+- `.claude/commands/` exists and contains at least: `start.md`, `learn.md`, `refactor-memory.md`, `doctor.md`, `checkpoint.md`
 - `.claude/agents/` exists (may be empty if user removed shipped agents)
 - `.claude/rules/` exists (may be empty before the user runs `/refactor-memory`)
 - `.claude/CLAUDE.md` exists
@@ -24,7 +24,8 @@ For every `.md` file under `.claude/commands/`, `.claude/agents/`, `.claude/rule
 
 - Verify the file starts with a YAML frontmatter block delimited by `---`.
 - For agents: confirm `name`, `description`, `tools`, and `model` keys are present. If `description` should auto-trigger the agent, confirm it contains `PROACTIVELY` (note when missing — may be intentional).
-- For rules: confirm `paths:` (a list of glob patterns) and `description:` keys are present.
+- For rules: confirm `paths:` (a list of glob patterns), `description:`, `when_to_use:`, and `tags:` keys are present.
+- For rule `tags:`, confirm there are 1-5 lowercase kebab-case tags describing domain or scope.
 - For commands: confirm `description:` is present.
 - Report any malformed YAML, missing required keys, or obviously broken frontmatter.
 
@@ -40,6 +41,7 @@ For every rule file in `.claude/rules/*.md`:
 - Read each glob pattern in `paths:`.
 - Use Glob to verify each pattern matches at least one real file in the repo.
 - Patterns matching zero files → flag as **possibly dead rule**: either the codebase moved or the rule was scoped wrong. Suggest re-scoping or removal.
+- `paths: ["**/*"]` is allowed for universal rules such as `ai-behavior.md`.
 
 ### 4. .claude/CLAUDE.md ↔ Rules Cross-Linking
 
@@ -56,8 +58,9 @@ For every rule file in `.claude/rules/*.md`:
 ### 5b. CONTEXT/JOURNAL Wiring (token hygiene)
 
 - Confirm `@.claude/CONTEXT.md` is referenced in `.claude/CLAUDE.md` Domain Rules. If missing, current-state handoff isn't loaded — flag as **Medium**.
-- `.claude/CONTEXT.md` line count must be ≤ 150 (use `wc -l`, do NOT full-read the file). If exceeded, flag as **High** — past the declarative ceiling, needs trimming or graduation via `/learn`.
+- `.claude/CONTEXT.md` line count must be ≤ 150 (use `wc -l`, do NOT full-read the file just to count). Also report approximate tokens using `wc -w .claude/CONTEXT.md | awk '{printf "~%d tokens", $1 * 1.3}'` and cross-check with `wc -c .claude/CONTEXT.md | awk '{printf "~%d tokens", $1 / 4}'`. If line count exceeded, flag as **High** — past the declarative ceiling, needs trimming or graduation via `/learn`.
 - **CRITICAL**: search `.claude/CLAUDE.md` AND every file in `.claude/rules/` for any `@.claude/JOURNAL.md` reference (use `grep -r '@.claude/JOURNAL.md' .claude/CLAUDE.md .claude/rules/`). If found, flag as **Critical** — JOURNAL must NEVER be loaded into session context (defeats the entire token-saving purpose). Recommend immediate removal.
+- Search `.claude/CONTEXT.md` for `<!-- since: YYYY-MM-DD -->` comments. Flag items older than 30 days as graduation candidates if they remain in Recent Decisions or otherwise look durable. If an obviously long-lived decision has no `since:` comment, warn that future `/checkpoint` should preserve/add one.
 - For `.claude/JOURNAL.md` integrity, use spot-checks rather than full reads (the file may be large):
     - `head -n 20 .claude/JOURNAL.md` — verify the canonical header is intact.
     - `wc -l .claude/JOURNAL.md` — report total entry count for the user.
@@ -73,9 +76,18 @@ For every rule file in `.claude/rules/*.md`:
 ### 7. .claude/CLAUDE.md Size Sanity
 
 - Count lines of `.claude/CLAUDE.md`. The target is < 100 lines.
+- Report approximate tokens using both estimates:
+  - `wc -w .claude/CLAUDE.md | awk '{printf "~%d tokens\n", $1 * 1.3}'`
+  - `wc -c .claude/CLAUDE.md | awk '{printf "~%d tokens (byte estimate)\n", $1 / 4}'`
 - If significantly larger, recommend running `/refactor-memory` to extract domains.
 
-### 8. Agent Overlap
+### 8. Rule Tag Index And Overlap
+
+- Build a tag index from rule frontmatter only, e.g. `grep -h '^tags:' .claude/rules/*.md | sort -u`.
+- Flag rules missing `tags:` or using vague/non-domain tags.
+- Use overlapping tags as an initial signal for possible duplicate rules; read bodies only when tags or paths suggest overlap.
+
+### 9. Agent Overlap
 
 - For all files in `.claude/agents/`, compare their `description:` fields.
 - If two agents share >50% of trigger keywords (e.g., both contain "review", "code", "PROACTIVELY"), flag as **possible overlap** — they may both auto-trigger on the same situation and waste tokens.

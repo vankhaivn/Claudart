@@ -43,7 +43,7 @@ Walk the conversation chronologically, comparing each assistant turn against the
    - Skip this step if `.codex/JOURNAL.md` does not exist or has fewer than 5 entries.
 3. Decide where new knowledge belongs:
    - Existing domain with a strong match -> update the exact file in `.codex/guidelines/`.
-   - New domain with no strong match -> create a new guideline file in `.codex/guidelines/` with proper `paths: [...]` and `description:` frontmatter, then reference it from `AGENTS.md`.
+   - New domain with no strong match -> create a new guideline file in `.codex/guidelines/` with complete frontmatter, then reference it from `AGENTS.md`.
    - Global Codex standard -> update `AGENTS.md` directly.
 
 Critical constraint: do not shoehorn a new concept into an existing guideline if the match is weaker than 80%. Prefer creating a new domain file over polluting a specific guideline.
@@ -59,6 +59,7 @@ It does not rewrite `.codex/JOURNAL.md`; JOURNAL is append-only. You may read it
 ## Output Standard
 
 - Rules must be verifiable from the codebase. If a reader cannot check whether the rule was followed, rewrite it.
+- New or updated guideline files must include frontmatter with `paths:`, `description:`, `when_to_use:`, and `tags:`. Use 1-5 lowercase kebab-case tags that describe the domain or scope.
 - Use `NEVER`, `YOU MUST`, or `IMPORTANT` for constraints that have been violated before.
 - Do not paste long code snippets into guideline files. Cite source file paths and line numbers instead.
 - Execute safe file changes autonomously, then summarize each file touched and why.

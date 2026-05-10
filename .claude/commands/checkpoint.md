@@ -26,7 +26,7 @@ For each item currently in `.claude/CONTEXT.md`, decide one of:
 
 | Status | Action |
 |---|---|
-| Still true right now | Keep it (refresh wording if needed) |
+| Still true right now | Keep it (refresh wording if needed). Preserve any existing `<!-- since: YYYY-MM-DD -->` comment. |
 | Done / resolved / merged | **Drop from .claude/CONTEXT.md.** Candidate for JOURNAL if it was a real decision, completion, or pivot. Pure tactical noise (e.g., "tried X, didn't work") is dropped silently. |
 | Superseded by a newer state | Drop the old, write the new |
 | Still relevant but applies broadly to all future work | This has graduated beyond CONTEXT — propose to user that it move to `.claude/rules/` via `/learn`, then drop from CONTEXT |
@@ -41,6 +41,8 @@ Add to `.claude/CONTEXT.md` only what's true *now*:
 
 Be terse. One bullet ≈ one short sentence.
 
+For every new bullet, append `<!-- since: YYYY-MM-DD -->` using today's date. If you keep an existing bullet, preserve its original `since:` date rather than resetting it. These comments make `/doctor` able to flag old decisions that should graduate into rules.
+
 ### Step 4 — Build the new .claude/CONTEXT.md
 
 Use this skeleton; **omit any section that has nothing to say**:
@@ -49,16 +51,16 @@ Use this skeleton; **omit any section that has nothing to say**:
 <!-- .claude/CONTEXT.md — current state of work. Updated by /checkpoint. Declarative, not a log. -->
 
 ## In Progress
-- [What is mid-stream right now, with file:line]
+- [What is mid-stream right now, with file:line] <!-- since: YYYY-MM-DD -->
 
 ## Open Questions / Blockers
-- [Unresolved things blocking progress]
+- [Unresolved things blocking progress] <!-- since: YYYY-MM-DD -->
 
 ## Recent Decisions (not yet promoted to rules)
-- [Decision + brief why; promote to .claude/rules/ via /learn when it stabilizes]
+- [Decision + brief why; promote to .claude/rules/ via /learn when it stabilizes] <!-- since: YYYY-MM-DD -->
 
 ## Next Session Should Start By
-- [One concrete action, e.g., "run pytest tests/auth/", "ask user about caching strategy"]
+- [One concrete action, e.g., "run pytest tests/auth/", "ask user about caching strategy"] <!-- since: YYYY-MM-DD -->
 ```
 
 Count lines. If > 150, STOP and report to the user; do not write the file.

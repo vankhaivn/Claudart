@@ -16,7 +16,7 @@ Run a read-only health check on this repository's CLAUDART installation from the
 - `.codex/JOURNAL.md` exists. Warn if missing.
 - `.codex/guidelines/` exists and contains at least `ai-behavior.md`.
 - `.codex/agents/` exists, even if the user removed shipped agents.
-- `.agents/skills/` exists and contains `codex-checkpoint`, `codex-learn`, `codex-doctor`, and `codex-refactor-memory`.
+- `.agents/skills/` exists and contains `codex-start`, `codex-checkpoint`, `codex-learn`, `codex-doctor`, and `codex-refactor-memory`.
 
 For each missing path, report which workflow would create or repair it.
 
@@ -25,7 +25,8 @@ For each missing path, report which workflow would create or repair it.
 For every `.md` file under `.codex/guidelines/`:
 
 - Verify the file starts with YAML frontmatter delimited by `---`.
-- Confirm `paths:` and `description:` are present.
+- Confirm `paths:`, `description:`, `when_to_use:`, and `tags:` are present.
+- Confirm `tags:` contains 1-5 lowercase kebab-case tags describing domain or scope.
 - Report malformed YAML, missing required keys, or obviously broken frontmatter.
 
 For every `.agents/skills/*/SKILL.md` file:
@@ -67,7 +68,11 @@ For every guideline file in `.codex/guidelines/*.md`:
 
 - Confirm `.codex/CONTEXT.md` is referenced in `AGENTS.md`.
 - `.codex/CONTEXT.md` line count must be at most 150. Use `wc -l`; do not full-read the file just to count.
+- Report approximate `.codex/CONTEXT.md` tokens using both estimates:
+  - `wc -w .codex/CONTEXT.md | awk '{printf "~%d tokens\n", $1 * 1.3}'`
+  - `wc -c .codex/CONTEXT.md | awk '{printf "~%d tokens (byte estimate)\n", $1 / 4}'`
 - Search `AGENTS.md` and `.codex/guidelines/` for any operational auto-load instruction for `.codex/JOURNAL.md`. If found, flag as Critical.
+- Search `.codex/CONTEXT.md` for `<!-- since: YYYY-MM-DD -->` comments. Flag items older than 30 days as graduation candidates if they remain in Recent Decisions or otherwise look durable. If an obviously long-lived decision has no `since:` comment, warn that future `$codex-checkpoint` should preserve/add one.
 - For `.codex/JOURNAL.md` integrity, use spot-checks rather than full reads:
   - `head -n 20 .codex/JOURNAL.md`
   - `wc -l .codex/JOURNAL.md`
@@ -84,9 +89,18 @@ For every guideline file in `.codex/guidelines/*.md`:
 ### 8. Size Sanity
 
 - Count lines in `AGENTS.md`. Target is under 100 lines.
+- Report approximate tokens using both estimates:
+  - `wc -w AGENTS.md | awk '{printf "~%d tokens\n", $1 * 1.3}'`
+  - `wc -c AGENTS.md | awk '{printf "~%d tokens (byte estimate)\n", $1 / 4}'`
 - If bloated, recommend `$codex-refactor-memory`.
 
-### 9. Agent Overlap
+### 9. Guideline Tag Index And Overlap
+
+- Build a tag index from guideline frontmatter only, e.g. `grep -h '^tags:' .codex/guidelines/*.md | sort -u`.
+- Flag guidelines missing `tags:` or using vague/non-domain tags.
+- Use overlapping tags as an initial signal for possible duplicate guidelines; read bodies only when tags or paths suggest overlap.
+
+### 10. Agent Overlap
 
 For all files in `.codex/agents/`, compare their `description` and responsibilities.
 

@@ -10,6 +10,7 @@ This repository contains CLAUDART, a markdown-based operating layer for AI codin
 
 ## Core Commands
 
+- `$codex-start` — orients a new session from `.codex/CONTEXT.md` plus the last three git commits.
 - `$codex-project-discovery` — interviews the user about a rough project idea and creates a raw synthesis plus structured project docs.
 - `$codex-checkpoint` — updates `.codex/CONTEXT.md` and appends meaningful retired items to `.codex/JOURNAL.md`.
 - `$codex-learn` — promotes validated recurring decisions into Codex guidelines.
@@ -30,5 +31,5 @@ See `.codex/guidelines/ai-behavior.md` for universal AI behavior guidelines.
 
 - "Do not assume a human will document your code patterns. If you build it, document it."
 - Existing Codex guidelines change → update the relevant file in `.codex/guidelines/`.
-- New domains/layers → create a new guideline file and ensure `AGENTS.md` points to it when globally relevant.
+- New domains/layers → create a new guideline file with `paths:`, `description:`, `when_to_use:`, and `tags:` frontmatter, then ensure `AGENTS.md` points to it when globally relevant.
 - Live state → update `.codex/CONTEXT.md` through `$codex-checkpoint`.

@@ -68,6 +68,7 @@ A note starts in `CONTEXT.md`. When it's settled, one line goes to `JOURNAL.md`.
 
 | Claude Code          | Codex CLI                  | What it does                                                                                        |
 | -------------------- | -------------------------- | --------------------------------------------------------------------------------------------------- |
+| `/start`             | `$codex-start`             | Lightweight session boot — reads current CONTEXT and the last 3 git commits                         |
 | `/project-discovery` | `$codex-project-discovery` | Interview-first planning — turns rough ideas into project docs before any code                      |
 | `/refactor-memory`   | `$codex-refactor-memory`   | Trims CLAUDE.md/AGENTS.md into a lightweight index; extracts durable guidance into rules/guidelines |
 | `/checkpoint`        | `$codex-checkpoint`        | Declarative CONTEXT rebuild + JOURNAL append (hard 150-line ceiling)                                |
@@ -82,9 +83,9 @@ Two review agents are always available: `clean-code-reviewer` (scope + Clean Cod
 your-project/
 ├── AGENTS.md                       # Codex root loader (copied from .codex/AGENTS.md on install)
 ├── .agents/
-│   └── skills/                     # Codex repo skills (codex-checkpoint, codex-doctor, …)
+│   └── skills/                     # Codex repo skills (codex-start, codex-checkpoint, …)
 ├── .codex/
-│   ├── AGENTS.md                   # Codex memory index
+│   ├── AGENTS.md                   # Codex source template in CLAUDART; copied to root AGENTS.md
 │   ├── CONTEXT.md                  # Live state, declarative, ≤ 150 lines
 │   ├── JOURNAL.md                  # Append-only audit log — never auto-loaded
 │   ├── agents/                     # Codex TOML subagents

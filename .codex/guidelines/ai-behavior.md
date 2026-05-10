@@ -1,6 +1,8 @@
 ---
 paths: ["**/*"]
 description: Universal AI behavior guidelines applied on every Codex task, regardless of stack or domain.
+when_to_use: Every Codex task, regardless of stack or domain.
+tags: [behavior, universal]
 ---
 
 # AI Behavior Guidelines

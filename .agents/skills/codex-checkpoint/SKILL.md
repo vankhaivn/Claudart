@@ -31,7 +31,7 @@ For each item currently in `.codex/CONTEXT.md`, decide one of:
 
 | Status | Action |
 |---|---|
-| Still true right now | Keep it, refreshing wording if needed. |
+| Still true right now | Keep it, refreshing wording if needed. Preserve any existing `<!-- since: YYYY-MM-DD -->` comment. |
 | Done / resolved / merged | Drop it from `.codex/CONTEXT.md`. Candidate for JOURNAL if it was a real decision, completion, or pivot. |
 | Superseded by newer state | Drop the old item and write the new current state. |
 | Broadly relevant to all future work | Propose moving it into `.codex/guidelines/` via `$codex-learn`, then drop it from CONTEXT. |
@@ -49,6 +49,8 @@ Add to `.codex/CONTEXT.md` only what is true now:
 
 Be terse. One bullet should be one short sentence.
 
+For every new bullet, append `<!-- since: YYYY-MM-DD -->` using today's date. If you keep an existing bullet, preserve its original `since:` date rather than resetting it. Codex is not documented to strip HTML comments, so keep these comments short; they exist so `$codex-doctor` can flag old decisions that should graduate into guidelines.
+
 ### Step 4: Build the New CONTEXT
 
 Use this skeleton. Omit any section that has nothing to say.
@@ -57,16 +59,16 @@ Use this skeleton. Omit any section that has nothing to say.
 <!-- .codex/CONTEXT.md - current state of work. Updated by checkpoint. Declarative, not a log. -->
 
 ## In Progress
-- [What is mid-stream right now, with file:line]
+- [What is mid-stream right now, with file:line] <!-- since: YYYY-MM-DD -->
 
 ## Open Questions / Blockers
-- [Unresolved things blocking progress]
+- [Unresolved things blocking progress] <!-- since: YYYY-MM-DD -->
 
 ## Recent Decisions (not yet promoted to rules)
-- [Decision + brief why; promote via learn when it stabilizes]
+- [Decision + brief why; promote via learn when it stabilizes] <!-- since: YYYY-MM-DD -->
 
 ## Next Session Should Start By
-- [One concrete action, e.g. "run pytest tests/auth/" or "ask user about caching strategy"]
+- [One concrete action, e.g. "run pytest tests/auth/" or "ask user about caching strategy"] <!-- since: YYYY-MM-DD -->
 ```
 
 Count lines. If more than 150, stop and report to the user. Do not write the file.
