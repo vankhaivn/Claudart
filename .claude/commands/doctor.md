@@ -9,9 +9,10 @@ Please run a health check on this repository's CLAUDART installation. Your job i
 ### 1. Required Structure
 
 - `.claude/` exists at the repository root
-- `.claude/commands/` exists and contains at least: `start.md`, `learn.md`, `refactor-memory.md`, `doctor.md`, `checkpoint.md`
+- `.claude/commands/` exists and contains at least: `start.md`, `learn.md`, `refactor-memory.md`, `doctor.md`, `checkpoint.md`, `plan.md`
 - `.claude/agents/` exists (may be empty if user removed shipped agents)
 - `.claude/rules/` exists (may be empty before the user runs `/refactor-memory`)
+- `.claude/tasks/` exists with `index.md` and `done/` subdirectory (warn if missing — `/plan` will create on first use)
 - `.claude/CLAUDE.md` exists
 - `.claude/CONTEXT.md` exists (warn if missing — the user may not have run `/checkpoint` yet)
 - `.claude/JOURNAL.md` exists (warn if missing)
@@ -68,6 +69,25 @@ For every rule file in `.claude/rules/*.md`:
     - `wc -l .claude/JOURNAL.md` — report total entry count for the user.
     - `tail -n 5 .claude/JOURNAL.md` — sample-check the most recent lines match the `YYYY-MM-DD | <type> | <summary>` format.
     - Skip deeper validation. If a malformed line is suspected, ask the user; do not slurp the whole file just to verify format.
+
+### 5c. Task Document Health (`.claude/tasks/`)
+
+Skip this section if `.claude/tasks/` does not exist.
+
+- Confirm `.claude/tasks/index.md` exists. If missing, flag as **Medium** — `/checkpoint` or `/plan` should regenerate it.
+- Count `.claude/tasks/index.md` lines via `wc -l`. Hard ceiling 100. If exceeded, flag as **High** — trim Recently Done.
+- For every `.claude/tasks/*.md` file (excluding `index.md` and `done/`), check the YAML frontmatter:
+  - Required keys: `slug`, `status`, `created`, `updated`, `agent`, `tags`.
+  - `status` must be one of: `planning`, `in-progress`, `blocked`, `done`, `cancelled`.
+  - `slug` must match the filename (excluding the `YYYY-MM-DD-` prefix and `.md` suffix).
+  - `tags` must be inline YAML array style with 1-5 lowercase kebab-case tags.
+- Flag any task in the top-level folder with `status: done` or `status: cancelled` — these should have been moved to `done/` by `/checkpoint`. Suggest running `/checkpoint`.
+- Flag any task with `status: in-progress` AND `updated:` more than 7 days old as **stalled** — Medium severity. Suggest flipping to `blocked` or `cancelled`.
+- Flag any task with `status: planning` AND `updated:` more than 14 days old — the user probably abandoned it. Suggest cancellation.
+- Cross-check `index.md` Active entries against actual task files: every Active entry must correspond to a real file; every real file with `status` ∈ {planning, in-progress, blocked} must appear in Active. Mismatches → suggest `/checkpoint` to resync.
+- Required sections in every task file body: `## Purpose`, `## Context & Orientation`, `## Plan of Work`, `## Concrete Steps`, `## Validation & Acceptance`, `## Decision Log`, `## Surprises & Discoveries`, `## Outcomes & Retrospective`. Flag missing sections.
+- Within `## Context & Orientation`, flag if `### Memory Hints` is missing or empty — that section is the cross-session lifeline.
+- **Redundant `.gitkeep`**: if `.claude/tasks/done/.gitkeep` exists AND `.claude/tasks/done/` contains at least one real `.md` file, flag as **Low** severity. The `.gitkeep` exists only to track an empty folder; once real archived tasks live there, it is redundant. Mention that `/refactor-memory` will clean it up, or the user can `rm` it manually.
 
 ### 6. Anti-Patterns Inside Rules and Agents
 

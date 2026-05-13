@@ -64,16 +64,31 @@ CONTEXT.md      →   JOURNAL.md        →   rules/ or guidelines/
 
 A note starts in `CONTEXT.md`. When it's settled, one line goes to `JOURNAL.md`. When the same pattern recurs, `/learn` or `$codex-learn` promotes it to durable rules. The journal is **never auto-loaded** — it's audit history, not active memory.
 
+### Plan persistence — replacing built-in plan mode
+
+Both Claude Code and Codex CLI ship a built-in plan mode (Shift+Tab or `/plan`), but their plans live only in the chat session — close the terminal, lose the plan; let a few unrelated commits land while you pause, lose the context. CLAUDART persists every non-trivial plan as a markdown document:
+
+```text
+/plan <task>  →  tasks/<YYYY-MM-DD-slug>.md  →  tasks/done/<slug>.md  →  JOURNAL.md
+ (create)         (working doc, status: planning      (archived after        (one-line record)
+                  → in-progress → done)                completion)
+```
+
+Each task file is self-contained: Purpose, related code paths, related docs, **Memory Hints for the next session**, Plan of Work, checkbox steps with UTC timestamps, Decision Log, Surprises, Validation criteria, and final Outcomes. A session can resume from the file alone — even days later, even after other branches landed. The full schema lives in `.claude/rules/task-management.md` (and `.codex/guidelines/task-management.md`).
+
+**Planning lock**: while a task has `status: planning`, the agent is constrained by convention to **read-only** exploration — same safety net as native plan mode, but the plan is a real file you can review, edit, and commit. Say "go" / "approved" / "implement" to flip status to `in-progress`.
+
 ## Commands & Skills
 
 | Claude Code          | Codex CLI                  | What it does                                                                                        |
 | -------------------- | -------------------------- | --------------------------------------------------------------------------------------------------- |
-| `/start`             | `$codex-start`             | Lightweight session boot — reads current CONTEXT and the last 3 git commits                         |
+| `/start`             | `$codex-start`             | Lightweight session boot — reads CONTEXT, active tasks, and the last 3 git commits                  |
+| `/plan <task>`       | `$codex-plan <task>`       | Creates a persistent implementation plan as a markdown doc in `tasks/` — replaces native plan mode  |
 | `/project-discovery` | `$codex-project-discovery` | Interview-first planning — turns rough ideas into project docs before any code                      |
 | `/refactor-memory`   | `$codex-refactor-memory`   | Trims CLAUDE.md/AGENTS.md into a lightweight index; extracts durable guidance into rules/guidelines |
-| `/checkpoint`        | `$codex-checkpoint`        | Declarative CONTEXT rebuild + JOURNAL append (hard 150-line ceiling)                                |
+| `/checkpoint`        | `$codex-checkpoint`        | Declarative CONTEXT rebuild + `tasks/index.md` sync + JOURNAL append                                |
 | `/learn`             | `$codex-learn`             | Retrospective — promotes recurring lessons into rules/guidelines with loophole-closing language     |
-| `/doctor`            | `$codex-doctor`            | Read-only health check: structure, frontmatter, token hygiene, wiring                               |
+| `/doctor`            | `$codex-doctor`            | Read-only health check: structure, frontmatter, token hygiene, wiring, task hygiene                 |
 
 Two review agents are always available: `clean-code-reviewer` (scope + Clean Code discipline) and `secure-reviewer` (read-only OWASP audit).
 
@@ -83,14 +98,19 @@ Two review agents are always available: `clean-code-reviewer` (scope + Clean Cod
 your-project/
 ├── AGENTS.md                       # Codex root loader (copied from .codex/AGENTS.md on install)
 ├── .agents/
-│   └── skills/                     # Codex repo skills (codex-start, codex-checkpoint, …)
+│   └── skills/                     # Codex repo skills (codex-start, codex-plan, codex-checkpoint, …)
 ├── .codex/
 │   ├── AGENTS.md                   # Codex source template in CLAUDART; copied to root AGENTS.md
 │   ├── CONTEXT.md                  # Live state, declarative, ≤ 150 lines
 │   ├── JOURNAL.md                  # Append-only audit log — never auto-loaded
 │   ├── agents/                     # Codex TOML subagents
 │   ├── config.toml                 # Codex project defaults
-│   └── guidelines/                 # Codex-native semantic guidance
+│   ├── guidelines/                 # Codex-native semantic guidance
+│   │   ├── ai-behavior.md
+│   │   └── task-management.md
+│   └── tasks/                      # Persistent implementation plans (one file per task)
+│       ├── index.md                # Active + recently-done dashboard, ≤ 100 lines
+│       └── done/                   # Archived completed/cancelled tasks
 └── .claude/
     ├── CLAUDE.md                   # Lightweight index (< 100 lines)
     ├── CONTEXT.md                  # Live state, declarative, ≤ 150 lines
@@ -99,8 +119,12 @@ your-project/
     │   ├── clean-code-reviewer.md
     │   └── secure-reviewer.md
     ├── commands/                   # Slash command protocols
-    └── rules/
-        └── ai-behavior.md
+    ├── rules/
+    │   ├── ai-behavior.md
+    │   └── task-management.md
+    └── tasks/                      # Persistent implementation plans (one file per task)
+        ├── index.md                # Active + recently-done dashboard, ≤ 100 lines
+        └── done/                   # Archived completed/cancelled tasks
 ```
 
 ## Contributing

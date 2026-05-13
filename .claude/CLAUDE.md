@@ -6,10 +6,11 @@ CLAUDART keeps the Claude-specific operating layer inside `.claude/`, including 
 
 ## Core Commands
 
-- `/start` orients a new session from `.claude/CONTEXT.md` plus the last three git commits.
+- `/start` orients a new session from `.claude/CONTEXT.md`, `.claude/tasks/index.md`, and the last three git commits.
+- `/plan <description>` creates a persistent implementation plan in `.claude/tasks/` — use instead of native plan mode for any multi-session or multi-file work.
 - `/refactor-memory` consolidates this file, `.claude/rules/`, and `.claude/agents/` into a coherent Modular Rules System.
 - `/project-discovery` interviews the user about a rough project idea and creates a raw synthesis plus structured project docs.
-- `/checkpoint` rewrites `.claude/CONTEXT.md` as the current state and appends meaningful retired items to `.claude/JOURNAL.md`.
+- `/checkpoint` rewrites `.claude/CONTEXT.md` as the current state, syncs `.claude/tasks/index.md`, and appends meaningful retired items to `.claude/JOURNAL.md`.
 - `/learn` promotes validated recurring decisions into `.claude/rules/`.
 - `/doctor` runs a read-only health check on the CLAUDART installation.
 
@@ -17,6 +18,7 @@ CLAUDART keeps the Claude-specific operating layer inside `.claude/`, including 
 
 See @.claude/CONTEXT.md for the current state of work (updated by /checkpoint).
 See @.claude/rules/ai-behavior.md for universal AI behavior guidelines.
+See @.claude/rules/task-management.md for the persistent task-document workflow that replaces native plan mode.
 
 ## Agent Self-Evolution & Context Maintenance
 

@@ -14,9 +14,10 @@ Run a read-only health check on this repository's CLAUDART installation from the
 - `AGENTS.md` exists at the repository root (copied from `.codex/AGENTS.md` by the installer).
 - `.codex/CONTEXT.md` exists. Warn if missing because the user may not have run checkpoint yet.
 - `.codex/JOURNAL.md` exists. Warn if missing.
-- `.codex/guidelines/` exists and contains at least `ai-behavior.md`.
+- `.codex/guidelines/` exists and contains at least `ai-behavior.md` and `task-management.md`.
 - `.codex/agents/` exists, even if the user removed shipped agents.
-- `.agents/skills/` exists and contains `codex-start`, `codex-checkpoint`, `codex-learn`, `codex-doctor`, and `codex-refactor-memory`.
+- `.codex/tasks/` exists with `index.md` and `done/` subdirectory (warn if missing — `$codex-plan` will create on first use).
+- `.agents/skills/` exists and contains `codex-start`, `codex-checkpoint`, `codex-learn`, `codex-doctor`, `codex-refactor-memory`, and `codex-plan`.
 
 For each missing path, report which workflow would create or repair it.
 
@@ -80,6 +81,25 @@ For every guideline file in `.codex/guidelines/*.md`:
   - `wc -l .codex/JOURNAL.md`
   - `tail -n 5 .codex/JOURNAL.md`
 - Skip deeper validation unless a malformed line is suspected.
+
+### 6b. Task Document Health (`.codex/tasks/`)
+
+Skip this section if `.codex/tasks/` does not exist.
+
+- Confirm `.codex/tasks/index.md` exists. If missing, flag as Medium — `$codex-checkpoint` or `$codex-plan` should regenerate it.
+- Count `.codex/tasks/index.md` lines via `wc -l`. Hard ceiling 100. If exceeded, flag as High — trim Recently Done.
+- For every `.codex/tasks/*.md` file (excluding `index.md` and `done/`), check the YAML frontmatter:
+  - Required keys: `slug`, `status`, `created`, `updated`, `agent`, `tags`.
+  - `status` must be one of: `planning`, `in-progress`, `blocked`, `done`, `cancelled`.
+  - `slug` must match the filename (excluding the `YYYY-MM-DD-` prefix and `.md` suffix).
+  - `tags` must be inline YAML array style with 1-5 lowercase kebab-case tags.
+- Flag any task in the top-level folder with `status: done` or `status: cancelled` — these should have been moved to `done/` by `$codex-checkpoint`. Suggest running `$codex-checkpoint`.
+- Flag any task with `status: in-progress` AND `updated:` more than 7 days old as stalled — Medium severity. Suggest flipping to `blocked` or `cancelled`.
+- Flag any task with `status: planning` AND `updated:` more than 14 days old — the user probably abandoned it. Suggest cancellation.
+- Cross-check `index.md` Active entries against actual task files: every Active entry must correspond to a real file; every real file with `status` in {planning, in-progress, blocked} must appear in Active. Mismatches -> suggest `$codex-checkpoint` to resync.
+- Required sections in every task file body: `## Purpose`, `## Context & Orientation`, `## Plan of Work`, `## Concrete Steps`, `## Validation & Acceptance`, `## Decision Log`, `## Surprises & Discoveries`, `## Outcomes & Retrospective`. Flag missing sections.
+- Within `## Context & Orientation`, flag if `### Memory Hints` is missing or empty — that section is the cross-session lifeline.
+- Redundant `.gitkeep`: if `.codex/tasks/done/.gitkeep` exists AND `.codex/tasks/done/` contains at least one real `.md` file, flag as Low severity. The `.gitkeep` exists only to track an empty folder; once real archived tasks live there, it is redundant. Mention that `$codex-refactor-memory` will clean it up, or the user can `rm` it manually.
 
 ### 7. Anti-Patterns
 

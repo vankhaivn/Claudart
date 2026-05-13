@@ -1,5 +1,5 @@
 ---
-description: Update .claude/CONTEXT.md to reflect the CURRENT state of work (declarative overwrite). Append graduated items to .claude/JOURNAL.md. Run at the end of meaningful sessions.
+description: Update .claude/CONTEXT.md to reflect the CURRENT state of work (declarative overwrite). Sync .claude/tasks/index.md with current task file states. Append graduated items to .claude/JOURNAL.md. Run at the end of meaningful sessions.
 ---
 
 You are about to write a session checkpoint. The output is **not a log of what happened** — it is a **declarative snapshot of what is true right now**. Lifelong append is the failure mode this command exists to prevent.
@@ -11,6 +11,10 @@ You are about to write a session checkpoint. The output is **not a log of what h
 3. **.claude/JOURNAL.md is append-only.** Never edit or delete prior entries. Each new entry is a single line.
 4. **NEVER add `@.claude/JOURNAL.md` to `.claude/CLAUDE.md`.** JOURNAL is intentionally outside the loaded context to save tokens. If you find such an import, remove it and warn the user.
 5. **Skip JOURNAL entirely when there is nothing meaningful to record.** Empty entries pollute the file.
+6. **Task files keep their own bodies; CONTEXT.md never absorbs a task body.** But CONTEXT.md **should** still reference the currently-focused task by slug + path in `## In Progress` so `/start` sees both task and non-task work in one place. Two valid CONTEXT entries:
+   - Task reference: `- Working task \`add-jwt-auth\` (see .claude/tasks/2026-05-13-add-jwt-auth.md) <!-- since: YYYY-MM-DD -->`
+   - Ad-hoc non-task change the user requested without creating a `/plan` (a quick tweak, a transient pivot): `- Tweaking rate-limit constant in src/api/limits.ts:42 (no task) <!-- since: YYYY-MM-DD -->`
+   Checkpoint *syncs* `tasks/index.md` AND ensures CONTEXT references the focus task — but never copies a task's Steps/Decisions/Surprises into CONTEXT.
 
 ## Procedure
 
@@ -34,7 +38,8 @@ For each item currently in `.claude/CONTEXT.md`, decide one of:
 ### Step 3 — Add new state from this session
 
 Add to `.claude/CONTEXT.md` only what's true *now*:
-- What you are mid-stream on (with `file:line` if applicable)
+- What you are mid-stream on (with `file:line` if applicable). **If the work is being tracked in a task file**, reference it by slug + path (e.g., `Working task \`add-jwt-auth\` (see .claude/tasks/2026-05-13-add-jwt-auth.md)`). Do not duplicate the task body here.
+- Ad-hoc changes the user requested *without* creating a `/plan` (quick fixes, transient tweaks, mid-flight pivots) — these have no task file, so CONTEXT is their only home. Mark them with `(no task)` so they are obviously distinct from task-tracked work.
 - Decisions just made that are not yet codified in rules
 - Open questions / blockers currently unresolved
 - The single most useful thing the next session should do first
@@ -95,14 +100,43 @@ If there is nothing to journal, skip this step. Do NOT write empty entries.
 
 Now (and only now) write the new `.claude/CONTEXT.md` from Step 4.
 
+### Step 6b — Sync .claude/tasks/index.md
+
+This step is independent of CONTEXT.md. Skip entirely if `.claude/tasks/` does not exist.
+
+1. List `.claude/tasks/*.md` (exclude `index.md` and the `done/` subfolder). For each, read only frontmatter (`status`, `slug`, `updated`).
+2. List `.claude/tasks/done/*.md`. For each, read frontmatter (`status`, `slug`, `updated`).
+3. Detect any task in the top-level `tasks/` folder whose `status` is `done` or `cancelled`. These have not been archived yet. For each:
+   - Ensure `Outcomes & Retrospective` is filled (read the body to confirm). If empty, flag in the report — do NOT auto-fill; the user or implementing agent should write it.
+   - Move the file to `.claude/tasks/done/`.
+   - Append one line to `.claude/JOURNAL.md`:
+     `YYYY-MM-DD | completed | <slug> — <one-line outcome>, see tasks/done/<filename>`
+     (Use `cancelled` instead of `completed` for cancelled tasks.)
+4. Rewrite `.claude/tasks/index.md` from scratch using the canonical skeleton:
+   ```markdown
+   <!-- .claude/tasks/index.md — dashboard of task documents. Maintained by /plan and /checkpoint. -->
+
+   ## Active
+   - [<slug>](<filename>) — <status> — updated <YYYY-MM-DD>
+
+   ## Recently Done (last 14 days)
+   - [<slug>](done/<filename>) — done <YYYY-MM-DD>
+   ```
+   - `Active`: every task in top-level `tasks/` (status: planning, in-progress, blocked).
+   - `Recently Done`: every task in `tasks/done/` whose `updated:` date is within the last 14 days. Older completed tasks remain on disk but drop out of the index.
+   - If a section has no entries, write `- _(none)_` instead.
+5. Count lines. If `index.md` > 100 lines, trim `Recently Done` first (shorten to last 7 days, then last 3 days, then drop the section).
+6. **Flag stalled tasks**: if any task has `status: in-progress` AND `updated:` is more than 7 days old, list it in the report. Suggest the user flip to `blocked` or `cancelled`, or resume it.
+
 ### Step 7 — Report
 
-Output a 5-line summary:
+Output a 6-line summary:
 1. Lines in new .claude/CONTEXT.md
 2. Items kept / dropped / added (counts)
 3. JOURNAL entries appended (or "none")
-4. Anything proposed for `/learn` graduation
-5. Reminder for the user to commit so the checkpoint enters git history
+4. Tasks synced: active=<n>, archived this run=<n>, stalled=<n>
+5. Anything proposed for `/learn` graduation
+6. Reminder for the user to commit so the checkpoint enters git history
 
 Do not run `git commit` yourself.
 

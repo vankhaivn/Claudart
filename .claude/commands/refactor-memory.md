@@ -106,6 +106,11 @@ For `.claude/JOURNAL.md`:
 - **CRITICAL**: search `.claude/CLAUDE.md` and every file in `.claude/rules/` for any `@.claude/JOURNAL.md` reference. If found, REMOVE it — JOURNAL must never be loaded into session context. Warn the user that this was fixed.
 - Do NOT prune or rewrite JOURNAL entries. The file is append-only by contract.
 
+For `.claude/tasks/`:
+- If the folder does not exist but `/plan` is documented in `.claude/commands/`, create it with a seed `index.md` and a `done/.gitkeep`.
+- If `.claude/tasks/done/.gitkeep` exists AND `.claude/tasks/done/` contains at least one real `.md` file, delete the `.gitkeep` — once real archives live there, the placeholder is redundant. Report what was removed.
+- Do NOT modify or move any task `.md` file content. Task files are working documents owned by `/plan` and `/checkpoint`; refactor-memory only touches the `.gitkeep` placeholder and (if missing) the seed `index.md`.
+
 Report all proposed audit changes in a clear bulleted list before applying them. Apply the safe ones (frontmatter fixes, snippet removal, missing `@.claude/CONTEXT.md` import, JOURNAL @import removal); ask the user before merging or deleting agents/rules.
 
 ## 8. Append Agent Self-Evolution Section

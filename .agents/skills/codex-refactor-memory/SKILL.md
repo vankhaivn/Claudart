@@ -164,6 +164,12 @@ For `.codex/JOURNAL.md`:
 - Do not full-read JOURNAL by default. Use `tail` and targeted `rg` searches for pattern analysis.
 - Do not prune or rewrite JOURNAL entries. The file is append-only by contract.
 
+For `.codex/tasks/`:
+
+- If the folder does not exist but `codex-plan` is present in `.agents/skills/`, create it with a seed `index.md` and a `done/.gitkeep`.
+- If `.codex/tasks/done/.gitkeep` exists AND `.codex/tasks/done/` contains at least one real `.md` file, delete the `.gitkeep` — once real archives live there, the placeholder is redundant. Report what was removed.
+- Do not modify or move any task `.md` file content. Task files are working documents owned by `$codex-plan` and `$codex-checkpoint`; refactor-memory only touches the `.gitkeep` placeholder and (if missing) the seed `index.md`.
+
 ## 10. Base Template Notes
 
 If this repository is a base template whose `.codex/` and `.agents/` directories are installed into other projects:
