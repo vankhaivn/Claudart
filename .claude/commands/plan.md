@@ -104,12 +104,18 @@ Once the user gives an approval signal, follow the protocol in `.claude/rules/ta
 1. Flip frontmatter `status: planning → in-progress`, bump `updated:`.
 2. Execute Concrete Steps in order, marking each `[x]` with `(YYYY-MM-DD HH:MMZ)` UTC timestamp on completion.
 3. Update Surprises / Decision Log as needed.
-4. On full completion, run the completion flow (Outcomes + move to `done/` + JOURNAL line + `index.md` update).
+4. When all Concrete Steps + Validation boxes are checked, run the **Two-Phase Completion Gate** from the rule file:
+   - **Phase 1**: fill draft Outcomes, flip `status: in-progress → awaiting-review`, report to user, **STOP**. Do NOT archive, do NOT write JOURNAL.
+   - **Phase 2a**: only after the user gives a completion signal ("approved", "looks good", "close it", "done", "ship", "ok đóng task") — run the archive flow.
+   - **Phase 2b**: if the user reports a problem, append to Surprises, flip back to `in-progress`, fix, return to Phase 1.
+
+The agent must NEVER skip Phase 1 or self-confirm Phase 2. The completion gate is symmetric with the planning approval gate at the other end.
 
 ## Anti-Patterns
 
-- Do not write code while `status: planning`. The planning lock is the safety net replacing native plan mode.
+- Do not write code while `status: planning` or `status: awaiting-review`. Both are read-only locks.
+- **Do not auto-complete the task.** When all boxes are checked, you go to `awaiting-review` and stop. The user — not you — flips it to `done`.
 - Do not skip Memory Hints. A plan with no Memory Hints is a plan that won't survive a context reset.
 - Do not put the plan body into chat instead of the file. The file IS the plan.
 - Do not call `ExitPlanMode`. This workflow does not use it.
-- Do not auto-approve on user enthusiasm ("great idea!") — wait for an explicit approval cue.
+- Do not auto-approve on user enthusiasm ("great idea!") — wait for an explicit approval cue at each gate.

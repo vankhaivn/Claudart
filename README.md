@@ -70,13 +70,19 @@ Both Claude Code and Codex CLI ship a built-in plan mode (Shift+Tab or `/plan`),
 
 ```text
 /plan <task>  →  tasks/<YYYY-MM-DD-slug>.md  →  tasks/done/<slug>.md  →  JOURNAL.md
- (create)         (working doc, status: planning      (archived after        (one-line record)
-                  → in-progress → done)                completion)
+ (create)         (working doc, status: planning →     (archived after        (one-line record)
+                  in-progress → awaiting-review →      user confirms)
+                  done)
 ```
 
 Each task file is self-contained: Purpose, related code paths, related docs, **Memory Hints for the next session**, Plan of Work, checkbox steps with UTC timestamps, Decision Log, Surprises, Validation criteria, and final Outcomes. A session can resume from the file alone — even days later, even after other branches landed. The full schema lives in `.claude/rules/task-management.md` (and `.codex/guidelines/task-management.md`).
 
-**Planning lock**: while a task has `status: planning`, the agent is constrained by convention to **read-only** exploration — same safety net as native plan mode, but the plan is a real file you can review, edit, and commit. Say "go" / "approved" / "implement" to flip status to `in-progress`.
+**Two symmetric safety gates** — the agent is locked out of code edits at both ends of the lifecycle, and only the user can flip the gate open:
+
+- **Planning gate** (`status: planning` → `in-progress`): the agent explores read-only and drafts the plan. Say "go" / "approved" / "implement" to start coding.
+- **Completion gate** (`status: awaiting-review` → `done`): when all steps and validation are checked, the agent flips to `awaiting-review` and **stops** — no archiving, no JOURNAL entry. You verify the work for real (run the app, manual QA, check the diff). Say "approved" / "looks good" / "ok đóng" to close. If something's broken, just report it — the agent flips back to `in-progress`, logs your feedback in Surprises, and fixes it.
+
+Both gates are convention-enforced. Together they replace native plan mode (no more lost plans on session close) **and** the silent agent self-completion that hides real bugs behind a green checkbox.
 
 ## Commands & Skills
 

@@ -90,11 +90,12 @@ Skip this section if `.codex/tasks/` does not exist.
 - Count `.codex/tasks/index.md` lines via `wc -l`. Hard ceiling 100. If exceeded, flag as High — trim Recently Done.
 - For every `.codex/tasks/*.md` file (excluding `index.md` and `done/`), check the YAML frontmatter:
   - Required keys: `slug`, `status`, `created`, `updated`, `agent`, `tags`.
-  - `status` must be one of: `planning`, `in-progress`, `blocked`, `done`, `cancelled`.
+  - `status` must be one of: `planning`, `in-progress`, `awaiting-review`, `blocked`, `done`, `cancelled`.
   - `slug` must match the filename (excluding the `YYYY-MM-DD-` prefix and `.md` suffix).
   - `tags` must be inline YAML array style with 1-5 lowercase kebab-case tags.
 - Flag any task in the top-level folder with `status: done` or `status: cancelled` — these should have been moved to `done/` by `$codex-checkpoint`. Suggest running `$codex-checkpoint`.
 - Flag any task with `status: in-progress` AND `updated:` more than 7 days old as stalled — Medium severity. Suggest flipping to `blocked` or `cancelled`.
+- Flag any task with `status: awaiting-review` AND `updated:` more than 3 days old as stuck awaiting confirmation — Medium severity. The agent has reported completion; the user has not confirmed. Surface prominently and suggest the user verify and run the close-out signal (or reject and flip back to in-progress).
 - Flag any task with `status: planning` AND `updated:` more than 14 days old — the user probably abandoned it. Suggest cancellation.
 - Cross-check `index.md` Active entries against actual task files: every Active entry must correspond to a real file; every real file with `status` in {planning, in-progress, blocked} must appear in Active. Mismatches -> suggest `$codex-checkpoint` to resync.
 - Required sections in every task file body: `## Purpose`, `## Context & Orientation`, `## Plan of Work`, `## Concrete Steps`, `## Validation & Acceptance`, `## Decision Log`, `## Surprises & Discoveries`, `## Outcomes & Retrospective`. Flag missing sections.

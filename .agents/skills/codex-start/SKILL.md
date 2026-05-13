@@ -37,13 +37,18 @@ Start a Codex session with a lightweight CLAUDART orientation. This skill is rea
 
 Decide based on what was found in steps 1-3:
 
-### Case A: At least one task with `status: in-progress` or `blocked`
+### Case A: At least one task with `status: awaiting-review`, `in-progress`, or `blocked`
 
-Pick the most recently updated one and ask:
+Pick the most recently updated one. The exact prompt depends on its status:
 
-> "There's an active task `<slug>` (status: <status>, updated <date>). Want to resume it? I'll read the full task file and verify the steps still hold against current code. Or tell me to start something else."
+- `awaiting-review`: a previous session reported the task complete and is waiting for the user's verification. Say:
+  > "Task `<slug>` is `awaiting-review` — a previous session finished it and is waiting for your verification. Open `.codex/tasks/<file>` to review draft Outcomes. Confirm to close, or tell me what didn't work and I'll flip it back to `in-progress`."
+- `in-progress`: say:
+  > "There's an active task `<slug>` (in-progress, updated <date>). Want to resume? I'll read the full file and verify the completed steps still hold against current code. Or tell me to start something else."
+- `blocked`: say:
+  > "Task `<slug>` is blocked (updated <date>). Has the blocker cleared? If yes, I'll flip to in-progress and resume. If no, tell me what to work on instead."
 
-Do not auto-read the task body or auto-resume. Wait for explicit user confirmation. When the user confirms, read the full task file and follow the Resumption protocol in `.codex/guidelines/task-management.md` (verify completed steps still hold against current code, surface drift in Surprises section).
+Do not auto-read the task body, auto-resume, or auto-confirm completion. Wait for explicit user direction. When the user confirms a resume, read the full task file and follow the Resumption protocol in `.codex/guidelines/task-management.md` (verify completed steps still hold against current code, surface drift in Surprises section).
 
 ### Case B: No active task, but `## Next Session Should Start By` is set in CONTEXT.md
 
@@ -62,3 +67,4 @@ Ask plainly:
 - Keep the report short and actionable.
 - If `.codex/CONTEXT.md` items look stale (`<!-- since: -->` more than 30 days old), mention that `$codex-checkpoint` should refresh them after this session.
 - If a task in the Active list has `updated:` more than 7 days old AND `status: in-progress`, flag it as possibly stalled — suggest either resuming or flipping to `blocked`/`cancelled` via `$codex-checkpoint`.
+- If a task has `status: awaiting-review` AND `updated:` more than 3 days old, flag it as awaiting-review stuck — the user likely forgot to confirm. Surface it prominently; the task is not abandoned, it just needs a sign-off.

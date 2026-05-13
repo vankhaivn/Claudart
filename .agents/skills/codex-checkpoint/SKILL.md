@@ -116,12 +116,13 @@ This step is independent of CONTEXT.md. Skip entirely if `.codex/tasks/` does no
 
 1. List `.codex/tasks/*.md` (exclude `index.md` and the `done/` subfolder). For each, read only frontmatter (`status`, `slug`, `updated`).
 2. List `.codex/tasks/done/*.md`. For each, read frontmatter (`status`, `slug`, `updated`).
-3. Detect any task in the top-level `tasks/` folder whose `status` is `done` or `cancelled`. These have not been archived yet. For each:
+3. Detect any task in the top-level `tasks/` folder whose `status` is `done` or `cancelled`. These have been user-confirmed (or cancelled) and not yet archived. For each:
    - Ensure `Outcomes & Retrospective` is filled (read the body to confirm). If empty, flag in the report — do not auto-fill; the user or implementing agent should write it.
    - Move the file to `.codex/tasks/done/`.
    - Append one line to `.codex/JOURNAL.md`:
      `YYYY-MM-DD | completed | <slug> — <one-line outcome>, see tasks/done/<filename>`
      (Use `cancelled` instead of `completed` for cancelled tasks.)
+   - DO NOT archive `awaiting-review` tasks. Those are explicitly waiting for user confirmation; archiving them defeats the gate. They stay in the top-level `tasks/` folder and appear in the Active list.
 4. Rewrite `.codex/tasks/index.md` from scratch using the canonical skeleton:
    ```markdown
    <!-- .codex/tasks/index.md — dashboard of task documents. Maintained by $codex-plan and $codex-checkpoint. -->
@@ -132,11 +133,15 @@ This step is independent of CONTEXT.md. Skip entirely if `.codex/tasks/` does no
    ## Recently Done (last 14 days)
    - [<slug>](done/<filename>) — done <YYYY-MM-DD>
    ```
-   - `Active`: every task in top-level `tasks/` (status: planning, in-progress, blocked).
+   - `Active`: every task in top-level `tasks/` (status: planning, in-progress, awaiting-review, blocked).
+   - When listing `awaiting-review` entries, append ` ⏳ awaiting your confirmation` to the line so the dashboard makes the gate visible.
    - `Recently Done`: every task in `tasks/done/` whose `updated:` date is within the last 14 days. Older completed tasks remain on disk but drop out of the index.
    - If a section has no entries, write `- _(none)_` instead.
 5. Count lines. If `index.md` > 100 lines, trim `Recently Done` first (shorten to last 7 days, then last 3 days, then drop the section).
-6. Flag stalled tasks: if any task has `status: in-progress` AND `updated:` is more than 7 days old, list it in the report. Suggest the user flip to `blocked` or `cancelled`, or resume it.
+6. Flag stalled tasks: list each in the report.
+   - `status: in-progress` AND `updated:` > 7 days old -> stalled work. Suggest flipping to `blocked`/`cancelled` or resuming.
+   - `status: awaiting-review` AND `updated:` > 3 days old -> stuck awaiting confirmation. Suggest the user verify and confirm (or reject) so the task can move forward.
+   - `status: planning` AND `updated:` > 14 days old -> abandoned plan. Suggest cancellation.
 
 ### Step 7: Report
 
