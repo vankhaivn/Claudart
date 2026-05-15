@@ -136,7 +136,7 @@ Memory Hints from previous sessions is the lifeline. Populate it generously when
 | `/learn`             | `$codex-learn`             | Retrospective — promotes recurring lessons into rules/guidelines with loophole-closing language     |
 | `/doctor`            | `$codex-doctor`            | Read-only health check: structure, frontmatter, token hygiene, wiring, task hygiene                 |
 
-Two review agents ship with the Claude side: `clean-code-reviewer` (scope + Clean Code discipline) and `secure-reviewer` (read-only OWASP audit).
+Review agents ship with both layers: `clean-code-reviewer` (scope + Clean Code discipline) and `security-auditor` (read-only OWASP audit). Claude uses kebab-case Markdown agent names; Codex uses snake_case TOML `name` values.
 
 ## Directory layout
 
@@ -150,6 +150,8 @@ your-project/
 │   ├── CONTEXT.md                  # Live state, declarative, ≤ 150 lines
 │   ├── JOURNAL.md                  # Append-only audit log — never auto-loaded
 │   ├── agents/                     # Codex TOML subagents
+│   │   ├── clean-code-reviewer.toml
+│   │   └── security-auditor.toml
 │   ├── config.toml                 # Codex project defaults
 │   ├── guidelines/                 # Codex-native semantic guidance
 │   │   ├── ai-behavior.md
@@ -163,7 +165,7 @@ your-project/
     ├── JOURNAL.md                  # Append-only audit log — never auto-loaded
     ├── agents/
     │   ├── clean-code-reviewer.md
-    │   └── secure-reviewer.md
+    │   └── security-auditor.md
     ├── commands/                   # Slash command protocols
     ├── rules/
     │   ├── ai-behavior.md

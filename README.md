@@ -32,7 +32,7 @@ Default installs the Claude Code layer. Pass `--codex` for Codex, `--both` for b
 | Plans die when the session closes                               | `/plan <task>` writes a persistent doc in `tasks/` that survives any pause                                  |
 | Same decisions re-discovered every week                         | `/learn` graduates recurring patterns into durable `rules/` files that auto-load on relevant paths          |
 | `CLAUDE.md` / `AGENTS.md` bloats and burns tokens               | `/refactor-memory` extracts knowledge into scoped rules;                                                    |
-| Agents drift off-scope; nobody catches it                       | `clean-code-reviewer` + `secure-reviewer` agents auto-trigger after meaningful edits — scope + OWASP checks |
+| Agents drift off-scope; nobody catches it                       | `clean-code-reviewer` + `security-auditor` agents auto-trigger after meaningful edits — scope + OWASP checks |
 | Memory files drift silently — no way to spot rot                | `/doctor` validates structure, frontmatter, token hygiene end-to-end                                        |
 | Rough idea, no project skeleton yet                             | `/project-discovery` interviews you into structured project docs before any code                            |
 | Other memory frameworks need vector DBs, Docker, cloud accounts | Pure markdown. Works offline. PR-reviewable.                                                                |
