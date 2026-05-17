@@ -79,7 +79,7 @@ Skip this section if `.claude/tasks/` does not exist.
 - For every `.claude/tasks/*.md` file (excluding `index.md` and `done/`), check the YAML frontmatter:
   - Required keys: `slug`, `status`, `created`, `updated`, `agent`, `tags`.
   - `status` must be one of: `planning`, `in-progress`, `awaiting-review`, `blocked`, `done`, `cancelled`.
-  - `slug` must match the filename (excluding the `YYYY-MM-DD-` prefix and `.md` suffix).
+  - `slug` must match the filename (excluding the `YYYY-MM-DD-NNN-` prefix and `.md` suffix).
   - `tags` must be inline YAML array style with 1-5 lowercase kebab-case tags.
 - Flag any task in the top-level folder with `status: done` or `status: cancelled` — these should have been moved to `done/` by `/checkpoint`. Suggest running `/checkpoint`.
 - Flag any task with `status: in-progress` AND `updated:` more than 7 days old as **stalled** — Medium severity. Suggest flipping to `blocked` or `cancelled`.

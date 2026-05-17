@@ -49,10 +49,11 @@ If you need clarification before the plan is sensible, ask now. Do not invent an
 ### Step 4: Generate the slug and filename
 
 - Slug: 2-5 lowercase kebab-case words derived from the task. Example: `add-jwt-middleware`, `refactor-payment-retry`, `fix-cors-on-api`.
-- Filename: `YYYY-MM-DD-<slug>.md` using today's UTC date.
+- Sequence number: scan `.codex/tasks/` and `.codex/tasks/done/` for existing files whose name starts with today's UTC date (`YYYY-MM-DD-`). The next sequence number is the highest existing NNN for that date + 1, zero-padded to 3 digits (e.g. `001`, `002`). If no files exist for today, start at `001`.
+- Filename: `YYYY-MM-DD-NNN-<slug>.md` using today's UTC date and the computed sequence number.
 - Path: `.codex/tasks/<filename>`.
 
-If a file with that slug already exists in `.codex/tasks/` or `.codex/tasks/done/`, suffix with `-v2`, `-v3`, etc.
+No slug suffix (`-v2`, `-v3`) is needed — the sequence number already guarantees uniqueness per day.
 
 ### Step 5: Write the task file
 
@@ -76,7 +77,7 @@ Use the exact skeleton in `.codex/guidelines/task-management.md`. Fill every sec
 If `.codex/tasks/index.md` does not exist, create it with the canonical header (see guideline file). Add the new task under `## Active`:
 
 ```
-- [<slug>](<YYYY-MM-DD-slug>.md) — planning — updated <YYYY-MM-DD>
+- [<slug>](<YYYY-MM-DD-NNN-slug>.md) — planning — updated <YYYY-MM-DD>
 ```
 
 Keep `index.md` under 100 lines.

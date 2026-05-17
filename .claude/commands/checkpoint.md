@@ -12,7 +12,7 @@ You are about to write a session checkpoint. The output is **not a log of what h
 4. **NEVER add `@.claude/JOURNAL.md` to `.claude/CLAUDE.md`.** JOURNAL is intentionally outside the loaded context to save tokens. If you find such an import, remove it and warn the user.
 5. **Skip JOURNAL entirely when there is nothing meaningful to record.** Empty entries pollute the file.
 6. **Task files keep their own bodies; CONTEXT.md never absorbs a task body.** But CONTEXT.md **should** still reference the currently-focused task by slug + path in `## In Progress` so `/start` sees both task and non-task work in one place. Two valid CONTEXT entries:
-   - Task reference: `- Working task \`add-jwt-auth\` (see .claude/tasks/2026-05-13-add-jwt-auth.md) <!-- since: YYYY-MM-DD -->`
+   - Task reference: `- Working task \`add-jwt-auth\` (see .claude/tasks/2026-05-13-001-add-jwt-auth.md) <!-- since: YYYY-MM-DD -->`
    - Ad-hoc non-task change the user requested without creating a `/plan` (a quick tweak, a transient pivot): `- Tweaking rate-limit constant in src/api/limits.ts:42 (no task) <!-- since: YYYY-MM-DD -->`
    Checkpoint *syncs* `tasks/index.md` AND ensures CONTEXT references the focus task — but never copies a task's Steps/Decisions/Surprises into CONTEXT.
 
@@ -38,7 +38,7 @@ For each item currently in `.claude/CONTEXT.md`, decide one of:
 ### Step 3 — Add new state from this session
 
 Add to `.claude/CONTEXT.md` only what's true *now*:
-- What you are mid-stream on (with `file:line` if applicable). **If the work is being tracked in a task file**, reference it by slug + path (e.g., `Working task \`add-jwt-auth\` (see .claude/tasks/2026-05-13-add-jwt-auth.md)`). Do not duplicate the task body here.
+- What you are mid-stream on (with `file:line` if applicable). **If the work is being tracked in a task file**, reference it by slug + path (e.g., `Working task \`add-jwt-auth\` (see .claude/tasks/2026-05-13-001-add-jwt-auth.md)`). Do not duplicate the task body here.
 - Ad-hoc changes the user requested *without* creating a `/plan` (quick fixes, transient tweaks, mid-flight pivots) — these have no task file, so CONTEXT is their only home. Mark them with `(no task)` so they are obviously distinct from task-tracked work.
 - Decisions just made that are not yet codified in rules
 - Open questions / blockers currently unresolved

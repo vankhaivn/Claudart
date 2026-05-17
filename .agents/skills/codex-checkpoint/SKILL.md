@@ -17,7 +17,7 @@ The output is not a log of what happened. It is a declarative snapshot of what i
 4. Never add `.codex/JOURNAL.md` as auto-loaded context in `AGENTS.md` or `.codex/guidelines/`.
 5. Skip JOURNAL entirely when there is nothing meaningful to record. Empty entries pollute the file.
 6. Task files keep their own bodies; CONTEXT.md never absorbs a task body. But CONTEXT.md should still reference the currently-focused task by slug + path in `## In Progress` so `$codex-start` sees both task and non-task work in one place. Two valid CONTEXT entries:
-   - Task reference: `- Working task \`add-jwt-auth\` (see .codex/tasks/2026-05-13-add-jwt-auth.md) <!-- since: YYYY-MM-DD -->`
+   - Task reference: `- Working task \`add-jwt-auth\` (see .codex/tasks/2026-05-13-001-add-jwt-auth.md) <!-- since: YYYY-MM-DD -->`
    - Ad-hoc non-task change the user requested without creating a `$codex-plan` (a quick tweak, a transient pivot): `- Tweaking rate-limit constant in src/api/limits.ts:42 (no task) <!-- since: YYYY-MM-DD -->`
    Checkpoint *syncs* `tasks/index.md` AND ensures CONTEXT references the focus task, but never copies a task's Steps/Decisions/Surprises into CONTEXT.
 
@@ -46,7 +46,7 @@ Pure tactical noise is dropped silently.
 
 Add to `.codex/CONTEXT.md` only what is true now:
 
-- Work that is mid-stream, with `file:line` where useful. If the work is being tracked in a task file, reference it by slug + path (e.g., `Working task \`add-jwt-auth\` (see .codex/tasks/2026-05-13-add-jwt-auth.md)`). Do not duplicate the task body here.
+- Work that is mid-stream, with `file:line` where useful. If the work is being tracked in a task file, reference it by slug + path (e.g., `Working task \`add-jwt-auth\` (see .codex/tasks/2026-05-13-001-add-jwt-auth.md)`). Do not duplicate the task body here.
 - Ad-hoc changes the user requested *without* creating a `$codex-plan` (quick fixes, transient tweaks, mid-flight pivots). These have no task file, so CONTEXT is their only home. Mark them with `(no task)` so they are obviously distinct from task-tracked work.
 - Decisions just made that are not yet codified in guidelines.
 - Open questions or blockers currently unresolved.

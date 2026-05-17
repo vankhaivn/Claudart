@@ -16,13 +16,13 @@ This guideline supersedes the native `/plan` mode workflow for persistence. Use 
 ```
 .codex/tasks/
 ├── index.md                                # Active + recently-done dashboard
-├── 2026-05-13-add-auth-middleware.md       # Active task
-├── 2026-05-10-refactor-payments.md         # Active task
+├── 2026-05-13-001-add-auth-middleware.md       # Active task
+├── 2026-05-13-002-refactor-payments.md         # Active task
 └── done/
     └── 2026-04-28-fix-cors-bug.md          # Archived completed task
 ```
 
-- **Naming**: `YYYY-MM-DD-<kebab-slug>.md`. Date is creation date (UTC). Slug is 2-5 words, lowercase, hyphen-separated.
+- **Naming**: `YYYY-MM-DD-NNN-<kebab-slug>.md`. Date is creation date (UTC). NNN is a zero-padded 3-digit sequence number starting at 001, incrementing per day (001, 002, … 999). Slug is 2-5 words, lowercase, hyphen-separated.
 - **One task per file.** Never split a single task across files. Do not nest folders inside `tasks/` beyond `done/`.
 - **`done/` is archive.** Files move here on completion or cancellation; they are never deleted.
 - **`index.md` is a dashboard**, maintained by `$codex-plan` and `$codex-checkpoint`. Task files are the source of truth; `index.md` is a convenience cache.
@@ -223,10 +223,10 @@ Never assume the file is still accurate without verification. The Memory Hints s
 <!-- .codex/tasks/index.md — dashboard of task documents. Maintained by $codex-plan and $codex-checkpoint. -->
 
 ## Active
-- [<slug>](<YYYY-MM-DD-slug>.md) — <status> — updated <YYYY-MM-DD>
+- [<slug>](<YYYY-MM-DD-NNN-slug>.md) — <status> — updated <YYYY-MM-DD>
 
 ## Recently Done (last 14 days)
-- [<slug>](done/<YYYY-MM-DD-slug>.md) — done <YYYY-MM-DD>
+- [<slug>](done/<YYYY-MM-DD-NNN-slug>.md) — done <YYYY-MM-DD>
 ```
 
 - Active list shows every file in `tasks/` whose `status` is `planning`, `in-progress`, or `blocked`.

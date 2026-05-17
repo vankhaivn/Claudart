@@ -46,7 +46,7 @@ Native plan mode (Shift+Tab in Claude Code, `/plan` in Codex CLI) keeps plans in
 CLAUDART replaces this with **persistent task documents** — one markdown file per task, in `.claude/tasks/` or `.codex/tasks/`, versioned in git.
 
 ```text
-/plan <task>  →  tasks/<YYYY-MM-DD-slug>.md  →  tasks/done/<slug>.md  →  JOURNAL.md
+/plan <task>  →  tasks/<YYYY-MM-DD-NNN-slug>.md  →  tasks/done/<NNN-slug>.md  →  JOURNAL.md
  (create)         (lifecycle: planning → in-progress →    (archived after       (one-line record)
                   awaiting-review → done)                  user confirms)
 ```
