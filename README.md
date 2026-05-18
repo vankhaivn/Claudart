@@ -19,10 +19,24 @@ CLAUDART is a small set of slash commands and a three-tier memory model that tur
 ## Install
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash
+# Claude Code layer (default)
+curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --claude
 ```
 
-Default installs the Claude Code layer. Pass `--codex` for Codex, `--both` for both, `--force` to overwrite.
+```bash
+# Codex layer
+curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --codex
+```
+
+```bash
+# Both layers
+curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --both
+```
+
+```bash
+# Overwrite existing files
+curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --force
+```
 
 ## What it solves
 
