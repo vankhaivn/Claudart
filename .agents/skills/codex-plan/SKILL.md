@@ -12,7 +12,7 @@ Before doing anything, read `.codex/guidelines/task-management.md`. That guideli
 ## Inputs
 
 - The user's request after `$codex-plan` is the task description. If invoked with no argument, ask one short clarifying question: "What's the task?"
-- If the request is ambiguous or missing critical detail (target files, success criteria), ask up to 3 clarifying questions BEFORE writing the file. Better to ask than to write a useless plan.
+- If the request is ambiguous or missing critical detail (target files, success criteria), state your interpretation as an explicit assumption in the Decision Log and flag it under **Open questions** in the Step 7 report. Do not block on interactive questions — document the assumption and let the user correct it.
 
 ## Procedure
 
@@ -40,7 +40,7 @@ You are in planning lock from this point. Do not write or edit any file other th
 Use read-only operations to:
 
 - Locate every file your plan will touch.
-- Identify existing patterns and helpers to reuse.
+- Identify existing patterns and helpers to reuse (avoid rewriting what already exists).
 - Surface constraints: linters, type checkers, framework idioms, naming conventions in the relevant area.
 - Note non-obvious context worth recording for a future-session agent.
 
@@ -66,9 +66,9 @@ Use the exact skeleton in `.codex/guidelines/task-management.md`. Fill every sec
   - *Related Docs*: project docs (`docs/...`) AND external references (URLs, RFCs).
   - *Memory Hints*: free-form notes — every non-obvious thing discovered during exploration that a fresh agent would otherwise re-discover. This section is the lifeline against memory loss across sessions. Be generous.
 - **Plan of Work**: 1-3 paragraphs of prose narrating the sequence and rationale.
-- **Concrete Steps**: ordered checklist. Each step is one self-contained action with target file and expected outcome.
-- **Validation & Acceptance**: observable success criteria.
-- **Decision Log**: any non-obvious choice made while planning, with rationale.
+- **Concrete Steps**: ordered checklist. Each step is one self-contained action with target file and expected outcome. Steps should be small enough that completing one is a meaningful save point.
+- **Validation & Acceptance**: observable success criteria — tests to pass, commands to run, behaviors to verify.
+- **Decision Log**: any non-obvious choice made while planning (library, approach, trade-off), with rationale. Include assumptions made due to ambiguous input.
 - **Surprises & Discoveries**: anything unexpected found during exploration.
 - **Outcomes & Retrospective**: leave empty (filled at completion).
 
