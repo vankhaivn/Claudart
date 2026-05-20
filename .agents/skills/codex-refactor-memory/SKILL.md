@@ -78,7 +78,46 @@ Rule Quality Checklist:
 3. Critical-tagged: prefix high-priority constraints with `NEVER`, `YOU MUST`, `IMPORTANT`, or similar unambiguous language.
 4. Scoped: the rule belongs in the named guideline and does not duplicate unrelated guidance elsewhere.
 
-## 5. Refactor AGENTS.md
+## 5. Audit Domain Guideline Semantics
+
+Do not stop at frontmatter, link, and glob hygiene. A successful memory refactor must also check whether the domain-specific guideline content still reflects the repository's current behavior.
+
+For every non-universal guideline under `.codex/guidelines/`:
+
+1. Read the guideline body and identify concrete claims.
+    - Claims include named files, modules, classes, functions, commands, config keys, environment variables, endpoints, schemas, database models, event names, message/queue topics, feature flags, UI routes, document contracts, or operational workflows.
+    - Ignore purely stylistic rules unless they contradict the codebase's current conventions.
+2. Verify each concrete claim against the actual repository.
+    - Use repository-native source files, package manifests, schemas, migrations, generated types, tests, docs/contracts, and config loaders as evidence.
+    - Prefer structured files and source-of-truth contracts over comments or stale prose.
+    - Use `rg` / `rg --files` first; use language/framework tooling only when it materially improves confidence.
+3. Classify each finding:
+    - **accurate**: guideline matches source and remains useful.
+    - **guideline-stale**: source/contract has intentionally moved on; update the guideline.
+    - **source-debt**: guideline is still the desired invariant, but source currently violates it; keep the guideline and report the code/doc debt instead of weakening the rule.
+    - **open-work**: a task, issue, TODO, or explicit user decision already tracks the gap; keep or update the guideline so future agents see the intended direction and the active gap.
+    - **needs-user-decision**: source and guideline disagree and neither clearly wins from local evidence; ask before rewriting either.
+4. Detect overbroad or kitchen-sink guidelines.
+    - If one guideline mixes unrelated domains, propose splitting it into focused files.
+    - Split only when the new files have clear `paths:` scopes and durable ownership. Do not create files just to satisfy symmetry.
+    - Preserve generic cross-cutting rules in broad files; move business/domain invariants into focused files.
+5. Detect near-duplicates and stale detail.
+    - If two guidelines repeat the same invariant, keep the rule in the most specific owner and replace the other copy with a pointer.
+    - Replace fragile line-number references and long source excerpts with stable symbol/file references where possible.
+    - Remove "future" or "temporary" wording once the feature is implemented, unless it still describes a real future state.
+6. Promote stable live-state decisions.
+    - Read `.codex/CONTEXT.md` for Recent Decisions. If a decision is now durable project behavior, move it into the relevant guideline and remove it from CONTEXT through the checkpoint workflow.
+    - If a decision is still temporary, keep it in CONTEXT and do not bury it in guidelines.
+
+Semantic audit output must list:
+
+- guidelines updated automatically;
+- stale rules fixed;
+- source-debt items intentionally left as code/doc follow-up;
+- split/merge actions performed;
+- split/merge actions that still need user confirmation.
+
+## 6. Refactor AGENTS.md
 
 Trim root `AGENTS.md` so it stays a concise memory index, not a knowledge dump.
 
@@ -95,7 +134,7 @@ It should contain only:
 
 Target: keep `AGENTS.md` under 100 lines where practical. If it exceeds 100 lines, extract more into `.codex/guidelines/`, workflows, or project docs. If it exceeds 150 lines, flag it in the final summary.
 
-## 6. Cross-Link Guidelines
+## 7. Cross-Link Guidelines
 
 Under a `## Guidelines` heading in `AGENTS.md`, add references for every guideline file plus the live-state context file.
 
@@ -109,7 +148,7 @@ See `.codex/guidelines/architecture.md` for architecture boundaries.
 
 NEVER add `.codex/JOURNAL.md` as a loaded context reference. JOURNAL is intentionally excluded from session context to save tokens. If you find such an import or auto-load instruction in `AGENTS.md` or `.codex/guidelines/`, remove it and warn the user in the final summary.
 
-## 7. Wire Up AI Behavior Guidelines
+## 8. Wire Up AI Behavior Guidelines
 
 `ai-behavior.md` is the universal behavior guideline for Codex work.
 
@@ -118,7 +157,7 @@ NEVER add `.codex/JOURNAL.md` as a loaded context reference. JOURNAL is intentio
 - Do not inline `ai-behavior.md` into `AGENTS.md`.
 - Add a single reference under `## Guidelines`.
 
-## 8. Audit Guidelines, Skills, And Agents
+## 9. Audit Guidelines, Skills, And Agents
 
 Report proposed audit changes in a clear list before applying risky changes. Apply safe fixes such as missing references, stale deleted-file references, frontmatter corrections, missing `.codex/CONTEXT.md` references, and JOURNAL auto-load removal. Ask before merging or deleting agents, guidelines, or skills.
 
@@ -131,6 +170,7 @@ For every file in `.codex/guidelines/`:
 - If a glob matches zero files, flag the guideline as potentially dead and ask whether to remove or rescope it.
 - Replace long inlined code with `file:line` references.
 - Apply the Rule Quality Checklist.
+- Apply the semantic audit from Step 5 before declaring a guideline healthy.
 - Use tag overlap as an initial signal for near-duplicates; read bodies only when tags or paths suggest overlap. Merge near-duplicates only after user confirmation.
 
 For every file in `.agents/skills/*/SKILL.md`:
@@ -148,7 +188,7 @@ For every file in `.codex/agents/`:
 - Replace hardcoded grep pattern lists with guidance to scan the codebase and use project tooling when present.
 - Confirm the agent's responsibilities do not overlap more than 50% with another agent. If they do, propose a merge.
 
-## 9. Maintain CONTEXT And JOURNAL
+## 10. Maintain CONTEXT And JOURNAL
 
 For `.codex/CONTEXT.md`:
 
@@ -170,7 +210,7 @@ For `.codex/tasks/`:
 - If `.codex/tasks/done/.gitkeep` exists AND `.codex/tasks/done/` contains at least one real `.md` file, delete the `.gitkeep` — once real archives live there, the placeholder is redundant. Report what was removed.
 - Do not modify or move any task `.md` file content. Task files are working documents owned by `$codex-plan` and `$codex-checkpoint`; refactor-memory only touches the `.gitkeep` placeholder and (if missing) the seed `index.md`.
 
-## 10. Base Template Notes
+## 11. Base Template Notes
 
 If this repository is a base template whose `.codex/` and `.agents/` directories are installed into other projects:
 
@@ -179,7 +219,7 @@ If this repository is a base template whose `.codex/` and `.agents/` directories
 - If an installer copies `.codex/AGENTS.md` to root `AGENTS.md`, document that relationship clearly and keep both files synchronized.
 - Do not assume a downstream project has the same languages, frameworks, docs, or tests as the template repository.
 
-## 11. Append Agent Self-Evolution Section
+## 12. Append Agent Self-Evolution Section
 
 At the end of root `AGENTS.md`, ensure `## Agent Self-Evolution & Context Maintenance` exists.
 
@@ -191,7 +231,7 @@ Include these rules, adapted to Codex paths:
 - Global Codex changes -> update `AGENTS.md` directly.
 - Shared live state -> update `.codex/CONTEXT.md` through `$codex-checkpoint`, not through refactor-memory.
 
-## 12. Verification
+## 13. Verification
 
 Before the final summary, run or perform:
 
@@ -201,19 +241,21 @@ Before the final summary, run or perform:
 - Search for stale references to deleted memory files, such as `.codex/AGENTS.md`, if those files were removed.
 - Search `AGENTS.md` and `.codex/guidelines/` for JOURNAL auto-load instructions.
 - Confirm every guideline listed in `AGENTS.md` exists.
+- Confirm semantic guideline findings were classified as accurate, guideline-stale, source-debt, open-work, or needs-user-decision.
 
 Do not run `git commit`, `git push`, `git merge`, `git rebase`, or similar history/remote-writing commands yourself.
 
-## 13. Final Summary
+## 14. Final Summary
 
 Output a concise summary covering:
 
 1. Guideline files created or updated.
 2. `AGENTS.md` changes and final line count.
-3. Audit findings from step 8, separated into auto-fixed and needs user decision.
-4. Deprecated memory files removed or retained.
-5. Verification commands/checks run.
-6. Remaining risks or user decisions.
-7. Suggest the user run `git diff` to review every change before committing.
+3. Audit findings from Step 9, separated into auto-fixed and needs user decision.
+4. Semantic drift findings from Step 5, including source-debt items not fixed in memory.
+5. Deprecated memory files removed or retained.
+6. Verification commands/checks run.
+7. Remaining risks or user decisions.
+8. Suggest the user run `git diff` to review every change before committing.
 
 Confirm completion only after every relevant step has been completed or explicitly marked not applicable.

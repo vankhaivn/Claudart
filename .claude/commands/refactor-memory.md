@@ -2,132 +2,255 @@
 description: Auto-refactor .claude/CLAUDE.md, rules, and agents into a coherent Modular Rules System
 ---
 
-Please analyze the existing `.claude/CLAUDE.md` (if any), `.claude/rules/*.md`, and `.claude/agents/*.md` in this repository and refactor everything into a coherent **Modular Rules System**. The goal is a lightweight `.claude/CLAUDE.md` (< 100 lines) acting purely as an index, with all domain knowledge extracted into path-scoped files inside `.claude/rules/`. Agents must also be audited so they stay on-pattern.
+Analyze the existing Claude memory layer in this repository and refactor it into a coherent Claude-native Modular Rules System.
 
-> **Pre-flight check (the user relies on git for rollback)**: confirm `git status` is clean or that the user has committed in-progress work before you begin. Refuse to proceed if the working tree has unrelated uncommitted changes that this refactor could swallow.
+The target shape is:
+
+- a concise `.claude/CLAUDE.md` as the sole Claude memory index and instruction entrypoint;
+- durable domain knowledge in scoped files under `.claude/rules/`;
+- current live state in `.claude/CONTEXT.md`;
+- append-only history in `.claude/JOURNAL.md`;
+- self-contained skills in `.agents/skills/` or `.claude/commands/`;
+- optional read-only reviewer/explorer agents in `.claude/agents/`.
+
+> **Pre-flight check**: confirm `git status --short` is clean or that the user understands there is in-progress work before you begin. Refuse to proceed if unrelated uncommitted changes could be swallowed by the refactor.
 
 Execute the following steps systematically, without losing essential project context.
 
-## 1. Analyze the Project
+## 1. Resolve The Memory Shape
 
-- Determine the main framework, language, and architectural layers based on `.claude/CLAUDE.md` and the project structure.
-- Identify the core logical layers (e.g., Database/Repositories, API/Controllers, UI/Components, Background Jobs).
-- Note linters/formatters/test runners detected — you will delegate styling rules to them rather than encoding into `.claude/CLAUDE.md`.
+- Confirm whether the canonical memory file is root `CLAUDE.md` or `.claude/CLAUDE.md`.
+- If both root `CLAUDE.md` and `.claude/CLAUDE.md` exist, compare them.
+    - If they are identical, remove or ignore the duplicate according to the repository convention.
+    - If they differ, ask which file should win before overwriting either one. Typically `.claude/CLAUDE.md` is canonical for CLAUDART projects; root `CLAUDE.md` is what `/init` generates.
+- Search skills, agents, and rules for references to deleted or deprecated memory files and update them during the refactor.
 
-## 2. Ensure the Rules Directory Exists
+## 2. Analyze The Project
 
-Create `.claude/rules/` if it doesn't already exist.
+- Determine the main framework, language, runtime, and architectural layers from `.claude/CLAUDE.md`, project structure, package manifests, build files, and existing docs.
+- Identify the core logical layers, such as docs/contracts, database/repositories, API/controllers, UI/components, background jobs, runtime/deploy, or AI/model workflows.
+- Note linters, formatters, test runners, and validation commands detected. Delegate style rules to those tools instead of encoding them into `.claude/CLAUDE.md`.
+- For docs-first repositories, identify document layers, source-of-truth boundaries, templates, workflows, and contract directories.
 
-## 3. Extract Domain-Specific Rules from .claude/CLAUDE.md
+## 3. Ensure The Rules Directory Exists
 
-Group detailed coding rules, boundaries, and validation requirements from `.claude/CLAUDE.md` into 2–4 logical domain files inside `.claude/rules/` (e.g., `db-rules.md`, `api-routers.md`, `ui-components.md`).
+Create `.claude/rules/` if it does not already exist.
 
-**Required for each rule file:**
+Use `.claude/rules/*.md` for durable semantic guidance with YAML frontmatter.
 
-- **YAML frontmatter** with `paths:` glob to scope the rule (prevents VSCode YAML lint errors). `paths:` must use YAML flow sequence style (`[...]`), not block-list style. Example:
-  ```yaml
-  ---
-  paths: ["src/models/**/*.py", "src/repositories/**/*.py"]
-  description: One-line summary of what this domain covers.
-  when_to_use: When reading or writing model, repository, migration, or schema files.
-  tags: [database, repositories]
-  ---
-  ```
-- **NO CODE SNIPPETS**. Do NOT copy-paste code blocks. Use file:line references (e.g., `See src/core/db.ts:45 for the connection pattern`) so context never gets stale.
-- **Rule Quality Checklist** — for every rule written, verify:
-  1. **Verifiable**: a reader can check whether it was followed by reading the code. If you can't verify it, rewrite it.
-  2. **Loophole-closed**: if the rule has an obvious bypass, add `NEVER X, even when Y` to name the rationalization.
-  3. **Critical-tagged**: prefix high-priority constraints with `NEVER`, `YOU MUST`, or `IMPORTANT`. Emphasis raises adherence.
+## 4. Extract Domain-Specific Rules
 
-## 4. Refactor .claude/CLAUDE.md
+Group detailed coding rules, boundaries, and validation requirements from `.claude/CLAUDE.md`, deprecated memory files, and repeated workflow decisions into a small set of logical rule files under `.claude/rules/`.
 
-Trim `.claude/CLAUDE.md` so it ONLY contains:
-- Project Overview
-- Core CLI Commands
-- Path Aliases
-- Global Naming Conventions
-- Domain Rules cross-links (step 5)
-- AI Behavior Guidelines reference (step 6)
-- Agent Self-Evolution section (step 8)
+Common examples:
+
+- `architecture.md`
+- `api.md`
+- `db.md`
+- `ui.md`
+- `runtime.md`
+- `testing.md`
+
+Do not create rule files just to create files. A small docs repo may only need one or two rules.
+
+Required for each rule file:
+
+- YAML frontmatter with `paths:`, `description:`, `when_to_use:`, and `tags:`.
+- `paths:` must be a glob or list of globs scoped to the files the rule governs.
+- `paths:` must use YAML flow sequence style, e.g. `paths: ["src/**/*.ts", "test/**/*.ts"]`. Never use block-list style (`paths:` followed by `- item`).
+- `description:` must say what domain the rule controls.
+- `when_to_use:` must say when future agents should consult the rule.
+- `tags:` must be an inline YAML array on one line, e.g. `tags: [architecture, nestjs, boundaries]`. Never use block-list style (`tags:` followed by `- item`) because tag indexing depends on single-line frontmatter.
+- `tags:` must contain 1-5 lowercase kebab-case values that describe the rule domain or scope.
+- No long code snippets. Prefer `file:line` references and behavior-level rules so context does not go stale.
+- No secrets, tokens, private keys, production credentials, or real `.env` values.
+
+Rule Quality Checklist:
+
+1. Verifiable: a reader can check whether the rule was followed by reading the repo.
+2. Loophole-closed: if a rule has an obvious bypass, add `NEVER do X, even when Y seems like a good reason`.
+3. Critical-tagged: prefix high-priority constraints with `NEVER`, `YOU MUST`, `IMPORTANT`, or similar unambiguous language.
+4. Scoped: the rule belongs in the named file and does not duplicate unrelated guidance elsewhere.
+
+## 5. Audit Domain Rule Semantics
+
+Do not stop at frontmatter, link, and glob hygiene. A successful memory refactor must also check whether the domain-specific rule content still reflects the repository's current behavior.
+
+For every non-universal rule under `.claude/rules/`:
+
+1. Read the rule body and identify concrete claims.
+    - Claims include named files, modules, classes, functions, commands, config keys, environment variables, endpoints, schemas, database models, event names, message/queue topics, feature flags, UI routes, document contracts, or operational workflows.
+    - Ignore purely stylistic rules unless they contradict the codebase's current conventions.
+2. Verify each concrete claim against the actual repository.
+    - Use repository-native source files, package manifests, schemas, migrations, generated types, tests, docs/contracts, and config loaders as evidence.
+    - Prefer structured files and source-of-truth contracts over comments or stale prose.
+    - Use `rg` / `rg --files` first; use language/framework tooling only when it materially improves confidence.
+3. Classify each finding:
+    - **accurate**: rule matches source and remains useful.
+    - **rule-stale**: source/contract has intentionally moved on; update the rule.
+    - **source-debt**: rule is still the desired invariant, but source currently violates it; keep the rule and report the code/doc debt instead of weakening it.
+    - **open-work**: a task, issue, TODO, or explicit user decision already tracks the gap; keep or update the rule so future agents see the intended direction and the active gap.
+    - **needs-user-decision**: source and rule disagree and neither clearly wins from local evidence; ask before rewriting either.
+4. Detect overbroad or kitchen-sink rules.
+    - If one rule mixes unrelated domains, propose splitting it into focused files.
+    - Split only when the new files have clear `paths:` scopes and durable ownership. Do not create files just to satisfy symmetry.
+    - Preserve generic cross-cutting rules in broad files; move business/domain invariants into focused files.
+5. Detect near-duplicates and stale detail.
+    - If two rules repeat the same invariant, keep the rule in the most specific owner and replace the other copy with a pointer.
+    - Replace fragile line-number references and long source excerpts with stable symbol/file references where possible.
+    - Remove "future" or "temporary" wording once the feature is implemented, unless it still describes a real future state.
+6. Promote stable live-state decisions.
+    - Read `.claude/CONTEXT.md` for Recent Decisions. If a decision is now durable project behavior, move it into the relevant rule and remove it from CONTEXT through the checkpoint workflow.
+    - If a decision is still temporary, keep it in CONTEXT and do not bury it in rules.
+
+Semantic audit output must list:
+
+- rules updated automatically;
+- stale rules fixed;
+- source-debt items intentionally left as code/doc follow-up;
+- split/merge actions performed;
+- split/merge actions that still need user confirmation.
+
+## 6. Refactor .claude/CLAUDE.md
+
+Trim `.claude/CLAUDE.md` so it stays a concise memory index, not a knowledge dump.
+
+It should contain only:
+
+- project identity and overview;
+- core CLI commands and skill selection;
+- a project map or pointers to primary docs;
+- security and repository-wide constraints;
+- a `## Domain Rules` section linking `.claude/CONTEXT.md` and `.claude/rules/*.md`;
+- a clear rule that `.claude/JOURNAL.md` is not auto-loaded;
+- the `## Agent Self-Evolution & Context Maintenance` section.
+
+Target: keep `.claude/CLAUDE.md` under 100 lines where practical. If it exceeds 100 lines, extract more into `.claude/rules/`, workflows, or project docs. If it exceeds 150 lines, flag it in the final summary.
 
 **CRITICAL**: PURGE all domain-specific logic AND style/formatting rules — delegate styling to standard tools (Prettier, ESLint, Ruff, gofmt). Do not duplicate info already in `package.json` or `README.md`. Less is more.
 
-## 5. Cross-Link the Rules
+## 7. Cross-Link Rules
 
-Under a `## Domain Rules` heading near the bottom of the trimmed `.claude/CLAUDE.md`, add semantic imports for every rule file, plus the live-state CONTEXT file:
+Under a `## Domain Rules` heading in `.claude/CLAUDE.md`, add `@` imports for every rule file plus the live-state context file.
+
+Example:
 
 ```markdown
-See @.claude/CONTEXT.md for the current state of work (updated by /checkpoint).
-See @.claude/rules/architecture.md for global boundaries.
-See @.claude/rules/db-rules.md for database patterns.
+See @.claude/CONTEXT.md for current session state, updated by `/checkpoint`.
+See @.claude/rules/ai-behavior.md for universal AI behavior guidelines.
+See @.claude/rules/architecture.md for architecture boundaries.
 ```
 
-**NEVER add `@.claude/JOURNAL.md`** — JOURNAL is intentionally excluded from session context to save tokens. If you find such an import already in `.claude/CLAUDE.md`, remove it and warn the user in your final summary.
+**NEVER add `@.claude/JOURNAL.md`** as a loaded context reference. JOURNAL is intentionally excluded from session context to save tokens. If you find such an import or auto-load instruction in `.claude/CLAUDE.md` or `.claude/rules/`, remove it and warn the user in the final summary.
 
-## 6. Wire Up AI Behavior Guidelines (file-based, not inlined)
+## 8. Wire Up AI Behavior Guidelines
 
-CLAUDART ships `.claude/rules/ai-behavior.md` as the canonical universal behavior guideline (Karpathy-derived).
+`ai-behavior.md` is the universal behavior guideline for Claude work.
 
-- If `.claude/rules/ai-behavior.md` does NOT exist, create it from the CLAUDART template (see https://github.com/vankhaivn/Claudart) or copy from a fresh CLAUDART checkout.
-- Do NOT inline the guidelines into `.claude/CLAUDE.md`. Instead, add this single line under the `## Domain Rules` heading:
-  ```markdown
-  See @.claude/rules/ai-behavior.md for universal AI behavior guidelines.
-  ```
-- If the user has customized `ai-behavior.md`, leave their content alone — only ensure the `@` import exists.
+- If `.claude/rules/ai-behavior.md` does not exist, create a concise version with complete frontmatter and durable behavior rules.
+- If the user has customized `ai-behavior.md`, leave their content alone and only ensure the reference exists.
+- Do not inline `ai-behavior.md` into `.claude/CLAUDE.md`.
+- Add a single reference under `## Domain Rules`.
 
-## 7. Audit Existing Rules and Agents (keep the whole system on-pattern)
+## 9. Audit Rules, Skills, And Agents
 
-Refactor isn't only about `.claude/CLAUDE.md`. Sweep through `.claude/rules/*.md` and `.claude/agents/*.md` and enforce the same standards.
+Report proposed audit changes in a clear list before applying risky changes. Apply safe fixes such as missing references, stale deleted-file references, frontmatter corrections, missing `@.claude/CONTEXT.md` references, and JOURNAL `@` import removal. Ask before merging or deleting agents, rules, or skills.
 
 For every file in `.claude/rules/`:
-- Verify YAML frontmatter exists with a valid `paths:` glob, `description:`, `when_to_use:`, and `tags:`.
-- Paths must use YAML flow sequence style, e.g. `paths: ["src/**/*.ts", "test/**/*.ts"]`. Never use block-list style (`paths:` followed by `- item`).
-- Tags must be an inline YAML array on one line, e.g. `tags: [architecture, nestjs, boundaries]`. Never use block-list style (`tags:` followed by `- item`) because tag indexing depends on single-line frontmatter.
-- Tags must contain 1-5 lowercase kebab-case values that describe the rule domain or scope.
-- Run a Glob check on each `paths:` entry — if it matches **zero** files, flag the rule as potentially dead and ask the user whether to remove or rescope it.
-- **NO CODE SNIPPETS**: replace any inlined code with `file:line` references.
-- Apply the Rule Quality Checklist (verifiable, loophole-closed, critical-tagged).
-- Use tag overlap as an initial signal for near-duplicates; read bodies only when tags or paths suggest overlap. Merge near-duplicates: if two rules cover ≥80% the same scope, propose a consolidation (do not execute without user confirmation).
+
+- Verify YAML frontmatter exists with valid `paths:`, `description:`, `when_to_use:`, and `tags:`.
+- Flag block-list `paths:`; rules must use flow-style `paths: ["glob-a", "glob-b"]`.
+- Flag block-list `tags:`; rules must use inline `tags: [tag-a, tag-b]` style.
+- Run a glob check on each `paths:` entry. `paths: ["**/*"]` is valid for universal rules.
+- If a glob matches zero files, flag the rule as potentially dead and ask whether to remove or rescope it.
+- Replace long inlined code with `file:line` references.
+- Apply the Rule Quality Checklist.
+- Apply the semantic audit from Step 5 before declaring a rule healthy.
+- Use tag overlap as an initial signal for near-duplicates; read bodies only when tags or paths suggest overlap. Merge near-duplicates only after user confirmation.
+
+For every file in `.agents/skills/*/SKILL.md` and `.claude/commands/*.md`:
+
+- Verify the file starts with YAML frontmatter.
+- Confirm `name:` (for SKILL.md) and `description:` are present.
+- Confirm the skill contains sufficient procedure detail to execute the workflow without referencing external files.
+- Keep skills complete and actionable. A future Claude session should know exactly what to do and which files it may update.
+- Remove stale generated-marker comments or references to deleted memory files.
 
 For every file in `.claude/agents/`:
+
 - Verify YAML frontmatter has `name`, `description` (with `PROACTIVELY` if it should auto-trigger), `tools`, and `model`.
-- Strip stale metadata like hardcoded `Last Updated: <date>` lines.
-- Replace example code blocks with references to a real file in the project, OR remove them.
-- Replace hardcoded `grep`/shell pattern lists with guidance ("scan the codebase for hardcoded secrets using the project's security tooling").
-- Confirm the agent's responsibilities don't overlap >50% with another agent — if they do, propose a merge.
+- Keep review/explorer agents read-only unless the agent is explicitly a worker.
+- Replace hardcoded grep pattern lists with guidance to scan the codebase and use project tooling when present.
+- Confirm the agent's responsibilities do not overlap more than 50% with another agent. If they do, propose a merge.
+
+## 10. Maintain CONTEXT And JOURNAL
 
 For `.claude/CONTEXT.md`:
-- Confirm it exists. If not, create it from the CLAUDART template (declarative state file maintained by `/checkpoint`).
-- Verify line count ≤ 150. If exceeded, flag for user review — propose either trimming or graduating long-lived items into `.claude/rules/`.
-- Confirm `@.claude/CONTEXT.md` is imported in `.claude/CLAUDE.md` (Domain Rules section). If missing, add it.
+
+- Confirm it exists. If not, create a concise template.
+- Verify line count is at most 150. If exceeded, flag for user review and propose trimming or graduating long-lived items into `.claude/rules/`.
+- Confirm `@.claude/CONTEXT.md` is imported in `.claude/CLAUDE.md`. If missing, add it.
+- Ensure it describes current state only.
 
 For `.claude/JOURNAL.md`:
-- Confirm it exists. If not, create it from the CLAUDART template.
-- **CRITICAL**: search `.claude/CLAUDE.md` and every file in `.claude/rules/` for any `@.claude/JOURNAL.md` reference. If found, REMOVE it — JOURNAL must never be loaded into session context. Warn the user that this was fixed.
-- Do NOT prune or rewrite JOURNAL entries. The file is append-only by contract.
+
+- Confirm it exists. If not, create a concise append-only template.
+- Search `.claude/CLAUDE.md` and `.claude/rules/` for instructions that auto-load `.claude/JOURNAL.md`. If found, remove them and warn the user.
+- Do not full-read JOURNAL by default. Use `tail` and targeted `rg` searches for pattern analysis.
+- Do not prune or rewrite JOURNAL entries. The file is append-only by contract.
 
 For `.claude/tasks/`:
+
 - If the folder does not exist but `/plan` is documented in `.claude/commands/`, create it with a seed `index.md` and a `done/.gitkeep`.
 - If `.claude/tasks/done/.gitkeep` exists AND `.claude/tasks/done/` contains at least one real `.md` file, delete the `.gitkeep` — once real archives live there, the placeholder is redundant. Report what was removed.
-- Do NOT modify or move any task `.md` file content. Task files are working documents owned by `/plan` and `/checkpoint`; refactor-memory only touches the `.gitkeep` placeholder and (if missing) the seed `index.md`.
+- Do not modify or move any task `.md` file content. Task files are working documents owned by `/plan` and `/checkpoint`; refactor-memory only touches the `.gitkeep` placeholder and (if missing) the seed `index.md`.
 
-Report all proposed audit changes in a clear bulleted list before applying them. Apply the safe ones (frontmatter fixes, snippet removal, missing `@.claude/CONTEXT.md` import, JOURNAL @import removal); ask the user before merging or deleting agents/rules.
+## 11. Base Template Notes
 
-## 8. Append Agent Self-Evolution Section
+If this repository is a base template whose `.claude/` and `.agents/` directories are installed into other projects:
 
-At the very end of `.claude/CLAUDE.md`, APPEND `## Agent Self-Evolution & Context Maintenance` (skip if it already exists). Include these rules verbatim:
+- Do not add generated-marker comments to base template files.
+- Keep template language generic and avoid project-specific names unless the template is intentionally branded.
+- If an installer copies `.claude/CLAUDE.md` to a downstream project, document that relationship clearly and keep both files synchronized.
+- Do not assume a downstream project has the same languages, frameworks, docs, or tests as the template repository.
+
+## 12. Append Agent Self-Evolution Section
+
+At the end of `.claude/CLAUDE.md`, ensure `## Agent Self-Evolution & Context Maintenance` exists.
+
+Include these rules:
 
 - "Do not assume a human will document your code patterns. If you build it, document it."
 - Existing rules change → update the relevant file in `.claude/rules/`.
 - New domains/layers → CREATE a new rule file in `.claude/rules/` (with flow-style `paths: [...]`, `description:`, `when_to_use:`, and inline `tags: [...]` frontmatter) AND APPEND its `@` import to `.claude/CLAUDE.md`'s Domain Rules section.
 - Global changes → update `.claude/CLAUDE.md` directly.
+- Shared live state → update `.claude/CONTEXT.md` through `/checkpoint`, not through refactor-memory.
 
-## 9. Final Summary
+## 13. Verification
+
+Before the final summary, run or perform:
+
+- `git diff --stat`
+- `git status --short`
+- `wc -l .claude/CLAUDE.md .claude/CONTEXT.md`
+- Search for stale references to deleted memory files.
+- Search `.claude/CLAUDE.md` and `.claude/rules/` for JOURNAL auto-load instructions.
+- Confirm every rule listed in `.claude/CLAUDE.md` exists on disk.
+- Confirm semantic rule findings were classified as accurate, rule-stale, source-debt, open-work, or needs-user-decision.
+
+Do not run `git commit`, `git push`, `git merge`, `git rebase`, or similar history/remote-writing commands yourself.
+
+## 14. Final Summary
 
 Output a concise summary covering:
-1. Domain rule files created/updated in step 3.
-2. Audit findings from step 7 (what was auto-fixed vs. what needs user decision).
-3. Final `.claude/CLAUDE.md` line count (should be < 100).
-4. Suggest the user run `git diff` to review every change before committing.
 
-Confirm only after every step has been completed.
+1. Rule files created or updated.
+2. `.claude/CLAUDE.md` changes and final line count.
+3. Audit findings from Step 9, separated into auto-fixed and needs user decision.
+4. Semantic drift findings from Step 5, including source-debt items not fixed in memory.
+5. Deprecated memory files removed or retained.
+6. Verification commands/checks run.
+7. Remaining risks or user decisions.
+8. Suggest the user run `git diff` to review every change before committing.
+
+Confirm completion only after every relevant step has been completed or explicitly marked not applicable.
