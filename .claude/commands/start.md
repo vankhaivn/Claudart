@@ -45,7 +45,7 @@ Pick the most recently updated one. The exact prompt depends on its status:
 - **`blocked`**: say:
   > "Task `<slug>` is blocked (updated <date>). Has the blocker cleared? If yes, I'll flip to in-progress and resume. If no, tell me what to work on instead."
 
-Do NOT auto-read the task body, auto-resume, or auto-confirm completion. Wait for explicit user direction. When the user confirms a resume, read the full task file and follow the Resumption protocol in `.claude/rules/task-management.md` (verify completed steps still hold against current code, surface drift in Surprises section).
+Do NOT auto-read the task body, auto-resume, or auto-confirm completion. Wait for explicit user direction. When the user confirms a resume, **warm the session**: read the full task file, then read the files in its `Related Code` section (cap ~5 most relevant) so you resume against real code, not the plan's description of it. Then follow the Resumption protocol in `.claude/rules/task-management.md` (verify completed steps still hold against current code, surface drift in Surprises section).
 
 ### Case B — No active task, but `## Next Session Should Start By` is set in CONTEXT.md
 
@@ -62,6 +62,7 @@ Ask plainly:
 ## Notes
 
 - Keep the report short and actionable.
+- **Warm resume for ad-hoc work:** when the user picks up a `(no task)` micro-handoff from `## In Progress` (Case B), read the files on its `Files:` line (cap ~5) before acting — the same warm-up a task resume gets. This is the `/compact`-style "re-read recent files" applied to un-planned work.
 - If `.claude/CONTEXT.md` items look stale (e.g., dated `<!-- since: -->` more than 30 days old), mention that `/checkpoint` should refresh them after this session.
 - If a task in the Active list has `updated:` more than 7 days old AND `status: in-progress`, flag it as possibly stalled — suggest either resuming or flipping to `blocked`/`cancelled` via `/checkpoint`.
 - If a task has `status: awaiting-review` AND `updated:` more than 3 days old, flag it as **awaiting-review stuck** — the user likely forgot to confirm. Surface it prominently; the task is not abandoned, it just needs a sign-off.

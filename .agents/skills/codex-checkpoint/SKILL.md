@@ -18,7 +18,7 @@ The output is not a log of what happened. It is a declarative snapshot of what i
 5. Skip JOURNAL entirely when there is nothing meaningful to record. Empty entries pollute the file.
 6. Task files keep their own bodies; CONTEXT.md never absorbs a task body. But CONTEXT.md should still reference the currently-focused task by slug + path in `## In Progress` so `$codex-start` sees both task and non-task work in one place. Two valid CONTEXT entries:
    - Task reference: `- Working task \`add-jwt-auth\` (see .codex/tasks/2026-05-13-001-add-jwt-auth.md) <!-- since: YYYY-MM-DD -->`
-   - Ad-hoc non-task change the user requested without creating a `$codex-plan` (a quick tweak, a transient pivot): `- Tweaking rate-limit constant in src/api/limits.ts:42 (no task) <!-- since: YYYY-MM-DD -->`
+   - Ad-hoc non-task change the user requested without creating a `$codex-plan` (a quick tweak, a transient pivot): CONTEXT is its **only** home, so it gets a **micro-handoff** — intent in the user's words + files of interest + next step (see Step 4) — not just a one-line pointer.
    Checkpoint *syncs* `tasks/index.md` AND ensures CONTEXT references the focus task, but never copies a task's Steps/Decisions/Surprises into CONTEXT.
 
 ## Procedure
@@ -47,12 +47,12 @@ Pure tactical noise is dropped silently.
 Add to `.codex/CONTEXT.md` only what is true now:
 
 - Work that is mid-stream, with `file:line` where useful. If the work is being tracked in a task file, reference it by slug + path (e.g., `Working task \`add-jwt-auth\` (see .codex/tasks/2026-05-13-001-add-jwt-auth.md)`). Do not duplicate the task body here.
-- Ad-hoc changes the user requested *without* creating a `$codex-plan` (quick fixes, transient tweaks, mid-flight pivots). These have no task file, so CONTEXT is their only home. Mark them with `(no task)` so they are obviously distinct from task-tracked work.
+- Ad-hoc changes the user requested *without* creating a `$codex-plan` (quick fixes, transient tweaks, mid-flight pivots). These have no task file, so CONTEXT **is** their handoff summary, not just a note. Give each *active* one a **micro-handoff** (see Step 4 skeleton): the user's intent in their own words, the files of interest with `file:line`, and the next concrete step. Mark them `(no task)`.
 - Decisions just made that are not yet codified in guidelines.
 - Open questions or blockers currently unresolved.
 - The single most useful thing the next session should do first.
 
-Be terse. One bullet should be one short sentence.
+Be terse: task references, decisions, and blockers are one short sentence each. Only *active* `(no task)` work earns the 3-line micro-handoff, and only while it is live — the moment it ships or is abandoned, drop it this same checkpoint (JOURNAL it if it was a real decision/completion). That triage is what keeps CONTEXT under the ceiling.
 
 For every new bullet, append `<!-- since: YYYY-MM-DD -->` using today's date. If you keep an existing bullet, preserve its original `since:` date rather than resetting it. Codex is not documented to strip HTML comments, so keep these comments short; they exist so `$codex-doctor` can flag old decisions that should graduate into guidelines.
 
@@ -64,7 +64,13 @@ Use this skeleton. Omit any section that has nothing to say.
 <!-- .codex/CONTEXT.md - current state of work. Updated by checkpoint. Declarative, not a log. -->
 
 ## In Progress
-- [What is mid-stream right now, with file:line] <!-- since: YYYY-MM-DD -->
+<!-- planned work → one-line pointer; the task file holds the depth -->
+- Working task `<slug>` (see .codex/tasks/<file>) <!-- since: YYYY-MM-DD -->
+<!-- un-planned work → CONTEXT is the only handoff, so each live thread gets a micro-handoff -->
+- <short label> (no task) <!-- since: YYYY-MM-DD -->
+  > "<the user's intent, quoted in their own words>"
+  - Files: path/to/file.ext:LINE — why it matters
+  - Next: <one concrete step>
 
 ## Open Questions / Blockers
 - [Unresolved things blocking progress] <!-- since: YYYY-MM-DD -->
