@@ -136,7 +136,7 @@ Memory Hints from previous sessions is the lifeline. Populate it generously when
 | `/learn`             | `$codex-learn`             | Retrospective — promotes recurring lessons into rules/guidelines with loophole-closing language     |
 | `/doctor`            | `$codex-doctor`            | Read-only health check: structure, frontmatter, token hygiene, wiring, task hygiene                 |
 
-Review agents ship with both layers: `clean-code-reviewer` (scope + Clean Code discipline) and `security-auditor` (read-only OWASP audit). Claude uses kebab-case Markdown agent names; Codex uses snake_case TOML `name` values.
+Review agents ship with both layers: `clean-code-reviewer` (scope + Clean Code discipline) and `security-auditor` (OWASP audit — read-only on your code, but writes its findings to a `security-audit-<date>.md` report at the project root and prints only the summary to chat). Claude uses kebab-case Markdown agent names; Codex uses snake_case TOML `name` values.
 
 ## Directory layout
 
