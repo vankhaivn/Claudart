@@ -38,6 +38,12 @@ curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh 
 curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --force
 ```
 
+### Or install with your agent (AI-native)
+
+`install.sh` does a fresh copy — great for a clean project, but it will clobber an existing setup and can't tell you what changed on an upgrade. If you **already run your own agents/workflow**, or you're **upgrading from an older CLAUDART**, paste this into your Claude Code or Codex session instead. Your agent reads the repo, diffs it against your project, and merges — asking before it changes anything you've customized:
+
+> Read https://raw.githubusercontent.com/vankhaivn/Claudart/main/INTEGRATE.md and follow it to integrate CLAUDART into this project. Ask me before touching anything I've customized.
+
 ## What it solves
 
 | Pain when working with coding agents                                 | CLAUDART's answer                                                                                                                                           |
