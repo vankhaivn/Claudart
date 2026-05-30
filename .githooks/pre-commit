@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+files="$(mktemp)"
+trap 'rm -f "$files"' EXIT
+
+git diff --cached --name-only -z --diff-filter=ACMR -- '*.md' > "$files"
+
+if [[ ! -s "$files" ]]; then
+  exit 0
+fi
+
+dirty=0
+while IFS= read -r -d '' path; do
+  if ! git diff --quiet -- "$path"; then
+    echo "pre-commit: staged Markdown has unstaged changes: $path" >&2
+    dirty=1
+  fi
+done < "$files"
+
+if [[ "$dirty" -ne 0 ]]; then
+  echo "pre-commit: stage or stash those Markdown changes before committing." >&2
+  exit 1
+fi
+
+if [[ -x "./node_modules/.bin/prettier" ]]; then
+  prettier_cmd="./node_modules/.bin/prettier"
+elif command -v prettier >/dev/null 2>&1; then
+  prettier_cmd="$(command -v prettier)"
+else
+  echo "prettier not found. Run npm install before committing." >&2
+  exit 1
+fi
+
+xargs -0 "$prettier_cmd" --write --ignore-unknown -- < "$files"
+xargs -0 git add -- < "$files"

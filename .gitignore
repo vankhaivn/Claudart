@@ -19,5 +19,8 @@ Thumbs.db
 tmp/
 temp/
 
+# Node dependencies
+node_modules/
+
 # Claude Code per-user state
 .claude/settings.local.json

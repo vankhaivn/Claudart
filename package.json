@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "scripts": {
+    "format:md": "prettier --write \"**/*.md\"",
+    "hooks:install": "git config core.hooksPath .githooks"
+  },
+  "devDependencies": {
+    "prettier": "3.8.3"
+  }
+}
