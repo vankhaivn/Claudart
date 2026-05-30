@@ -217,7 +217,7 @@ For `.claude/tasks/`:
 For `.claude/knowledge/`:
 
 - If the folder does not exist, create it with a seed `INDEX.md` (header comment + empty `## Knowledge` section).
-- **Bootstrap an empty tier (opt-in, ask first).** If `knowledge/` is empty — the common case right after adopting the tier — offer to seed it; **never auto-run**. Source _only_ from existing durable facts you can ground: the project `README`, `docs/`, architecture/contract files, and descriptive content removed from `.claude/CLAUDE.md` in Steps 4/6 (build on your Step 2 analysis). Propose a **small** set of DRAFT entries (domain, architecture, key integrations, glossary — a handful, not an exhaustive dump); **every entry MUST carry a `sources:` anchor** to the real file it summarizes — no source, no entry (that would be speculation). Write only entries the user approves; never bulk-generate, and never invent facts by reading raw implementation.
+- **Bootstrap an empty tier — discover and write grounded drafts.** If `knowledge/` is empty (the common case right after adopting the tier), do NOT skip it: running `/refactor-memory` IS the trigger to seed it. Proactively (a) discover durable facts you can ground from the project `README`, `docs/`, architecture/contract files, `Makefile`/`package.json`, and descriptive content pulled out of `.claude/CLAUDE.md` in Steps 4/6 (build on your Step 2 analysis); (b) **write** a **small** set of draft entries (domain, architecture, key integrations, glossary — a handful, not an exhaustive dump) into `knowledge/` and register them in `INDEX.md`. **Every entry MUST carry a `sources:` anchor** to the real file it summarizes — no source, no entry. This is an auto-write like the CONTEXT/JOURNAL writes: the **git diff is the review gate** — report exactly what you created so the user can revert anything they dislike. NEVER invent facts by reading raw source code (summarize existing docs/contracts only); if there is genuinely nothing groundable, say so and skip.
 - **Reconcile the index**: every `.md` file (excluding `INDEX.md`) must have an `INDEX.md` entry, and every entry must point to a real file. Add missing entries; flag dead entries.
 - Audit each knowledge file: frontmatter present (`name`/`description`/`type`/`updated`); `sources:` relative paths still exist (dead → report); `updated:` older than 90 days → flag for review.
 - Enforce the boundary: knowledge is **descriptive**. If a file carries prescriptive rules (`MUST`/`NEVER`), propose moving that content to `.claude/rules/`. The boundary is bidirectional — Step 5 handles the reverse (a purely descriptive rule that belongs here).
@@ -268,7 +268,7 @@ Do not run `git commit`, `git push`, `git merge`, `git rebase`, or similar histo
 
 Output a concise summary covering:
 
-1. Rule files and `.claude/knowledge/` entries created, updated, or migrated between tiers (including any opt-in bootstrap).
+1. Rule files and `.claude/knowledge/` entries created, updated, or migrated between tiers (including any bootstrap of an empty tier).
 2. `.claude/CLAUDE.md` changes and final line count.
 3. Audit findings from Step 9, separated into auto-fixed and needs user decision.
 4. Semantic drift findings from Step 5, including source-debt items not fixed in memory.
