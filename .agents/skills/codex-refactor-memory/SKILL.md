@@ -48,6 +48,8 @@ Use `.codex/guidelines/*.md` for durable semantic guidance. Do not use `.codex/r
 
 Group detailed coding rules, boundaries, and validation requirements from `AGENTS.md`, deprecated memory files, and repeated workflow decisions into a small set of logical guideline files under `.codex/guidelines/`.
 
+**Route by type first.** Split the candidate content: **prescriptive** material (an enforceable `MUST`/`NEVER`/should-avoid invariant — how to behave) becomes a guideline; **descriptive** material (how a subsystem works, an integration detail, a domain term, a pointer to a doc — a fact) goes to `.codex/knowledge/` instead (Step 10), never a guideline. Do not file a fact as a guideline and rely on Step 5 to re-route it later.
+
 Common examples:
 
 - `architecture.md`
@@ -239,6 +241,7 @@ For Codex delegation state:
 For `.codex/knowledge/`:
 
 - If the folder does not exist, create it with a seed `INDEX.md` (header comment + empty `## Knowledge` section).
+- Bootstrap an empty tier (opt-in, ask first). If `.codex/knowledge/` is empty — the common case right after adopting the tier — offer to seed it; never auto-run. Source only from existing durable facts you can ground: the project `README`, `docs/`, architecture/contract files, and descriptive content removed from `AGENTS.md` in Steps 4/6 (build on your Step 2 analysis). Propose a small set of DRAFT entries (domain, architecture, key integrations, glossary — a handful, not an exhaustive dump); every entry MUST carry a `sources:` anchor to the real file it summarizes — no source, no entry (that would be speculation). Write only entries the user approves; never bulk-generate, and never invent facts by reading raw implementation.
 - Reconcile the index: every `.md` file (excluding `INDEX.md`) must have an `INDEX.md` entry, and every entry must point to a real file. Add missing entries; flag dead entries.
 - Audit each knowledge file: frontmatter present (`name`/`description`/`type`/`updated`); `sources:` relative paths still exist (dead -> report); `updated:` older than 90 days -> flag for review.
 - Enforce the boundary: knowledge is descriptive. If a file carries prescriptive rules (`MUST`/`NEVER`), propose moving that content to `.codex/guidelines/`. The boundary is bidirectional — Step 5 handles the reverse (a purely descriptive guideline that belongs here).
@@ -280,6 +283,7 @@ Before the final summary, run or perform:
 - Search `AGENTS.md` and `.codex/guidelines/` for JOURNAL auto-load instructions.
 - Confirm every guideline listed in `AGENTS.md` exists.
 - Confirm `.codex/knowledge/INDEX.md` exists, lists every topic file, and is referenced by a plain pointer in `AGENTS.md`.
+- Confirm every knowledge entry you created this run (bootstrap or migration) carries a `sources:` anchor; drop or flag any that does not.
 - Confirm `.codex/guidelines/agent-delegation.md` is referenced when `.codex/agents/` exists.
 - Confirm `.codex/config.toml` keeps `[agents] max_depth = 1` unless recursive delegation is explicitly documented.
 - Confirm semantic guideline findings were classified as accurate, guideline-stale, source-debt, open-work, or needs-user-decision.
@@ -290,7 +294,7 @@ Do not run `git commit`, `git push`, `git merge`, `git rebase`, or similar histo
 
 Output a concise summary covering:
 
-1. Guideline files created or updated.
+1. Guideline files and `.codex/knowledge/` entries created, updated, or migrated between tiers (including any opt-in bootstrap).
 2. `AGENTS.md` changes and final line count.
 3. Audit findings from Step 9, separated into auto-fixed and needs user decision.
 4. Semantic drift findings from Step 5, including source-debt items not fixed in memory.

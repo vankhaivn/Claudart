@@ -96,6 +96,7 @@ Skip this section if `.claude/tasks/` does not exist.
 Skip this section if `.claude/knowledge/` does not exist.
 
 - Confirm `.claude/knowledge/INDEX.md` exists. If missing, flag as **Medium** — `/refactor-memory` should regenerate it.
+- **Empty tier** (informational — not a Warning): if `INDEX.md` lists no entries and no topic files exist, note that the tier is wired but unused. For a fresh adopter this is normal — do NOT flag it as a problem. If the project plausibly has durable facts worth capturing, surface a gentle nudge (under Passing or Recommended Next Step): `/refactor-memory` can bootstrap it (opt-in, from existing docs), and `/checkpoint` fills it over time.
 - **INDEX ↔ files match** (both directions):
   - Every `.md` file under `.claude/knowledge/` (excluding `INDEX.md`) must be listed in `INDEX.md`. Unlisted files → flag as **Medium** (invisible to `/start`, defeats the tier).
   - Every entry in `INDEX.md` must point to a file that exists on disk. Dead entries → flag as **Low**.

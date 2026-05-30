@@ -42,6 +42,8 @@ Use `.claude/rules/*.md` for durable semantic guidance with YAML frontmatter.
 
 Group detailed coding rules, boundaries, and validation requirements from `.claude/CLAUDE.md`, deprecated memory files, and repeated workflow decisions into a small set of logical rule files under `.claude/rules/`.
 
+**Route by type first.** Split the candidate content: **prescriptive** material (an enforceable `MUST`/`NEVER`/should-avoid invariant — how to behave) becomes a rule; **descriptive** material (how a subsystem works, an integration detail, a domain term, a pointer to a doc — a fact) goes to `.claude/knowledge/` instead (Step 10), never a rule. Do not file a fact as a rule and rely on Step 5 to re-route it later.
+
 Common examples:
 
 - `architecture.md`
@@ -132,7 +134,7 @@ It should contain only:
 
 Target: keep `.claude/CLAUDE.md` under 100 lines where practical. If it exceeds 100 lines, extract more into `.claude/rules/`, workflows, or project docs. If it exceeds 150 lines, flag it in the final summary.
 
-**CRITICAL**: PURGE all domain-specific logic AND style/formatting rules — delegate styling to standard tools (Prettier, ESLint, Ruff, gofmt). Do not duplicate info already in `package.json` or `README.md`. Less is more.
+**CRITICAL**: PURGE all domain-specific logic AND style/formatting rules — delegate styling to standard tools (Prettier, ESLint, Ruff, gofmt). Do not duplicate info already in `package.json` or `README.md`. Less is more. Descriptive project facts you pull out of `.claude/CLAUDE.md` belong in `.claude/knowledge/` (Step 10), not `.claude/rules/`.
 
 ## 7. Cross-Link Rules
 
@@ -215,6 +217,7 @@ For `.claude/tasks/`:
 For `.claude/knowledge/`:
 
 - If the folder does not exist, create it with a seed `INDEX.md` (header comment + empty `## Knowledge` section).
+- **Bootstrap an empty tier (opt-in, ask first).** If `knowledge/` is empty — the common case right after adopting the tier — offer to seed it; **never auto-run**. Source *only* from existing durable facts you can ground: the project `README`, `docs/`, architecture/contract files, and descriptive content removed from `.claude/CLAUDE.md` in Steps 4/6 (build on your Step 2 analysis). Propose a **small** set of DRAFT entries (domain, architecture, key integrations, glossary — a handful, not an exhaustive dump); **every entry MUST carry a `sources:` anchor** to the real file it summarizes — no source, no entry (that would be speculation). Write only entries the user approves; never bulk-generate, and never invent facts by reading raw implementation.
 - **Reconcile the index**: every `.md` file (excluding `INDEX.md`) must have an `INDEX.md` entry, and every entry must point to a real file. Add missing entries; flag dead entries.
 - Audit each knowledge file: frontmatter present (`name`/`description`/`type`/`updated`); `sources:` relative paths still exist (dead → report); `updated:` older than 90 days → flag for review.
 - Enforce the boundary: knowledge is **descriptive**. If a file carries prescriptive rules (`MUST`/`NEVER`), propose moving that content to `.claude/rules/`. The boundary is bidirectional — Step 5 handles the reverse (a purely descriptive rule that belongs here).
@@ -256,6 +259,7 @@ Before the final summary, run or perform:
 - Search `.claude/CLAUDE.md` and `.claude/rules/` for JOURNAL auto-load instructions.
 - Confirm every rule listed in `.claude/CLAUDE.md` exists on disk.
 - Confirm `.claude/knowledge/INDEX.md` exists, lists every topic file, and is referenced by a plain (non-`@`) pointer in `.claude/CLAUDE.md`.
+- Confirm every knowledge entry you created this run (bootstrap or migration) carries a `sources:` anchor; drop or flag any that does not.
 - Confirm semantic rule findings were classified as accurate, rule-stale, source-debt, open-work, or needs-user-decision.
 
 Do not run `git commit`, `git push`, `git merge`, `git rebase`, or similar history/remote-writing commands yourself.
@@ -264,7 +268,7 @@ Do not run `git commit`, `git push`, `git merge`, `git rebase`, or similar histo
 
 Output a concise summary covering:
 
-1. Rule files created or updated.
+1. Rule files and `.claude/knowledge/` entries created, updated, or migrated between tiers (including any opt-in bootstrap).
 2. `.claude/CLAUDE.md` changes and final line count.
 3. Audit findings from Step 9, separated into auto-fixed and needs user decision.
 4. Semantic drift findings from Step 5, including source-debt items not fixed in memory.
