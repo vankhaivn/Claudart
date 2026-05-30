@@ -12,6 +12,7 @@ Please run a health check on this repository's CLAUDART installation. Your job i
 - `.claude/commands/` exists and contains at least: `start.md`, `learn.md`, `refactor-memory.md`, `doctor.md`, `checkpoint.md`, `plan.md`
 - `.claude/agents/` exists (may be empty if user removed shipped agents)
 - `.claude/rules/` exists (may be empty before the user runs `/refactor-memory`)
+- `.claude/knowledge/` exists with `INDEX.md` (warn if missing — `/refactor-memory` will recreate it)
 - `.claude/tasks/` exists with `index.md` and `done/` subdirectory (warn if missing — `/plan` will create on first use)
 - `.claude/CLAUDE.md` exists
 - `.claude/CONTEXT.md` exists (warn if missing — the user may not have run `/checkpoint` yet)
@@ -90,6 +91,21 @@ Skip this section if `.claude/tasks/` does not exist.
 - Within `## Context & Orientation`, flag if `### Memory Hints` is missing or empty — that section is the cross-session lifeline.
 - **Redundant `.gitkeep`**: if `.claude/tasks/done/.gitkeep` exists AND `.claude/tasks/done/` contains at least one real `.md` file, flag as **Low** severity. The `.gitkeep` exists only to track an empty folder; once real archived tasks live there, it is redundant. Mention that `/refactor-memory` will clean it up, or the user can `rm` it manually.
 
+### 5d. Knowledge Tier Wiring (`.claude/knowledge/`)
+
+Skip this section if `.claude/knowledge/` does not exist.
+
+- Confirm `.claude/knowledge/INDEX.md` exists. If missing, flag as **Medium** — `/refactor-memory` should regenerate it.
+- **INDEX ↔ files match** (both directions):
+  - Every `.md` file under `.claude/knowledge/` (excluding `INDEX.md`) must be listed in `INDEX.md`. Unlisted files → flag as **Medium** (invisible to `/start`, defeats the tier).
+  - Every entry in `INDEX.md` must point to a file that exists on disk. Dead entries → flag as **Low**.
+- For every knowledge file (excluding `INDEX.md`), check frontmatter: required `name`, `description`, `type`, `updated`; `type` ∈ {domain, architecture, integration, glossary, reference, agent-context}. Missing/invalid → flag as **Low**.
+- **Dead local references**: for each `sources:` entry that is a relative path, confirm the target exists on disk; missing → flag as **Low** (stale pointer). Do NOT fetch URLs — only list `sources:` that are neither a valid `http(s)` URL nor an existing path as malformed.
+- **Staleness**: flag any knowledge file whose `updated:` is more than 90 days old, or whose stated `verify:` condition no longer holds, as a **Low** review candidate.
+- **Descriptive-only separation**: knowledge is facts, not behavior. If a knowledge file contains prescriptive language (`MUST`, `NEVER`, `YOU MUST`, `always do`/`never do`), flag as **Medium** — that content belongs in `.claude/rules/`.
+- **INDEX stays a map**: `INDEX.md` should be one line per entry. If it grows prose paragraphs or deep sections, flag as **Low** (knowledge belongs in topic files, not the index).
+- **Not auto-loaded**: run `grep -n '@.claude/knowledge/' .claude/CLAUDE.md`. A plain (non-`@`) pointer line is fine; an `@`-import of `INDEX.md` or any detail file → flag as **Medium** (knowledge is surfaced by `/start`, not force-loaded every turn).
+
 ### 6. Anti-Patterns Inside Rules and Agents
 
 - **Inlined code blocks**: any triple-backtick code block longer than ~5 lines inside a rule or agent file is a likely violation of the "NO CODE SNIPPETS" principle. Report file + line.
@@ -134,6 +150,6 @@ Skip this section if `.claude/tasks/` does not exist.
 [Single actionable suggestion: e.g., "Run /refactor-memory to extract domains and create missing ai-behavior import."]
 ```
 
-If everything passes, output a one-line summary: `✅ CLAUDART installation healthy. <n> rules, <n> agents, <n> commands.`
+If everything passes, output a one-line summary: `✅ CLAUDART installation healthy. <n> rules, <n> knowledge entries, <n> agents, <n> commands.`
 
 **Reminder**: this command is read-only. Never modify files.

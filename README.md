@@ -14,7 +14,7 @@
 
 > **The problem.** Working with AI coding agents leaks state in every direction: every session starts blind, plans die in chat, the same decisions are re-discovered every week, and `CLAUDE.md` / `AGENTS.md` accumulates until it's a token sink that nobody trusts.
 
-CLAUDART is a small set of slash commands and a three-tier memory model that turns ad-hoc agent use into a reproducible workflow. Everything is plain markdown under `.claude/` and `.codex/` — versioned in git, reviewable in PRs, readable offline. No vector DB. No daemon. No cloud account.
+CLAUDART is a small set of slash commands and a layered markdown memory model that turns ad-hoc agent use into a reproducible workflow. Everything is plain markdown under `.claude/` and `.codex/` — versioned in git, reviewable in PRs, readable offline. No vector DB. No daemon. No cloud account.
 
 ## Install
 
@@ -45,6 +45,7 @@ curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh 
 | Every session starts blind                                      | `/start` reads `CONTEXT.md` + active tasks + last 3 commits — instant orientation                           |
 | Plans die when the session closes                               | `/plan <task>` writes a persistent doc in `tasks/` that survives any pause                                  |
 | Same decisions re-discovered every week                         | `/learn` graduates recurring patterns into durable `rules/` files that auto-load on relevant paths          |
+| Durable project facts have nowhere to live (not behavior, not state) | `knowledge/` holds descriptive facts — domain, architecture, glossary, pointers to external docs; `/start` surfaces the index so they survive every session |
 | `CLAUDE.md` / `AGENTS.md` bloats and burns tokens               | `/refactor-memory` extracts knowledge into scoped rules;                                                    |
 | Codex subagents get used inconsistently or too broadly          | `agent-delegation.md` makes parallel Codex work explicit, bounded, and parent-reviewed                      |
 | Agents drift off-scope; nobody catches it                       | `clean-code-reviewer` + `security-auditor` agents run on explicit review/audit or authorized delegation      |
@@ -52,14 +53,14 @@ curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh 
 | Rough idea, no project skeleton yet                             | `/project-discovery` interviews you into structured project docs before any code                            |
 | Other memory frameworks need vector DBs, Docker, cloud accounts | Pure markdown. Works offline. PR-reviewable.                                                                |
 
-## The three-tier memory model
+## The memory model
 
 ```text
-CONTEXT.md       →     JOURNAL.md         →     rules/ or guidelines/
-("right now")          ("what happened")         ("always true")
+CONTEXT.md       JOURNAL.md          rules/ · guidelines/     knowledge/
+("right now")    ("what happened")   ("how to behave")        ("what the project is")
 ```
 
-`/checkpoint` rebuilds `CONTEXT.md` declaratively (hard 150-line ceiling) and graduates retired items to `JOURNAL.md`. `/learn` promotes recurring patterns from JOURNAL into path-scoped rule files. Only `CONTEXT.md` and rule files are auto-loaded — the journal is audit history, kept out of the working context to save tokens.
+`/checkpoint` rebuilds `CONTEXT.md` declaratively (hard 150-line ceiling), graduates retired items to `JOURNAL.md`, and writes durable **facts** (domain, architecture, external-doc pointers) into `knowledge/` topic files. `/learn` promotes recurring **behavior** into path-scoped rule files. Only `CONTEXT.md` and rule files are auto-loaded; `/start` surfaces the `knowledge/INDEX.md` map and reads detail on demand. The journal is audit history, kept out of the working context to save tokens.
 
 ## Quick start
 

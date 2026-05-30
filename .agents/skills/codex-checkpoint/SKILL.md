@@ -1,6 +1,6 @@
 ---
 name: codex-checkpoint
-description: Update Codex current state by rewriting .codex/CONTEXT.md, syncing .codex/tasks/index.md with task file states, and appending meaningful retired items to .codex/JOURNAL.md.
+description: Update Codex current state by rewriting .codex/CONTEXT.md, syncing .codex/tasks/index.md with task file states, and appending meaningful retired items to .codex/JOURNAL.md. Graduate durable project facts to .codex/knowledge/.
 ---
 
 # CodexCheckpoint
@@ -40,6 +40,7 @@ For each item currently in `.codex/CONTEXT.md`, decide one of:
 | Done / resolved / merged | Drop it from `.codex/CONTEXT.md`. Candidate for JOURNAL if it was a real decision, completion, or pivot. |
 | Superseded by newer state | Drop the old item and write the new current state. |
 | Broadly relevant to all future work | Propose moving it into `.codex/guidelines/` via `$codex-learn`, then drop it from CONTEXT. |
+| A durable project *fact* (domain, architecture, integration, glossary, external-doc pointer — descriptive, not behavior) | Flag for **Step 6c** — checkpoint writes it into `.codex/knowledge/` itself (descriptive, distinct from prescriptive guidelines), then drop from CONTEXT. |
 
 Pure tactical noise is dropped silently.
 
@@ -53,6 +54,8 @@ Add to `.codex/CONTEXT.md` only what is true now:
 - Durable subagent outcomes that still matter after this session, such as a validated finding, unresolved worker/reviewer blocker, or changed ownership boundary. Do not mention subagent thread ids.
 - Open questions or blockers currently unresolved.
 - The single most useful thing the next session should do first.
+
+A durable project *fact* surfaced this session (how a subsystem works, an integration detail, a pointer to a doc in another folder) does NOT belong in CONTEXT — flag it for **Step 6c**, which writes it into `.codex/knowledge/`. CONTEXT holds transient state, not reference knowledge.
 
 Be terse: task references, decisions, and blockers are one short sentence each. Only *active* `(no task)` work earns the 3-line micro-handoff, and only while it is live — the moment it ships or is abandoned, drop it this same checkpoint (JOURNAL it if it was a real decision/completion). That triage is what keeps CONTEXT under the ceiling.
 
@@ -78,7 +81,7 @@ Use this skeleton. Omit any section that has nothing to say.
 - [Unresolved things blocking progress] <!-- since: YYYY-MM-DD -->
 
 ## Recent Decisions (not yet promoted to guidelines)
-- [Decision + brief why; promote via learn when it stabilizes] <!-- since: YYYY-MM-DD -->
+- [Decision + brief why; promote when it stabilizes — behavior → .codex/guidelines/ via $codex-learn, durable fact → .codex/knowledge/ via $codex-checkpoint] <!-- since: YYYY-MM-DD -->
 
 ## Next Session Should Start By
 - [One concrete action, e.g. "run pytest tests/auth/" or "ask user about caching strategy"] <!-- since: YYYY-MM-DD -->
@@ -130,6 +133,7 @@ This step is independent of CONTEXT.md. Skip entirely if `.codex/tasks/` does no
    - Append one line to `.codex/JOURNAL.md`:
      `YYYY-MM-DD | completed | <slug> — <one-line outcome>, see tasks/done/<filename>`
      (Use `cancelled` instead of `completed` for cancelled tasks.)
+   - Before archiving, scan the task's `### Memory Hints` and `### Related Docs`. If they captured project-wide durable facts (not task-specific detail), graduate them to `.codex/knowledge/` in **Step 6c** so they survive archival (project-wide durable facts only — never task-specific detail).
    - DO NOT archive `awaiting-review` tasks. Those are explicitly waiting for user confirmation; archiving them defeats the gate. They stay in the top-level `tasks/` folder and appear in the Active list.
 4. Rewrite `.codex/tasks/index.md` from scratch using the canonical skeleton:
    ```markdown
@@ -151,6 +155,20 @@ This step is independent of CONTEXT.md. Skip entirely if `.codex/tasks/` does no
    - `status: awaiting-review` AND `updated:` > 3 days old -> stuck awaiting confirmation. Suggest the user verify and confirm (or reject) so the task can move forward.
    - `status: planning` AND `updated:` > 14 days old -> abandoned plan. Suggest cancellation.
 
+### Step 6c: Graduate Durable Facts to .codex/knowledge/
+
+Skip if no durable project fact surfaced this session (the common case for routine checkpoints).
+
+A **durable project fact** is descriptive, project-wide, and outlives this session: how a subsystem works, an integration detail, a domain/glossary term, or a pointer to a doc in another folder. It is NOT transient state (that stays in CONTEXT) and NOT a behavioral guideline (that graduates to `.codex/guidelines/` via `$codex-learn`). When unsure whether a fact is durable, leave it in CONTEXT/JOURNAL — do not write a speculative entry. Never write secrets.
+
+For each durable fact flagged in Step 2, Step 3, or Step 6b:
+
+1. Read `.codex/knowledge/INDEX.md` (the map). If `.codex/knowledge/` is missing, create it with the INDEX scaffold first.
+2. If an existing entry already covers the topic, update it (merge the fact, bump `updated:` to today). Otherwise create `.codex/knowledge/<kebab-slug>.md` using the frontmatter template in INDEX (`name`/`description`/`type`/`updated`; optional `sources`/`related`/`verify`). Keep it descriptive — never `MUST`/`NEVER` (that belongs in guidelines).
+3. In the same step, add or update the one-line INDEX entry so the map never drifts from the files: `- [Title](<slug>.md) — <hook> · <type> · updated YYYY-MM-DD`.
+
+This is an automatic write, like the CONTEXT/JOURNAL/index writes above — the git diff is the review gate. Do not duplicate an entry that already exists.
+
 ### Step 7: Report
 
 Output a 5-line summary:
@@ -159,7 +177,7 @@ Output a 5-line summary:
 2. Items kept, dropped, and added.
 3. JOURNAL entries appended, or `none`.
 4. Tasks synced: active=<n>, archived this run=<n>, stalled=<n>.
-5. Anything proposed for `$codex-learn` graduation.
+5. Knowledge entries written/updated this run (list slugs, or `none`); plus anything proposed for `$codex-learn` (recurring behavior → guidelines).
 
 Do not run `git commit` yourself. Do not mention uncommitted changes — the user commits independently.
 

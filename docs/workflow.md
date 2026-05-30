@@ -27,18 +27,19 @@ Every Claude command has a mirrored Codex skill. The core memory and task lifecy
 
 ## Memory model — the graduation pipeline
 
-CLAUDART has three tiers of project memory, with explicit graduation between them:
+CLAUDART has these tiers of project memory, with explicit graduation between them:
 
 ```text
-CONTEXT.md       →     JOURNAL.md         →     rules/ or guidelines/
-("right now")          ("what happened")         ("always true")
+CONTEXT.md       JOURNAL.md          rules/ · guidelines/      knowledge/
+("right now")    ("what happened")   ("how to behave")         ("what the project is")
 ```
 
 - **`CONTEXT.md`** — declarative state, what is true *right now*. Updated by `/checkpoint` (Claude) or `$codex-checkpoint` (Codex). Hard ceiling: 150 lines.
 - **`JOURNAL.md`** — append-only audit log. One line per retired item. **Never auto-loaded into session context** — it exists for explicit review, not active recall.
-- **`rules/`** (Claude) and **`guidelines/`** (Codex) — durable, path-scoped behavioral rules. Created when a pattern recurs enough that `/learn` (or `$codex-learn`) promotes it.
+- **`rules/`** (Claude) and **`guidelines/`** (Codex) — durable, path-scoped **behavioral** rules (prescriptive — "how to behave"). Created when a pattern recurs enough that `/learn` (or `$codex-learn`) promotes it.
+- **`knowledge/`** — durable **descriptive** project facts (domain, architecture, glossary) and pointers to canonical docs in other folders. The opposite axis from rules: rules prescribe, knowledge describes. One topic per file; only `knowledge/INDEX.md` is surfaced — by `/start` (or `$codex-start`) — and detail files are read on demand (map-not-encyclopedia). Reference external docs rather than duplicating them, so they never go stale-by-copy.
 
-A note enters at `CONTEXT.md`. When it settles, one line graduates to `JOURNAL.md`. When the same pattern recurs across sessions, `/learn` promotes it to a rule file. Only rules are auto-loaded — the rest stay out of the working set unless explicitly invoked.
+A note enters at `CONTEXT.md`. When it settles, one line graduates to `JOURNAL.md`. `/checkpoint` graduates durable **facts** to a `knowledge/` topic file (registered in `INDEX.md`); when a behavioral pattern recurs, `/learn` promotes it to a rule file. Only rules and `CONTEXT.md` are auto-loaded; knowledge is surfaced as an index and pulled on demand — the rest stay out of the working set unless explicitly invoked.
 
 ## Persistent task workflow
 
@@ -175,6 +176,8 @@ your-project/
 │   │   ├── ai-behavior.md
 │   │   ├── agent-delegation.md
 │   │   └── task-management.md
+│   ├── knowledge/                  # Durable descriptive facts + external-doc pointers
+│   │   └── INDEX.md                # Map surfaced by $codex-start; topic files read on demand
 │   └── tasks/                      # Persistent implementation plans (one file per task)
 │       ├── index.md                # Active + recently-done dashboard, ≤ 100 lines
 │       └── done/                   # Archived completed/cancelled tasks
@@ -186,6 +189,8 @@ your-project/
     │   ├── clean-code-reviewer.md
     │   └── security-auditor.md
     ├── commands/                   # Slash command protocols
+    ├── knowledge/                  # Durable descriptive facts + external-doc pointers
+    │   └── INDEX.md                # Map surfaced by /start; topic files read on demand
     ├── rules/
     │   ├── ai-behavior.md
     │   └── task-management.md

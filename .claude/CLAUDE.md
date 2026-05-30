@@ -6,7 +6,7 @@ CLAUDART keeps the Claude-specific operating layer inside `.claude/`, including 
 
 ## Core Commands
 
-- `/start` orients a new session from `.claude/CONTEXT.md`, `.claude/tasks/index.md`, and the last three git commits.
+- `/start` orients a new session from `.claude/CONTEXT.md`, `.claude/tasks/index.md`, `.claude/knowledge/INDEX.md`, and the last three git commits.
 - `/plan <description>` creates a persistent implementation plan in `.claude/tasks/` — use instead of native plan mode for any multi-session or multi-file work.
 - `/refactor-memory` consolidates this file, `.claude/rules/`, and `.claude/agents/` into a coherent Modular Rules System.
 - `/project-discovery` interviews the user about a rough project idea and creates a raw synthesis plus structured project docs.
@@ -20,9 +20,12 @@ See @.claude/CONTEXT.md for the current state of work (updated by /checkpoint).
 See @.claude/rules/ai-behavior.md for universal AI behavior guidelines.
 See @.claude/rules/task-management.md for the persistent task-document workflow that replaces native plan mode.
 
+Project knowledge: see `.claude/knowledge/INDEX.md` for durable project facts and pointers to external docs. Surfaced by `/start`; NOT auto-loaded (no `@`) — read entries on demand.
+
 ## Agent Self-Evolution & Context Maintenance
 
 - "Do not assume a human will document your code patterns. If you build it, document it."
 - Existing rules change -> update the relevant file in `.claude/rules/`.
 - New domains/layers -> CREATE a new rule file in `.claude/rules/` (with flow-style `paths: [...]`, `description:`, `when_to_use:`, and inline `tags: [...]` frontmatter) AND APPEND its `@` import to `.claude/CLAUDE.md`'s Domain Rules section.
+- Durable project facts (domain, architecture, integrations, glossary, external-doc pointers) -> CREATE or update a topic file in `.claude/knowledge/` and register it in `.claude/knowledge/INDEX.md`. Knowledge is descriptive; rules are prescriptive.
 - Global changes -> update `.claude/CLAUDE.md` directly.

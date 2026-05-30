@@ -15,6 +15,7 @@ Run a read-only health check on this repository's CLAUDART installation from the
 - `.codex/CONTEXT.md` exists. Warn if missing because the user may not have run checkpoint yet.
 - `.codex/JOURNAL.md` exists. Warn if missing.
 - `.codex/guidelines/` exists and contains at least `ai-behavior.md`, `task-management.md`, and `agent-delegation.md`.
+- `.codex/knowledge/` exists with `INDEX.md` (warn if missing — `$codex-refactor-memory` will recreate it).
 - `.codex/agents/` exists, even if the user removed shipped agents.
 - `.codex/config.toml` exists and contains an `[agents]` table with conservative delegation limits.
 - `.codex/tasks/` exists with `index.md` and `done/` subdirectory (warn if missing — `$codex-plan` will create on first use).
@@ -79,6 +80,21 @@ For every guideline file in `.codex/guidelines/*.md`:
 - Confirm `.codex/config.toml` has `[agents] max_depth = 1`. If higher, flag as Medium unless the repo explicitly documents recursive delegation.
 - Confirm `.codex/config.toml` has `[agents] max_threads` set to a positive integer. Flag values above 6 as Medium unless documented, because broad fan-out can create token cost and merge-conflict risk.
 - Confirm delegation guidance says subagents require explicit user authorization. If missing, flag as High because Codex may over-delegate on vague prompts.
+
+### 5c. Knowledge Base Wiring (`.codex/knowledge/`)
+
+Skip this section if `.codex/knowledge/` does not exist.
+
+- Confirm `.codex/knowledge/INDEX.md` exists. If missing, flag as Medium — `$codex-refactor-memory` should regenerate it.
+- INDEX ↔ files match (both directions):
+  - Every `.md` file under `.codex/knowledge/` (excluding `INDEX.md`) must be listed in `INDEX.md`. Unlisted files -> flag as Medium (invisible to `$codex-start`, defeats the tier).
+  - Every entry in `INDEX.md` must point to a file that exists on disk. Dead entries -> flag as Low.
+- For every knowledge file (excluding `INDEX.md`), check frontmatter: required `name`, `description`, `type`, `updated`; `type` in {domain, architecture, integration, glossary, reference, agent-context}. Missing/invalid -> flag as Low.
+- Dead local references: for each `sources:` entry that is a relative path, confirm the target exists on disk; missing -> flag as Low. Do NOT fetch URLs — only list `sources:` that are neither a valid `http(s)` URL nor an existing path as malformed.
+- Staleness: flag any knowledge file whose `updated:` is more than 90 days old, or whose stated `verify:` condition no longer holds, as a Low review candidate.
+- Descriptive-only separation: knowledge is facts, not behavior. If a knowledge file contains prescriptive language (`MUST`, `NEVER`, `YOU MUST`, `always do`/`never do`), flag as Medium — that content belongs in `.codex/guidelines/`.
+- INDEX stays a map: `INDEX.md` should be one line per entry. If it grows prose paragraphs or deep sections, flag as Low.
+- Not auto-loaded: search the active memory index (`AGENTS.md` / `.codex/AGENTS.md`) for any operational auto-load instruction for a knowledge detail file. A plain pointer line to `INDEX.md` is fine; an auto-load directive -> flag as Medium (`$codex-start` surfaces the index; knowledge is not force-loaded every turn).
 
 ### 6. CONTEXT/JOURNAL Wiring
 
@@ -166,7 +182,7 @@ If two agents share more than 50% of trigger keywords or review scope, flag poss
 If everything passes, output:
 
 ```text
-CLAUDART Codex installation healthy. <n> guidelines, <n> agents, <n> skills. Delegation wiring: <ok/warnings>.
+CLAUDART Codex installation healthy. <n> guidelines, <n> knowledge entries, <n> agents, <n> skills. Delegation wiring: <ok/warnings>.
 ```
 
 Reminder: this command is read-only. Never modify files.

@@ -12,7 +12,7 @@ This repository contains CLAUDART, a markdown-based operating layer for AI codin
 
 ## Core Commands
 
-- `$codex-start` — orients a new session from `.codex/CONTEXT.md`, `.codex/tasks/index.md`, and the last three git commits.
+- `$codex-start` — orients a new session from `.codex/CONTEXT.md`, `.codex/tasks/index.md`, `.codex/knowledge/INDEX.md`, and the last three git commits.
 - `$codex-plan <description>` — creates a persistent implementation plan in `.codex/tasks/`. Use instead of session-only `/plan` for any multi-session or multi-file work.
 - `$codex-project-discovery` — interviews the user about a rough project idea and creates a raw synthesis plus structured project docs.
 - `$codex-checkpoint` — updates `.codex/CONTEXT.md`, syncs `.codex/tasks/index.md`, and appends meaningful retired items to `.codex/JOURNAL.md`.
@@ -31,10 +31,12 @@ This repository contains CLAUDART, a markdown-based operating layer for AI codin
 See `.codex/guidelines/ai-behavior.md` for universal AI behavior guidelines.
 See `.codex/guidelines/task-management.md` for the persistent task-document workflow that replaces session-only plan mode.
 See `.codex/guidelines/agent-delegation.md` for Codex subagent and parallel delegation protocol. Only use subagents when the user explicitly authorizes subagents, delegation, or parallel agent work.
+Project knowledge: see `.codex/knowledge/INDEX.md` for durable project facts and pointers to external docs. Surfaced by `$codex-start`; not auto-loaded — read entries on demand.
 
 ## Agent Self-Evolution & Context Maintenance
 
 - "Do not assume a human will document your code patterns. If you build it, document it."
 - Existing Codex guidelines change → update the relevant file in `.codex/guidelines/`.
 - New domains/layers → create a new guideline file with flow-style `paths: [...]`, `description:`, `when_to_use:`, and inline `tags: [...]` frontmatter, then ensure `AGENTS.md` points to it when globally relevant.
+- Durable project facts → create or update a topic file in `.codex/knowledge/` and register it in `.codex/knowledge/INDEX.md`. Knowledge is descriptive; guidelines are prescriptive.
 - Live state → update `.codex/CONTEXT.md` through `$codex-checkpoint`.

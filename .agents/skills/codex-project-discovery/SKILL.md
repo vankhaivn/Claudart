@@ -452,3 +452,4 @@ After writing the docs, report:
 3. Highest-confidence decisions.
 4. Biggest remaining open questions.
 5. Recommended next skill or workflow, such as `$codex-refactor-memory`, `$codex-checkpoint`, or implementation planning.
+6. If durable project facts emerged (especially `05-domain-language.md`, `06-technical-brief.md`), offer to register them in `.codex/knowledge/INDEX.md` as reference entries (`sources:` pointing to the discovery docs — do not duplicate them). Optional; recommended for long-lived projects.

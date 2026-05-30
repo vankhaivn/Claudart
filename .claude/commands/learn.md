@@ -44,8 +44,9 @@ Walk the conversation chronologically, comparing each assistant turn against the
       - Existing domain (perfect match) → Update the exact file in `.claude/rules/`.
       - New domain (no strong match) → Create a new `.md` file in `.claude/rules/` with complete YAML frontmatter and append the `@` import to `.claude/CLAUDE.md`.
       - Global standard (applies universally) → Update `.claude/CLAUDE.md` (or `.claude/rules/ai-behavior.md` if it's a behavioral rather than structural rule).
+      - Durable project *fact* (descriptive, not behavior — how a subsystem works, an integration detail, a domain term, a pointer to a doc in another folder) → this is **knowledge, not a rule**. Create or update a topic file in `.claude/knowledge/` (frontmatter `name`/`description`/`type`/`updated`; optional `sources`/`related`/`verify`) and register it in `.claude/knowledge/INDEX.md` in the same step. Rules prescribe behavior; knowledge describes facts. (Routine fact-capture is `/checkpoint`'s job; `/learn` writes knowledge only when a retrospective surfaces a durable fact checkpoint missed.)
 
-**Boundary**: `/learn` updates **rules and `.claude/CLAUDE.md` only**. Do NOT modify `.claude/CONTEXT.md` (that's `/checkpoint`'s job) and do NOT rewrite `.claude/JOURNAL.md` entries (it's append-only). You may *read* both as evidence.
+**Boundary**: `/learn` updates **rules, `.claude/knowledge/`, and `.claude/CLAUDE.md` only**. Do NOT modify `.claude/CONTEXT.md` (that's `/checkpoint`'s job) and do NOT rewrite `.claude/JOURNAL.md` entries (it's append-only). You may *read* both as evidence.
 
 
 ## Output Standard

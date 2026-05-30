@@ -9,14 +9,15 @@ Start this session with a lightweight CLAUDART orientation. This command is read
 1. Read `.claude/CONTEXT.md` if it exists. If missing, say the project has no Claude context yet and suggest `/checkpoint` after meaningful work.
 2. Read `.claude/tasks/index.md` if it exists. If missing, treat as "no active tasks". If present, extract entries under `## Active`.
 3. For each Active entry, verify the underlying file exists in `.claude/tasks/` (the index is a cache; the file is truth). Read its frontmatter (`status`, `updated`, `slug`) only — do not full-read task bodies in `/start`.
-4. Run `git log -3 --oneline`. If the directory is not a git repo or has fewer than three commits, report what is available.
-5. Extract only these sections from `.claude/CONTEXT.md` when present:
+4. Read `.claude/knowledge/INDEX.md` if it exists — the INDEX only. Count the entries under `## Knowledge`. Do NOT read individual knowledge detail files, and do NOT validate freshness or dead links (that is `/doctor`'s job). The index makes durable project facts discoverable; read a detail file only if a later task needs it.
+5. Run `git log -3 --oneline`. If the directory is not a git repo or has fewer than three commits, report what is available.
+6. Extract only these sections from `.claude/CONTEXT.md` when present:
    - `## In Progress`
    - `## Next Session Should Start By`
    - `## Open Questions / Blockers`
-6. Do not read `.claude/JOURNAL.md`.
-7. Do not read task bodies in `.claude/tasks/done/`.
-8. Do not run `/doctor`; that is a heavier health check.
+7. Do not read `.claude/JOURNAL.md`.
+8. Do not read task bodies in `.claude/tasks/done/`.
+9. Do not run `/doctor`; that is a heavier health check.
 
 ## Output Format
 
@@ -26,6 +27,7 @@ Start this session with a lightweight CLAUDART orientation. This command is read
 **Current focus:** [In Progress section, or "None recorded"]
 **Last 3 commits:** [git log -3 --oneline output, compact]
 **Active tasks:** [list of "<slug> (<status>, updated <date>)" from tasks/index.md, or "None"]
+**Project knowledge:** [N entries in knowledge/INDEX.md, or "none"]
 **Start by:** [Next Session Should Start By section, or see "Three Cases" below]
 **Open blockers:** [Open Questions / Blockers section, or "None recorded"]
 ```

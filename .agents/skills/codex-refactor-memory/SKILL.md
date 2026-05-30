@@ -152,6 +152,8 @@ See `.codex/guidelines/agent-delegation.md` for Codex subagent and parallel dele
 
 NEVER add `.codex/JOURNAL.md` as a loaded context reference. JOURNAL is intentionally excluded from session context to save tokens. If you find such an import or auto-load instruction in `AGENTS.md` or `.codex/guidelines/`, remove it and warn the user in the final summary.
 
+For the knowledge tier, add a plain pointer line under `## Guidelines`, e.g. `Project knowledge: see .codex/knowledge/INDEX.md (surfaced by $codex-start; read entries on demand).` Only `$codex-start` surfaces the index; knowledge detail files are never auto-loaded.
+
 ## 8. Wire Up AI Behavior Guidelines
 
 `ai-behavior.md` is the universal behavior guideline for Codex work.
@@ -229,6 +231,14 @@ For Codex delegation state:
 - Keep durable subagent outcomes in task files first; use CONTEXT only for still-active blockers, decisions, or next-session handoff notes.
 - If recurring delegation mistakes appear in JOURNAL or task retrospectives, propose `$codex-learn` to harden `.codex/guidelines/agent-delegation.md`.
 
+For `.codex/knowledge/`:
+
+- If the folder does not exist, create it with a seed `INDEX.md` (header comment + empty `## Knowledge` section).
+- Reconcile the index: every `.md` file (excluding `INDEX.md`) must have an `INDEX.md` entry, and every entry must point to a real file. Add missing entries; flag dead entries.
+- Audit each knowledge file: frontmatter present (`name`/`description`/`type`/`updated`); `sources:` relative paths still exist (dead -> report); `updated:` older than 90 days -> flag for review.
+- Enforce the boundary: knowledge is descriptive. If a file carries prescriptive rules (`MUST`/`NEVER`), propose moving that content to `.codex/guidelines/`.
+- Do not auto-delete or rewrite knowledge bodies — flag staleness and dead pointers for user review. Keep `INDEX.md` a one-line-per-entry map.
+
 ## 11. Base Template Notes
 
 If this repository is a base template whose `.codex/` and `.agents/` directories are installed into other projects:
@@ -247,6 +257,7 @@ Include these rules, adapted to Codex paths:
 - "Do not assume a human will document your code patterns. If you build it, document it."
 - Existing guidelines change -> update the relevant file in `.codex/guidelines/`.
 - New domains/layers -> create a new guideline file in `.codex/guidelines/` with flow-style `paths: [...]`, `description:`, `when_to_use:`, and inline `tags: [...]` frontmatter and append its reference to `AGENTS.md`.
+- Durable project facts (domain, architecture, integration, glossary, external-doc pointers) -> create or update a topic file in `.codex/knowledge/` and register it in `.codex/knowledge/INDEX.md`. Knowledge is descriptive; guidelines are prescriptive.
 - Global Codex changes -> update `AGENTS.md` directly.
 - Shared live state -> update `.codex/CONTEXT.md` through `$codex-checkpoint`, not through refactor-memory.
 
@@ -260,6 +271,7 @@ Before the final summary, run or perform:
 - Search for stale references to deleted memory files, such as `.codex/AGENTS.md`, if those files were removed.
 - Search `AGENTS.md` and `.codex/guidelines/` for JOURNAL auto-load instructions.
 - Confirm every guideline listed in `AGENTS.md` exists.
+- Confirm `.codex/knowledge/INDEX.md` exists, lists every topic file, and is referenced by a plain pointer in `AGENTS.md`.
 - Confirm `.codex/guidelines/agent-delegation.md` is referenced when `.codex/agents/` exists.
 - Confirm `.codex/config.toml` keeps `[agents] max_depth = 1` unless recursive delegation is explicitly documented.
 - Confirm semantic guideline findings were classified as accurate, guideline-stale, source-debt, open-work, or needs-user-decision.

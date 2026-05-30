@@ -143,6 +143,8 @@ See @.claude/rules/architecture.md for architecture boundaries.
 
 **NEVER add `@.claude/JOURNAL.md`** as a loaded context reference. JOURNAL is intentionally excluded from session context to save tokens. If you find such an import or auto-load instruction in `.claude/CLAUDE.md` or `.claude/rules/`, remove it and warn the user in the final summary.
 
+For the knowledge tier, add a **plain pointer line** (not an `@` import), e.g. `Project knowledge: see .claude/knowledge/INDEX.md (surfaced by /start; read entries on demand).` Only `/start` loads the index; knowledge detail files are never auto-loaded.
+
 ## 8. Wire Up AI Behavior Guidelines
 
 `ai-behavior.md` is the universal behavior guideline for Claude work.
@@ -205,6 +207,14 @@ For `.claude/tasks/`:
 - If `.claude/tasks/done/.gitkeep` exists AND `.claude/tasks/done/` contains at least one real `.md` file, delete the `.gitkeep` — once real archives live there, the placeholder is redundant. Report what was removed.
 - Do not modify or move any task `.md` file content. Task files are working documents owned by `/plan` and `/checkpoint`; refactor-memory only touches the `.gitkeep` placeholder and (if missing) the seed `index.md`.
 
+For `.claude/knowledge/`:
+
+- If the folder does not exist, create it with a seed `INDEX.md` (header comment + empty `## Knowledge` section).
+- **Reconcile the index**: every `.md` file (excluding `INDEX.md`) must have an `INDEX.md` entry, and every entry must point to a real file. Add missing entries; flag dead entries.
+- Audit each knowledge file: frontmatter present (`name`/`description`/`type`/`updated`); `sources:` relative paths still exist (dead → report); `updated:` older than 90 days → flag for review.
+- Enforce the boundary: knowledge is **descriptive**. If a file carries prescriptive rules (`MUST`/`NEVER`), propose moving that content to `.claude/rules/`.
+- Do not auto-delete or rewrite knowledge bodies — flag staleness and dead pointers for user review. Keep `INDEX.md` a one-line-per-entry map.
+
 ## 11. Base Template Notes
 
 If this repository is a base template whose `.claude/` and `.agents/` directories are installed into other projects:
@@ -223,6 +233,7 @@ Include these rules:
 - "Do not assume a human will document your code patterns. If you build it, document it."
 - Existing rules change → update the relevant file in `.claude/rules/`.
 - New domains/layers → CREATE a new rule file in `.claude/rules/` (with flow-style `paths: [...]`, `description:`, `when_to_use:`, and inline `tags: [...]` frontmatter) AND APPEND its `@` import to `.claude/CLAUDE.md`'s Domain Rules section.
+- Durable project facts (domain, architecture, integration, glossary, external-doc pointers) → CREATE or update a topic file in `.claude/knowledge/` and register it in `.claude/knowledge/INDEX.md`. Knowledge is descriptive; rules are prescriptive.
 - Global changes → update `.claude/CLAUDE.md` directly.
 - Shared live state → update `.claude/CONTEXT.md` through `/checkpoint`, not through refactor-memory.
 
@@ -236,6 +247,7 @@ Before the final summary, run or perform:
 - Search for stale references to deleted memory files.
 - Search `.claude/CLAUDE.md` and `.claude/rules/` for JOURNAL auto-load instructions.
 - Confirm every rule listed in `.claude/CLAUDE.md` exists on disk.
+- Confirm `.claude/knowledge/INDEX.md` exists, lists every topic file, and is referenced by a plain (non-`@`) pointer in `.claude/CLAUDE.md`.
 - Confirm semantic rule findings were classified as accurate, rule-stale, source-debt, open-work, or needs-user-decision.
 
 Do not run `git commit`, `git push`, `git merge`, `git rebase`, or similar history/remote-writing commands yourself.

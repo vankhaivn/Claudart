@@ -1,5 +1,5 @@
 ---
-description: Update .claude/CONTEXT.md to reflect the CURRENT state of work (declarative overwrite). Sync .claude/tasks/index.md with current task file states. Append graduated items to .claude/JOURNAL.md. Run at the end of meaningful sessions.
+description: Update .claude/CONTEXT.md to reflect the CURRENT state of work (declarative overwrite). Sync .claude/tasks/index.md with current task file states. Append graduated items to .claude/JOURNAL.md. Graduate durable project facts to .claude/knowledge/. Run at the end of meaningful sessions.
 ---
 
 You are about to write a session checkpoint. The output is **not a log of what happened** — it is a **declarative snapshot of what is true right now**. Lifelong append is the failure mode this command exists to prevent.
@@ -34,6 +34,7 @@ For each item currently in `.claude/CONTEXT.md`, decide one of:
 | Done / resolved / merged | **Drop from .claude/CONTEXT.md.** Candidate for JOURNAL if it was a real decision, completion, or pivot. Pure tactical noise (e.g., "tried X, didn't work") is dropped silently. |
 | Superseded by a newer state | Drop the old, write the new |
 | Still relevant but applies broadly to all future work | This has graduated beyond CONTEXT — propose to user that it move to `.claude/rules/` via `/learn`, then drop from CONTEXT |
+| A durable project *fact* (domain, architecture, integration, glossary, external-doc pointer — descriptive, not behavior) | Flag for **Step 6c** — checkpoint writes it into `.claude/knowledge/` itself (descriptive, distinct from prescriptive rules), then drop from CONTEXT |
 
 ### Step 3 — Add new state from this session
 
@@ -43,6 +44,8 @@ Add to `.claude/CONTEXT.md` only what's true *now*:
 - Decisions just made that are not yet codified in rules
 - Open questions / blockers currently unresolved
 - The single most useful thing the next session should do first
+
+A durable project *fact* surfaced this session (how a subsystem works, an integration detail, a pointer to a doc in another folder) does NOT belong in CONTEXT — flag it for **Step 6c**, which writes it into `.claude/knowledge/`. CONTEXT holds transient state, not reference knowledge.
 
 Be terse: task references, decisions, and blockers are one short sentence each. Only *active* `(no task)` work earns the 3-line micro-handoff, and only while it is live — the moment it ships or is abandoned, drop it this same checkpoint (JOURNAL it if it was a real decision/completion). That triage is what keeps CONTEXT under the ceiling.
 
@@ -68,7 +71,7 @@ Use this skeleton; **omit any section that has nothing to say**:
 - [Unresolved things blocking progress] <!-- since: YYYY-MM-DD -->
 
 ## Recent Decisions (not yet promoted to rules)
-- [Decision + brief why; promote to .claude/rules/ via /learn when it stabilizes] <!-- since: YYYY-MM-DD -->
+- [Decision + brief why; promote when it stabilizes — behavior → .claude/rules/ via /learn, durable fact → .claude/knowledge/ via /checkpoint] <!-- since: YYYY-MM-DD -->
 
 ## Next Session Should Start By
 - [One concrete action, e.g., "run pytest tests/auth/", "ask user about caching strategy"] <!-- since: YYYY-MM-DD -->
@@ -118,6 +121,7 @@ This step is independent of CONTEXT.md. Skip entirely if `.claude/tasks/` does n
    - Append one line to `.claude/JOURNAL.md`:
      `YYYY-MM-DD | completed | <slug> — <one-line outcome>, see tasks/done/<filename>`
      (Use `cancelled` instead of `completed` for cancelled tasks.)
+   - Before archiving, scan the task's `### Memory Hints` and `### Related Docs`. If they captured project-wide durable facts (not task-specific detail), graduate them to `.claude/knowledge/` in **Step 6c** so they survive archival (project-wide durable facts only — never task-specific detail).
    - **DO NOT archive `awaiting-review` tasks.** Those are explicitly waiting for user confirmation; archiving them defeats the gate. They stay in the top-level `tasks/` folder and appear in the Active list.
 4. Rewrite `.claude/tasks/index.md` from scratch using the canonical skeleton:
    ```markdown
@@ -139,6 +143,20 @@ This step is independent of CONTEXT.md. Skip entirely if `.claude/tasks/` does n
    - `status: awaiting-review` AND `updated:` > 3 days old → stuck awaiting confirmation. Suggest the user verify and confirm (or reject) so the task can move forward.
    - `status: planning` AND `updated:` > 14 days old → abandoned plan. Suggest cancellation.
 
+### Step 6c — Graduate durable facts to .claude/knowledge/
+
+Skip if no durable project fact surfaced this session (the common case for routine checkpoints).
+
+A **durable project fact** is descriptive, project-wide, and outlives this session: how a subsystem works, an integration detail, a domain/glossary term, or a pointer to a doc in another folder. It is NOT transient state (that stays in CONTEXT) and NOT a behavioral rule (that graduates to `.claude/rules/` via `/learn`). When unsure whether a fact is durable, leave it in CONTEXT/JOURNAL — do not write a speculative entry. Never write secrets.
+
+For each durable fact flagged in Step 2, Step 3, or Step 6b:
+
+1. Read `.claude/knowledge/INDEX.md` (the map). If `.claude/knowledge/` is missing, create it with the INDEX scaffold first.
+2. If an existing entry already covers the topic, **update** it (merge the fact, bump `updated:` to today). Otherwise **create** `.claude/knowledge/<kebab-slug>.md` using the frontmatter template in INDEX (`name`/`description`/`type`/`updated`; optional `sources`/`related`/`verify`). Keep it descriptive — never `MUST`/`NEVER` (that belongs in rules).
+3. In the **same step**, add or update the one-line INDEX entry so the map never drifts from the files: `- [Title](<slug>.md) — <hook> · <type> · updated YYYY-MM-DD`.
+
+This is an automatic write, like the CONTEXT/JOURNAL/index writes above — the git diff is the review gate, so the user sees exactly what was captured before committing. Do not duplicate an entry that already exists.
+
 ### Step 7 — Report
 
 Output a 6-line summary:
@@ -146,7 +164,7 @@ Output a 6-line summary:
 2. Items kept / dropped / added (counts)
 3. JOURNAL entries appended (or "none")
 4. Tasks synced: active=<n>, archived this run=<n>, stalled=<n>
-5. Anything proposed for `/learn` graduation
+5. Knowledge entries written/updated this run (list slugs, or "none"); plus anything proposed for `/learn` (recurring behavior → rules)
 6. Reminder for the user to commit so the checkpoint enters git history
 
 Do not run `git commit` yourself.
