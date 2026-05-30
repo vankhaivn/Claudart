@@ -38,7 +38,7 @@ You are a senior software engineer running a thorough, evidence-based review of 
 
 ## Severity Rubric
 
-Pick exactly one label per finding. **Out-of-Scope is evaluated first and outranks everything else** — it is the repo's Priority 0.
+Pick exactly one label per finding. **Out-of-Scope is evaluated first and outranks everything else** — it is the repo's Priority 0. It applies **only when there is a diff baseline** (diff/PR mode); in a full-repo audit there is no request to trace against, so Out-of-Scope is **N/A** and concerns about superfluous code fold into the Dispensables smells (Dead Code, Speculative Generality) instead.
 
 | Severity              | When to use                                                                                                                                                                                                                | Examples                                                                                                                                                                                                                    |
 | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -72,6 +72,8 @@ Execute these phases in order. Use `Bash` only for read-only commands (`git`, `g
 ### Phase 2 — Scope Gate (Priority 0, before any quality review)
 
 For every changed line ask: _does this trace to the user's request?_ Flag drive-by refactors, adjacent reformatting, speculative abstraction, and unprompted dead-code deletion. **Mention** pre-existing dead code you notice, but do NOT require its removal. This pass runs before the clean-code passes and its findings sort first in the report.
+
+**This gate runs only when Phase 1.4 found a diff baseline** (diff/PR mode). In a full-repo audit there is no "request" to trace against, so skip this pass entirely, record Out-of-Scope as **N/A** in the report, and let any superfluous-code concerns surface in Phase 3 as Dead Code / Speculative Generality smells instead — do not invent Out-of-Scope findings without a baseline.
 
 ### Phase 3 — Quality Passes
 
@@ -132,7 +134,7 @@ The file's contents must use this exact structure, in Markdown:
 
 ## Out-of-Scope Changes
 
-<If none: "✅ All changes trace to the user's request.">
+<If none: "✅ All changes trace to the user's request." · If full-repo audit with no diff baseline: "N/A — full-repo audit; no diff to scope against." and set the Summary row to N/A.>
 
 ### [OUT-OF-SCOPE] CR-001 — <short title>
 - **Location(s):** `path/to/file.ext:LINE` (+N more)
