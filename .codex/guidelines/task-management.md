@@ -11,6 +11,8 @@ Plans live as markdown documents in `.codex/tasks/`, not in session memory. One 
 
 This guideline supersedes the native `/plan` mode workflow for persistence. Use `$codex-plan` to create a task document instead of relying on session-only plan state.
 
+For tasks that may benefit from Codex subagents, also follow `.codex/guidelines/agent-delegation.md`. Task files may record a delegation strategy, but subagents are used only after the user explicitly authorizes subagents, delegation, or parallel agent work.
+
 ## File Layout
 
 ```
@@ -61,6 +63,7 @@ tags: [1-5 lowercase kebab-case tags]
 - Non-obvious constraints discovered while exploring
 - Libraries/tools the project uses (e.g., "uses Zod, not Joi")
 - Pitfalls already encountered
+- Delegation strategy when relevant: authorization status, subagent roles, ownership boundaries, validation responsibilities
 - Anything that would save the next session from re-discovering the same thing>
 
 ## Plan of Work
@@ -153,6 +156,12 @@ When `status: in-progress`, maintain the task file as work progresses:
 5. **Do not delete or rewrite steps that were skipped or abandoned** — strike them through with `~~text~~` and add a Surprises entry explaining why.
 
 The plan is a living document. Edits to it are part of the work, not an afterthought.
+
+If subagents are used while the task is `in-progress`, record durable outputs in the task file instead of relying on subagent thread history:
+
+- Add a Surprises entry for important findings, failed validations, merge conflicts, or scope drift.
+- Add a Decision Log entry when subagent results change the implementation approach.
+- Mark worker-owned Concrete Steps complete only after the parent session reviews the patch and validates it.
 
 ## Completion — Two-Phase Gate
 
@@ -254,3 +263,4 @@ So: a task's existence is signalled in CONTEXT by a pointer line. The task's con
 - Auto-loading task files via `AGENTS.md`. Task files are working documents, not always-loaded guidelines.
 - Deleting completed task files. They are project history.
 - Creating a task without filling Memory Hints if any non-obvious context was discovered during planning.
+- Spawning subagents from a planning-locked task. Planning may record delegation opportunities, but execution waits until the task is `in-progress` and the user has explicitly authorized delegation.

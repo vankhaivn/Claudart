@@ -20,6 +20,7 @@ The output is not a log of what happened. It is a declarative snapshot of what i
    - Task reference: `- Working task \`add-jwt-auth\` (see .codex/tasks/2026-05-13-001-add-jwt-auth.md) <!-- since: YYYY-MM-DD -->`
    - Ad-hoc non-task change the user requested without creating a `$codex-plan` (a quick tweak, a transient pivot): CONTEXT is its **only** home, so it gets a **micro-handoff** — intent in the user's words + files of interest + next step (see Step 4) — not just a one-line pointer.
    Checkpoint *syncs* `tasks/index.md` AND ensures CONTEXT references the focus task, but never copies a task's Steps/Decisions/Surprises into CONTEXT.
+7. Subagent threads are not durable project memory. Do not store subagent ids, nicknames, or transient thread state in CONTEXT. Store only durable outcomes: decisions, unresolved blockers, validated findings, changed ownership boundaries, and next steps.
 
 ## Procedure
 
@@ -49,6 +50,7 @@ Add to `.codex/CONTEXT.md` only what is true now:
 - Work that is mid-stream, with `file:line` where useful. If the work is being tracked in a task file, reference it by slug + path (e.g., `Working task \`add-jwt-auth\` (see .codex/tasks/2026-05-13-001-add-jwt-auth.md)`). Do not duplicate the task body here.
 - Ad-hoc changes the user requested *without* creating a `$codex-plan` (quick fixes, transient tweaks, mid-flight pivots). These have no task file, so CONTEXT **is** their handoff summary, not just a note. Give each *active* one a **micro-handoff** (see Step 4 skeleton): the user's intent in their own words, the files of interest with `file:line`, and the next concrete step. Mark them `(no task)`.
 - Decisions just made that are not yet codified in guidelines.
+- Durable subagent outcomes that still matter after this session, such as a validated finding, unresolved worker/reviewer blocker, or changed ownership boundary. Do not mention subagent thread ids.
 - Open questions or blockers currently unresolved.
 - The single most useful thing the next session should do first.
 
@@ -75,7 +77,7 @@ Use this skeleton. Omit any section that has nothing to say.
 ## Open Questions / Blockers
 - [Unresolved things blocking progress] <!-- since: YYYY-MM-DD -->
 
-## Recent Decisions (not yet promoted to rules)
+## Recent Decisions (not yet promoted to guidelines)
 - [Decision + brief why; promote via learn when it stabilizes] <!-- since: YYYY-MM-DD -->
 
 ## Next Session Should Start By
@@ -151,7 +153,7 @@ This step is independent of CONTEXT.md. Skip entirely if `.codex/tasks/` does no
 
 ### Step 7: Report
 
-Output a 6-line summary:
+Output a 5-line summary:
 
 1. Lines in new `.codex/CONTEXT.md`.
 2. Items kept, dropped, and added.

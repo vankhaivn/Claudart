@@ -35,6 +35,7 @@ Walk the conversation chronologically, comparing each assistant turn against the
 ## Phase 2: New Knowledge Integration
 
 1. Identify core bug root causes, architectural decisions, or design patterns validated in this session.
+   - If subagents were used, identify delegation patterns that should repeat or be avoided: authorization wording, task decomposition, ownership boundaries, merge conflicts, validation gaps, and reviewer usefulness.
 2. Pattern check via JOURNAL:
    - `.codex/JOURNAL.md` can grow to thousands of lines, so never full-read it.
    - Tail first: read only the last ~200 lines with `tail -n 200 .codex/JOURNAL.md`.
@@ -43,6 +44,7 @@ Walk the conversation chronologically, comparing each assistant turn against the
    - Skip this step if `.codex/JOURNAL.md` does not exist or has fewer than 5 entries.
 3. Decide where new knowledge belongs:
    - Existing domain with a strong match -> update the exact file in `.codex/guidelines/`.
+   - Codex subagent/delegation behavior -> update `.codex/guidelines/agent-delegation.md` when it exists.
    - New domain with no strong match -> create a new guideline file in `.codex/guidelines/` with complete frontmatter, then reference it from `AGENTS.md`.
    - Global Codex standard -> update `AGENTS.md` directly.
 

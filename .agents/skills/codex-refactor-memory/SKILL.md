@@ -11,6 +11,7 @@ The target shape is:
 
 - a concise root `AGENTS.md` as the sole Codex memory index and instruction entrypoint;
 - durable domain knowledge in scoped files under `.codex/guidelines/`;
+- Codex subagent delegation policy in `.codex/guidelines/agent-delegation.md` when the repo uses or ships Codex agents;
 - current live state in `.codex/CONTEXT.md`;
 - append-only history in `.codex/JOURNAL.md`;
 - self-contained skills in `.agents/skills/`;
@@ -56,6 +57,7 @@ Common examples:
 - `runtime.md`
 - `testing.md`
 - `srs-integration.md`
+- `agent-delegation.md`
 
 Do not create guidelines just to create files. A small docs repo may only need one or two guidelines.
 
@@ -130,6 +132,7 @@ It should contain only:
 - security and repository-wide constraints;
 - a `## Guidelines` section linking `.codex/CONTEXT.md` and `.codex/guidelines/*.md`;
 - a clear rule that `.codex/JOURNAL.md` is not auto-loaded;
+- a clear rule that Codex subagents require explicit user authorization before delegation or parallel agent work;
 - the `## Agent Self-Evolution & Context Maintenance` section.
 
 Target: keep `AGENTS.md` under 100 lines where practical. If it exceeds 100 lines, extract more into `.codex/guidelines/`, workflows, or project docs. If it exceeds 150 lines, flag it in the final summary.
@@ -144,6 +147,7 @@ Example:
 See `.codex/CONTEXT.md` for current session state, updated by `$codex-checkpoint`.
 See `.codex/guidelines/ai-behavior.md` for universal AI behavior guidelines.
 See `.codex/guidelines/architecture.md` for architecture boundaries.
+See `.codex/guidelines/agent-delegation.md` for Codex subagent and parallel delegation protocol.
 ```
 
 NEVER add `.codex/JOURNAL.md` as a loaded context reference. JOURNAL is intentionally excluded from session context to save tokens. If you find such an import or auto-load instruction in `AGENTS.md` or `.codex/guidelines/`, remove it and warn the user in the final summary.
@@ -155,6 +159,14 @@ NEVER add `.codex/JOURNAL.md` as a loaded context reference. JOURNAL is intentio
 - If `.codex/guidelines/ai-behavior.md` does not exist, create a concise version with complete frontmatter and durable behavior rules.
 - If the user has customized `ai-behavior.md`, leave their content alone and only ensure the reference exists.
 - Do not inline `ai-behavior.md` into `AGENTS.md`.
+- Add a single reference under `## Guidelines`.
+
+## 8b. Wire Up Agent Delegation Guidelines
+
+`agent-delegation.md` is the Codex subagent and parallel-work guideline.
+
+- If `.codex/guidelines/agent-delegation.md` does not exist and the repository ships `.codex/agents/`, create a concise version with complete frontmatter. It must require explicit user authorization to spawn (depth, thoroughness, or investigation do not count) and define critical-path versus sidecar work, disjoint worker ownership, parent review responsibility, and durable handoff recording.
+- Keep the delegation behavior in the guideline, not `.codex/config.toml`; config only caps agent fan-out.
 - Add a single reference under `## Guidelines`.
 
 ## 9. Audit Guidelines, Skills, And Agents
@@ -185,6 +197,7 @@ For every file in `.codex/agents/`:
 
 - Verify TOML includes `name`, `description`, `model`, `sandbox_mode`, and `developer_instructions`.
 - Keep review/explorer agents read-only unless the agent is explicitly a worker.
+- Confirm worker-style agents define ownership expectations and say they must not revert changes made by others in parallel.
 - Replace hardcoded grep pattern lists with guidance to scan the codebase and use project tooling when present.
 - Confirm the agent's responsibilities do not overlap more than 50% with another agent. If they do, propose a merge.
 
@@ -209,6 +222,12 @@ For `.codex/tasks/`:
 - If the folder does not exist but `codex-plan` is present in `.agents/skills/`, create it with a seed `index.md` and a `done/.gitkeep`.
 - If `.codex/tasks/done/.gitkeep` exists AND `.codex/tasks/done/` contains at least one real `.md` file, delete the `.gitkeep` — once real archives live there, the placeholder is redundant. Report what was removed.
 - Do not modify or move any task `.md` file content. Task files are working documents owned by `$codex-plan` and `$codex-checkpoint`; refactor-memory only touches the `.gitkeep` placeholder and (if missing) the seed `index.md`.
+
+For Codex delegation state:
+
+- Do not store subagent ids or transient thread names in `.codex/CONTEXT.md`.
+- Keep durable subagent outcomes in task files first; use CONTEXT only for still-active blockers, decisions, or next-session handoff notes.
+- If recurring delegation mistakes appear in JOURNAL or task retrospectives, propose `$codex-learn` to harden `.codex/guidelines/agent-delegation.md`.
 
 ## 11. Base Template Notes
 
@@ -241,6 +260,8 @@ Before the final summary, run or perform:
 - Search for stale references to deleted memory files, such as `.codex/AGENTS.md`, if those files were removed.
 - Search `AGENTS.md` and `.codex/guidelines/` for JOURNAL auto-load instructions.
 - Confirm every guideline listed in `AGENTS.md` exists.
+- Confirm `.codex/guidelines/agent-delegation.md` is referenced when `.codex/agents/` exists.
+- Confirm `.codex/config.toml` keeps `[agents] max_depth = 1` unless recursive delegation is explicitly documented.
 - Confirm semantic guideline findings were classified as accurate, guideline-stale, source-debt, open-work, or needs-user-decision.
 
 Do not run `git commit`, `git push`, `git merge`, `git rebase`, or similar history/remote-writing commands yourself.

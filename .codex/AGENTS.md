@@ -30,6 +30,7 @@ This repository contains CLAUDART, a markdown-based operating layer for AI codin
 
 See `.codex/guidelines/ai-behavior.md` for universal AI behavior guidelines.
 See `.codex/guidelines/task-management.md` for the persistent task-document workflow that replaces session-only plan mode.
+See `.codex/guidelines/agent-delegation.md` for Codex subagent and parallel delegation protocol. Only use subagents when the user explicitly authorizes subagents, delegation, or parallel agent work.
 
 ## Agent Self-Evolution & Context Maintenance
 

@@ -11,11 +11,12 @@ Run a read-only health check on this repository's CLAUDART installation from the
 
 ### 1. Required Structure
 
-- `AGENTS.md` exists at the repository root (copied from `.codex/AGENTS.md` by the installer).
+- A Codex memory index exists: root `AGENTS.md` for an installed downstream project, or `.codex/AGENTS.md` for the CLAUDART source template copied by the installer. If both exist, compare them and flag drift.
 - `.codex/CONTEXT.md` exists. Warn if missing because the user may not have run checkpoint yet.
 - `.codex/JOURNAL.md` exists. Warn if missing.
-- `.codex/guidelines/` exists and contains at least `ai-behavior.md` and `task-management.md`.
+- `.codex/guidelines/` exists and contains at least `ai-behavior.md`, `task-management.md`, and `agent-delegation.md`.
 - `.codex/agents/` exists, even if the user removed shipped agents.
+- `.codex/config.toml` exists and contains an `[agents]` table with conservative delegation limits.
 - `.codex/tasks/` exists with `index.md` and `done/` subdirectory (warn if missing — `$codex-plan` will create on first use).
 - `.agents/skills/` exists and contains `codex-start`, `codex-checkpoint`, `codex-learn`, `codex-doctor`, `codex-refactor-memory`, and `codex-plan`.
 
@@ -42,6 +43,7 @@ For every `.codex/agents/*.toml` file:
 
 - Confirm `name`, `description`, `model`, `model_reasoning_effort`, `sandbox_mode`, and `developer_instructions` keys are present.
 - Confirm review/explorer agents use `sandbox_mode = "read-only"` unless their purpose clearly requires writes.
+- Confirm any worker-style agent clearly describes its write scope expectations and warns that other agents may be editing in parallel.
 
 ### 3. Guideline Path Coverage
 
@@ -55,26 +57,37 @@ For every guideline file in `.codex/guidelines/*.md`:
 
 ### 4. Codex Memory Cross-Linking
 
-- Read `AGENTS.md`.
-- Confirm it points Codex to `.codex/CONTEXT.md` and `.codex/guidelines/*.md`.
-- Find the guideline section in `AGENTS.md`.
+- Determine the active memory index to inspect:
+  - If root `AGENTS.md` exists, read it.
+  - Otherwise read `.codex/AGENTS.md` and report that this is the template source copied to root by `install.sh`.
+  - If both exist, compare them and flag drift unless the project deliberately documents a different canonical file.
+- Confirm the memory index points Codex to `.codex/CONTEXT.md` and `.codex/guidelines/*.md`.
+- Find the guideline section in the memory index.
 - For every `.codex/guidelines/*.md` reference there, confirm the target file exists.
-- For every file under `.codex/guidelines/`, confirm there is a matching reference in `AGENTS.md`. Files without a reference may not be loaded consistently; flag them as isolated guidelines.
+- For every file under `.codex/guidelines/`, confirm there is a matching reference in the memory index. Files without a reference may not be loaded consistently; flag them as isolated guidelines.
 
 ### 5. AI Behavior Wiring
 
 - Confirm `.codex/guidelines/ai-behavior.md` exists.
-- Confirm `AGENTS.md` references `.codex/guidelines/ai-behavior.md`.
+- Confirm the active memory index references `.codex/guidelines/ai-behavior.md`.
 - If missing, flag as High severity because universal behavior guidelines are not loaded.
+
+### 5b. Agent Delegation Wiring
+
+- Confirm `.codex/guidelines/agent-delegation.md` exists.
+- Confirm the active memory index references `.codex/guidelines/agent-delegation.md`.
+- Confirm `.codex/config.toml` has `[agents] max_depth = 1`. If higher, flag as Medium unless the repo explicitly documents recursive delegation.
+- Confirm `.codex/config.toml` has `[agents] max_threads` set to a positive integer. Flag values above 6 as Medium unless documented, because broad fan-out can create token cost and merge-conflict risk.
+- Confirm delegation guidance says subagents require explicit user authorization. If missing, flag as High because Codex may over-delegate on vague prompts.
 
 ### 6. CONTEXT/JOURNAL Wiring
 
-- Confirm `.codex/CONTEXT.md` is referenced in `AGENTS.md`.
+- Confirm `.codex/CONTEXT.md` is referenced in the active memory index.
 - `.codex/CONTEXT.md` line count must be at most 150. Use `wc -l`; do not full-read the file just to count.
 - Report approximate `.codex/CONTEXT.md` tokens using both estimates:
   - `wc -w .codex/CONTEXT.md | awk '{printf "~%d tokens\n", $1 * 1.3}'`
   - `wc -c .codex/CONTEXT.md | awk '{printf "~%d tokens (byte estimate)\n", $1 / 4}'`
-- Search `AGENTS.md` and `.codex/guidelines/` for any operational auto-load instruction for `.codex/JOURNAL.md`. If found, flag as Critical.
+- Search the active memory index and `.codex/guidelines/` for any operational auto-load instruction for `.codex/JOURNAL.md`. If found, flag as Critical.
 - Search `.codex/CONTEXT.md` for `<!-- since: YYYY-MM-DD -->` comments. Flag items older than 30 days as graduation candidates if they remain in Recent Decisions or otherwise look durable. If an obviously long-lived decision has no `since:` comment, warn that future `$codex-checkpoint` should preserve/add one.
 - For `.codex/JOURNAL.md` integrity, use spot-checks rather than full reads:
   - `head -n 20 .codex/JOURNAL.md`
@@ -97,7 +110,7 @@ Skip this section if `.codex/tasks/` does not exist.
 - Flag any task with `status: in-progress` AND `updated:` more than 7 days old as stalled — Medium severity. Suggest flipping to `blocked` or `cancelled`.
 - Flag any task with `status: awaiting-review` AND `updated:` more than 3 days old as stuck awaiting confirmation — Medium severity. The agent has reported completion; the user has not confirmed. Surface prominently and suggest the user verify and run the close-out signal (or reject and flip back to in-progress).
 - Flag any task with `status: planning` AND `updated:` more than 14 days old — the user probably abandoned it. Suggest cancellation.
-- Cross-check `index.md` Active entries against actual task files: every Active entry must correspond to a real file; every real file with `status` in {planning, in-progress, blocked} must appear in Active. Mismatches -> suggest `$codex-checkpoint` to resync.
+- Cross-check `index.md` Active entries against actual task files: every Active entry must correspond to a real file; every real file with `status` in {planning, in-progress, awaiting-review, blocked} must appear in Active. Mismatches -> suggest `$codex-checkpoint` to resync.
 - Required sections in every task file body: `## Purpose`, `## Context & Orientation`, `## Plan of Work`, `## Concrete Steps`, `## Validation & Acceptance`, `## Decision Log`, `## Surprises & Discoveries`, `## Outcomes & Retrospective`. Flag missing sections.
 - Within `## Context & Orientation`, flag if `### Memory Hints` is missing or empty — that section is the cross-session lifeline.
 - Redundant `.gitkeep`: if `.codex/tasks/done/.gitkeep` exists AND `.codex/tasks/done/` contains at least one real `.md` file, flag as Low severity. The `.gitkeep` exists only to track an empty folder; once real archived tasks live there, it is redundant. Mention that `$codex-refactor-memory` will clean it up, or the user can `rm` it manually.
@@ -108,13 +121,15 @@ Skip this section if `.codex/tasks/` does not exist.
 - Stale metadata such as `Last Updated: <date>`.
 - Hardcoded shell pattern lists inside agent instructions. Agents should use repository tooling or discover patterns from the codebase.
 - Vague Codex skills that do not contain sufficient detail to execute the workflow.
+- Agent delegation instructions that promise automatic subagent use without explicit user authorization.
+- Worker agent instructions that allow overlapping writes or omit ownership boundaries.
 
 ### 8. Size Sanity
 
-- Count lines in `AGENTS.md`. Target is under 100 lines.
+- Count lines in the active memory index. Target is under 100 lines.
 - Report approximate tokens using both estimates:
-  - `wc -w AGENTS.md | awk '{printf "~%d tokens\n", $1 * 1.3}'`
-  - `wc -c AGENTS.md | awk '{printf "~%d tokens (byte estimate)\n", $1 / 4}'`
+  - `wc -w <active-memory-index> | awk '{printf "~%d tokens\n", $1 * 1.3}'`
+  - `wc -c <active-memory-index> | awk '{printf "~%d tokens (byte estimate)\n", $1 / 4}'`
 - If bloated, recommend `$codex-refactor-memory`.
 
 ### 9. Guideline Tag Index And Overlap
@@ -151,7 +166,7 @@ If two agents share more than 50% of trigger keywords or review scope, flag poss
 If everything passes, output:
 
 ```text
-CLAUDART Codex installation healthy. <n> guidelines, <n> agents, <n> skills.
+CLAUDART Codex installation healthy. <n> guidelines, <n> agents, <n> skills. Delegation wiring: <ok/warnings>.
 ```
 
 Reminder: this command is read-only. Never modify files.

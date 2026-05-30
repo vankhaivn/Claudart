@@ -12,6 +12,7 @@ The deep-dive companion to the [README](../README.md). Covers architecture, memo
   - [Two-phase completion gate](#two-phase-completion-gate)
   - [Approval signals](#approval-signals)
   - [Cross-session resumption](#cross-session-resumption)
+- [Codex subagent delegation](#codex-subagent-delegation)
 - [Commands and skills](#commands-and-skills)
 - [Directory layout](#directory-layout)
 
@@ -22,7 +23,7 @@ CLAUDART installs as two parallel layers in your project. Run them independently
 - **Claude layer** (`.claude/`) — slash commands, rules, review agents, session state
 - **Codex layer** (`.codex/` + `.agents/skills/`) — guidelines, TOML subagents, repo skills
 
-Every Claude command has a mirrored Codex skill. The protocols are identical; only the invocation differs (`/start` vs `$codex-start`).
+Every Claude command has a mirrored Codex skill. The core memory and task lifecycle protocols are identical; tool-specific capabilities such as Codex subagents add extra guidelines where the runtimes differ.
 
 ## Memory model — the graduation pipeline
 
@@ -124,6 +125,21 @@ A new session resuming a task:
 
 Memory Hints from previous sessions is the lifeline. Populate it generously when planning — every non-obvious constraint, library quirk, or pitfall discovered during exploration belongs there.
 
+## Codex subagent delegation
+
+Codex can run subagents for parallel exploration, bounded implementation, review, and audit work. CLAUDART treats that capability as **explicitly authorized parallelism**, not as an automatic response to large tasks.
+
+The Codex layer adds `.codex/guidelines/agent-delegation.md` as the durable protocol. It requires the parent Codex session to separate:
+
+- **Critical path** — work the parent agent should do locally now
+- **Sidecar tasks** — bounded tasks that can run in parallel without blocking the parent
+- **Ownership** — exact read questions or write scopes assigned to each subagent
+- **Merge plan** — how findings, patches, and validation results return to the parent
+
+Use subagents when the user explicitly says things like "use subagents", "delegate this", or "parallelize with agents". Do not infer authorization from "be thorough" or "research deeply". Explorers should stay read-only, workers need disjoint write scopes, and reviewers/security auditors produce findings that the parent still owns and validates.
+
+Task documents persist the durable parts of delegation — authorization status, roles, ownership boundaries, findings, decisions, and validation outcomes. They do not store transient subagent thread ids. `$codex-checkpoint` may carry forward active delegation blockers or next steps in `CONTEXT.md`, but completed findings should live in the task file and eventually `JOURNAL.md`.
+
 ## Commands and skills
 
 | Claude Code          | Codex CLI                  | What it does                                                                                        |
@@ -137,6 +153,8 @@ Memory Hints from previous sessions is the lifeline. Populate it generously when
 | `/doctor`            | `$codex-doctor`            | Read-only health check: structure, frontmatter, token hygiene, wiring, task hygiene                 |
 
 Review agents ship with both layers: `clean-code-reviewer` (scope + Clean Code discipline) and `security-auditor` (OWASP audit — read-only on your code, but writes its findings to a `security-audit-<date>.md` report at the project root and prints only the summary to chat). Claude uses kebab-case Markdown agent names; Codex uses snake_case TOML `name` values.
+
+Codex subagent delegation is governed by `.codex/guidelines/agent-delegation.md`. The shipped Codex config keeps `[agents] max_depth = 1` and a conservative `max_threads` default so downstream projects get useful parallelism without recursive fan-out.
 
 ## Directory layout
 
@@ -155,6 +173,7 @@ your-project/
 │   ├── config.toml                 # Codex project defaults
 │   ├── guidelines/                 # Codex-native semantic guidance
 │   │   ├── ai-behavior.md
+│   │   ├── agent-delegation.md
 │   │   └── task-management.md
 │   └── tasks/                      # Persistent implementation plans (one file per task)
 │       ├── index.md                # Active + recently-done dashboard, ≤ 100 lines
