@@ -42,7 +42,7 @@ curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh 
 
 `install.sh` copy mới toàn bộ — rất hợp với project sạch, nhưng có thể ghi đè setup hiện có và không cho bạn biết upstream đã thay đổi gì khi upgrade. Nếu bạn **đã có agent/workflow riêng**, hoặc đang **nâng cấp từ một bản CLAUDART cũ**, hãy paste prompt này vào Claude Code hoặc Codex session. Agent sẽ đọc repo, diff với project của bạn, rồi merge có kiểm soát — hỏi trước khi đụng tới bất kỳ thứ gì bạn đã custom:
 
-> Read https://raw.githubusercontent.com/vankhaivn/Claudart/main/INTEGRATE.md and follow it to integrate CLAUDART into this project. Ask me before touching anything I've customized.
+> Đọc https://raw.githubusercontent.com/vankhaivn/Claudart/main/INTEGRATE.md và làm theo để tích hợp CLAUDART vào project này. Hỏi tôi trước khi đụng tới bất kỳ thứ gì tôi đã custom.
 
 ## CLAUDART giải quyết gì
 
