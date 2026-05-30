@@ -21,8 +21,8 @@ Execute the following steps systematically, without losing essential project con
 
 - Confirm whether the canonical memory file is root `CLAUDE.md` or `.claude/CLAUDE.md`.
 - If both root `CLAUDE.md` and `.claude/CLAUDE.md` exist, compare them.
-    - If they are identical, remove or ignore the duplicate according to the repository convention.
-    - If they differ, ask which file should win before overwriting either one. Typically `.claude/CLAUDE.md` is canonical for CLAUDART projects; root `CLAUDE.md` is what `/init` generates.
+  - If they are identical, remove or ignore the duplicate according to the repository convention.
+  - If they differ, ask which file should win before overwriting either one. Typically `.claude/CLAUDE.md` is canonical for CLAUDART projects; root `CLAUDE.md` is what `/init` generates.
 - Search skills, agents, and rules for references to deleted or deprecated memory files and update them during the refactor.
 
 ## 2. Analyze The Project
@@ -81,33 +81,33 @@ Do not stop at frontmatter, link, and glob hygiene. A successful memory refactor
 For every non-universal rule under `.claude/rules/`:
 
 1. Read the rule body and identify concrete claims.
-    - Claims include named files, modules, classes, functions, commands, config keys, environment variables, endpoints, schemas, database models, event names, message/queue topics, feature flags, UI routes, document contracts, or operational workflows.
-    - Ignore purely stylistic rules unless they contradict the codebase's current conventions.
+   - Claims include named files, modules, classes, functions, commands, config keys, environment variables, endpoints, schemas, database models, event names, message/queue topics, feature flags, UI routes, document contracts, or operational workflows.
+   - Ignore purely stylistic rules unless they contradict the codebase's current conventions.
 2. Verify each concrete claim against the actual repository.
-    - Use repository-native source files, package manifests, schemas, migrations, generated types, tests, docs/contracts, and config loaders as evidence.
-    - Prefer structured files and source-of-truth contracts over comments or stale prose.
-    - Use `rg` / `rg --files` first; use language/framework tooling only when it materially improves confidence.
+   - Use repository-native source files, package manifests, schemas, migrations, generated types, tests, docs/contracts, and config loaders as evidence.
+   - Prefer structured files and source-of-truth contracts over comments or stale prose.
+   - Use `rg` / `rg --files` first; use language/framework tooling only when it materially improves confidence.
 3. Classify each finding:
-    - **accurate**: rule matches source and remains useful.
-    - **rule-stale**: source/contract has intentionally moved on; update the rule.
-    - **source-debt**: rule is still the desired invariant, but source currently violates it; keep the rule and report the code/doc debt instead of weakening it.
-    - **open-work**: a task, issue, TODO, or explicit user decision already tracks the gap; keep or update the rule so future agents see the intended direction and the active gap.
-    - **needs-user-decision**: source and rule disagree and neither clearly wins from local evidence; ask before rewriting either.
+   - **accurate**: rule matches source and remains useful.
+   - **rule-stale**: source/contract has intentionally moved on; update the rule.
+   - **source-debt**: rule is still the desired invariant, but source currently violates it; keep the rule and report the code/doc debt instead of weakening it.
+   - **open-work**: a task, issue, TODO, or explicit user decision already tracks the gap; keep or update the rule so future agents see the intended direction and the active gap.
+   - **needs-user-decision**: source and rule disagree and neither clearly wins from local evidence; ask before rewriting either.
 4. Detect overbroad or kitchen-sink rules.
-    - If one rule mixes unrelated domains, propose splitting it into focused files.
-    - Split only when the new files have clear `paths:` scopes and durable ownership. Do not create files just to satisfy symmetry.
-    - Preserve generic cross-cutting rules in broad files; move business/domain invariants into focused files.
+   - If one rule mixes unrelated domains, propose splitting it into focused files.
+   - Split only when the new files have clear `paths:` scopes and durable ownership. Do not create files just to satisfy symmetry.
+   - Preserve generic cross-cutting rules in broad files; move business/domain invariants into focused files.
 5. Detect near-duplicates and stale detail.
-    - If two rules repeat the same invariant, keep the rule in the most specific owner and replace the other copy with a pointer.
-    - Replace fragile line-number references and long source excerpts with stable symbol/file references where possible.
-    - Remove "future" or "temporary" wording once the feature is implemented, unless it still describes a real future state.
+   - If two rules repeat the same invariant, keep the rule in the most specific owner and replace the other copy with a pointer.
+   - Replace fragile line-number references and long source excerpts with stable symbol/file references where possible.
+   - Remove "future" or "temporary" wording once the feature is implemented, unless it still describes a real future state.
 6. Promote stable live-state decisions.
-    - Read `.claude/CONTEXT.md` for Recent Decisions. If a decision is now durable project behavior, move it into the relevant rule and remove it from CONTEXT through the checkpoint workflow.
-    - If a decision is still temporary, keep it in CONTEXT and do not bury it in rules.
+   - Read `.claude/CONTEXT.md` for Recent Decisions. If a decision is now durable project behavior, move it into the relevant rule and remove it from CONTEXT through the checkpoint workflow.
+   - If a decision is still temporary, keep it in CONTEXT and do not bury it in rules.
 7. Detect mis-tiered content (a rule that belongs in knowledge).
-    - `.claude/rules/` is **prescriptive** — each rule constrains behavior (an enforceable `MUST`/`NEVER`/should-avoid invariant). If a rule body is purely **descriptive** — it only states how a subsystem works, an integration detail, a domain term, or a doc pointer, with no constraint a reader could "follow" — it is misfiled.
-    - Propose moving it to `.claude/knowledge/`: create or update the topic file + its `INDEX.md` entry, then remove the rule and its `@`-import from `.claude/CLAUDE.md`. Confirm with the user before removing a rule.
-    - This is the exact reverse of the Step 10 boundary (which pushes prescriptive content out of knowledge into rules). The descriptive/prescriptive boundary runs **both ways**.
+   - `.claude/rules/` is **prescriptive** — each rule constrains behavior (an enforceable `MUST`/`NEVER`/should-avoid invariant). If a rule body is purely **descriptive** — it only states how a subsystem works, an integration detail, a domain term, or a doc pointer, with no constraint a reader could "follow" — it is misfiled.
+   - Propose moving it to `.claude/knowledge/`: create or update the topic file + its `INDEX.md` entry, then remove the rule and its `@`-import from `.claude/CLAUDE.md`. Confirm with the user before removing a rule.
+   - This is the exact reverse of the Step 10 boundary (which pushes prescriptive content out of knowledge into rules). The descriptive/prescriptive boundary runs **both ways**.
 
 Semantic audit output must list:
 
@@ -217,12 +217,12 @@ For `.claude/tasks/`:
 For `.claude/knowledge/`:
 
 - If the folder does not exist, create it with a seed `INDEX.md` (header comment + empty `## Knowledge` section).
-- **Bootstrap an empty tier (opt-in, ask first).** If `knowledge/` is empty — the common case right after adopting the tier — offer to seed it; **never auto-run**. Source *only* from existing durable facts you can ground: the project `README`, `docs/`, architecture/contract files, and descriptive content removed from `.claude/CLAUDE.md` in Steps 4/6 (build on your Step 2 analysis). Propose a **small** set of DRAFT entries (domain, architecture, key integrations, glossary — a handful, not an exhaustive dump); **every entry MUST carry a `sources:` anchor** to the real file it summarizes — no source, no entry (that would be speculation). Write only entries the user approves; never bulk-generate, and never invent facts by reading raw implementation.
+- **Bootstrap an empty tier (opt-in, ask first).** If `knowledge/` is empty — the common case right after adopting the tier — offer to seed it; **never auto-run**. Source _only_ from existing durable facts you can ground: the project `README`, `docs/`, architecture/contract files, and descriptive content removed from `.claude/CLAUDE.md` in Steps 4/6 (build on your Step 2 analysis). Propose a **small** set of DRAFT entries (domain, architecture, key integrations, glossary — a handful, not an exhaustive dump); **every entry MUST carry a `sources:` anchor** to the real file it summarizes — no source, no entry (that would be speculation). Write only entries the user approves; never bulk-generate, and never invent facts by reading raw implementation.
 - **Reconcile the index**: every `.md` file (excluding `INDEX.md`) must have an `INDEX.md` entry, and every entry must point to a real file. Add missing entries; flag dead entries.
 - Audit each knowledge file: frontmatter present (`name`/`description`/`type`/`updated`); `sources:` relative paths still exist (dead → report); `updated:` older than 90 days → flag for review.
 - Enforce the boundary: knowledge is **descriptive**. If a file carries prescriptive rules (`MUST`/`NEVER`), propose moving that content to `.claude/rules/`. The boundary is bidirectional — Step 5 handles the reverse (a purely descriptive rule that belongs here).
 - **Verify concrete claims against the repo** — apply the same rigor as Step 5, on knowledge bodies: extract concrete claims (named files, modules, symbols, endpoints, config keys, paths) and confirm they still exist. Classify accurate / stale / needs-user-decision. Knowledge is descriptive fact about the codebase, so it rots faster than rules — flag stale facts for user review, never auto-delete. Recommend a `sources:` or `verify:` anchor for any entry that has neither (unanchored facts can't be checked deterministically by `/doctor`).
-- **Overlap detection** (`knowledge ↔ knowledge` and `knowledge ↔ rules`): use `description`/`type` keywords as a cheap overlap signal (as Step 9 uses tag overlap for rules); read bodies only when keywords collide. Two knowledge entries on the same topic → propose merging into the most specific owner + a `[[link]]`. A fact restated inside a rule's prose → propose keeping the *behavior* in the rule and the *fact* in knowledge, cross-linked — never duplicated. Propose only; merge after user confirmation.
+- **Overlap detection** (`knowledge ↔ knowledge` and `knowledge ↔ rules`): use `description`/`type` keywords as a cheap overlap signal (as Step 9 uses tag overlap for rules); read bodies only when keywords collide. Two knowledge entries on the same topic → propose merging into the most specific owner + a `[[link]]`. A fact restated inside a rule's prose → propose keeping the _behavior_ in the rule and the _fact_ in knowledge, cross-linked — never duplicated. Propose only; merge after user confirmation.
 - **Reconcile `related:` links**: confirm each `[[slug]]` in a knowledge file's `related:` resolves to an existing knowledge topic or rule; repair or report dead links.
 - Do not auto-delete or rewrite knowledge bodies — flag staleness and dead pointers for user review. Keep `INDEX.md` a one-line-per-entry map.
 

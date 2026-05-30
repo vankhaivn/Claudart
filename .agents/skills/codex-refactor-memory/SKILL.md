@@ -27,8 +27,8 @@ Execute the following steps systematically, without losing essential project con
 
 - Confirm whether the canonical memory file is root `AGENTS.md` or a template source such as `.codex/AGENTS.md`.
 - If both root `AGENTS.md` and `.codex/AGENTS.md` exist, compare them.
-    - If they are identical, remove or ignore the duplicate according to the repository convention.
-    - If they differ, ask which file should win before overwriting either one.
+  - If they are identical, remove or ignore the duplicate according to the repository convention.
+  - If they differ, ask which file should win before overwriting either one.
 - Search skills, agents, and guidelines for references to deleted or deprecated memory files and update them during the refactor.
 
 ## 2. Analyze The Project
@@ -89,33 +89,33 @@ Do not stop at frontmatter, link, and glob hygiene. A successful memory refactor
 For every non-universal guideline under `.codex/guidelines/`:
 
 1. Read the guideline body and identify concrete claims.
-    - Claims include named files, modules, classes, functions, commands, config keys, environment variables, endpoints, schemas, database models, event names, message/queue topics, feature flags, UI routes, document contracts, or operational workflows.
-    - Ignore purely stylistic rules unless they contradict the codebase's current conventions.
+   - Claims include named files, modules, classes, functions, commands, config keys, environment variables, endpoints, schemas, database models, event names, message/queue topics, feature flags, UI routes, document contracts, or operational workflows.
+   - Ignore purely stylistic rules unless they contradict the codebase's current conventions.
 2. Verify each concrete claim against the actual repository.
-    - Use repository-native source files, package manifests, schemas, migrations, generated types, tests, docs/contracts, and config loaders as evidence.
-    - Prefer structured files and source-of-truth contracts over comments or stale prose.
-    - Use `rg` / `rg --files` first; use language/framework tooling only when it materially improves confidence.
+   - Use repository-native source files, package manifests, schemas, migrations, generated types, tests, docs/contracts, and config loaders as evidence.
+   - Prefer structured files and source-of-truth contracts over comments or stale prose.
+   - Use `rg` / `rg --files` first; use language/framework tooling only when it materially improves confidence.
 3. Classify each finding:
-    - **accurate**: guideline matches source and remains useful.
-    - **guideline-stale**: source/contract has intentionally moved on; update the guideline.
-    - **source-debt**: guideline is still the desired invariant, but source currently violates it; keep the guideline and report the code/doc debt instead of weakening the rule.
-    - **open-work**: a task, issue, TODO, or explicit user decision already tracks the gap; keep or update the guideline so future agents see the intended direction and the active gap.
-    - **needs-user-decision**: source and guideline disagree and neither clearly wins from local evidence; ask before rewriting either.
+   - **accurate**: guideline matches source and remains useful.
+   - **guideline-stale**: source/contract has intentionally moved on; update the guideline.
+   - **source-debt**: guideline is still the desired invariant, but source currently violates it; keep the guideline and report the code/doc debt instead of weakening the rule.
+   - **open-work**: a task, issue, TODO, or explicit user decision already tracks the gap; keep or update the guideline so future agents see the intended direction and the active gap.
+   - **needs-user-decision**: source and guideline disagree and neither clearly wins from local evidence; ask before rewriting either.
 4. Detect overbroad or kitchen-sink guidelines.
-    - If one guideline mixes unrelated domains, propose splitting it into focused files.
-    - Split only when the new files have clear `paths:` scopes and durable ownership. Do not create files just to satisfy symmetry.
-    - Preserve generic cross-cutting rules in broad files; move business/domain invariants into focused files.
+   - If one guideline mixes unrelated domains, propose splitting it into focused files.
+   - Split only when the new files have clear `paths:` scopes and durable ownership. Do not create files just to satisfy symmetry.
+   - Preserve generic cross-cutting rules in broad files; move business/domain invariants into focused files.
 5. Detect near-duplicates and stale detail.
-    - If two guidelines repeat the same invariant, keep the rule in the most specific owner and replace the other copy with a pointer.
-    - Replace fragile line-number references and long source excerpts with stable symbol/file references where possible.
-    - Remove "future" or "temporary" wording once the feature is implemented, unless it still describes a real future state.
+   - If two guidelines repeat the same invariant, keep the rule in the most specific owner and replace the other copy with a pointer.
+   - Replace fragile line-number references and long source excerpts with stable symbol/file references where possible.
+   - Remove "future" or "temporary" wording once the feature is implemented, unless it still describes a real future state.
 6. Promote stable live-state decisions.
-    - Read `.codex/CONTEXT.md` for Recent Decisions. If a decision is now durable project behavior, move it into the relevant guideline and remove it from CONTEXT through the checkpoint workflow.
-    - If a decision is still temporary, keep it in CONTEXT and do not bury it in guidelines.
+   - Read `.codex/CONTEXT.md` for Recent Decisions. If a decision is now durable project behavior, move it into the relevant guideline and remove it from CONTEXT through the checkpoint workflow.
+   - If a decision is still temporary, keep it in CONTEXT and do not bury it in guidelines.
 7. Detect mis-tiered content (a guideline that belongs in knowledge).
-    - `.codex/guidelines/` is **prescriptive** — each guideline constrains behavior (an enforceable `MUST`/`NEVER`/should-avoid invariant). If a guideline body is purely **descriptive** — it only states how a subsystem works, an integration detail, a domain term, or a doc pointer, with no constraint a reader could "follow" — it is misfiled.
-    - Propose moving it to `.codex/knowledge/`: create or update the topic file + its `INDEX.md` entry, then remove the guideline and its reference from `AGENTS.md`. Confirm with the user before removing a guideline.
-    - This is the exact reverse of the Step 10 boundary (which pushes prescriptive content out of knowledge into guidelines). The descriptive/prescriptive boundary runs **both ways**.
+   - `.codex/guidelines/` is **prescriptive** — each guideline constrains behavior (an enforceable `MUST`/`NEVER`/should-avoid invariant). If a guideline body is purely **descriptive** — it only states how a subsystem works, an integration detail, a domain term, or a doc pointer, with no constraint a reader could "follow" — it is misfiled.
+   - Propose moving it to `.codex/knowledge/`: create or update the topic file + its `INDEX.md` entry, then remove the guideline and its reference from `AGENTS.md`. Confirm with the user before removing a guideline.
+   - This is the exact reverse of the Step 10 boundary (which pushes prescriptive content out of knowledge into guidelines). The descriptive/prescriptive boundary runs **both ways**.
 
 Semantic audit output must list:
 

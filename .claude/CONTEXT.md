@@ -12,13 +12,17 @@ Never mention "uncommitted changes" or reference git status — it will be stale
 -->
 
 ## In Progress
+
 - _(nothing yet — run `/checkpoint` at the end of a session to populate this)_
 
 ## Open Questions / Blockers
+
 - _(none)_
 
 ## Recent Decisions (not yet promoted to rules)
+
 - _(none)_
 
 ## Next Session Should Start By
+
 - _(no handoff yet)_

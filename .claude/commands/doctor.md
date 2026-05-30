@@ -66,10 +66,10 @@ For every rule file in `.claude/rules/*.md`:
 - **CRITICAL**: search `.claude/CLAUDE.md` AND every file in `.claude/rules/` for any `@.claude/JOURNAL.md` reference (use `grep -r '@.claude/JOURNAL.md' .claude/CLAUDE.md .claude/rules/`). If found, flag as **Critical** — JOURNAL must NEVER be loaded into session context (defeats the entire token-saving purpose). Recommend immediate removal.
 - Search `.claude/CONTEXT.md` for `<!-- since: YYYY-MM-DD -->` comments. Flag items older than 30 days as graduation candidates if they remain in Recent Decisions or otherwise look durable. If an obviously long-lived decision has no `since:` comment, warn that future `/checkpoint` should preserve/add one.
 - For `.claude/JOURNAL.md` integrity, use spot-checks rather than full reads (the file may be large):
-    - `head -n 20 .claude/JOURNAL.md` — verify the canonical header is intact.
-    - `wc -l .claude/JOURNAL.md` — report total entry count for the user.
-    - `tail -n 5 .claude/JOURNAL.md` — sample-check the most recent lines match the `YYYY-MM-DD | <type> | <summary>` format.
-    - Skip deeper validation. If a malformed line is suspected, ask the user; do not slurp the whole file just to verify format.
+  - `head -n 20 .claude/JOURNAL.md` — verify the canonical header is intact.
+  - `wc -l .claude/JOURNAL.md` — report total entry count for the user.
+  - `tail -n 5 .claude/JOURNAL.md` — sample-check the most recent lines match the `YYYY-MM-DD | <type> | <summary>` format.
+  - Skip deeper validation. If a malformed line is suspected, ask the user; do not slurp the whole file just to verify format.
 
 ### 5c. Task Document Health (`.claude/tasks/`)
 
@@ -103,7 +103,7 @@ Skip this section if `.claude/knowledge/` does not exist.
 - For every knowledge file (excluding `INDEX.md`), check frontmatter: required `name`, `description`, `type`, `updated`; `type` ∈ {domain, architecture, integration, glossary, reference, agent-context}. Missing/invalid → flag as **Low**.
 - **Dead local references**: for each `sources:` entry that is a relative path, confirm the target exists on disk; missing → flag as **Low** (stale pointer). Do NOT fetch URLs — only list `sources:` that are neither a valid `http(s)` URL nor an existing path as malformed.
 - **Staleness**: flag any knowledge file whose `updated:` is more than 90 days old, or whose stated `verify:` condition no longer holds, as a **Low** review candidate.
-- **Descriptive-only separation**: knowledge is facts, not behavior. If a knowledge file contains prescriptive language (`MUST`, `NEVER`, `YOU MUST`, `always do`/`never do`), flag as **Medium** — that content belongs in `.claude/rules/`. The boundary runs both ways — §6 flags the reverse (a purely descriptive *rule* that belongs in knowledge).
+- **Descriptive-only separation**: knowledge is facts, not behavior. If a knowledge file contains prescriptive language (`MUST`, `NEVER`, `YOU MUST`, `always do`/`never do`), flag as **Medium** — that content belongs in `.claude/rules/`. The boundary runs both ways — §6 flags the reverse (a purely descriptive _rule_ that belongs in knowledge).
 - **INDEX stays a map**: `INDEX.md` should be one line per entry. If it grows prose paragraphs or deep sections, flag as **Low** (knowledge belongs in topic files, not the index).
 - **Not auto-loaded**: run `grep -n '@.claude/knowledge/' .claude/CLAUDE.md`. A plain (non-`@`) pointer line is fine; an `@`-import of `INDEX.md` or any detail file → flag as **Medium** (knowledge is surfaced by `/start`, not force-loaded every turn).
 - **Unanchored entries** (staleness cannot be checked): a knowledge file with neither a `sources:` path nor a `verify:` condition can't be staleness-checked deterministically → flag as **Low**, suggest adding a `verify:` anchor or a `sources:` path so future runs can catch rot.

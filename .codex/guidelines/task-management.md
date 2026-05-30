@@ -36,30 +36,35 @@ Every task file must use this exact skeleton. Omit a section only if explicitly 
 ```markdown
 ---
 slug: <kebab-slug-matching-filename>
-status: planning              # planning | in-progress | awaiting-review | blocked | done | cancelled
+status: planning # planning | in-progress | awaiting-review | blocked | done | cancelled
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
-agent: codex                  # claude | codex | both
+agent: codex # claude | codex | both
 tags: [1-5 lowercase kebab-case tags]
 ---
 
 # <Human-readable Title>
 
 ## Purpose
+
 <2-3 sentences: what someone gains after this change and how they can see it working.>
 
 ## Context & Orientation
 
 ### Related Code
+
 - `path/to/file.ext` — why it matters
 - `path/to/dir/` — what's in there
 
 ### Related Docs
+
 - `docs/...` — internal project docs the next session must read
 - https://... — external spec, RFC, or reference
 
 ### Memory Hints
+
 <Free-form notes from this session to the next. Things the future agent must not "forget":
+
 - Non-obvious constraints discovered while exploring
 - Libraries/tools the project uses (e.g., "uses Zod, not Joi")
 - Pitfalls already encountered
@@ -67,25 +72,31 @@ tags: [1-5 lowercase kebab-case tags]
 - Anything that would save the next session from re-discovering the same thing>
 
 ## Plan of Work
+
 <Prose narrative, 1-3 paragraphs, describing the sequence of edits and why they happen in that order. Not a checklist — that comes next.>
 
 ## Concrete Steps
+
 - [ ] Step 1 — exact action, target file, expected outcome
 - [ ] Step 2 — ...
 - [x] (YYYY-MM-DD HH:MMZ) Step 0 — example completed step with UTC timestamp
 
 ## Validation & Acceptance
+
 - [ ] Observable check 1 (e.g., `npm test -- auth.spec.ts` passes)
 - [ ] Observable check 2 (e.g., curl with no token returns 401)
 
 ## Decision Log
+
 - **Decision** (YYYY-MM-DD, codex): <what was chosen>.
   **Rationale**: <why; what alternatives were rejected>.
 
 ## Surprises & Discoveries
+
 - (YYYY-MM-DD) <what was unexpected while exploring or implementing>
 
 ## Outcomes & Retrospective
+
 <Fill only when status flips to `done` or `cancelled`. What was delivered, what gaps remain, what was learned.>
 ```
 
@@ -206,12 +217,12 @@ The cycle Phase 1 <-> Phase 2b may repeat. That's correct behavior, not a bug.
 
 ## Approval Signal Cheat Sheet
 
-| Transition | What user says |
-|---|---|
-| `planning -> in-progress` | "go", "approved", "implement", "do it", "ok làm đi", "start" |
-| `awaiting-review -> done` | "approved", "confirmed", "looks good", "close it", "done", "ship", "ok đóng", "merge it" |
-| `awaiting-review -> in-progress` | Any report of a problem — "didn't work", "broken", "missed X", "step Y is wrong" |
-| `* -> cancelled` | "cancel", "abandon", "drop this", "bỏ task" |
+| Transition                       | What user says                                                                           |
+| -------------------------------- | ---------------------------------------------------------------------------------------- |
+| `planning -> in-progress`        | "go", "approved", "implement", "do it", "ok làm đi", "start"                             |
+| `awaiting-review -> done`        | "approved", "confirmed", "looks good", "close it", "done", "ship", "ok đóng", "merge it" |
+| `awaiting-review -> in-progress` | Any report of a problem — "didn't work", "broken", "missed X", "step Y is wrong"         |
+| `* -> cancelled`                 | "cancel", "abandon", "drop this", "bỏ task"                                              |
 
 The agent must wait for the explicit signal. Enthusiasm ("great!", "nice plan") is NOT approval. Questions are NOT approval. Edits the user makes to the task file are NOT approval.
 
@@ -232,9 +243,11 @@ Never assume the file is still accurate without verification. The Memory Hints s
 <!-- .codex/tasks/index.md — dashboard of task documents. Maintained by $codex-plan and $codex-checkpoint. -->
 
 ## Active
+
 - [<slug>](<YYYY-MM-DD-NNN-slug>.md) — <status> — updated <YYYY-MM-DD>
 
 ## Recently Done (last 14 days)
+
 - [<slug>](done/<YYYY-MM-DD-NNN-slug>.md) — done <YYYY-MM-DD>
 ```
 
@@ -249,7 +262,7 @@ CONTEXT.md and task files are complementary, not exclusive:
 
 - **CONTEXT.md** holds two things: (a) a one-line pointer to the currently-focused task (`Working task \`<slug>\` (see .codex/tasks/<file>)`) so `$codex-start` sees task work at a glance, and (b) ad-hoc work the user asked for **without** a `$codex-plan` — quick fixes, transient tweaks, mid-flight pivots that don't justify a full task document.
 - **Task file** holds the full body: Purpose, Plan of Work, Concrete Steps, Decisions, Memory Hints, etc.
-- **`tasks/index.md`** is the canonical dashboard for *all* active tasks; CONTEXT only mentions the one in focus.
+- **`tasks/index.md`** is the canonical dashboard for _all_ active tasks; CONTEXT only mentions the one in focus.
 
 So: a task's existence is signalled in CONTEXT by a pointer line. The task's content lives in its own file. The two never duplicate each other.
 
@@ -259,7 +272,7 @@ So: a task's existence is signalled in CONTEXT by a pointer line. The task's con
 - Editing code while `status: planning` or `status: awaiting-review`. Both states are read-only locks.
 - Treating user enthusiasm or silence as approval. The signals listed in the cheat sheet are explicit and required.
 - Letting `updated:` go stale (>3 days during in-progress without movement signals abandonment — flip to `blocked` or address it).
-- Copying a task's body (Steps / Decisions / Surprises / Memory Hints) into `.codex/CONTEXT.md`. CONTEXT may *reference* the active task by slug + path, but must never duplicate its content.
+- Copying a task's body (Steps / Decisions / Surprises / Memory Hints) into `.codex/CONTEXT.md`. CONTEXT may _reference_ the active task by slug + path, but must never duplicate its content.
 - Auto-loading task files via `AGENTS.md`. Task files are working documents, not always-loaded guidelines.
 - Deleting completed task files. They are project history.
 - Creating a task without filling Memory Hints if any non-obvious context was discovered during planning.

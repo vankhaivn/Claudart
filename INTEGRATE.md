@@ -4,7 +4,7 @@
 
 Source of truth: <https://github.com/vankhaivn/Claudart> (branch `main`).
 
-This file is a **protocol, not a script** — follow it top to bottom. It exists because the one-line `install.sh` does a *fresh copy* and will clobber an existing setup. You are smarter than that: you can read the repo, compare it to this project, and merge surgically.
+This file is a **protocol, not a script** — follow it top to bottom. It exists because the one-line `install.sh` does a _fresh copy_ and will clobber an existing setup. You are smarter than that: you can read the repo, compare it to this project, and merge surgically.
 
 > **Golden rule — read freely, write only what is approved.** NEVER overwrite or delete anything the user authored or customized. When CLAUDART and the project disagree, show a diff and ASK. Default to preserving the user's work, even when taking CLAUDART's version "seems obviously better."
 
@@ -18,12 +18,13 @@ This file is a **protocol, not a script** — follow it top to bottom. It exists
    ```
    If you cannot clone (no git, or no network for clone), fetch files on demand from
    `https://raw.githubusercontent.com/vankhaivn/Claudart/main/<path>` instead.
-2. Before touching anything, read these in the source to integrate the *model*, not just files: `README.md`, `docs/workflow.md`, `CONTRIBUTING.md`.
+2. Before touching anything, read these in the source to integrate the _model_, not just files: `README.md`, `docs/workflow.md`, `CONTRIBUTING.md`.
 3. Do **not** run `install.sh` in a project that already has its own AI setup — that is exactly the situation this protocol replaces.
 
 ## What CLAUDART contains (orientation — the clone is the source of truth)
 
 **Claude layer** (`.claude/`):
+
 - `commands/` — slash commands: `start`, `plan`, `checkpoint`, `learn`, `refactor-memory`, `doctor`, `project-discovery`
 - `agents/` — review agents: `clean-code-reviewer`, `security-auditor` (read-only on user code)
 - `rules/` — **prescriptive**, path-scoped behavior (`ai-behavior`, `task-management`)
@@ -32,6 +33,7 @@ This file is a **protocol, not a script** — follow it top to bottom. It exists
 - `tasks/` — persistent plan documents (`index.md` + `done/`)
 
 **Codex layer** (`.codex/` + `.agents/`):
+
 - `.agents/skills/codex-*` — the same commands as Codex skills
 - `.codex/guidelines/` (= rules), `.codex/knowledge/`, `.codex/agents/*.toml`, `.codex/config.toml`, `.codex/CONTEXT.md`, `.codex/JOURNAL.md`, `.codex/tasks/`
 - `AGENTS.md` at repo root (Codex memory index; the installer copies it from `.codex/AGENTS.md`)
@@ -53,10 +55,13 @@ Then ask which **layer(s)** to target — Claude (`.claude/`), Codex (`.codex/` 
 State a short plan for the detected scenario and chosen layer(s): list **exactly** which files you would add, merge, or skip. **Wait for explicit approval before writing anything.**
 
 ### Scenario A — Clean adopt
+
 Copy the chosen layer(s) from the clone. The only merge is into index files that may already exist: if a root `CLAUDE.md` / `AGENTS.md` is present, **splice** CLAUDART's Core Commands and Domain Rules / Guidelines pointers into it — do not replace it. Then go to Step 3 → Step 4.
 
 ### Scenario B — Merge into an existing workflow (do not clobber)
+
 For each CLAUDART piece, find its counterpart in the project and act by type:
+
 - **Net-new** (no counterpart — e.g. `knowledge/`, `tasks/`, a command they lack) → safe to add. Still list it in the plan.
 - **Same concept, different file** (e.g. they have their own reviewer agent) → do NOT overwrite. Show both and ask: keep theirs, take CLAUDART's, or run both under a renamed file.
 - **Same filename** (`CLAUDE.md`, `AGENTS.md`, a rule of the same name) → **merge sections**, never replace. Add CLAUDART's command list / rule pointers / self-evolution section while preserving everything the user wrote.
@@ -65,11 +70,12 @@ For each CLAUDART piece, find its counterpart in the project and act by type:
 Present the full add / merge / skip plan and ask before writing.
 
 ### Scenario C — Upgrade an existing CLAUDART install ("what changed?")
+
 1. Diff the project's CLAUDART files against the clone and bucket every difference:
    - **New upstream** (absent locally, e.g. `.claude/knowledge/`) → propose adding, with a one-line "what it's for."
    - **Updated upstream, untouched locally** (local matches an older CLAUDART version) → propose replacing with the new version.
    - **Diverged** (the user edited this file locally) → **3-way reconcile**: show the upstream change beside their version and ASK how to merge. Never discard their edits.
-2. For *why* things changed, skim recent commit messages in the clone: `git -C /tmp/claudart-src log --oneline -20`.
+2. For _why_ things changed, skim recent commit messages in the clone: `git -C /tmp/claudart-src log --oneline -20`.
 3. Produce a **"What's new since your version"** summary first, then apply only what the user approves.
 
 ## Step 3 — Conflict protocol (every scenario)

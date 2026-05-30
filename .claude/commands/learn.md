@@ -22,32 +22,31 @@ You cannot judge deviations against rules you haven't re-read. If `.claude/rules
 
 Walk the conversation chronologically, comparing each assistant turn against the rule index from Phase 0.
 
-1. List every moment the human corrected you OR you deviated from a rule. For each one, answer: *"What rationalization did I use to justify the deviation?"* — do not just say "I missed the rule".
+1. List every moment the human corrected you OR you deviated from a rule. For each one, answer: _"What rationalization did I use to justify the deviation?"_ — do not just say "I missed the rule".
 2. Did any rule fail because it only described the happy path without closing obvious loopholes?
 3. For each identified gap, update the rule using this pattern: `NEVER do X, even when Y seems like a good reason` — explicitly name the rationalization so future runs cannot reuse it.
 4. If rules contradict each other, resolve the contradiction immediately in `.claude/rules/` or `.claude/CLAUDE.md`.
-5. Also save quiet *confirmations*: if the human accepted an unusual judgment call without pushback, that's a validated approach — record it so you don't drift away from it next time.
+5. Also save quiet _confirmations_: if the human accepted an unusual judgment call without pushback, that's a validated approach — record it so you don't drift away from it next time.
 
 ## Phase 2: New Knowledge Integration (Self-Evolution)
 
 1. Identify any core bug root-causes, architectural decisions, or new design patterns successfully validated in this session.
 2. **Pattern check via JOURNAL** — `.claude/JOURNAL.md` can grow to thousands of lines, so NEVER full-read it. Use this token-efficient strategy:
-    - **Tail first**: read only the last ~200 lines via `tail -n 200 .claude/JOURNAL.md` (Bash) or `Read` with an `offset` near EOF.
-    - **Grep when targeted**: if you suspect a specific pattern is recurring, use `grep '| decision |' .claude/JOURNAL.md` (or `pivot`) to surface only matching lines without loading the rest.
-    - Look for the same `decision` or `pivot` recurring 2+ times in what you read. A repeating decision is a strong signal that the underlying principle should graduate from CONTEXT/JOURNAL into `.claude/rules/`. Surface these candidates explicitly.
-    - Skip this step entirely if `.claude/JOURNAL.md` doesn't exist or has fewer than 5 entries.
+   - **Tail first**: read only the last ~200 lines via `tail -n 200 .claude/JOURNAL.md` (Bash) or `Read` with an `offset` near EOF.
+   - **Grep when targeted**: if you suspect a specific pattern is recurring, use `grep '| decision |' .claude/JOURNAL.md` (or `pivot`) to surface only matching lines without loading the rest.
+   - Look for the same `decision` or `pivot` recurring 2+ times in what you read. A repeating decision is a strong signal that the underlying principle should graduate from CONTEXT/JOURNAL into `.claude/rules/`. Surface these candidates explicitly.
+   - Skip this step entirely if `.claude/JOURNAL.md` doesn't exist or has fewer than 5 entries.
 3. Use Chain of Thought before updating files:
-    - First, list all existing files in `.claude/rules/` (already done in Phase 0).
-    - Compare the new knowledge with the scope of these existing files.
-    - **CRITICAL CONSTRAINT**: DO NOT shoehorn or force new concepts into an existing file if the match is less than 80%. It is strictly PREFERRED to create a new domain file rather than polluting existing specific rules.
-    - Then, decide:
-      - Existing domain (perfect match) → Update the exact file in `.claude/rules/`.
-      - New domain (no strong match) → Create a new `.md` file in `.claude/rules/` with complete YAML frontmatter and append the `@` import to `.claude/CLAUDE.md`.
-      - Global standard (applies universally) → Update `.claude/CLAUDE.md` (or `.claude/rules/ai-behavior.md` if it's a behavioral rather than structural rule).
-      - Durable project *fact* (descriptive, not behavior — how a subsystem works, an integration detail, a domain term, a pointer to a doc in another folder) → this is **knowledge, not a rule**. Create or update a topic file in `.claude/knowledge/` (frontmatter `name`/`description`/`type`/`updated`; optional `sources`/`related`/`verify`) and register it in `.claude/knowledge/INDEX.md` in the same step. Rules prescribe behavior; knowledge describes facts. (Routine fact-capture is `/checkpoint`'s job; `/learn` writes knowledge only when a retrospective surfaces a durable fact checkpoint missed.)
+   - First, list all existing files in `.claude/rules/` (already done in Phase 0).
+   - Compare the new knowledge with the scope of these existing files.
+   - **CRITICAL CONSTRAINT**: DO NOT shoehorn or force new concepts into an existing file if the match is less than 80%. It is strictly PREFERRED to create a new domain file rather than polluting existing specific rules.
+   - Then, decide:
+     - Existing domain (perfect match) → Update the exact file in `.claude/rules/`.
+     - New domain (no strong match) → Create a new `.md` file in `.claude/rules/` with complete YAML frontmatter and append the `@` import to `.claude/CLAUDE.md`.
+     - Global standard (applies universally) → Update `.claude/CLAUDE.md` (or `.claude/rules/ai-behavior.md` if it's a behavioral rather than structural rule).
+     - Durable project _fact_ (descriptive, not behavior — how a subsystem works, an integration detail, a domain term, a pointer to a doc in another folder) → this is **knowledge, not a rule**. Create or update a topic file in `.claude/knowledge/` (frontmatter `name`/`description`/`type`/`updated`; optional `sources`/`related`/`verify`) and register it in `.claude/knowledge/INDEX.md` in the same step. Rules prescribe behavior; knowledge describes facts. (Routine fact-capture is `/checkpoint`'s job; `/learn` writes knowledge only when a retrospective surfaces a durable fact checkpoint missed.)
 
-**Boundary**: `/learn` updates **rules, `.claude/knowledge/`, and `.claude/CLAUDE.md` only**. Do NOT modify `.claude/CONTEXT.md` (that's `/checkpoint`'s job) and do NOT rewrite `.claude/JOURNAL.md` entries (it's append-only). You may *read* both as evidence.
-
+**Boundary**: `/learn` updates **rules, `.claude/knowledge/`, and `.claude/CLAUDE.md` only**. Do NOT modify `.claude/CONTEXT.md` (that's `/checkpoint`'s job) and do NOT rewrite `.claude/JOURNAL.md` entries (it's append-only). You may _read_ both as evidence.
 
 ## Output Standard
 

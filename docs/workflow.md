@@ -34,7 +34,7 @@ CONTEXT.md       JOURNAL.md          rules/ · guidelines/      knowledge/
 ("right now")    ("what happened")   ("how to behave")         ("what the project is")
 ```
 
-- **`CONTEXT.md`** — declarative state, what is true *right now*. Updated by `/checkpoint` (Claude) or `$codex-checkpoint` (Codex). Hard ceiling: 150 lines.
+- **`CONTEXT.md`** — declarative state, what is true _right now_. Updated by `/checkpoint` (Claude) or `$codex-checkpoint` (Codex). Hard ceiling: 150 lines.
 - **`JOURNAL.md`** — append-only audit log. One line per retired item. **Never auto-loaded into session context** — it exists for explicit review, not active recall.
 - **`rules/`** (Claude) and **`guidelines/`** (Codex) — durable, path-scoped **behavioral** rules (prescriptive — "how to behave"). Created when a pattern recurs enough that `/learn` (or `$codex-learn`) promotes it.
 - **`knowledge/`** — durable **descriptive** project facts (domain, architecture, glossary) and pointers to canonical docs in other folders. The opposite axis from rules: rules prescribe, knowledge describes. One topic per file; only `knowledge/INDEX.md` is surfaced — by `/start` (or `$codex-start`) — and detail files are read on demand (map-not-encyclopedia). Reference external docs rather than duplicating them, so they never go stale-by-copy.
@@ -108,12 +108,12 @@ Found a bug? Just say it. The agent appends your report verbatim to Surprises, u
 
 The agent watches for natural-language cues, not slash commands:
 
-| Transition | What you say |
-|---|---|
-| `planning → in-progress` | "go", "approved", "implement", "do it", "ok làm đi", "start" |
-| `awaiting-review → done` | "approved", "confirmed", "looks good", "close it", "done", "ship", "ok đóng" |
-| `awaiting-review → in-progress` | Any report of a problem — "didn't work", "broken", "missed X" |
-| `* → cancelled` | "cancel", "abandon", "drop this", "bỏ task" |
+| Transition                      | What you say                                                                 |
+| ------------------------------- | ---------------------------------------------------------------------------- |
+| `planning → in-progress`        | "go", "approved", "implement", "do it", "ok làm đi", "start"                 |
+| `awaiting-review → done`        | "approved", "confirmed", "looks good", "close it", "done", "ship", "ok đóng" |
+| `awaiting-review → in-progress` | Any report of a problem — "didn't work", "broken", "missed X"                |
+| `* → cancelled`                 | "cancel", "abandon", "drop this", "bỏ task"                                  |
 
 Enthusiasm ("great!", "nice plan") is **not** approval. Edits you make to the task file are **not** approval. The signals are explicit and required.
 
@@ -145,15 +145,15 @@ Task documents persist the durable parts of delegation — authorization status,
 
 ## Commands and skills
 
-| Claude Code          | Codex CLI                  | What it does                                                                                        |
-| -------------------- | -------------------------- | --------------------------------------------------------------------------------------------------- |
-| `/start`             | `$codex-start`             | Lightweight session boot — reads CONTEXT, active tasks, and the last 3 git commits                  |
-| `/plan <task>`       | `$codex-plan <task>`       | Creates a persistent implementation plan in `tasks/` — replaces native plan mode                    |
-| `/project-discovery` | `$codex-project-discovery` | Interview-first planning — turns rough ideas into project docs before any code                      |
+| Claude Code          | Codex CLI                  | What it does                                                                                                                         |
+| -------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `/start`             | `$codex-start`             | Lightweight session boot — reads CONTEXT, active tasks, and the last 3 git commits                                                   |
+| `/plan <task>`       | `$codex-plan <task>`       | Creates a persistent implementation plan in `tasks/` — replaces native plan mode                                                     |
+| `/project-discovery` | `$codex-project-discovery` | Interview-first planning — turns rough ideas into project docs before any code                                                       |
 | `/refactor-memory`   | `$codex-refactor-memory`   | Trims CLAUDE.md/AGENTS.md into a lightweight index; extracts durable guidance into rules/guidelines; consolidates the knowledge tier |
-| `/checkpoint`        | `$codex-checkpoint`        | Declarative CONTEXT rebuild + `tasks/index.md` sync + JOURNAL append + durable facts → `knowledge/`                                |
-| `/learn`             | `$codex-learn`             | Retrospective — promotes recurring lessons into rules/guidelines with loophole-closing language     |
-| `/doctor`            | `$codex-doctor`            | Read-only health check: structure, frontmatter, token hygiene, wiring, task & knowledge hygiene                 |
+| `/checkpoint`        | `$codex-checkpoint`        | Declarative CONTEXT rebuild + `tasks/index.md` sync + JOURNAL append + durable facts → `knowledge/`                                  |
+| `/learn`             | `$codex-learn`             | Retrospective — promotes recurring lessons into rules/guidelines with loophole-closing language                                      |
+| `/doctor`            | `$codex-doctor`            | Read-only health check: structure, frontmatter, token hygiene, wiring, task & knowledge hygiene                                      |
 
 Review agents ship with both layers: `clean-code-reviewer` (scope + Clean Code discipline) and `security-auditor` (OWASP audit — read-only on your code, but writes its findings to a `security-audit-<date>.md` report at the project root and prints only the summary to chat). Claude uses kebab-case Markdown agent names; Codex uses snake_case TOML `name` values.
 

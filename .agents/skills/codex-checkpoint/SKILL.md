@@ -19,7 +19,7 @@ The output is not a log of what happened. It is a declarative snapshot of what i
 6. Task files keep their own bodies; CONTEXT.md never absorbs a task body. But CONTEXT.md should still reference the currently-focused task by slug + path in `## In Progress` so `$codex-start` sees both task and non-task work in one place. Two valid CONTEXT entries:
    - Task reference: `- Working task \`add-jwt-auth\` (see .codex/tasks/2026-05-13-001-add-jwt-auth.md) <!-- since: YYYY-MM-DD -->`
    - Ad-hoc non-task change the user requested without creating a `$codex-plan` (a quick tweak, a transient pivot): CONTEXT is its **only** home, so it gets a **micro-handoff** — intent in the user's words + files of interest + next step (see Step 4) — not just a one-line pointer.
-   Checkpoint *syncs* `tasks/index.md` AND ensures CONTEXT references the focus task, but never copies a task's Steps/Decisions/Surprises into CONTEXT.
+     Checkpoint _syncs_ `tasks/index.md` AND ensures CONTEXT references the focus task, but never copies a task's Steps/Decisions/Surprises into CONTEXT.
 7. Subagent threads are not durable project memory. Do not store subagent ids, nicknames, or transient thread state in CONTEXT. Store only durable outcomes: decisions, unresolved blockers, validated findings, changed ownership boundaries, and next steps.
 
 ## Procedure
@@ -34,13 +34,13 @@ The output is not a log of what happened. It is a declarative snapshot of what i
 
 For each item currently in `.codex/CONTEXT.md`, decide one of:
 
-| Status | Action |
-|---|---|
-| Still true right now | Keep it, refreshing wording if needed. Preserve any existing `<!-- since: YYYY-MM-DD -->` comment. |
-| Done / resolved / merged | Drop it from `.codex/CONTEXT.md`. Candidate for JOURNAL if it was a real decision, completion, or pivot. |
-| Superseded by newer state | Drop the old item and write the new current state. |
-| Broadly relevant to all future work | Propose moving it into `.codex/guidelines/` via `$codex-learn`, then drop it from CONTEXT. |
-| A durable project *fact* (domain, architecture, integration, glossary, external-doc pointer — descriptive, not behavior) | Flag for **Step 6c** — checkpoint writes it into `.codex/knowledge/` itself (descriptive, distinct from prescriptive guidelines), then drop from CONTEXT. |
+| Status                                                                                                                   | Action                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Still true right now                                                                                                     | Keep it, refreshing wording if needed. Preserve any existing `<!-- since: YYYY-MM-DD -->` comment.                                                        |
+| Done / resolved / merged                                                                                                 | Drop it from `.codex/CONTEXT.md`. Candidate for JOURNAL if it was a real decision, completion, or pivot.                                                  |
+| Superseded by newer state                                                                                                | Drop the old item and write the new current state.                                                                                                        |
+| Broadly relevant to all future work                                                                                      | Propose moving it into `.codex/guidelines/` via `$codex-learn`, then drop it from CONTEXT.                                                                |
+| A durable project _fact_ (domain, architecture, integration, glossary, external-doc pointer — descriptive, not behavior) | Flag for **Step 6c** — checkpoint writes it into `.codex/knowledge/` itself (descriptive, distinct from prescriptive guidelines), then drop from CONTEXT. |
 
 Pure tactical noise is dropped silently.
 
@@ -49,15 +49,15 @@ Pure tactical noise is dropped silently.
 Add to `.codex/CONTEXT.md` only what is true now:
 
 - Work that is mid-stream, with `file:line` where useful. If the work is being tracked in a task file, reference it by slug + path (e.g., `Working task \`add-jwt-auth\` (see .codex/tasks/2026-05-13-001-add-jwt-auth.md)`). Do not duplicate the task body here.
-- Ad-hoc changes the user requested *without* creating a `$codex-plan` (quick fixes, transient tweaks, mid-flight pivots). These have no task file, so CONTEXT **is** their handoff summary, not just a note. Give each *active* one a **micro-handoff** (see Step 4 skeleton): the user's intent in their own words, the files of interest with `file:line`, and the next concrete step. Mark them `(no task)`.
+- Ad-hoc changes the user requested _without_ creating a `$codex-plan` (quick fixes, transient tweaks, mid-flight pivots). These have no task file, so CONTEXT **is** their handoff summary, not just a note. Give each _active_ one a **micro-handoff** (see Step 4 skeleton): the user's intent in their own words, the files of interest with `file:line`, and the next concrete step. Mark them `(no task)`.
 - Decisions just made that are not yet codified in guidelines.
 - Durable subagent outcomes that still matter after this session, such as a validated finding, unresolved worker/reviewer blocker, or changed ownership boundary. Do not mention subagent thread ids.
 - Open questions or blockers currently unresolved.
 - The single most useful thing the next session should do first.
 
-A durable project *fact* surfaced this session (how a subsystem works, an integration detail, a pointer to a doc in another folder) does NOT belong in CONTEXT — flag it for **Step 6c**, which writes it into `.codex/knowledge/`. CONTEXT holds transient state, not reference knowledge.
+A durable project _fact_ surfaced this session (how a subsystem works, an integration detail, a pointer to a doc in another folder) does NOT belong in CONTEXT — flag it for **Step 6c**, which writes it into `.codex/knowledge/`. CONTEXT holds transient state, not reference knowledge.
 
-Be terse: task references, decisions, and blockers are one short sentence each. Only *active* `(no task)` work earns the 3-line micro-handoff, and only while it is live — the moment it ships or is abandoned, drop it this same checkpoint (JOURNAL it if it was a real decision/completion). That triage is what keeps CONTEXT under the ceiling.
+Be terse: task references, decisions, and blockers are one short sentence each. Only _active_ `(no task)` work earns the 3-line micro-handoff, and only while it is live — the moment it ships or is abandoned, drop it this same checkpoint (JOURNAL it if it was a real decision/completion). That triage is what keeps CONTEXT under the ceiling.
 
 For every new bullet, append `<!-- since: YYYY-MM-DD -->` using today's date. If you keep an existing bullet, preserve its original `since:` date rather than resetting it. Codex is not documented to strip HTML comments, so keep these comments short; they exist so `$codex-doctor` can flag old decisions that should graduate into guidelines.
 
@@ -69,7 +69,9 @@ Use this skeleton. Omit any section that has nothing to say.
 <!-- .codex/CONTEXT.md - current state of work. Updated by checkpoint. Declarative, not a log. -->
 
 ## In Progress
+
 <!-- planned work → one-line pointer; the task file holds the depth -->
+
 - Working task `<slug>` (see .codex/tasks/<file>) <!-- since: YYYY-MM-DD -->
 <!-- un-planned work → CONTEXT is the only handoff, so each live thread gets a micro-handoff -->
 - <short label> (no task) <!-- since: YYYY-MM-DD -->
@@ -78,12 +80,15 @@ Use this skeleton. Omit any section that has nothing to say.
   - Next: <one concrete step>
 
 ## Open Questions / Blockers
+
 - [Unresolved things blocking progress] <!-- since: YYYY-MM-DD -->
 
 ## Recent Decisions (not yet promoted to guidelines)
+
 - [Decision + brief why; promote when it stabilizes — behavior → .codex/guidelines/ via $codex-learn, durable fact → .codex/knowledge/ via $codex-checkpoint] <!-- since: YYYY-MM-DD -->
 
 ## Next Session Should Start By
+
 - [One concrete action, e.g. "run pytest tests/auth/" or "ask user about caching strategy"] <!-- since: YYYY-MM-DD -->
 ```
 
@@ -136,19 +141,24 @@ This step is independent of CONTEXT.md. Skip entirely if `.codex/tasks/` does no
    - Before archiving, scan the task's `### Memory Hints` and `### Related Docs`. If they captured project-wide durable facts (not task-specific detail), graduate them to `.codex/knowledge/` in **Step 6c** so they survive archival (project-wide durable facts only — never task-specific detail).
    - DO NOT archive `awaiting-review` tasks. Those are explicitly waiting for user confirmation; archiving them defeats the gate. They stay in the top-level `tasks/` folder and appear in the Active list.
 4. Rewrite `.codex/tasks/index.md` from scratch using the canonical skeleton:
+
    ```markdown
    <!-- .codex/tasks/index.md — dashboard of task documents. Maintained by $codex-plan and $codex-checkpoint. -->
 
    ## Active
-   - [<slug>](<filename>) — <status> — updated <YYYY-MM-DD>
+
+   - [<slug>](filename) — <status> — updated <YYYY-MM-DD>
 
    ## Recently Done (last 14 days)
+
    - [<slug>](done/<filename>) — done <YYYY-MM-DD>
    ```
+
    - `Active`: every task in top-level `tasks/` (status: planning, in-progress, awaiting-review, blocked).
    - When listing `awaiting-review` entries, append ` ⏳ awaiting your confirmation` to the line so the dashboard makes the gate visible.
    - `Recently Done`: every task in `tasks/done/` whose `updated:` date is within the last 14 days. Older completed tasks remain on disk but drop out of the index.
    - If a section has no entries, write `- _(none)_` instead.
+
 5. Count lines. If `index.md` > 100 lines, trim `Recently Done` first (shorten to last 7 days, then last 3 days, then drop the section).
 6. Flag stalled tasks: list each in the report.
    - `status: in-progress` AND `updated:` > 7 days old -> stalled work. Suggest flipping to `blocked`/`cancelled` or resuming.

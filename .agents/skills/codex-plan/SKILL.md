@@ -63,9 +63,9 @@ Use the exact skeleton in `.codex/guidelines/task-management.md`. Fill every sec
 - **Frontmatter**: `status: planning`, today's date in `created` and `updated`, `agent: codex`, 1-5 lowercase kebab tags.
 - **Purpose**: 2-3 sentences. Answer "who gains what, how do they verify it works".
 - **Context & Orientation**: this is the handoff to future-self. Fill all three subsections:
-  - *Related Code*: every file path the plan touches or reads, with one-line reason.
-  - *Related Docs*: project docs (`docs/...`) AND external references (URLs, RFCs).
-  - *Memory Hints*: free-form notes — every non-obvious thing discovered during exploration that a fresh agent would otherwise re-discover. This section is the lifeline against memory loss across sessions. Be generous. If a hint is a project-wide durable fact (not specific to this task), flag it as a `.codex/knowledge/` graduation candidate — on completion, `$codex-checkpoint` or `$codex-learn` can promote it so it survives task archival.
+  - _Related Code_: every file path the plan touches or reads, with one-line reason.
+  - _Related Docs_: project docs (`docs/...`) AND external references (URLs, RFCs).
+  - _Memory Hints_: free-form notes — every non-obvious thing discovered during exploration that a fresh agent would otherwise re-discover. This section is the lifeline against memory loss across sessions. Be generous. If a hint is a project-wide durable fact (not specific to this task), flag it as a `.codex/knowledge/` graduation candidate — on completion, `$codex-checkpoint` or `$codex-learn` can promote it so it survives task archival.
 - **Plan of Work**: 1-3 paragraphs of prose narrating the sequence and rationale. If subagents are useful, include a concise delegation strategy only when the user explicitly authorized subagents/delegation/parallel work; otherwise mention only the delegation opportunity and the approval needed.
 - **Concrete Steps**: ordered checklist. Each step is one self-contained action with target file and expected outcome. Steps should be small enough that completing one is a meaningful save point.
 - **Validation & Acceptance**: observable success criteria — tests to pass, commands to run, behaviors to verify.
