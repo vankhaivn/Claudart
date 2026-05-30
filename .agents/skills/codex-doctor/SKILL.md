@@ -92,9 +92,13 @@ Skip this section if `.codex/knowledge/` does not exist.
 - For every knowledge file (excluding `INDEX.md`), check frontmatter: required `name`, `description`, `type`, `updated`; `type` in {domain, architecture, integration, glossary, reference, agent-context}. Missing/invalid -> flag as Low.
 - Dead local references: for each `sources:` entry that is a relative path, confirm the target exists on disk; missing -> flag as Low. Do NOT fetch URLs — only list `sources:` that are neither a valid `http(s)` URL nor an existing path as malformed.
 - Staleness: flag any knowledge file whose `updated:` is more than 90 days old, or whose stated `verify:` condition no longer holds, as a Low review candidate.
-- Descriptive-only separation: knowledge is facts, not behavior. If a knowledge file contains prescriptive language (`MUST`, `NEVER`, `YOU MUST`, `always do`/`never do`), flag as Medium — that content belongs in `.codex/guidelines/`.
+- Descriptive-only separation: knowledge is facts, not behavior. If a knowledge file contains prescriptive language (`MUST`, `NEVER`, `YOU MUST`, `always do`/`never do`), flag as Medium — that content belongs in `.codex/guidelines/`. The boundary runs both ways — §7 flags the reverse (a purely descriptive guideline that belongs in knowledge).
 - INDEX stays a map: `INDEX.md` should be one line per entry. If it grows prose paragraphs or deep sections, flag as Low.
 - Not auto-loaded: search the active memory index (`AGENTS.md` / `.codex/AGENTS.md`) for any operational auto-load instruction for a knowledge detail file. A plain pointer line to `INDEX.md` is fine; an auto-load directive -> flag as Medium (`$codex-start` surfaces the index; knowledge is not force-loaded every turn).
+- Unanchored entries (staleness cannot be checked): a knowledge file with neither a `sources:` path nor a `verify:` condition can't be staleness-checked deterministically -> flag as Low, suggest adding a `verify:` anchor or a `sources:` path so future runs can catch rot.
+- Dead code references in the body: for each backtick-quoted repo path in a knowledge body (e.g. `src/auth/legacy.ts`), confirm it still exists; missing -> flag as Low (the fact may describe deleted code). Bounded and offline — check only backtick'd path-like tokens, never free prose.
+- Dangling `related:` links: for each `[[slug]]` in a knowledge file's `related:`, confirm it resolves to an existing knowledge topic (`<slug>.md`) or guideline; unresolved -> flag as Low.
+- Duplication signal: if two knowledge entries share most of their `description` keywords, or an entry's keywords strongly overlap a guideline's `description`/`tags`, flag as Low — possible intra-tier or cross-tier duplication (`$codex-refactor-memory` can consolidate). Keyword-overlap only; do not deep-read to confirm.
 
 ### 6. CONTEXT/JOURNAL Wiring
 
@@ -139,6 +143,7 @@ Skip this section if `.codex/tasks/` does not exist.
 - Vague Codex skills that do not contain sufficient detail to execute the workflow.
 - Agent delegation instructions that promise automatic subagent use without explicit user authorization.
 - Worker agent instructions that allow overlapping writes or omit ownership boundaries.
+- Mis-tiered guideline (descriptive, not prescriptive): a `.codex/guidelines/` file whose body states only facts (how a subsystem works, an integration detail, a domain term, a doc pointer) with no behavioral constraint (`MUST`/`NEVER`/`should`/`avoid`/`always`/`never`) -> flag as Low: it likely belongs in `.codex/knowledge/`. Mirror of §5c's descriptive-only check; the boundary runs both ways. Universal guidance like `ai-behavior.md` is exempt.
 
 ### 8. Size Sanity
 

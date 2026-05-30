@@ -41,6 +41,8 @@ CONTEXT.md       JOURNAL.md          rules/ · guidelines/      knowledge/
 
 A note enters at `CONTEXT.md`. When it settles, one line graduates to `JOURNAL.md`. `/checkpoint` graduates durable **facts** to a `knowledge/` topic file (registered in `INDEX.md`); when a behavioral pattern recurs, `/learn` promotes it to a rule file. Only rules and `CONTEXT.md` are auto-loaded; knowledge is surfaced as an index and pulled on demand — the rest stay out of the working set unless explicitly invoked.
 
+Knowledge is **maintained, not just accumulated**. `/doctor` is read-only and flags drift — stale facts, dead `sources:`/`related:` links, duplication across tiers, or content sitting in the wrong tier. `/refactor-memory` acts on those flags: it re-verifies each fact against the current code, consolidates duplicates, and moves content across the descriptive↔prescriptive boundary **both ways** (a fact misfiled as a rule → `knowledge/`; a rule that leaked into knowledge → back). Nothing is auto-deleted — drift is surfaced for you to confirm.
+
 ## Persistent task workflow
 
 Native plan mode (Shift+Tab in Claude Code, `/plan` in Codex CLI) keeps plans in chat. Close the terminal and the plan is gone; pause for a day and the context drifts away as other commits land.
@@ -148,10 +150,10 @@ Task documents persist the durable parts of delegation — authorization status,
 | `/start`             | `$codex-start`             | Lightweight session boot — reads CONTEXT, active tasks, and the last 3 git commits                  |
 | `/plan <task>`       | `$codex-plan <task>`       | Creates a persistent implementation plan in `tasks/` — replaces native plan mode                    |
 | `/project-discovery` | `$codex-project-discovery` | Interview-first planning — turns rough ideas into project docs before any code                      |
-| `/refactor-memory`   | `$codex-refactor-memory`   | Trims CLAUDE.md/AGENTS.md into a lightweight index; extracts durable guidance into rules/guidelines |
-| `/checkpoint`        | `$codex-checkpoint`        | Declarative CONTEXT rebuild + `tasks/index.md` sync + JOURNAL append                                |
+| `/refactor-memory`   | `$codex-refactor-memory`   | Trims CLAUDE.md/AGENTS.md into a lightweight index; extracts durable guidance into rules/guidelines; consolidates the knowledge tier |
+| `/checkpoint`        | `$codex-checkpoint`        | Declarative CONTEXT rebuild + `tasks/index.md` sync + JOURNAL append + durable facts → `knowledge/`                                |
 | `/learn`             | `$codex-learn`             | Retrospective — promotes recurring lessons into rules/guidelines with loophole-closing language     |
-| `/doctor`            | `$codex-doctor`            | Read-only health check: structure, frontmatter, token hygiene, wiring, task hygiene                 |
+| `/doctor`            | `$codex-doctor`            | Read-only health check: structure, frontmatter, token hygiene, wiring, task & knowledge hygiene                 |
 
 Review agents ship with both layers: `clean-code-reviewer` (scope + Clean Code discipline) and `security-auditor` (OWASP audit — read-only on your code, but writes its findings to a `security-audit-<date>.md` report at the project root and prints only the summary to chat). Claude uses kebab-case Markdown agent names; Codex uses snake_case TOML `name` values.
 

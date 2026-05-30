@@ -102,6 +102,10 @@ For every non-universal rule under `.claude/rules/`:
 6. Promote stable live-state decisions.
     - Read `.claude/CONTEXT.md` for Recent Decisions. If a decision is now durable project behavior, move it into the relevant rule and remove it from CONTEXT through the checkpoint workflow.
     - If a decision is still temporary, keep it in CONTEXT and do not bury it in rules.
+7. Detect mis-tiered content (a rule that belongs in knowledge).
+    - `.claude/rules/` is **prescriptive** — each rule constrains behavior (an enforceable `MUST`/`NEVER`/should-avoid invariant). If a rule body is purely **descriptive** — it only states how a subsystem works, an integration detail, a domain term, or a doc pointer, with no constraint a reader could "follow" — it is misfiled.
+    - Propose moving it to `.claude/knowledge/`: create or update the topic file + its `INDEX.md` entry, then remove the rule and its `@`-import from `.claude/CLAUDE.md`. Confirm with the user before removing a rule.
+    - This is the exact reverse of the Step 10 boundary (which pushes prescriptive content out of knowledge into rules). The descriptive/prescriptive boundary runs **both ways**.
 
 Semantic audit output must list:
 
@@ -109,7 +113,8 @@ Semantic audit output must list:
 - stale rules fixed;
 - source-debt items intentionally left as code/doc follow-up;
 - split/merge actions performed;
-- split/merge actions that still need user confirmation.
+- split/merge actions that still need user confirmation;
+- rules proposed for migration to `.claude/knowledge/` (descriptive content misfiled as behavior).
 
 ## 6. Refactor .claude/CLAUDE.md
 
@@ -212,7 +217,10 @@ For `.claude/knowledge/`:
 - If the folder does not exist, create it with a seed `INDEX.md` (header comment + empty `## Knowledge` section).
 - **Reconcile the index**: every `.md` file (excluding `INDEX.md`) must have an `INDEX.md` entry, and every entry must point to a real file. Add missing entries; flag dead entries.
 - Audit each knowledge file: frontmatter present (`name`/`description`/`type`/`updated`); `sources:` relative paths still exist (dead → report); `updated:` older than 90 days → flag for review.
-- Enforce the boundary: knowledge is **descriptive**. If a file carries prescriptive rules (`MUST`/`NEVER`), propose moving that content to `.claude/rules/`.
+- Enforce the boundary: knowledge is **descriptive**. If a file carries prescriptive rules (`MUST`/`NEVER`), propose moving that content to `.claude/rules/`. The boundary is bidirectional — Step 5 handles the reverse (a purely descriptive rule that belongs here).
+- **Verify concrete claims against the repo** — apply the same rigor as Step 5, on knowledge bodies: extract concrete claims (named files, modules, symbols, endpoints, config keys, paths) and confirm they still exist. Classify accurate / stale / needs-user-decision. Knowledge is descriptive fact about the codebase, so it rots faster than rules — flag stale facts for user review, never auto-delete. Recommend a `sources:` or `verify:` anchor for any entry that has neither (unanchored facts can't be checked deterministically by `/doctor`).
+- **Overlap detection** (`knowledge ↔ knowledge` and `knowledge ↔ rules`): use `description`/`type` keywords as a cheap overlap signal (as Step 9 uses tag overlap for rules); read bodies only when keywords collide. Two knowledge entries on the same topic → propose merging into the most specific owner + a `[[link]]`. A fact restated inside a rule's prose → propose keeping the *behavior* in the rule and the *fact* in knowledge, cross-linked — never duplicated. Propose only; merge after user confirmation.
+- **Reconcile `related:` links**: confirm each `[[slug]]` in a knowledge file's `related:` resolves to an existing knowledge topic or rule; repair or report dead links.
 - Do not auto-delete or rewrite knowledge bodies — flag staleness and dead pointers for user review. Keep `INDEX.md` a one-line-per-entry map.
 
 ## 11. Base Template Notes

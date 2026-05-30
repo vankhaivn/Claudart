@@ -102,15 +102,20 @@ Skip this section if `.claude/knowledge/` does not exist.
 - For every knowledge file (excluding `INDEX.md`), check frontmatter: required `name`, `description`, `type`, `updated`; `type` ∈ {domain, architecture, integration, glossary, reference, agent-context}. Missing/invalid → flag as **Low**.
 - **Dead local references**: for each `sources:` entry that is a relative path, confirm the target exists on disk; missing → flag as **Low** (stale pointer). Do NOT fetch URLs — only list `sources:` that are neither a valid `http(s)` URL nor an existing path as malformed.
 - **Staleness**: flag any knowledge file whose `updated:` is more than 90 days old, or whose stated `verify:` condition no longer holds, as a **Low** review candidate.
-- **Descriptive-only separation**: knowledge is facts, not behavior. If a knowledge file contains prescriptive language (`MUST`, `NEVER`, `YOU MUST`, `always do`/`never do`), flag as **Medium** — that content belongs in `.claude/rules/`.
+- **Descriptive-only separation**: knowledge is facts, not behavior. If a knowledge file contains prescriptive language (`MUST`, `NEVER`, `YOU MUST`, `always do`/`never do`), flag as **Medium** — that content belongs in `.claude/rules/`. The boundary runs both ways — §6 flags the reverse (a purely descriptive *rule* that belongs in knowledge).
 - **INDEX stays a map**: `INDEX.md` should be one line per entry. If it grows prose paragraphs or deep sections, flag as **Low** (knowledge belongs in topic files, not the index).
 - **Not auto-loaded**: run `grep -n '@.claude/knowledge/' .claude/CLAUDE.md`. A plain (non-`@`) pointer line is fine; an `@`-import of `INDEX.md` or any detail file → flag as **Medium** (knowledge is surfaced by `/start`, not force-loaded every turn).
+- **Unanchored entries** (staleness cannot be checked): a knowledge file with neither a `sources:` path nor a `verify:` condition can't be staleness-checked deterministically → flag as **Low**, suggest adding a `verify:` anchor or a `sources:` path so future runs can catch rot.
+- **Dead code references in the body**: for each backtick-quoted repo path in a knowledge body (e.g. `` `src/auth/legacy.ts` ``), use Glob to confirm it still exists; missing → flag as **Low** (the fact may describe deleted code). Bounded & offline — check only backtick'd path-like tokens, never free prose.
+- **Dangling `related:` links**: for each `[[slug]]` in a knowledge file's `related:`, confirm it resolves to an existing knowledge topic (`<slug>.md`) or rule; unresolved → flag as **Low**.
+- **Duplication signal**: if two knowledge entries share most of their `description` keywords, or an entry's keywords strongly overlap a rule's `description`/`tags`, flag as **Low** — possible intra-tier or cross-tier duplication (`/refactor-memory` can consolidate). Keyword-overlap only; do not deep-read to confirm.
 
 ### 6. Anti-Patterns Inside Rules and Agents
 
 - **Inlined code blocks**: any triple-backtick code block longer than ~5 lines inside a rule or agent file is a likely violation of the "NO CODE SNIPPETS" principle. Report file + line.
 - **Stale metadata**: lines like `Last Updated: <date>` rot quickly. Flag for removal.
 - **Hardcoded shell patterns** (e.g., long `grep -r` lists) inside agent files. Flag — these belong in the project's tooling, not the agent prompt.
+- **Mis-tiered rule (descriptive, not prescriptive)**: a `.claude/rules/` file whose body states only facts (how a subsystem works, an integration detail, a domain term, a doc pointer) with no behavioral constraint (`MUST`/`NEVER`/`should`/`avoid`/`always`/`never`) → flag as **Low**: it likely belongs in `.claude/knowledge/`. This is the mirror of §5d's descriptive-only check — the boundary runs both ways. Universal guidance like `ai-behavior.md` is exempt.
 
 ### 7. .claude/CLAUDE.md Size Sanity
 

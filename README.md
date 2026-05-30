@@ -40,27 +40,33 @@ curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh 
 
 ## What it solves
 
-| Pain when working with coding agents                            | CLAUDART's answer                                                                                           |
-| --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| Every session starts blind                                      | `/start` reads `CONTEXT.md` + active tasks + last 3 commits — instant orientation                           |
-| Plans die when the session closes                               | `/plan <task>` writes a persistent doc in `tasks/` that survives any pause                                  |
-| Same decisions re-discovered every week                         | `/learn` graduates recurring patterns into durable `rules/` files that auto-load on relevant paths          |
+| Pain when working with coding agents                                 | CLAUDART's answer                                                                                                                                           |
+| -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Every session starts blind                                           | `/start` reads `CONTEXT.md` + active tasks + last 3 commits — instant orientation                                                                           |
+| Plans die when the session closes                                    | `/plan <task>` writes a persistent doc in `tasks/` that survives any pause                                                                                  |
+| Same decisions re-discovered every week                              | `/learn` graduates recurring patterns into durable `rules/` files that auto-load on relevant paths                                                          |
 | Durable project facts have nowhere to live (not behavior, not state) | `knowledge/` holds descriptive facts — domain, architecture, glossary, pointers to external docs; `/start` surfaces the index so they survive every session |
-| `CLAUDE.md` / `AGENTS.md` bloats and burns tokens               | `/refactor-memory` extracts knowledge into scoped rules;                                                    |
-| Codex subagents get used inconsistently or too broadly          | `agent-delegation.md` makes parallel Codex work explicit, bounded, and parent-reviewed                      |
-| Agents drift off-scope; nobody catches it                       | `clean-code-reviewer` + `security-auditor` agents run on explicit review/audit or authorized delegation      |
-| Memory files drift silently — no way to spot rot                | `/doctor` validates structure, frontmatter, token hygiene end-to-end                                        |
-| Rough idea, no project skeleton yet                             | `/project-discovery` interviews you into structured project docs before any code                            |
-| Other memory frameworks need vector DBs, Docker, cloud accounts | Pure markdown. Works offline. PR-reviewable.                                                                |
+| `CLAUDE.md` / `AGENTS.md` bloats and burns tokens                    | `/refactor-memory` extracts knowledge into scoped rules;                                                                                                    |
+| Codex subagents get used inconsistently or too broadly               | `agent-delegation.md` makes parallel Codex work explicit, bounded, and parent-reviewed                                                                      |
+| Agents drift off-scope; nobody catches it                            | `clean-code-reviewer` + `security-auditor` agents run on explicit review/audit or authorized delegation                                                     |
+| Memory files drift silently — no way to spot rot                     | `/doctor` validates structure, frontmatter, token hygiene, and knowledge freshness end-to-end                                                               |
+| Rough idea, no project skeleton yet                                  | `/project-discovery` interviews you into structured project docs before any code                                                                            |
+| Other memory frameworks need vector DBs, Docker, cloud accounts      | Pure markdown. Works offline. PR-reviewable.                                                                                                                |
 
 ## The memory model
 
 ```text
-CONTEXT.md       JOURNAL.md          rules/ · guidelines/     knowledge/
-("right now")    ("what happened")   ("how to behave")        ("what the project is")
+SESSION STATE (volatile)                DURABLE REFERENCE (survives sessions)
+
+CONTEXT.md       JOURNAL.md             rules/ · guidelines/   knowledge/
+what's true now  what happened          how to behave          what the project is
+(declarative)    (history log)          (prescriptive)         (descriptive facts)
+
+always loaded    never loaded           auto-loads on          INDEX on /start,
+in context       (audit only)           a matching path        detail on demand
 ```
 
-`/checkpoint` rebuilds `CONTEXT.md` declaratively (hard 150-line ceiling), graduates retired items to `JOURNAL.md`, and writes durable **facts** (domain, architecture, external-doc pointers) into `knowledge/` topic files. `/learn` promotes recurring **behavior** into path-scoped rule files. Only `CONTEXT.md` and rule files are auto-loaded; `/start` surfaces the `knowledge/INDEX.md` map and reads detail on demand. The journal is audit history, kept out of the working context to save tokens.
+`/checkpoint` rebuilds `CONTEXT.md` declaratively (hard 150-line ceiling), graduates retired items to `JOURNAL.md`, and writes durable **facts** (domain, architecture, external-doc pointers) into `knowledge/` topic files. `/learn` promotes recurring **behavior** into path-scoped rule files. The journal is audit history, kept out of the working context to save tokens (see the loading row above). Knowledge stays honest on its own loop — `/doctor` flags drift (stale facts, dead links, duplication), and `/refactor-memory` consolidates it and re-checks each fact against the code.
 
 ## Quick start
 
