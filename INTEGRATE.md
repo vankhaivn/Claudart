@@ -18,7 +18,7 @@ This file is a **protocol, not a script** — follow it top to bottom. It exists
    ```
    If you cannot clone (no git, or no network for clone), fetch files on demand from
    `https://raw.githubusercontent.com/vankhaivn/Claudart/main/<path>` instead.
-2. Before touching anything, read these in the source to integrate the _model_, not just files: `README.md`, `docs/workflow.md`, `CONTRIBUTING.md`.
+2. Before touching anything, read these in the source to integrate the _model_, not just files: `README.md`, `docs/WORKFLOW.md`, `CONTRIBUTING.md`.
 3. Do **not** run `install.sh` in a project that already has its own AI setup — that is exactly the situation this protocol replaces.
 
 ## What CLAUDART contains (orientation — the clone is the source of truth)

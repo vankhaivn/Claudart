@@ -91,7 +91,7 @@ Codex subagents are supported as an opt-in workflow. Tell Codex explicitly to us
 
 ## Documentation
 
-**[docs/workflow.md](docs/workflow.md)** — architecture, memory model, full task lifecycle, every command and skill, directory layout. The README is the pitch; `workflow.md` is the manual.
+**[docs/WORKFLOW.md](docs/WORKFLOW.md)** — architecture, memory model, full task lifecycle, every command and skill, directory layout. The README is the pitch; `WORKFLOW.md` is the manual.
 
 ## Comparison
 
