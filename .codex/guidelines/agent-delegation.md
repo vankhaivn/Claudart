@@ -22,6 +22,17 @@ Before spawning a subagent, write a short decomposition:
 
 Do not spawn if the next parent step is blocked on the subtask. Do that work locally instead.
 
+## Delegate-and-Consume vs. Delegate-and-Continue
+
+The deciding signal is **task structure, not the user's exact words.** Before spawning, ask: _does the request decompose into work genuinely separate from the delegated question, or IS the delegated question the whole task?_
+
+- **Whole task** — the delegated question is the entire request (a single read-only investigation, one bounded fix) → **spawn, then wait and consume the result.** Do NOT shadow-run the same investigation in the parent thread. Codex already pauses to consolidate subagent results (_"waits until all requested results are available"_); racing it locally pays for one answer twice and duplicates the subagent's work.
+- **Decomposable** — the request splits into disjoint units → **fan out one subagent per unit** (each owning a non-overlapping file set or sub-question) and let Codex consolidate, rather than answering one unit in the parent while a subagent answers another. Multi-subagent fan-out — not parent-vs-subagent racing — is Codex's native parallel idiom.
+
+Infer this from what the request _decomposes into_, never from a magic phrase. "Spawn an explorer to check X and tell me what it finds", "giao cho 1 agent điều tra repo Y", "delegate this audit and read its output" all describe **one delegated unit with no separate parent work** — the same shape, regardless of wording. The reliable tell is **overlap of the same sub-question**: if your own next step (or another subagent) would answer the _same_ sub-question this subagent owns, that is redundancy, not parallelism — collapse it.
+
+Redundancy is acceptable only when **deliberate and disclosed**: independent review (intentionally asking N agents the same question to cross-check), or a hedge the user authorized on a flaky path. The anti-pattern is _silent, unrequested_ duplication. In particular, if you are unsure the subagent will honor a constraint — e.g. a per-agent `model` override — **surface that constraint and choose one path** (delegate or do it locally), or ask. Never hedge by silently running both.
+
 ## Good Uses
 
 - Use `explorer` for read-heavy, specific codebase questions: entry points, call paths, test locations, ownership maps, and risk scans.
@@ -64,8 +75,8 @@ Prefer read-only explorers before workers when ownership is unclear.
 
 The parent Codex session remains responsible for the final result:
 
-- Keep working on non-overlapping local tasks after spawning.
-- Wait only when the next critical-path step needs a subagent result.
+- Prefer collapsing parallel work into multiple subagents over doing part of it yourself. If you do keep a local task running alongside, it must not overlap the delegated question. If the delegation covers the whole request, just wait for the consolidated result. "Stay busy after spawning" is not a goal; non-redundant progress is.
+- Wait when the next critical-path step needs a subagent result, or when the delegated task is the entire request.
 - Review subagent outputs quickly and integrate only the useful parts.
 - Run the relevant validation yourself or verify that the validation evidence is trustworthy.
 - Record important subagent findings in task files first; use `$codex-checkpoint` for active `CONTEXT.md` handoffs or eventual `JOURNAL.md` entries. Do not rely on subagent thread history for persistence.
@@ -84,4 +95,4 @@ If the user did not authorize subagents, note only "Delegation opportunity: <sho
 
 ## Safety And Cost
 
-Keep `max_depth = 1` unless the user explicitly asks for recursive delegation. Prefer conservative `max_threads` for template projects so downstream repos do not accidentally fan out expensive work. Use read-only sandboxing for explorers and any read-only delegation whenever possible.
+Keep `max_depth = 1` (the Codex default) unless the user explicitly asks for recursive delegation. Keep `max_threads` conservative — the default is **6**; raising it, in OpenAI's own words, _"can turn broad delegation instructions into repeated fan-out, which increases token usage, latency, and local resource consumption."_ For template projects keep it low so downstream repos do not accidentally fan out expensive work. Use read-only sandboxing for explorers and any read-only delegation whenever possible.
