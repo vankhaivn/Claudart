@@ -12,7 +12,7 @@ The deep-dive companion to the [README](../README.md). Covers architecture, memo
   - [Two-phase completion gate](#two-phase-completion-gate)
   - [Approval signals](#approval-signals)
   - [Cross-session resumption](#cross-session-resumption)
-- [Codex subagent delegation](#codex-subagent-delegation)
+- [Subagent delegation](#subagent-delegation)
 - [Commands and skills](#commands-and-skills)
 - [Directory layout](#directory-layout)
 
@@ -23,7 +23,7 @@ CLAUDART installs as two parallel layers in your project. Run them independently
 - **Claude layer** (`.claude/`) — slash commands, rules, review agents, session state
 - **Codex layer** (`.codex/` + `.agents/skills/`) — guidelines, TOML subagents, repo skills
 
-Every Claude command has a mirrored Codex skill. The core memory and task lifecycle protocols are identical; tool-specific capabilities such as Codex subagents add extra guidelines where the runtimes differ.
+Every Claude command has a mirrored Codex skill, and the core memory and task lifecycle protocols are identical. Where the runtimes differ, the guidance adapts to each one: subagent delegation, for instance, ships on both layers — `.claude/rules/agent-delegation.md` for Claude's Agent tool and `.codex/guidelines/agent-delegation.md` for Codex's explorer/worker model.
 
 ## Memory model — the graduation pipeline
 
@@ -42,6 +42,8 @@ CONTEXT.md       JOURNAL.md          rules/ · guidelines/      knowledge/
 A note enters at `CONTEXT.md`. When it settles, one line graduates to `JOURNAL.md`. `/checkpoint` graduates durable **facts** to a `knowledge/` topic file (registered in `INDEX.md`); when a behavioral pattern recurs, `/learn` promotes it to a rule file. Only rules and `CONTEXT.md` are auto-loaded; knowledge is surfaced as an index and pulled on demand — the rest stay out of the working set unless explicitly invoked.
 
 Knowledge is **maintained, not just accumulated**. `/doctor` is read-only and flags drift — stale facts, dead `sources:`/`related:` links, duplication across tiers, or content sitting in the wrong tier. `/refactor-memory` acts on those flags: it re-verifies each fact against the current code, consolidates duplicates, and moves content across the descriptive↔prescriptive boundary **both ways** (a fact misfiled as a rule → `knowledge/`; a rule that leaked into knowledge → back). Nothing is auto-deleted — drift is surfaced for you to confirm.
+
+Across commands, knowledge has a clear lifecycle: `/start` **surfaces** the INDEX, `/checkpoint` **writes** new facts (including project-wide ones rescued from an archived task's Memory Hints), and `/refactor-memory` **seeds** an empty tier from your existing docs and routes extracted content by type — behavior → rules, facts → knowledge. Every entry carries a `sources:`/`verify:` anchor to the file it summarizes, so `/doctor` can check it instead of guessing.
 
 ## Persistent task workflow
 
@@ -128,36 +130,33 @@ A new session resuming a task:
 
 Memory Hints from previous sessions is the lifeline. Populate it generously when planning — every non-obvious constraint, library quirk, or pitfall discovered during exploration belongs there.
 
-## Codex subagent delegation
+## Subagent delegation
 
-Codex can run subagents for parallel exploration, bounded implementation, review, and audit work. CLAUDART treats that capability as **explicitly authorized parallelism**, not as an automatic response to large tasks.
+Both layers can run subagents for parallel exploration, bounded implementation, review, and audit work. CLAUDART treats that capability as **explicitly authorized parallelism**, not an automatic response to large tasks — "be thorough" or "research deeply" is not authorization; "use subagents", "delegate this", or "parallelize with agents" is.
 
-The Codex layer adds `.codex/guidelines/agent-delegation.md` as the durable protocol. It requires the parent Codex session to separate:
+Each runtime gets a protocol written to its own mechanics — `.claude/rules/agent-delegation.md` (Claude's Agent tool) and `.codex/guidelines/agent-delegation.md` (Codex's explorer/worker model) — and they share one spine:
 
-- **Critical path** — work the parent agent should do locally now
-- **Sidecar tasks** — bounded tasks that can run in parallel without blocking the parent
-- **Ownership** — exact read questions or write scopes assigned to each subagent
-- **Merge plan** — how findings, patches, and validation results return to the parent
+- **Decomposition gate** — before spawning, the parent separates the **critical path** (work to do locally now), **sidecar tasks** (bounded, parallel-safe), **ownership** (the exact read question or write scope per subagent), and a **merge plan** (how findings return). If the next step is blocked on the subtask, don't spawn — do it locally.
+- **Delegate-and-consume vs. delegate-and-continue** — judged by task structure, not wording. If the delegated question _is_ the whole task, spawn and **wait** — don't shadow-run the same work in parallel. Fan out parallel agents only when the request splits into non-overlapping units; the tell is **overlap of the same sub-question** (if your next step answers what a subagent already owns, that's redundancy, not parallelism). Deliberate, disclosed redundancy is fine — independent review, or a hedge you authorized — but never a silent hedge because a tool felt risky.
+- **Ownership discipline** — explorers stay read-only; workers need disjoint write scopes (Claude isolates parallel writers in their own git worktrees); reviewers and security auditors produce findings the parent still owns and validates. A subagent patch is never final without parent review.
 
-Use subagents when the user explicitly says things like "use subagents", "delegate this", or "parallelize with agents". Do not infer authorization from "be thorough" or "research deeply". Explorers should stay read-only, workers need disjoint write scopes, and reviewers/security auditors produce findings that the parent still owns and validates.
-
-Task documents persist the durable parts of delegation — authorization status, roles, ownership boundaries, findings, decisions, and validation outcomes. They do not store transient subagent thread ids. `$codex-checkpoint` may carry forward active delegation blockers or next steps in `CONTEXT.md`, but completed findings should live in the task file and eventually `JOURNAL.md`.
+Task documents persist the durable parts of delegation — authorization status, roles, ownership boundaries, findings, decisions, and validation outcomes — never transient thread ids. `/checkpoint` (or `$codex-checkpoint`) carries forward active delegation blockers in `CONTEXT.md`, but completed findings live in the task file and eventually `JOURNAL.md`.
 
 ## Commands and skills
 
-| Claude Code          | Codex CLI                  | What it does                                                                                                                         |
-| -------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `/start`             | `$codex-start`             | Lightweight session boot — reads CONTEXT, active tasks, and the last 3 git commits                                                   |
-| `/plan <task>`       | `$codex-plan <task>`       | Creates a persistent implementation plan in `tasks/` — replaces native plan mode                                                     |
-| `/project-discovery` | `$codex-project-discovery` | Interview-first planning — turns rough ideas into project docs before any code                                                       |
-| `/refactor-memory`   | `$codex-refactor-memory`   | Trims CLAUDE.md/AGENTS.md into a lightweight index; extracts durable guidance into rules/guidelines; consolidates the knowledge tier |
-| `/checkpoint`        | `$codex-checkpoint`        | Declarative CONTEXT rebuild + `tasks/index.md` sync + JOURNAL append + durable facts → `knowledge/`                                  |
-| `/learn`             | `$codex-learn`             | Retrospective — promotes recurring lessons into rules/guidelines with loophole-closing language                                      |
-| `/doctor`            | `$codex-doctor`            | Read-only health check: structure, frontmatter, token hygiene, wiring, task & knowledge hygiene                                      |
+| Claude Code          | Codex CLI                  | What it does                                                                                                                                                            |
+| -------------------- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/start`             | `$codex-start`             | Lightweight session boot — reads CONTEXT, active tasks, the knowledge INDEX, and the last 3 git commits                                                                 |
+| `/plan <task>`       | `$codex-plan <task>`       | Creates a persistent implementation plan in `tasks/` — replaces native plan mode                                                                                        |
+| `/project-discovery` | `$codex-project-discovery` | Interview-first planning — turns rough ideas into project docs before any code                                                                                          |
+| `/refactor-memory`   | `$codex-refactor-memory`   | Trims CLAUDE.md/AGENTS.md to a lean index; routes durable content by type (behavior → rules/guidelines, facts → knowledge); bootstraps + re-verifies the knowledge tier |
+| `/checkpoint`        | `$codex-checkpoint`        | Declarative CONTEXT rebuild + `tasks/index.md` sync + JOURNAL append + durable facts → `knowledge/`                                                                     |
+| `/learn`             | `$codex-learn`             | Retrospective — promotes recurring lessons into rules/guidelines with loophole-closing language                                                                         |
+| `/doctor`            | `$codex-doctor`            | Read-only health check: structure, frontmatter, token hygiene, wiring, task & knowledge hygiene                                                                         |
 
 Review agents ship with both layers: `clean-code-reviewer` (scope + Clean Code discipline) and `security-auditor` (OWASP audit — read-only on your code, but writes its findings to a `security-audit-<date>.md` report at the project root and prints only the summary to chat). Claude uses kebab-case Markdown agent names; Codex uses snake_case TOML `name` values.
 
-Codex subagent delegation is governed by `.codex/guidelines/agent-delegation.md`. The shipped Codex config keeps `[agents] max_depth = 1` and a conservative `max_threads` default so downstream projects get useful parallelism without recursive fan-out.
+Subagent delegation is governed by `.claude/rules/agent-delegation.md` (Claude) and `.codex/guidelines/agent-delegation.md` (Codex). The shipped Codex config (`.codex/config.toml`) keeps `[agents] max_depth = 1` and `max_threads = 6` (Codex's default) so downstream projects get useful parallelism without recursive fan-out.
 
 ## Directory layout
 
@@ -194,6 +193,7 @@ your-project/
     ├── knowledge/                  # Durable descriptive facts + external-doc pointers
     │   └── INDEX.md                # Map surfaced by /start; topic files read on demand
     ├── rules/
+    │   ├── agent-delegation.md
     │   ├── ai-behavior.md
     │   └── task-management.md
     └── tasks/                      # Persistent implementation plans (one file per task)
