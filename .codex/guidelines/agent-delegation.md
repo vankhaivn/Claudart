@@ -70,6 +70,7 @@ A subagent does not inherit the parent session's conversation. It starts with fr
 Every worker prompt must include:
 
 - Goal: the exact user-visible outcome.
+- Boundary: state plainly that the worker IS the delegated agent for this one unit — not the main/control session — and that any inherited context is reference only. Codex subagents can otherwise misread inherited parent context as active instructions and drift into the parent's role ([openai/codex#24150](https://github.com/openai/codex/issues/24150)); explicit boundary text is the standing workaround.
 - Scope: files or modules the worker may edit.
 - Non-overlap: the worker is not alone in the codebase and must not revert changes by others.
 - Constraints: tests, style, security, and compatibility requirements.
@@ -79,10 +80,11 @@ Prefer read-only explorers before workers when ownership is unclear.
 
 ## Parent Responsibilities
 
-The parent Codex session remains responsible for the final result:
+The parent Codex session remains responsible for the final result. **Codex's documented orchestration model is spawn → wait → consolidate** — per the official docs it _"waits until all requested results are available, then returns a consolidated response"_ ([Codex Subagents](https://developers.openai.com/codex/subagents)). So after you delegate, the default is to **wait**, not to stay busy.
 
-- Prefer collapsing parallel work into multiple subagents over doing part of it yourself. If you do keep a local task running alongside, it must not overlap the delegated question. If the delegation covers the whole request, just wait for the consolidated result. "Stay busy after spawning" is not a goal; non-redundant progress is.
-- Wait when the next critical-path step needs a subagent result, or when the delegated task is the entire request.
+- **Default to waiting.** Once you spawn a delegate-and-consume unit, do not issue further reads, searches, or edits that touch the delegated question — wait for the consolidated result and build on it. Re-running the same investigation locally is the single most common failure: the parent re-derives what a still-running explorer was sent to find. "Stay busy after spawning" is not a goal; non-redundant progress is.
+- **Parallel local work is the exception, not the rule** — and only for a lane named _before_ spawning that provably needs nothing from the delegated output. If the lane would consume the delegated answer (e.g. seed/docs that depend on the routes an explorer is mapping), it is blocked on the subtask: wait, do not shadow-run it.
+- **A silent subagent is not a stalled one.** A healthy explorer/worker on a long task often emits no intermediate signal; treat silence as in-progress, not failure. Misreading liveness and duplicating the work is a known Codex pitfall ([openai/codex#16900](https://github.com/openai/codex/issues/16900)). If you genuinely suspect it is stuck, steer or stop it explicitly via `/agent` — never quietly redo its work.
 - Review subagent outputs quickly and integrate only the useful parts.
 - Run the relevant validation yourself or verify that the validation evidence is trustworthy.
 - Record important subagent findings in task files first; use `$codex-checkpoint` for active `CONTEXT.md` handoffs or eventual `JOURNAL.md` entries. Do not rely on subagent thread history for persistence.
