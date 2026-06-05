@@ -38,6 +38,7 @@ status: planning # planning | in-progress | awaiting-review | blocked | done | c
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
 agent: claude # claude | codex | both
+delegation: none # none | strategy-only | authorized — see "Delegation Authorization" below
 tags: [1-5 lowercase kebab-case tags]
 ---
 
@@ -66,6 +67,7 @@ tags: [1-5 lowercase kebab-case tags]
 - Non-obvious constraints discovered while exploring
 - Libraries/tools the project uses (e.g., "uses Zod, not Joi")
 - Pitfalls already encountered
+- Delegation strategy when relevant: authorization status, subagent roles, ownership boundaries, validation responsibilities (mirror the `delegation:` field)
 - Anything that would save the next session from re-discovering the same thing>
 
 ## Plan of Work
@@ -151,7 +153,17 @@ Treat these as NOT approval (still in planning):
 - Questions about the plan
 - Requests to add/remove/reorder steps
 
-On approval: flip frontmatter `status: planning → in-progress`, bump `updated:` to today, then begin executing the first unchecked step.
+On approval: flip frontmatter `status: planning → in-progress`, bump `updated:` to today, then begin executing the first unchecked step. The `delegation:` field decides whether "go" also starts delegated work — see below.
+
+## Delegation Authorization (the `delegation:` field)
+
+The frontmatter `delegation:` field persists whether subagent / parallel work is authorized **for execution**, so the approval signal ("go") can carry it without a second round-trip. The planner sets it during planning; the approval gate reads it. This is the only place authorization is persisted — `agent-delegation.md` defines _what_ counts as authorization; this field records the _decision_ so it survives into execution.
+
+- **`none`** (default) — delegation was not discussed, or the task does not benefit from it. On "go", work solo.
+- **`strategy-only`** — a delegation strategy is recorded (in Plan of Work / Memory Hints), but the user only _discussed or asked about_ subagents — a capability question ("can subagents handle the non-conflicting parts?"), which is NOT authorization. On "go", flip to `in-progress`, then make **a single one-line offer** before spawning anything ("plan records a subagent strategy — fan out, or run solo?"). Never silently default to solo.
+- **`authorized`** — the user _explicitly authorized subagents for execution_ during planning ("dùng subagents khi làm", "fan out when you implement"). On "go", flip to `in-progress` **and** begin per the recorded delegation plan with **no second prompt**; state in your reply that you are honoring the recorded authorization.
+
+Setting the field is a planning-time judgment, recorded with a Decision Log entry. The `strategy-only` ↔ `authorized` boundary is exactly the _question-vs-authorization_ line drawn in `agent-delegation.md` — persisting it here just lets "go" inherit it. If the user instead authorizes subagents at runtime (after "go"), update the field to `authorized` and proceed.
 
 ## Progress Updates During Implementation
 
@@ -216,6 +228,8 @@ The cycle Phase 1 ↔ Phase 2b may repeat. That's correct behavior, not a bug.
 | `* → cancelled`                 | "cancel", "abandon", "drop this", "bỏ task"                                              |
 
 The agent must wait for the explicit signal. Enthusiasm ("great!", "nice plan") is NOT approval. Questions are NOT approval. Edits the user makes to the task file are NOT approval.
+
+Subagent execution is a separate gate carried by the `delegation:` field (see "Delegation Authorization"): `authorized` lets "go" also start delegated work; `strategy-only` makes "go" offer once before spawning; `none` runs solo.
 
 ## Resumption Across Sessions
 

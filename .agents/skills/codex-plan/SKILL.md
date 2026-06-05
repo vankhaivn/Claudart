@@ -43,7 +43,7 @@ Use read-only operations to:
 - Identify existing patterns and helpers to reuse (avoid rewriting what already exists).
 - Surface constraints: linters, type checkers, framework idioms, naming conventions in the relevant area.
 - Note non-obvious context worth recording for a future-session agent.
-- Identify whether subagents would materially help after approval. Planning may record delegation opportunities, but it must not spawn subagents while the task is `planning`.
+- Identify whether subagents would materially help after approval, and set the `delegation:` field accordingly (`strategy-only` vs `authorized` per `.codex/guidelines/task-management.md`). Planning may record the strategy, but it must not spawn subagents while the task is `planning`.
 
 If you need clarification before the plan is sensible, ask now. Do not invent answers.
 
@@ -60,7 +60,7 @@ No slug suffix (`-v2`, `-v3`) is needed — the sequence number already guarante
 
 Use the exact skeleton in `.codex/guidelines/task-management.md`. Fill every section:
 
-- **Frontmatter**: `status: planning`, today's date in `created` and `updated`, `agent: codex`, 1-5 lowercase kebab tags.
+- **Frontmatter**: `status: planning`, today's date in `created` and `updated`, `agent: codex`, `delegation:` (`none` default; `strategy-only` if the user only discussed/asked about subagents; `authorized` only if they explicitly authorized subagents for execution — record the choice in the Decision Log), 1-5 lowercase kebab tags.
 - **Purpose**: 2-3 sentences. Answer "who gains what, how do they verify it works".
 - **Context & Orientation**: this is the handoff to future-self. Fill all three subsections:
   - _Related Code_: every file path the plan touches or reads, with one-line reason.
@@ -106,7 +106,7 @@ Do not begin implementing. Wait for the approval signal defined in `.codex/guide
 Once the user gives an approval signal, follow the protocol in `.codex/guidelines/task-management.md`:
 
 1. Flip frontmatter `status: planning -> in-progress`, bump `updated:`.
-2. If the user explicitly authorized subagents, follow `.codex/guidelines/agent-delegation.md`: decompose critical-path versus sidecar work, spawn only bounded non-blocking tasks, assign disjoint worker ownership, and record durable outputs in the task file.
+2. Honor the `delegation:` field per `.codex/guidelines/task-management.md` → "Delegation Authorization": `authorized` → follow `.codex/guidelines/agent-delegation.md` (decompose critical-path versus sidecar work, spawn only bounded non-blocking tasks, assign disjoint worker ownership, record durable outputs in the task file) with no second prompt; `strategy-only` → make a one-line offer before spawning; `none` → solo.
 3. Execute Concrete Steps in order, marking each `[x]` with `(YYYY-MM-DD HH:MMZ)` UTC timestamp on completion.
 4. Update Surprises / Decision Log as needed, including subagent findings that changed the plan.
 5. When all Concrete Steps + Validation boxes are checked, run the **Two-Phase Completion Gate** from the guideline file:
@@ -122,5 +122,5 @@ The agent must NEVER skip Phase 1 or self-confirm Phase 2. The completion gate i
 - Do not auto-complete the task. When all boxes are checked, you go to `awaiting-review` and stop. The user — not you — flips it to `done`.
 - Do not skip Memory Hints. A plan with no Memory Hints is a plan that won't survive a context reset.
 - Do not put the plan body into chat instead of the file. The file is the plan.
-- Do not spawn subagents from planning lock. Record the strategy; execution waits for both task approval and explicit subagent authorization.
+- Do not spawn subagents from planning lock. Record the strategy and set `delegation:` (including `authorized`); the spawn itself waits until the task is `in-progress`.
 - Do not auto-approve on user enthusiasm ("great idea!") — wait for an explicit approval cue at each gate.

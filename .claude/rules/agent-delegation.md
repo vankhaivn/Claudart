@@ -24,6 +24,12 @@ Before spawning a subagent, write a short decomposition:
 
 Do not spawn if the next parent step is blocked on the subtask. Do that work locally instead.
 
+## Pre-authorized Delegation (task-file `delegation:` field)
+
+The "explicit authorization" requirement above can be satisfied **at planning time** and persisted, not only at runtime. When a `/plan` task records `delegation: authorized` in its frontmatter, the user authorized subagents for execution during planning — the approval signal ("go") then activates delegation **without a second request**. `delegation: strategy-only` means a strategy is recorded but only _discussed_, not authorized: make a single one-line offer at "go" before spawning. See `task-management.md` → "Delegation Authorization" for the field's full semantics.
+
+The authorization bar itself is unchanged. A _question_ about subagents ("can they handle the non-conflicting parts?") is `strategy-only`, not `authorized`; only an explicit instruction to use them for the work sets `authorized`. Persisting the decision removes the redundant re-confirmation, not the gate.
+
 ## Delegate-and-Consume vs. Delegate-and-Continue
 
 The deciding signal is **task structure, not the user's exact words.** Before spawning, ask: _does the request decompose into work genuinely separate from the delegated question, or IS the delegated question the whole task?_
