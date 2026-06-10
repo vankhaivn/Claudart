@@ -6,6 +6,7 @@ The deep-dive companion to the [README](../README.md). Covers architecture, memo
 
 - [Two layers](#two-layers)
 - [Memory model — the graduation pipeline](#memory-model--the-graduation-pipeline)
+- [Session handoff — surviving a context overflow](#session-handoff--surviving-a-context-overflow)
 - [Persistent task workflow](#persistent-task-workflow)
   - [Task file structure](#task-file-structure)
   - [Status state machine](#status-state-machine)
@@ -44,6 +45,21 @@ A note enters at `CONTEXT.md`. When it settles, one line graduates to `JOURNAL.m
 Knowledge is **maintained, not just accumulated**. `/doctor` is read-only and flags drift — stale facts, dead `sources:`/`related:` links, duplication across tiers, or content sitting in the wrong tier. `/refactor-memory` acts on those flags: it re-verifies each fact against the current code, consolidates duplicates, and moves content across the descriptive↔prescriptive boundary **both ways** (a fact misfiled as a rule → `knowledge/`; a rule that leaked into knowledge → back). Nothing is auto-deleted — drift is surfaced for you to confirm.
 
 Across commands, knowledge has a clear lifecycle: `/start` **surfaces** the INDEX, `/checkpoint` **writes** new facts (including project-wide ones rescued from an archived task's Memory Hints), and `/refactor-memory` **seeds** an empty tier from your existing docs and routes extracted content by type — behavior → rules, facts → knowledge. Every entry carries a `sources:`/`verify:` anchor to the file it summarizes, so `/doctor` can check it instead of guessing.
+
+## Session handoff — surviving a context overflow
+
+The four memory tiers all store **project** state. But a productive session also carries **reasoning state** — the working hypothesis, the evidence gathered, the dead ends already ruled out, the exact next move — and that state dies when the context window fills up. Native `/compact` summarizes it in-place, but the result is volatile: invisible, not reviewable, gone with the session, locked to one tool.
+
+`/handoff` (Codex: `$codex-handoff`) writes that reasoning state to a **single-slot baton** — `.claude/HANDOFF.md` or `.codex/HANDOFF.md` — designed around how real compaction works (lessons taken from Claude Code's compact pipeline and Codex CLI's checkpoint compaction):
+
+- **Fixed schema, not freeform**: Objective, State of Play, Working Hypothesis, Evidence (`file:line` anchors), Dead Ends with reasons, User Constraints, Next Step, Open Questions.
+- **Verbatim tier**: the user's explicit constraints, their most recent request, and the quote anchoring where work stopped are preserved word-for-word — everything else is distilled. No transcript dumps.
+- **Anchored next step**: the recorded next action must trace to the user's latest explicit request, with a verbatim quote — so the resuming session can't drift onto tangents.
+- **Durable content routes out first**: facts go to `knowledge/`, task-bound discoveries go to the task file's Memory Hints — the baton holds only the conversational residue that has no durable home.
+
+Lifecycle: written once (overwriting any previous baton), surfaced by the next `/start` / `$codex-start`, verified against current code, then **deleted on consumption**. One file, one hop — never an archive. Repeated summarization is cumulatively lossy, so the baton is deliberately consumed-once; `/doctor` flags a baton that sits unconsumed for more than 7 days.
+
+Handoff complements `/checkpoint`, never replaces it: checkpoint records what is true about the _project_; handoff records what this _conversation_ was thinking. Run handoff when the context window is nearly full or when pausing mid-investigation — not as a session-end ritual.
 
 ## Persistent task workflow
 
@@ -144,15 +160,16 @@ Task documents persist the durable parts of delegation — authorization status,
 
 ## Commands and skills
 
-| Claude Code          | Codex CLI                  | What it does                                                                                                                                                            |
-| -------------------- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/start`             | `$codex-start`             | Lightweight session boot — reads CONTEXT, active tasks, the knowledge INDEX, and the last 3 git commits                                                                 |
-| `/plan <task>`       | `$codex-plan <task>`       | Creates a persistent implementation plan in `tasks/` — replaces native plan mode                                                                                        |
-| `/project-discovery` | `$codex-project-discovery` | Interview-first planning — turns rough ideas into project docs before any code                                                                                          |
-| `/refactor-memory`   | `$codex-refactor-memory`   | Trims CLAUDE.md/AGENTS.md to a lean index; routes durable content by type (behavior → rules/guidelines, facts → knowledge); bootstraps + re-verifies the knowledge tier |
-| `/checkpoint`        | `$codex-checkpoint`        | Declarative CONTEXT rebuild + `tasks/index.md` sync + JOURNAL append + durable facts → `knowledge/`                                                                     |
-| `/learn`             | `$codex-learn`             | Retrospective — promotes recurring lessons into rules/guidelines with loophole-closing language                                                                         |
-| `/doctor`            | `$codex-doctor`            | Read-only health check: structure, frontmatter, token hygiene, wiring, task & knowledge hygiene                                                                         |
+| Claude Code          | Codex CLI                  | What it does                                                                                                                                                                                               |
+| -------------------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/start`             | `$codex-start`             | Lightweight session boot — reads CONTEXT, active tasks, the knowledge INDEX, and the last 3 git commits                                                                                                    |
+| `/plan <task>`       | `$codex-plan <task>`       | Creates a persistent implementation plan in `tasks/` — replaces native plan mode                                                                                                                           |
+| `/project-discovery` | `$codex-project-discovery` | Interview-first planning — turns rough ideas into project docs before any code                                                                                                                             |
+| `/refactor-memory`   | `$codex-refactor-memory`   | Trims CLAUDE.md/AGENTS.md to a lean index; routes durable content by type (behavior → rules/guidelines, facts → knowledge); bootstraps + re-verifies the knowledge tier                                    |
+| `/checkpoint`        | `$codex-checkpoint`        | Declarative CONTEXT rebuild + `tasks/index.md` sync + JOURNAL append + durable facts → `knowledge/`                                                                                                        |
+| `/handoff`           | `$codex-handoff`           | Single-slot session baton (`HANDOFF.md`) distilling reasoning state — hypothesis, evidence, dead ends, anchored next step — when the context window is nearly full; consumed and deleted by the next start |
+| `/learn`             | `$codex-learn`             | Retrospective — promotes recurring lessons into rules/guidelines with loophole-closing language                                                                                                            |
+| `/doctor`            | `$codex-doctor`            | Read-only health check: structure, frontmatter, token hygiene, wiring, task & knowledge hygiene                                                                                                            |
 
 Review agents ship with both layers: `clean-code-reviewer` (scope + Clean Code discipline) and `security-auditor` (OWASP audit — read-only on your code, but writes its findings to a `security-audit-<date>.md` report at the project root and prints only the summary to chat). Claude uses kebab-case Markdown agent names; Codex uses snake_case TOML `name` values.
 
@@ -168,6 +185,7 @@ your-project/
 ├── .codex/
 │   ├── AGENTS.md                   # Codex source template; copied to root AGENTS.md
 │   ├── CONTEXT.md                  # Live state, declarative, ≤ 150 lines
+│   ├── HANDOFF.md                  # Transient session baton — exists only between $codex-handoff and the next $codex-start
 │   ├── JOURNAL.md                  # Append-only audit log — never auto-loaded
 │   ├── agents/                     # Codex TOML subagents
 │   │   ├── clean-code-reviewer.toml
@@ -185,6 +203,7 @@ your-project/
 └── .claude/
     ├── CLAUDE.md                   # Lightweight index (< 100 lines)
     ├── CONTEXT.md                  # Live state, declarative, ≤ 150 lines
+    ├── HANDOFF.md                  # Transient session baton — exists only between /handoff and the next /start
     ├── JOURNAL.md                  # Append-only audit log — never auto-loaded
     ├── agents/
     │   ├── clean-code-reviewer.md

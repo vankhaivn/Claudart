@@ -19,7 +19,7 @@ Run a read-only health check on this repository's CLAUDART installation from the
 - `.codex/agents/` exists, even if the user removed shipped agents.
 - `.codex/config.toml` exists and contains an `[agents]` table with conservative delegation limits.
 - `.codex/tasks/` exists with `index.md` and `done/` subdirectory (warn if missing — `$codex-plan` will create on first use).
-- `.agents/skills/` exists and contains `codex-start`, `codex-checkpoint`, `codex-learn`, `codex-doctor`, `codex-refactor-memory`, and `codex-plan`.
+- `.agents/skills/` exists and contains `codex-start`, `codex-checkpoint`, `codex-learn`, `codex-doctor`, `codex-refactor-memory`, `codex-plan`, and `codex-handoff`.
 
 For each missing path, report which workflow would create or repair it.
 
@@ -135,6 +135,15 @@ Skip this section if `.codex/tasks/` does not exist.
 - Required sections in every task file body: `## Purpose`, `## Context & Orientation`, `## Plan of Work`, `## Concrete Steps`, `## Validation & Acceptance`, `## Decision Log`, `## Surprises & Discoveries`, `## Outcomes & Retrospective`. Flag missing sections.
 - Within `## Context & Orientation`, flag if `### Memory Hints` is missing or empty — that section is the cross-session lifeline.
 - Redundant `.gitkeep`: if `.codex/tasks/done/.gitkeep` exists AND `.codex/tasks/done/` contains at least one real `.md` file, flag as Low severity. The `.gitkeep` exists only to track an empty folder; once real archived tasks live there, it is redundant. Mention that `$codex-refactor-memory` will clean it up, or the user can `rm` it manually.
+
+### 6c. Session Handoff Hygiene (`.codex/HANDOFF.md`)
+
+`.codex/HANDOFF.md` is a transient single-slot baton written by `$codex-handoff` and consumed (deleted) by the next `$codex-start`. Absent is the normal state — never warn when it is missing.
+
+- If present, it is an unconsumed baton. Report it informationally. If its frontmatter `created:` is more than 7 days old, flag as Medium — reasoning state rots fast; suggest resuming via `$codex-start` or deleting it.
+- Line count must be at most 150 (use `wc -l`). If exceeded, flag as High — the baton is drifting toward a transcript dump; `$codex-handoff`'s distillation rules were not honored.
+- Search the active memory index (`AGENTS.md` / `.codex/AGENTS.md`) and `.codex/guidelines/` for any operational auto-load instruction for `.codex/HANDOFF.md`. If found, flag as Critical — the baton is consumed once by `$codex-start`, never auto-loaded into every session.
+- Multiple handoff artifacts (`HANDOFF-*.md`, dated copies, a `handoff/` directory under `.codex/`) -> flag as Medium — violates the single-slot contract; suggest consolidating into one `HANDOFF.md` or deleting stale copies.
 
 ### 7. Anti-Patterns
 

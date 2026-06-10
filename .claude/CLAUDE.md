@@ -11,6 +11,7 @@ CLAUDART keeps the Claude-specific operating layer inside `.claude/`, including 
 - `/refactor-memory` consolidates this file, `.claude/rules/`, and `.claude/agents/` into a coherent Modular Rules System.
 - `/project-discovery` interviews the user about a rough project idea and creates a raw synthesis plus structured project docs.
 - `/checkpoint` rewrites `.claude/CONTEXT.md` as the current state, syncs `.claude/tasks/index.md`, and appends meaningful retired items to `.claude/JOURNAL.md`.
+- `/handoff` writes a single-slot session baton (`.claude/HANDOFF.md`) distilling this session's reasoning state — run when the context window is nearly full or when pausing mid-investigation; the next `/start` consumes and deletes it. Never auto-load `HANDOFF.md`.
 - `/learn` promotes validated recurring decisions into `.claude/rules/`.
 - `/doctor` runs a read-only health check on the CLAUDART installation.
 

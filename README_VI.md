@@ -33,6 +33,7 @@ curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh 
 | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
 | Session nào cũng bắt đầu mù mờ               | `/start` - đọc trạng thái hiện tại, task active, knowledge index và commit gần đây                                  |
 | Kế hoạch mất khi session đóng                | `/plan` - task doc bền, sống qua mọi lần pause                                                                      |
+| Session hiệu quả chạm trần context           | `/handoff` - baton single-slot giữ trạng thái suy luận của session; lần `/start` kế tiếp resume từ đó               |
 | Cùng quyết định bị tái khám phá hằng tuần    | `/learn` - thăng cấp pattern lặp lại thành `rules/` có scope theo path                                              |
 | Fact bền của dự án không có chỗ đúng để sống | `knowledge/` - fact mô tả (domain, architecture, glossary), được hiển thị mỗi session                               |
 | `CLAUDE.md` phình to và đốt token            | `/refactor-memory` - gọt còn index gọn; behavior -> rules, facts -> knowledge                                       |
@@ -59,6 +60,7 @@ vào context      (chỉ audit)        path phù hợp           detail đọc k
 # Trong project đã cài CLAUDART
 /start                          # định hướng session
 /plan add JWT middleware        # task doc bền - agent chờ bạn approve trước khi code
+/handoff                        # context window sắp đầy - distill trạng thái suy luận, resume bằng /start
 /checkpoint                     # rebuild CONTEXT.md + sync state cuối session
 /learn                          # thăng cấp quyết định lặp lại thành rule
 /doctor                         # health check khi setup có vẻ lệch

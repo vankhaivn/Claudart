@@ -8,6 +8,7 @@ This repository contains CLAUDART, a markdown-based operating layer for AI codin
 - Read `.codex/tasks/index.md` (if it exists) for active implementation plans.
 - Read `.codex/guidelines/*.md` for project behavior guidelines.
 - Do not auto-load `.codex/JOURNAL.md`; use it only for explicit history or learning tasks.
+- Do not auto-load `.codex/HANDOFF.md`; it is a one-shot session baton consumed by `$codex-start`.
 - Do not auto-load task bodies in `.codex/tasks/*.md` — read individual task files only when resuming or working on them.
 
 ## Core Commands
@@ -16,6 +17,7 @@ This repository contains CLAUDART, a markdown-based operating layer for AI codin
 - `$codex-plan <description>` — creates a persistent implementation plan in `.codex/tasks/`. Use instead of session-only `/plan` for any multi-session or multi-file work.
 - `$codex-project-discovery` — interviews the user about a rough project idea and creates a raw synthesis plus structured project docs.
 - `$codex-checkpoint` — updates `.codex/CONTEXT.md`, syncs `.codex/tasks/index.md`, and appends meaningful retired items to `.codex/JOURNAL.md`.
+- `$codex-handoff` — writes a single-slot session baton (`.codex/HANDOFF.md`) distilling the session's reasoning state when the context window is nearly full or an investigation pauses mid-flight; the next `$codex-start` consumes and deletes it.
 - `$codex-learn` — promotes validated recurring decisions into Codex guidelines.
 - `$codex-doctor` — runs a read-only health check.
 - `$codex-refactor-memory` — consolidates Codex memory, skills, guidelines, and agents.

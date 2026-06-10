@@ -9,7 +9,7 @@ Please run a health check on this repository's CLAUDART installation. Your job i
 ### 1. Required Structure
 
 - `.claude/` exists at the repository root
-- `.claude/commands/` exists and contains at least: `start.md`, `learn.md`, `refactor-memory.md`, `doctor.md`, `checkpoint.md`, `plan.md`
+- `.claude/commands/` exists and contains at least: `start.md`, `learn.md`, `refactor-memory.md`, `doctor.md`, `checkpoint.md`, `plan.md`, `handoff.md`
 - `.claude/agents/` exists (may be empty if user removed shipped agents)
 - `.claude/rules/` exists (may be empty before the user runs `/refactor-memory`)
 - `.claude/knowledge/` exists with `INDEX.md` (warn if missing — `/refactor-memory` will recreate it)
@@ -110,6 +110,15 @@ Skip this section if `.claude/knowledge/` does not exist.
 - **Dead code references in the body**: for each backtick-quoted repo path in a knowledge body (e.g. `` `src/auth/legacy.ts` ``), use Glob to confirm it still exists; missing → flag as **Low** (the fact may describe deleted code). Bounded & offline — check only backtick'd path-like tokens, never free prose.
 - **Dangling `related:` links**: for each `[[slug]]` in a knowledge file's `related:`, confirm it resolves to an existing knowledge topic (`<slug>.md`) or rule; unresolved → flag as **Low**.
 - **Duplication signal**: if two knowledge entries share most of their `description` keywords, or an entry's keywords strongly overlap a rule's `description`/`tags`, flag as **Low** — possible intra-tier or cross-tier duplication (`/refactor-memory` can consolidate). Keyword-overlap only; do not deep-read to confirm.
+
+### 5e. Session Handoff Hygiene (`.claude/HANDOFF.md`)
+
+`.claude/HANDOFF.md` is a transient single-slot baton written by `/handoff` and consumed (deleted) by the next `/start`. **Absent is the normal state — never warn when it is missing.**
+
+- If present, it is an unconsumed baton. Report it informationally. If its frontmatter `created:` is more than 7 days old, flag as **Medium** — reasoning state rots fast; suggest resuming via `/start` or deleting it.
+- Line count must be ≤ 150 (use `wc -l`). If exceeded, flag as **High** — the baton is drifting toward a transcript dump; `/handoff`'s distillation rules were not honored.
+- **CRITICAL**: run `grep -rn '@.claude/HANDOFF.md' .claude/CLAUDE.md .claude/rules/`. If found, flag as **Critical** — the baton is consumed once by `/start`, NEVER auto-loaded into every session.
+- Multiple handoff artifacts (`HANDOFF-*.md`, dated copies, a `handoff/` directory under `.claude/`) → flag as **Medium** — violates the single-slot contract; suggest consolidating into one `HANDOFF.md` or deleting stale copies.
 
 ### 6. Anti-Patterns Inside Rules and Agents
 

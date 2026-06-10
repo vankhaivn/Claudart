@@ -29,14 +29,15 @@ curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh 
 
 ## What it solves
 
-| Pain                                        | CLAUDART's answer                                                                                        |
-| ------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| Every session starts blind                  | `/start` — reads current state, active tasks, the knowledge index, and recent commits                    |
-| Plans die when the session closes           | `/plan` — a persistent task doc that survives any pause                                                  |
-| Same decisions re-discovered weekly         | `/learn` — graduates recurring patterns into path-scoped `rules/`                                        |
-| Durable facts have nowhere to live          | `knowledge/` — descriptive facts (domain, architecture, glossary), surfaced every session                |
-| `CLAUDE.md` bloats and burns tokens         | `/refactor-memory` — trims it to a lean index; behavior → rules, facts → knowledge                       |
-| Memory drifts silently; agents go off-scope | `/doctor` flags rot; `clean-code-reviewer`, `security-auditor`, and `agent-delegation` keep work bounded |
+| Pain                                          | CLAUDART's answer                                                                                        |
+| --------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Every session starts blind                    | `/start` — reads current state, active tasks, the knowledge index, and recent commits                    |
+| Plans die when the session closes             | `/plan` — a persistent task doc that survives any pause                                                  |
+| A productive session hits the context ceiling | `/handoff` — a single-slot baton with the session's reasoning state; the next `/start` resumes from it   |
+| Same decisions re-discovered weekly           | `/learn` — graduates recurring patterns into path-scoped `rules/`                                        |
+| Durable facts have nowhere to live            | `knowledge/` — descriptive facts (domain, architecture, glossary), surfaced every session                |
+| `CLAUDE.md` bloats and burns tokens           | `/refactor-memory` — trims it to a lean index; behavior → rules, facts → knowledge                       |
+| Memory drifts silently; agents go off-scope   | `/doctor` flags rot; `clean-code-reviewer`, `security-auditor`, and `agent-delegation` keep work bounded |
 
 ## The memory model
 
@@ -59,6 +60,7 @@ in context       (audit only)           a matching path        detail on demand
 # In a project with CLAUDART installed
 /start                          # orient the session
 /plan add JWT middleware        # persistent task doc — agent waits for your approval before coding
+/handoff                        # context window nearly full — distill reasoning state, resume via /start
 /checkpoint                     # rebuild CONTEXT.md + sync state at session end
 /learn                          # graduate recurring decisions into rules
 /doctor                         # health check when the setup feels off
