@@ -12,9 +12,9 @@
 
 ---
 
-> **Vấn đề.** AI coding agent làm rò trạng thái: mỗi session bắt đầu trong mù mờ, kế hoạch chết trong chat, quyết định cũ bị tái khám phá hằng tuần, còn `CLAUDE.md` / `AGENTS.md` phình thành bồn đốt token mà không ai còn tin.
+Coding agent hay quên. Đóng terminal là kế hoạch biến mất. Session kế tiếp bắt đầu trong mù mờ, đọc lại nửa repo, rồi tranh luận lại một quyết định bạn đã chốt từ thứ Ba tuần trước. Trong lúc đó `CLAUDE.md` cứ phình to, vì chẳng ai đủ tin nó để xóa bất kỳ thứ gì.
 
-CLAUDART xử lý chuyện đó bằng một nhóm slash command nhỏ trên mô hình memory nhiều tầng bằng markdown - các file thuần nằm trong `.claude/` và `.codex/`, được version bằng git, review được trong PR, đọc được offline. Không vector DB, không daemon, không cloud.
+CLAUDART xử lý chuyện này bằng file. Một nhóm slash command nhỏ duy trì một bộ tài liệu markdown dưới `.claude/` và `.codex/`: điều đang đúng ngay lúc này, kế hoạch cho từng task, các fact và rule đáng giữ lại. Tất cả đều được commit vào git, review được trong PR, và đọc được mà không cần tooling nào. Không có vector database, không daemon. Không cần host, không cần trông coi.
 
 ## Cài đặt
 
@@ -23,50 +23,54 @@ CLAUDART xử lý chuyện đó bằng một nhóm slash command nhỏ trên mô
 curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --claude
 ```
 
-**Bạn đã có setup riêng, hoặc đang nâng cấp?** `install.sh` copy mới và sẽ ghi đè phần bạn đã tùy chỉnh. Thay vào đó, hãy dán đoạn này vào agent của bạn - nó sẽ đọc repo, diff với project của bạn, và chỉ merge những gì bạn phê duyệt:
+`install.sh` copy mới toàn bộ, và đó không phải cách đúng cho một project đã có setup riêng. Trong trường hợp đó, hãy dán đoạn này vào agent của bạn. Nó sẽ đọc repo, diff với project, và chỉ merge những gì bạn phê duyệt:
 
 > Đọc https://raw.githubusercontent.com/vankhaivn/Claudart/main/INTEGRATE.md và làm theo để tích hợp CLAUDART vào project này. Hỏi tôi trước khi đụng tới bất kỳ thứ gì tôi đã custom.
 
 ## CLAUDART giải quyết gì
 
-| Nỗi đau                                      | Cách CLAUDART xử lý                                                                                                 |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| Session nào cũng bắt đầu mù mờ               | `/start` - đọc trạng thái hiện tại, task active, knowledge index và commit gần đây                                  |
-| Kế hoạch mất khi session đóng                | `/plan` - task doc bền, sống qua mọi lần pause                                                                      |
-| Session hiệu quả chạm trần context           | `/handoff` - baton single-slot giữ trạng thái suy luận của session; lần `/start` kế tiếp resume từ đó               |
-| Cùng quyết định bị tái khám phá hằng tuần    | `/learn` - thăng cấp pattern lặp lại thành `rules/` có scope theo path                                              |
-| Fact bền của dự án không có chỗ đúng để sống | `knowledge/` - fact mô tả (domain, architecture, glossary), được hiển thị mỗi session                               |
-| `CLAUDE.md` phình to và đốt token            | `/refactor-memory` - gọt còn index gọn; behavior -> rules, facts -> knowledge                                       |
-| Memory drift âm thầm; agent đi lệch scope    | `/doctor` báo dấu hiệu xuống cấp; `clean-code-reviewer`, `security-auditor` và `agent-delegation` giữ scope rõ ràng |
+| Nỗi đau                                      | Cách CLAUDART xử lý                                                                                   |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Session nào cũng bắt đầu mù mờ               | `/start` đọc trạng thái hiện tại, task đang mở và các commit gần đây trước khi đụng vào bất kỳ thứ gì |
+| Kế hoạch mất khi session đóng                | `/plan` ghi kế hoạch vào task file để session sau có thể tiếp tục đúng chỗ bạn dừng                   |
+| Session hiệu quả chạm trần context           | `/handoff` lưu suy luận của session - giả thuyết, evidence, dead ends - cho lần `/start` kế tiếp      |
+| Cùng quyết định bị tái khám phá hằng tuần    | `/learn` biến các chỉnh sửa lặp lại thành rule có scope theo path                                     |
+| Fact bền của dự án không có chỗ đúng để sống | `knowledge/` giữ chúng; index được hiển thị mỗi session, chi tiết được đọc khi cần                    |
+| `CLAUDE.md` phình thành bồn đốt token        | `/refactor-memory` gọt nó lại thành một index và đưa nội dung về đúng nơi                             |
+| Memory âm thầm mục ruỗng                     | `/doctor` là health check read-only để flag drift, link chết và nội dung đặt sai tầng                 |
+
+Hai review agent được ship kèm các command - `clean-code-reviewer` và `security-auditor` - cùng một delegation protocol để giữ việc subagent song song có biên rõ ràng thay vì lan rộng mất kiểm soát.
 
 ## Mô hình memory
 
+Bốn loại memory, bốn vòng đời khác nhau:
+
 ```text
-SESSION STATE (dễ bay hơi)          DURABLE REFERENCE (sống qua session)
+SESSION STATE (dễ bay hơi)           DURABLE REFERENCE (sống qua session)
 
-CONTEXT.md       JOURNAL.md         rules/ · guidelines/   knowledge/
-điều đang đúng   điều đã xảy ra     cách hành xử           dự án là gì
-(declarative)    (history log)      (prescriptive)         (descriptive facts)
+CONTEXT.md       JOURNAL.md          rules/ · guidelines/   knowledge/
+điều đang đúng   điều đã xảy ra      cách hành xử           dự án là gì
+(declarative)    (history log)       (prescriptive)         (descriptive facts)
 
-luôn được load   không được load    auto-load theo         INDEX trên /start,
-vào context      (chỉ audit)        path phù hợp           detail đọc khi cần
+luôn được load   không được load     auto-load theo         INDEX trên /start,
+vào context      (chỉ audit)         path phù hợp           chi tiết đọc khi cần
 ```
 
-`/checkpoint` rebuild `CONTEXT.md`, đưa lịch sử đã nghỉ sang `JOURNAL.md` (chỉ audit, không bao giờ load), và ghi fact bền vào `knowledge/`. `/learn` thăng cấp hành vi lặp lại thành `rules/`. `/doctor` và `/refactor-memory` giữ knowledge trung thực - flag drift và kiểm lại từng fact với code.
+`/checkpoint` rebuild `CONTEXT.md` ở cuối session và retire lịch sử sang `JOURNAL.md`, file không bao giờ được load vào context - nó tồn tại để audit, không phải để gợi nhớ. Fact nào hóa ra bền thì được thăng cấp vào `knowledge/`; hành vi nào cứ lặp lại thì được thăng cấp vào `rules/` qua `/learn`. Khi có gì đó trông stale, `/doctor` flag nó, và `/refactor-memory` kiểm lại từng fact với code thật trước khi giữ.
 
 ## Bắt đầu nhanh
 
 ```bash
 # Trong project đã cài CLAUDART
 /start                          # định hướng session
-/plan add JWT middleware        # task doc bền - agent chờ bạn approve trước khi code
-/handoff                        # context window sắp đầy - distill trạng thái suy luận, resume bằng /start
-/checkpoint                     # rebuild CONTEXT.md + sync state cuối session
+/plan add JWT middleware        # ghi task file; agent chờ bạn approve trước khi code
+/handoff                        # context gần đầy? lưu suy luận, resume fresh bằng /start
+/checkpoint                     # rebuild CONTEXT.md cuối session
 /learn                          # thăng cấp quyết định lặp lại thành rule
 /doctor                         # health check khi setup có vẻ lệch
 ```
 
-Codex CLI: cùng flow, đổi `/` thành `$codex-` (ví dụ `$codex-start`).
+Codex CLI chạy cùng flow với `$codex-` thay cho `/` (ví dụ `$codex-start`).
 
 ## Tài liệu
 
@@ -84,14 +88,8 @@ Bản tiếng Anh: **[README.md](README.md)** và **[docs/WORKFLOW.md](docs/WORK
 | **Memory review được bằng PR** |           ✅           |               ❌                |          ❌           |          ❌           |             ✅ JSON commit vào git             |            ❌ ChromaDB + SQLite binary             |
 | **Tool hỗ trợ**                | Claude Code, Codex CLI |             chỉ API             |        chỉ API        |     chỉ LangGraph     | Claude, Codex, Cursor, Copilot, Gemini + 6 nữa | Claude Code, Codex CLI, Gemini CLI, MCP-compatible |
 
-Markdown nằm trong repo đã thắng thế - `AGENTS.md` đã xuất hiện trong khoảng 20k public repo. CLAUDART làm convention đó có cấu trúc hơn và bổ sung workflow xung quanh nó: orientation, planning, learning, hygiene và review.
+Markdown thuần trong repo đã thắng lập luận này: `AGENTS.md` giờ là một tiêu chuẩn của Linux Foundation, được dùng trong hơn 60.000 public repository. CLAUDART dựa trên convention đó và xây workflow còn thiếu ở phía trên - orientation, planning, learning, hygiene và review.
 
 ## License
 
-MIT. Xem [`LICENSE`](LICENSE). Hoan nghênh đóng góp - xem [`CONTRIBUTING.md`](CONTRIBUTING.md).
-
----
-
-<div align="center">
-  <i>Được xây cho tương lai của phát triển phần mềm với AI hỗ trợ.</i>
-</div>
+MIT, xem [`LICENSE`](LICENSE). Hoan nghênh đóng góp; [`CONTRIBUTING.md`](CONTRIBUTING.md) có các nguyên tắc cơ bản.

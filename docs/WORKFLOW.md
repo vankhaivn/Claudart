@@ -1,6 +1,6 @@
 # CLAUDART Workflow
 
-The deep-dive companion to the [README](../README.md). Covers architecture, memory model, task lifecycle, commands, and directory layout.
+This is the manual. The [README](../README.md) is the pitch; this document explains how the pieces actually work — the two layers, the memory model, the task lifecycle, every command, and where each file lives.
 
 ## Contents
 
@@ -19,53 +19,57 @@ The deep-dive companion to the [README](../README.md). Covers architecture, memo
 
 ## Two layers
 
-CLAUDART installs as two parallel layers in your project. Run them independently or side-by-side; both write to the same git history.
+CLAUDART installs as two parallel layers. They don't depend on each other — install one, or both, and the only thing they share is the git history they're committed to.
 
-- **Claude layer** (`.claude/`) — slash commands, rules, review agents, session state
-- **Codex layer** (`.codex/` + `.agents/skills/`) — guidelines, TOML subagents, repo skills
+- **Claude layer** (`.claude/`): slash commands, rules, review agents, session state
+- **Codex layer** (`.codex/` + `.agents/skills/`): guidelines, TOML subagents, repo skills
 
-Every Claude command has a mirrored Codex skill, and the core memory and task lifecycle protocols are identical. Where the runtimes differ, the guidance adapts to each one: subagent delegation, for instance, ships on both layers — `.claude/rules/agent-delegation.md` for Claude's Agent tool and `.codex/guidelines/agent-delegation.md` for Codex's explorer/worker model.
+Every Claude command has a Codex skill that follows the same protocol. Where the two runtimes genuinely differ, the guidance differs with them. Subagent delegation, for example, is written twice on purpose: `.claude/rules/agent-delegation.md` speaks to Claude's Agent tool, `.codex/guidelines/agent-delegation.md` to Codex's explorer/worker model. Pretending they're the same tool would help nobody.
 
 ## Memory model — the graduation pipeline
 
-CLAUDART has these tiers of project memory, with explicit graduation between them:
+Project memory is split by how long things stay true:
 
 ```text
 CONTEXT.md       JOURNAL.md          rules/ · guidelines/      knowledge/
 ("right now")    ("what happened")   ("how to behave")         ("what the project is")
 ```
 
-- **`CONTEXT.md`** — declarative state, what is true _right now_. Updated by `/checkpoint` (Claude) or `$codex-checkpoint` (Codex). Hard ceiling: 150 lines.
-- **`JOURNAL.md`** — append-only audit log. One line per retired item. **Never auto-loaded into session context** — it exists for explicit review, not active recall.
-- **`rules/`** (Claude) and **`guidelines/`** (Codex) — durable, path-scoped **behavioral** rules (prescriptive — "how to behave"). Created when a pattern recurs enough that `/learn` (or `$codex-learn`) promotes it.
-- **`knowledge/`** — durable **descriptive** project facts (domain, architecture, glossary) and pointers to canonical docs in other folders. The opposite axis from rules: rules prescribe, knowledge describes. One topic per file; only `knowledge/INDEX.md` is surfaced — by `/start` (or `$codex-start`) — and detail files are read on demand (map-not-encyclopedia). Reference external docs rather than duplicating them, so they never go stale-by-copy.
+`CONTEXT.md` says what is true right now. `/checkpoint` (Codex: `$codex-checkpoint`) rewrites it at the end of a session — rewrites, not appends. When something stops being true it is removed, and the file has a hard ceiling of 150 lines to keep that honest.
 
-A note enters at `CONTEXT.md`. When it settles, one line graduates to `JOURNAL.md`. `/checkpoint` graduates durable **facts** to a `knowledge/` topic file (registered in `INDEX.md`); when a behavioral pattern recurs, `/learn` promotes it to a rule file. Only rules and `CONTEXT.md` are auto-loaded; knowledge is surfaced as an index and pulled on demand — the rest stay out of the working set unless explicitly invoked.
+`JOURNAL.md` is the archive: append-only, one line per retired item, and never loaded into a session. That sounds wasteful until you notice what it buys — history exists for the rare audit, not for burning tokens on every prompt.
 
-Knowledge is **maintained, not just accumulated**. `/doctor` is read-only and flags drift — stale facts, dead `sources:`/`related:` links, duplication across tiers, or content sitting in the wrong tier. `/refactor-memory` acts on those flags: it re-verifies each fact against the current code, consolidates duplicates, and moves content across the descriptive↔prescriptive boundary **both ways** (a fact misfiled as a rule → `knowledge/`; a rule that leaked into knowledge → back). Nothing is auto-deleted — drift is surfaced for you to confirm.
+`rules/` (Claude) and `guidelines/` (Codex) hold behavior: the prescriptive "always do X" patterns that earned a permanent place by recurring. `/learn` is how they get there.
 
-Across commands, knowledge has a clear lifecycle: `/start` **surfaces** the INDEX, `/checkpoint` **writes** new facts (including project-wide ones rescued from an archived task's Memory Hints), and `/refactor-memory` **seeds** an empty tier from your existing docs and routes extracted content by type — behavior → rules, facts → knowledge. Every entry carries a `sources:`/`verify:` anchor to the file it summarizes, so `/doctor` can check it instead of guessing.
+`knowledge/` holds facts: what the project is, how it's wired, what the words mean. Rules prescribe, knowledge describes — keeping the two apart is what stops both from rotting. One topic per file, and only `knowledge/INDEX.md` is surfaced at session start; detail files wait until a task actually needs them. Where a canonical doc already exists elsewhere, a knowledge entry points at it instead of copying it, so it can't go stale by copy.
+
+The graduation path: a note starts life in `CONTEXT.md`. If it settles into history, one line goes to `JOURNAL.md`. If it turns out to be a durable fact, `/checkpoint` files it under `knowledge/`. If it's a behavior worth repeating, `/learn` makes it a rule. Only `CONTEXT.md` and rules are auto-loaded — everything else waits to be asked.
+
+None of this survives without maintenance, so two commands exist to fight rot. `/doctor` is read-only: it flags stale facts, dead `sources:`/`related:` links, duplicated content, and things filed in the wrong tier. `/refactor-memory` acts on those flags — it re-verifies each fact against the current code, consolidates duplicates, and moves content across the descriptive/prescriptive boundary in both directions (a fact hiding in a rule goes to `knowledge/`; a rule that leaked into knowledge goes back). Nothing is deleted automatically. Drift is surfaced; you decide.
+
+One detail makes the checking possible at all: every knowledge entry carries a `sources:` or `verify:` anchor pointing at what it summarizes, so `/doctor` can test the claim instead of guessing at it.
 
 ## Session handoff — surviving a context overflow
 
-The four memory tiers all store **project** state. But a productive session also carries **reasoning state** — the working hypothesis, the evidence gathered, the dead ends already ruled out, the exact next move — and that state dies when the context window fills up. Native `/compact` summarizes it in-place, but the result is volatile: invisible, not reviewable, gone with the session, locked to one tool.
+The four tiers above store _project_ state. A session in the middle of a hard debug carries something else entirely: a working hypothesis, the evidence behind it, the approaches already tried and ruled out, the exact next move. That reasoning state dies when the context window fills. The native `/compact` will summarize it in place, but the summary is invisible, unreviewable, gone when the session ends, and locked to one tool.
 
-`/handoff` (Codex: `$codex-handoff`) writes that reasoning state to a **single-slot baton** — `.claude/HANDOFF.md` or `.codex/HANDOFF.md` — designed around how real compaction works (lessons taken from Claude Code's compact pipeline and Codex CLI's checkpoint compaction):
+`/handoff` (Codex: `$codex-handoff`) writes it to disk instead — one file, `.claude/HANDOFF.md` or `.codex/HANDOFF.md`, with a fixed schema: Objective, State of Play, Working Hypothesis, Evidence as `file:line` anchors, Dead Ends with the reason each was ruled out, User Constraints, Next Step, Open Questions.
 
-- **Fixed schema, not freeform**: Objective, State of Play, Working Hypothesis, Evidence (`file:line` anchors), Dead Ends with reasons, User Constraints, Next Step, Open Questions.
-- **Verbatim tier**: the user's explicit constraints, their most recent request, and the quote anchoring where work stopped are preserved word-for-word — everything else is distilled. No transcript dumps.
-- **Anchored next step**: the recorded next action must trace to the user's latest explicit request, with a verbatim quote — so the resuming session can't drift onto tangents.
-- **Durable content routes out first**: facts go to `knowledge/`, task-bound discoveries go to the task file's Memory Hints — the baton holds only the conversational residue that has no durable home.
+Three rules keep the baton honest:
 
-Lifecycle: written once (overwriting any previous baton), surfaced by the next `/start` / `$codex-start`, verified against current code, then **deleted on consumption**. One file, one hop — never an archive. Repeated summarization is cumulatively lossy, so the baton is deliberately consumed-once; `/doctor` flags a baton that sits unconsumed for more than 7 days.
+- The user's explicit constraints, their most recent request, and the quote showing where work stopped are kept word for word. Everything else is distilled. A handoff is never a transcript dump.
+- The recorded next step must trace to the user's latest request, quote included, so the resuming session can't wander off onto a tangent.
+- Durable content is routed out first — facts to `knowledge/`, task discoveries to the task file's Memory Hints. The baton keeps only the reasoning that has no durable home.
 
-Handoff complements `/checkpoint`, never replaces it: checkpoint records what is true about the _project_; handoff records what this _conversation_ was thinking. Run handoff when the context window is nearly full or when pausing mid-investigation — not as a session-end ritual.
+The lifecycle is deliberately short. Writing a new baton overwrites the old one. The next `/start` surfaces it, verifies its claims against the current code, and deletes it once the work is picked up. One file, one hop, never an archive — repeated summarization is cumulatively lossy, which is also why `/doctor` flags a baton left unconsumed for more than 7 days.
+
+Handoff complements `/checkpoint` rather than replacing it. Checkpoint records what is true about the project; handoff records what the conversation was thinking. Reach for it when the window is nearly full or when you're pausing mid-investigation — not as a session-end ritual.
 
 ## Persistent task workflow
 
-Native plan mode (Shift+Tab in Claude Code, `/plan` in Codex CLI) keeps plans in chat. Close the terminal and the plan is gone; pause for a day and the context drifts away as other commits land.
+Native plan mode (Shift+Tab in Claude Code, `/plan` in Codex CLI) keeps plans in chat. Close the terminal and the plan is gone; pause for a day and the codebase drifts out from under it.
 
-CLAUDART replaces this with **persistent task documents** — one markdown file per task, in `.claude/tasks/` or `.codex/tasks/`, versioned in git.
+CLAUDART keeps plans in files instead — one markdown document per task, under `.claude/tasks/` or `.codex/tasks/`, versioned like everything else:
 
 ```text
 /plan <task>  →  tasks/<YYYY-MM-DD-NNN-slug>.md  →  tasks/done/<NNN-slug>.md  →  JOURNAL.md
@@ -75,17 +79,19 @@ CLAUDART replaces this with **persistent task documents** — one markdown file 
 
 ### Task file structure
 
-Each task file is **self-contained** — reading it alone is enough to resume work in a new session, even days later, even after unrelated commits have landed. Required sections:
+A task file is written to be self-contained: reading it alone should be enough to resume the work days later, after unrelated commits have landed. The sections:
 
 - **Frontmatter** — `slug`, `status`, `created`, `updated`, `agent`, `tags`
-- **Purpose** — who gains what, how to verify it works
-- **Context & Orientation** — `Related Code`, `Related Docs`, and **`Memory Hints`** (free-form notes from this session to the next — the lifeline against context loss)
-- **Plan of Work** — prose narrative of the sequence and rationale
-- **Concrete Steps** — ordered checklist with UTC timestamps on completed items
+- **Purpose** — who gains what, and how to see it working
+- **Context & Orientation** — `Related Code`, `Related Docs`, and `Memory Hints`
+- **Plan of Work** — prose narrative of the sequence and why it's ordered that way
+- **Concrete Steps** — ordered checklist, UTC timestamps on completed items
 - **Validation & Acceptance** — observable success criteria (commands, manual checks)
-- **Decision Log** — non-obvious choices with rationale
+- **Decision Log** — non-obvious choices, with the alternatives that were rejected
 - **Surprises & Discoveries** — where reality diverged from the plan
 - **Outcomes & Retrospective** — filled at completion
+
+Memory Hints deserves a special mention: it's free-form notes from this session to the next, and it's the section that saves a future session from re-discovering the same constraint, the same library quirk, the same pitfall. When in doubt, write it down there.
 
 The canonical schema and protocol live in [`.claude/rules/task-management.md`](../.claude/rules/task-management.md) and [`.codex/guidelines/task-management.md`](../.codex/guidelines/task-management.md).
 
@@ -101,30 +107,21 @@ blocked ──(cleared)──▶ in-progress
 {any} ──(user cancels)──▶ cancelled
 ```
 
-Two states are **read-only locks** — the agent may only touch the task file, never code:
-
-- `planning` — drafting or awaiting approval to start
-- `awaiting-review` — agent has reported completion; user hasn't verified
+Two of these states are read-only locks. In `planning` and in `awaiting-review`, the agent may edit the task file and nothing else — no code. `planning` means the plan hasn't been approved yet; `awaiting-review` means the agent believes it's done and you haven't said so.
 
 ### Two-phase completion gate
 
-Most agent workflows let the agent self-mark a task done — and you find the real bug after the green checkbox is already in JOURNAL. CLAUDART splits completion into two phases:
+Most agent workflows let the agent grade its own homework, and you find the real bug after the green checkbox is already in the log. CLAUDART splits completion in two:
 
-**Phase 1 — Agent reports** (`in-progress → awaiting-review`)
+**Phase 1 — the agent reports** (`in-progress → awaiting-review`). When every checkbox is ticked, the agent drafts the Outcomes section, flips the status, tells you, and stops. No archive yet, no JOURNAL entry.
 
-When all checkboxes are ticked, the agent fills draft Outcomes, flips status to `awaiting-review`, reports to you, and **stops**. No archive, no JOURNAL entry yet.
+**Phase 2a — you confirm** (`awaiting-review → done`). You verify for real: run the app, check the build, read the diff. Say "approved" or "looks good" or "ok đóng", and the agent archives the task — file to `done/`, one line to JOURNAL, index updated.
 
-**Phase 2a — You confirm** (`awaiting-review → done`)
-
-You verify the work for real — run the app, check the build, inspect the diff. Say "approved" / "looks good" / "ok đóng" — the agent runs the archive flow: move the file to `done/`, append a JOURNAL line, update the index.
-
-**Phase 2b — You report a problem** (`awaiting-review → in-progress`)
-
-Found a bug? Just say it. The agent appends your report verbatim to Surprises, un-checks the wrong steps, flips back to `in-progress`, and fixes. The cycle Phase 1 ↔ 2b may repeat — that's the system catching real bugs, not a failure.
+**Phase 2b — you report a problem** (`awaiting-review → in-progress`). Found a bug? Just say it. Your report goes verbatim into Surprises & Discoveries, the wrong steps get unchecked, and the agent goes back to work. The Phase 1 ↔ 2b loop can repeat several times. That's the gate catching real bugs, not the system failing.
 
 ### Approval signals
 
-The agent watches for natural-language cues, not slash commands:
+The agent reads natural language, not slash commands:
 
 | Transition                      | What you say                                                                 |
 | ------------------------------- | ---------------------------------------------------------------------------- |
@@ -133,30 +130,30 @@ The agent watches for natural-language cues, not slash commands:
 | `awaiting-review → in-progress` | Any report of a problem — "didn't work", "broken", "missed X"                |
 | `* → cancelled`                 | "cancel", "abandon", "drop this", "bỏ task"                                  |
 
-Enthusiasm ("great!", "nice plan") is **not** approval. Edits you make to the task file are **not** approval. The signals are explicit and required.
+Enthusiasm is not approval — "nice plan!" keeps the task in `planning`. Neither are questions, and neither are edits you make to the task file yourself. The signals above are required.
 
-## Cross-session resumption
+### Cross-session resumption
 
 A new session resuming a task:
 
-1. Reads the entire task file (self-contained by design).
-2. Verifies completed steps still hold against the **current** code — unrelated commits may have moved files or changed APIs.
-3. Logs any drift in Surprises and asks you whether to adapt the plan or revisit prior steps.
-4. Picks up the next unchecked step.
+1. Reads the entire task file. It's self-contained by design.
+2. Checks that the completed steps still hold against the current code — unrelated commits may have moved files or changed APIs since.
+3. Logs any drift in Surprises & Discoveries and asks whether to adapt the plan or revisit earlier steps.
+4. Only then picks up the next unchecked step.
 
-Memory Hints from previous sessions is the lifeline. Populate it generously when planning — every non-obvious constraint, library quirk, or pitfall discovered during exploration belongs there.
+The file is a snapshot, not a guarantee. Verifying before continuing is what keeps a three-day-old plan from quietly executing against a codebase that no longer matches it.
 
 ## Subagent delegation
 
-Both layers can run subagents for parallel exploration, bounded implementation, review, and audit work. CLAUDART treats that capability as **explicitly authorized parallelism**, not an automatic response to large tasks — "be thorough" or "research deeply" is not authorization; "use subagents", "delegate this", or "parallelize with agents" is.
+Both layers can fan work out to subagents — parallel exploration, bounded implementation, review, audits. CLAUDART treats this as authorized parallelism, never a default: "be thorough" doesn't spawn agents; "use subagents" does.
 
-Each runtime gets a protocol written to its own mechanics — `.claude/rules/agent-delegation.md` (Claude's Agent tool) and `.codex/guidelines/agent-delegation.md` (Codex's explorer/worker model) — and they share one spine:
+Each runtime gets a protocol written for its own mechanics (`.claude/rules/agent-delegation.md` for Claude's Agent tool, `.codex/guidelines/agent-delegation.md` for Codex's explorer/worker model). They share one spine:
 
-- **Decomposition gate** — before spawning, the parent separates the **critical path** (work to do locally now), **sidecar tasks** (bounded, parallel-safe), **ownership** (the exact read question or write scope per subagent), and a **merge plan** (how findings return). If the next step is blocked on the subtask, don't spawn — do it locally.
-- **Delegate-and-consume vs. delegate-and-continue** — judged by task structure, not wording. If the delegated question _is_ the whole task, spawn and **wait** — don't shadow-run the same work in parallel. Fan out parallel agents only when the request splits into non-overlapping units; the tell is **overlap of the same sub-question** (if your next step answers what a subagent already owns, that's redundancy, not parallelism). Deliberate, disclosed redundancy is fine — independent review, or a hedge you authorized — but never a silent hedge because a tool felt risky.
-- **Ownership discipline** — explorers stay read-only; workers need disjoint write scopes (Claude isolates parallel writers in their own git worktrees); reviewers and security auditors produce findings the parent still owns and validates. A subagent patch is never final without parent review.
+- **A decomposition gate.** Before spawning anything, the parent writes down the critical path it will work locally, the bounded sidecar tasks that can run in parallel, exactly which files or questions each subagent owns, and how the results come back. If the next step is blocked on the subtask, there's nothing to parallelize — do it locally.
+- **Delegate-and-consume vs. delegate-and-continue.** Judged by task structure, not by the user's wording. When the delegated question _is_ the whole task, spawn one agent and wait — running the same investigation yourself in parallel pays twice for one answer. Fan out only when the request splits into units that don't overlap. The reliable tell is overlap: if your own next step answers a question a subagent already owns, that's redundancy, not parallelism. Deliberate redundancy is fine when disclosed (independent cross-review, a hedge the user asked for); silent redundancy never is.
+- **Ownership discipline.** Explorers stay read-only. Parallel writers get disjoint scopes — on Claude, each gets its own git worktree. Reviewer and auditor findings still belong to the parent, who validates before integrating. A subagent patch is never final without parent review.
 
-Task documents persist the durable parts of delegation — authorization status, roles, ownership boundaries, findings, decisions, and validation outcomes — never transient thread ids. `/checkpoint` (or `$codex-checkpoint`) carries forward active delegation blockers in `CONTEXT.md`, but completed findings live in the task file and eventually `JOURNAL.md`.
+What survives afterwards goes in the task document: who authorized what, the roles, the ownership boundaries, the findings, the validation outcomes. Never transient thread ids — `/checkpoint` carries active delegation blockers forward in `CONTEXT.md`, and completed findings live in the task file until they retire to `JOURNAL.md`.
 
 ## Commands and skills
 
@@ -171,9 +168,9 @@ Task documents persist the durable parts of delegation — authorization status,
 | `/learn`             | `$codex-learn`             | Retrospective — promotes recurring lessons into rules/guidelines with loophole-closing language                                                                                                            |
 | `/doctor`            | `$codex-doctor`            | Read-only health check: structure, frontmatter, token hygiene, wiring, task & knowledge hygiene                                                                                                            |
 
-Review agents ship with both layers: `clean-code-reviewer` (scope + Clean Code discipline) and `security-auditor` (OWASP audit — read-only on your code, but writes its findings to a `security-audit-<date>.md` report at the project root and prints only the summary to chat). Claude uses kebab-case Markdown agent names; Codex uses snake_case TOML `name` values.
+Both layers also ship two review agents. `clean-code-reviewer` enforces scope and Clean Code discipline. `security-auditor` runs an OWASP-mapped audit — read-only on your code, writing its findings to a `security-audit-<date>.md` report at the project root and printing only the summary to chat. Claude names agents in kebab-case Markdown; Codex uses snake_case TOML `name` values.
 
-Subagent delegation is governed by `.claude/rules/agent-delegation.md` (Claude) and `.codex/guidelines/agent-delegation.md` (Codex). The shipped Codex config (`.codex/config.toml`) keeps `[agents] max_depth = 1` and `max_threads = 6` (Codex's default) so downstream projects get useful parallelism without recursive fan-out.
+The shipped Codex config (`.codex/config.toml`) keeps `[agents] max_depth = 1` and `max_threads = 6` — Codex's default — so a downstream project gets useful parallelism without a small request accidentally fanning out into recursive subagent trees.
 
 ## Directory layout
 
