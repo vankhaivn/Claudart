@@ -2,7 +2,7 @@
 description: Orient a new CLAUDART session from current context, recent git history, and active task documents
 ---
 
-Start this session with a lightweight CLAUDART orientation. This command is read-only.
+Start this session with a lightweight CLAUDART orientation. This command is read-only, with one exception: consuming the handoff baton (Case H) deletes `.claude/HANDOFF.md` once the user resumes or discards it.
 
 ## Procedure
 

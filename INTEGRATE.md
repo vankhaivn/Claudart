@@ -25,7 +25,7 @@ This file is a **protocol, not a script** — follow it top to bottom. It exists
 
 **Claude layer** (`.claude/`):
 
-- `commands/` — slash commands: `start`, `plan`, `checkpoint`, `learn`, `refactor-memory`, `doctor`, `project-discovery`
+- `commands/` — slash commands: `start`, `plan`, `checkpoint`, `handoff`, `learn`, `refactor-memory`, `doctor`, `project-discovery`
 - `agents/` — review agents: `clean-code-reviewer`, `security-auditor` (read-only on user code)
 - `rules/` — **prescriptive**, path-scoped behavior (`ai-behavior`, `task-management`)
 - `knowledge/INDEX.md` — **descriptive** durable project facts (a map; detail files read on demand)
@@ -82,7 +82,7 @@ Present the full add / merge / skip plan and ask before writing.
 
 - **Never** overwrite a file the user created or modified without showing a diff and getting an explicit "yes."
 - Index / memory files (`CLAUDE.md`, `AGENTS.md`, `knowledge/INDEX.md`, `tasks/index.md`) are **spliced**, never wholesale-replaced — preserve the user's content and ordering.
-- `CONTEXT.md` and `JOURNAL.md` are live user state — **never** import them from the template; only create them empty (from the template header) if missing.
+- `CONTEXT.md` and `JOURNAL.md` are live user state — **never** import them from the template; only create them empty (from the template header) if missing. `HANDOFF.md` (when present) is a live one-shot session baton — never import, overwrite, or create it.
 - Do not touch `.env`, secrets, or anything matched by `.gitignore`.
 - If integrating both layers, keep the Claude command and its Codex skill mirror consistent.
 

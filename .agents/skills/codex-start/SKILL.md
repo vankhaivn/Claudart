@@ -5,7 +5,7 @@ description: Orient a new Codex session from current context, recent git history
 
 # Codex Start
 
-Start a Codex session with a lightweight CLAUDART orientation. This skill is read-only.
+Start a Codex session with a lightweight CLAUDART orientation. This skill is read-only, with one exception: consuming the handoff baton (Case H) deletes `.codex/HANDOFF.md` once the user resumes or discards it.
 
 ## Procedure
 
