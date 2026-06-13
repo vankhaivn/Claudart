@@ -87,12 +87,12 @@ tags: [1-5 lowercase kebab-case tags]
 
 ## Decision Log
 
-- **Decision** (YYYY-MM-DD, claude): <what was chosen>.
+- **Decision** (YYYY-MM-DD HH:MMZ, claude): <what was chosen>.
   **Rationale**: <why; what alternatives were rejected>.
 
 ## Surprises & Discoveries
 
-- (YYYY-MM-DD) <what was unexpected while exploring or implementing>
+- (YYYY-MM-DD HH:MMZ) <what was unexpected while exploring or implementing>
 
 ## Outcomes & Retrospective
 
@@ -171,11 +171,11 @@ When `status: in-progress`, the agent maintains the task file as it works:
 
 1. After completing each step, flip `- [ ]` → `- [x]` and prefix with `(YYYY-MM-DD HH:MMZ)` UTC timestamp.
 2. Bump frontmatter `updated:` whenever the file is touched.
-3. Append to **Surprises & Discoveries** when reality diverges from the plan (e.g., file moved, dependency missing, existing helper found).
-4. Append to **Decision Log** when changing approach mid-flight. Include rationale.
+3. Append to **Surprises & Discoveries** when reality diverges from the plan (e.g., file moved, dependency missing, existing helper found). Prefix each entry with a `(YYYY-MM-DD HH:MMZ)` UTC timestamp.
+4. Append to **Decision Log** when changing approach mid-flight, prefixed with `(YYYY-MM-DD HH:MMZ, <agent>)`. Include rationale.
 5. **Do not delete or rewrite steps that were skipped or abandoned** — strike them through with `~~text~~` and add a Surprises entry explaining why.
 
-The plan is a living document. Edits to it are part of the work, not an afterthought.
+The plan is a living document. Edits to it are part of the work, not an afterthought. Every in-task log entry — a completed step, a Decision Log line, a Surprises line — carries the full `YYYY-MM-DD HH:MMZ` UTC time, never date-only: one task often logs several entries in a single day, and the time is the only thing that keeps them ordered for audit.
 
 ## Completion — Two-Phase Gate
 
@@ -210,7 +210,7 @@ When the user gives a completion signal — "approved", "confirmed", "looks good
 
 If the user reports something is wrong — "step 3 didn't actually work in build", "the style resets to normal at runtime", "you missed X" — do NOT defend. The first completion attempt being wrong is normal; the system is designed to catch this. Run the rollback flow:
 
-1. Append the user's report to **Surprises & Discoveries** with today's UTC date, verbatim if useful. This is high-signal data for future-self.
+1. Append the user's report to **Surprises & Discoveries**, stamped with the current `(YYYY-MM-DD HH:MMZ)` UTC time, verbatim if useful. This is high-signal data for future-self.
 2. Un-check any Concrete Steps or Validation boxes that turned out to be wrong, OR add new steps if the gap is novel.
 3. Flip frontmatter `status: awaiting-review → in-progress`.
 4. Bump `updated:`.
