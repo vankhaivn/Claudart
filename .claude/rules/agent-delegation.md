@@ -1,34 +1,38 @@
 ---
 paths: ["**/*"]
-description: Claude Code subagent delegation protocol — project judgment layered on top of the Agent tool's built-in mechanics.
-when_to_use: When the user explicitly authorizes subagents, delegation, or parallel agent work, or when planning a Claude task that may benefit from such authorization.
+description: Claude Code subagent delegation — project guidance on HOW to delegate well (decomposition, worker prompts, anti-shadow-run, persistence), layered on top of the Agent tool's built-in WHEN-to-delegate mechanics.
+when_to_use: When delegating to subagents, or planning a task that may parallelize — for the project's decomposition, worker-prompt, anti-shadow-run, and finding-persistence guidance.
 tags: [subagents, delegation, parallelism, orchestration]
 ---
 
 # Agent Delegation
 
-The Agent tool is a parallel-work capability, not a default behavior. Use it only when the user explicitly asks for subagents, delegation, or parallel agent work. Requests for depth, thoroughness, investigation, or "be comprehensive" are not authorization by themselves.
+**Trust the harness on _whether and when_ to delegate.** The Agent tool's built-in mechanics already make that call well — reach for a subagent when work parallelizes, when a search spans many files, when an independent investigation can run on the side — exactly as in a vanilla Claude session. This rule does **not** gate that decision and does **not** require the user to pre-authorize routine delegation. Requests for depth, thoroughness, or "be comprehensive" are normal grounds for the harness to fan out; let it.
 
-**This rule does not restate the harness.** Claude's Agent tool already encodes the mechanics — when to delegate, launching parallel agents in a single message, `SendMessage` to continue a thread, `run_in_background`, `isolation: worktree`, and crucially: _"once you've delegated a search, don't also run it yourself — wait for the result."_ This rule adds only the project-specific judgment on top: the decomposition gate, the overlap test, the no-silent-hedge rule, and how delegated findings persist into CLAUDART memory.
+**What this rule adds is the _how_, not the _whether_.** Claude's Agent tool already encodes the mechanics — launching parallel agents in one message, `SendMessage` to continue a thread, `run_in_background`, `isolation: worktree`, and _"once you've delegated a search, don't also run it yourself — wait for the result."_ On top of that, this rule supplies the project-specific layer: how to decompose work, how to avoid shadow-running, how to write a self-contained worker prompt, and how delegated findings persist into CLAUDART memory.
 
 This protocol governs general-purpose delegation (`subagent_type: general-purpose`, `Explore`, `Plan`). Project review agents (`clean-code-reviewer`, `security-auditor` under `.claude/agents/`) carry their own instructions and are invoked by name; they are out of scope here.
 
-## Delegation Gate
+## Decompose before you fan out
 
-Before spawning a subagent, write a short decomposition:
+When a task is a candidate for delegation, sketch a short decomposition first — this is strategy guidance, not a permission gate:
 
 - **Main agent critical path**: the next work the parent session will do locally.
 - **Sidecar tasks**: bounded tasks that can run in parallel without blocking that critical path.
 - **Ownership**: exact files, modules, or read-only question each subagent owns.
 - **Merge plan**: how returned findings or patches will be reviewed and integrated.
 
-Do not spawn if the next parent step is blocked on the subtask. Do that work locally instead.
+Do not spawn if the next parent step is blocked on the subtask — that is the dependency test below, not reluctance to delegate. Do blocked work locally; fan out genuinely independent work freely.
 
-## Pre-authorized Delegation (task-file `delegation:` field)
+## The task-file `delegation:` field records strategy, not permission
 
-The "explicit authorization" requirement above can be satisfied **at planning time** and persisted, not only at runtime. When a `/plan` task records `delegation: authorized` in its frontmatter, the user authorized subagents for execution during planning — the approval signal ("go") then activates delegation **without a second request**. `delegation: strategy-only` means a strategy is recorded but only _discussed_, not authorized: make a single one-line offer at "go" before spawning. See `task-management.md` → "Delegation Authorization" for the field's full semantics.
+The `/plan` task-file `delegation:` field carries a **recorded delegation strategy** from planning into execution — it is a hint, not an authorization switch. The harness still decides whether to delegate at run time; the field just pre-loads a plan so a good decomposition isn't re-derived.
 
-The authorization bar itself is unchanged. A _question_ about subagents ("can they handle the non-conflicting parts?") is `strategy-only`, not `authorized`; only an explicit instruction to use them for the work sets `authorized`. Persisting the decision removes the redundant re-confirmation, not the gate.
+- **`none`** — no specific strategy recorded. On "go", use harness judgment: delegate if the work genuinely parallelizes, run solo if it doesn't. `none` is _not_ an instruction to avoid subagents.
+- **`strategy-only`** — a decomposition is recorded as a hint (in Plan of Work / Memory Hints). On "go", proceed by harness judgment, applying the recorded strategy where it fits. No mandatory permission round-trip.
+- **`authorized`** — the user recorded a specific delegation plan they want followed. On "go", begin per that plan directly and say you are following the recorded strategy.
+
+See `task-management.md` → "Delegation Authorization" for how the field rides the approval signal.
 
 ## Delegate-and-Consume vs. Delegate-and-Continue
 
@@ -60,11 +64,11 @@ The parent session remains responsible for the final result. Beyond the harness 
 
 ## Task Documents
 
-For planned work, capture delegation under `## Plan of Work` or `### Memory Hints`, not a separate schema section. Include: whether the user authorized subagents; intended roles; read/write ownership boundaries; validation and review responsibilities; any concurrency or cost limits. If the user did not authorize subagents, note only "Delegation opportunity: <short idea>" when it would materially help later.
+For planned work, capture delegation under `## Plan of Work` or `### Memory Hints`, not a separate schema section. Include: the intended decomposition; intended roles; read/write ownership boundaries; validation and review responsibilities; any concurrency or cost limits. When a task is likely to parallelize, record the strategy; otherwise note "Delegation opportunity: <short idea>" when it would materially help a later session.
 
 ## Safety And Cost
 
 - Keep delegation one level deep unless the user explicitly asks for recursive delegation.
 - Use read-only subagents (`Explore`) for any read-only delegation whenever possible.
 - Give parallel writers `isolation: worktree` so concurrent edits cannot conflict.
-- For template/downstream projects, prefer conservative fan-out so a small request does not accidentally launch expensive parallel work.
+- Be cost-aware on template/downstream projects: match fan-out to the size of the request so a trivial ask doesn't spin up expensive parallel work — judgment, not a brake on genuinely parallel work.

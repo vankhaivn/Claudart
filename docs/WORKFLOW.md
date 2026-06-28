@@ -145,15 +145,15 @@ The file is a snapshot, not a guarantee. Verifying before continuing is what kee
 
 ## Subagent delegation
 
-Both layers can fan work out to subagents — parallel exploration, bounded implementation, review, audits. CLAUDART treats this as authorized parallelism, never a default: "be thorough" doesn't spawn agents; "use subagents" does.
+Both layers can fan work out to subagents — parallel exploration, bounded implementation, review, audits. **Who decides _whether_ to delegate differs by runtime, on purpose.** Claude's Agent tool decides for itself when work parallelizes, so the Claude layer trusts the harness and does not gate delegation: "be thorough" is fair grounds to fan out. Codex never delegates on its own (it spawns only from an explicit named request), so the Codex layer keeps the stricter rule — authorized parallelism, never a default: "be thorough" doesn't spawn agents; "use subagents" does.
 
-Each runtime gets a protocol written for its own mechanics (`.claude/rules/agent-delegation.md` for Claude's Agent tool, `.codex/guidelines/agent-delegation.md` for Codex's explorer/worker model). They share one spine:
+Each runtime gets a protocol written for its own mechanics (`.claude/rules/agent-delegation.md` for Claude's Agent tool, `.codex/guidelines/agent-delegation.md` for Codex's explorer/worker model). Once delegation _is_ happening, they share one spine:
 
-- **A decomposition gate.** Before spawning anything, the parent writes down the critical path it will work locally, the bounded sidecar tasks that can run in parallel, exactly which files or questions each subagent owns, and how the results come back. If the next step is blocked on the subtask, there's nothing to parallelize — do it locally.
+- **Decompose before you fan out.** Before spawning anything, the parent writes down the critical path it will work locally, the bounded sidecar tasks that can run in parallel, exactly which files or questions each subagent owns, and how the results come back. This is strategy guidance, not a permission gate. If the next step is blocked on the subtask, there's nothing to parallelize — do it locally.
 - **Delegate-and-consume vs. delegate-and-continue.** Judged by task structure, not by the user's wording. When the delegated question _is_ the whole task, spawn one agent and wait — running the same investigation yourself in parallel pays twice for one answer. Fan out only when the request splits into units that don't overlap. The reliable tell is overlap: if your own next step answers a question a subagent already owns, that's redundancy, not parallelism. Deliberate redundancy is fine when disclosed (independent cross-review, a hedge the user asked for); silent redundancy never is.
 - **Ownership discipline.** Explorers stay read-only. Parallel writers get disjoint scopes — on Claude, each gets its own git worktree. Reviewer and auditor findings still belong to the parent, who validates before integrating. A subagent patch is never final without parent review.
 
-What survives afterwards goes in the task document: who authorized what, the roles, the ownership boundaries, the findings, the validation outcomes. Never transient thread ids — `/checkpoint` carries active delegation blockers forward in `CONTEXT.md`, and completed findings live in the task file until they retire to `JOURNAL.md`.
+What survives afterwards goes in the task document: the delegation strategy, the roles, the ownership boundaries, the findings, the validation outcomes. Never transient thread ids — `/checkpoint` carries active delegation blockers forward in `CONTEXT.md`, and completed findings live in the task file until they retire to `JOURNAL.md`.
 
 ## Commands and skills
 

@@ -67,7 +67,7 @@ tags: [1-5 lowercase kebab-case tags]
 - Non-obvious constraints discovered while exploring
 - Libraries/tools the project uses (e.g., "uses Zod, not Joi")
 - Pitfalls already encountered
-- Delegation strategy when relevant: authorization status, subagent roles, ownership boundaries, validation responsibilities (mirror the `delegation:` field)
+- Delegation strategy when relevant: subagent roles, ownership boundaries, validation responsibilities (mirror the `delegation:` field)
 - Anything that would save the next session from re-discovering the same thing>
 
 ## Plan of Work
@@ -153,17 +153,17 @@ Treat these as NOT approval (still in planning):
 - Questions about the plan
 - Requests to add/remove/reorder steps
 
-On approval: flip frontmatter `status: planning → in-progress`, bump `updated:` to today, then begin executing the first unchecked step. The `delegation:` field decides whether "go" also starts delegated work — see below.
+On approval: flip frontmatter `status: planning → in-progress`, bump `updated:` to today, then begin executing the first unchecked step. The `delegation:` field records any delegation strategy to carry into execution — see below; it does not gate whether you may delegate (the harness decides that).
 
 ## Delegation Authorization (the `delegation:` field)
 
-The frontmatter `delegation:` field persists whether subagent / parallel work is authorized **for execution**, so the approval signal ("go") can carry it without a second round-trip. The planner sets it during planning; the approval gate reads it. This is the only place authorization is persisted — `agent-delegation.md` defines _what_ counts as authorization; this field records the _decision_ so it survives into execution.
+The frontmatter `delegation:` field persists a **delegation strategy** recorded at planning time, so the approval signal ("go") can carry it into execution without re-deriving the decomposition. It is a hint, not a permission switch: per `agent-delegation.md`, the harness decides _whether_ to delegate; this field records _what plan to follow_ when it does.
 
-- **`none`** (default) — delegation was not discussed, or the task does not benefit from it. On "go", work solo.
-- **`strategy-only`** — a delegation strategy is recorded (in Plan of Work / Memory Hints), but the user only _discussed or asked about_ subagents — a capability question ("can subagents handle the non-conflicting parts?"), which is NOT authorization. On "go", flip to `in-progress`, then make **a single one-line offer** before spawning anything ("plan records a subagent strategy — fan out, or run solo?"). Never silently default to solo.
-- **`authorized`** — the user _explicitly authorized subagents for execution_ during planning ("dùng subagents khi làm", "fan out when you implement"). On "go", flip to `in-progress` **and** begin per the recorded delegation plan with **no second prompt**; state in your reply that you are honoring the recorded authorization.
+- **`none`** (default) — no specific strategy recorded. On "go", use harness judgment: delegate if the work genuinely parallelizes, run solo if it doesn't. `none` is _not_ an instruction to avoid subagents.
+- **`strategy-only`** — a decomposition is recorded (in Plan of Work / Memory Hints) as a hint. On "go", proceed by harness judgment, applying the recorded strategy where it fits — no mandatory permission round-trip.
+- **`authorized`** — the user recorded a specific delegation plan they want followed. On "go", flip to `in-progress` and begin per that plan directly; state in your reply that you are following the recorded strategy.
 
-Setting the field is a planning-time judgment, recorded with a Decision Log entry. The `strategy-only` ↔ `authorized` boundary is exactly the _question-vs-authorization_ line drawn in `agent-delegation.md` — persisting it here just lets "go" inherit it. If the user instead authorizes subagents at runtime (after "go"), update the field to `authorized` and proceed.
+Setting the field is a planning-time judgment, recorded with a Decision Log entry. The field is documentation of intent, not a lock — the harness may still delegate per its own judgment, and the user may record or change a strategy at runtime by updating the field.
 
 ## Progress Updates During Implementation
 
@@ -229,7 +229,7 @@ The cycle Phase 1 ↔ Phase 2b may repeat. That's correct behavior, not a bug.
 
 The agent must wait for the explicit signal. Enthusiasm ("great!", "nice plan") is NOT approval. Questions are NOT approval. Edits the user makes to the task file are NOT approval.
 
-Subagent execution is a separate gate carried by the `delegation:` field (see "Delegation Authorization"): `authorized` lets "go" also start delegated work; `strategy-only` makes "go" offer once before spawning; `none` runs solo.
+Subagent execution is not a separate approval gate — the harness decides whether to delegate. The `delegation:` field only records a strategy to follow (see "Delegation Authorization"): `authorized` carries a specific plan, `strategy-only` a hint, `none` leaves it to harness judgment.
 
 ## Resumption Across Sessions
 

@@ -145,15 +145,15 @@ File là snapshot, không phải bảo đảm. Verify trước khi tiếp tục 
 
 ## Subagent delegation
 
-Cả hai layer đều có thể fan work out cho subagent - khảo sát song song, triển khai có giới hạn, review, audit. CLAUDART xem đây là parallelism đã được cho phép, không phải mặc định: "be thorough" không spawn agent; "use subagents" thì có.
+Cả hai layer đều có thể fan work out cho subagent - khảo sát song song, triển khai có giới hạn, review, audit. **Ai quyết định _có nên_ delegate hay không khác nhau giữa hai runtime, một cách có chủ đích.** Agent tool của Claude tự quyết khi nào việc parallelize được, nên layer Claude tin harness và không gate delegation: "be thorough" là cơ sở hợp lý để fan out. Codex không bao giờ tự delegate (chỉ spawn khi có yêu cầu nêu tên rõ ràng), nên layer Codex giữ luật chặt hơn - parallelism đã được cho phép, không phải mặc định: "be thorough" không spawn agent; "use subagents" thì có.
 
-Mỗi runtime có protocol viết theo mechanics riêng (`.claude/rules/agent-delegation.md` cho Agent tool của Claude, `.codex/guidelines/agent-delegation.md` cho mô hình explorer/worker của Codex). Chúng chia sẻ một xương sống:
+Mỗi runtime có protocol viết theo mechanics riêng (`.claude/rules/agent-delegation.md` cho Agent tool của Claude, `.codex/guidelines/agent-delegation.md` cho mô hình explorer/worker của Codex). Một khi delegation _đang_ diễn ra, chúng chia sẻ một xương sống:
 
-- **Decomposition gate.** Trước khi spawn bất kỳ thứ gì, parent ghi ra critical path nó sẽ làm local, các sidecar task có giới hạn có thể chạy song song, chính xác file hoặc câu hỏi mỗi subagent sở hữu, và kết quả quay về thế nào. Nếu bước kế tiếp đang bị chặn bởi subtask, không có gì để parallelize - làm local.
+- **Decompose trước khi fan out.** Trước khi spawn bất kỳ thứ gì, parent ghi ra critical path nó sẽ làm local, các sidecar task có giới hạn có thể chạy song song, chính xác file hoặc câu hỏi mỗi subagent sở hữu, và kết quả quay về thế nào. Đây là hướng dẫn chiến lược, không phải permission gate. Nếu bước kế tiếp đang bị chặn bởi subtask, không có gì để parallelize - làm local.
 - **Delegate-and-consume vs. delegate-and-continue.** Đánh giá theo cấu trúc task, không theo wording của user. Khi câu hỏi được delegate _chính là_ toàn bộ task, spawn một agent và chờ - tự chạy cùng investigation song song là trả tiền hai lần cho một câu trả lời. Chỉ fan out khi request chia được thành các unit không chồng lấn. Dấu hiệu đáng tin là overlap: nếu bước kế tiếp của bạn trả lời câu hỏi mà subagent đã own, đó là dư thừa, không phải parallelism. Redundancy có chủ đích thì được nếu đã nói rõ (independent cross-review, hedge user yêu cầu); redundancy âm thầm thì không.
 - **Ownership discipline.** Explorer ở read-only. Parallel writer nhận scope tách biệt - với Claude, mỗi writer có git worktree riêng. Findings của reviewer và auditor vẫn thuộc trách nhiệm parent, parent validate trước khi integrate. Patch từ subagent không bao giờ là final nếu chưa được parent review.
 
-Phần sống sót sau đó đi vào task document: ai authorize việc gì, role, ownership boundary, findings, validation outcome. Không bao giờ lưu transient thread id - `/checkpoint` mang active delegation blocker tiếp vào `CONTEXT.md`, và findings đã hoàn tất sống trong task file cho tới khi retire vào `JOURNAL.md`.
+Phần sống sót sau đó đi vào task document: delegation strategy, role, ownership boundary, findings, validation outcome. Không bao giờ lưu transient thread id - `/checkpoint` mang active delegation blocker tiếp vào `CONTEXT.md`, và findings đã hoàn tất sống trong task file cho tới khi retire vào `JOURNAL.md`.
 
 ## Command và skill
 

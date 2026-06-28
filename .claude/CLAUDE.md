@@ -20,7 +20,7 @@ CLAUDART keeps the Claude-specific operating layer inside `.claude/`, including 
 See @.claude/CONTEXT.md for the current state of work (updated by /checkpoint).
 See @.claude/rules/ai-behavior.md for universal AI behavior guidelines.
 See @.claude/rules/task-management.md for the persistent task-document workflow that replaces native plan mode.
-See @.claude/rules/agent-delegation.md for the subagent delegation protocol (when the user authorizes parallel agent work).
+See @.claude/rules/agent-delegation.md for how to delegate well to subagents (decomposition, worker prompts, anti-shadow-run, persistence) — the harness decides _whether_ to delegate; the rule adds the project's _how_.
 
 Project knowledge: see `.claude/knowledge/INDEX.md` for durable project facts and pointers to external docs. Surfaced by `/start`; NOT auto-loaded (no `@`) — read entries on demand.
 

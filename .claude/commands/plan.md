@@ -42,7 +42,7 @@ Use `Read`, `Grep`, `Glob`, and read-only `Bash` (`ls`, `cat`, `git status/log/d
 - Identify existing patterns and helpers to reuse (avoid rewriting what already exists).
 - Surface constraints: linters, type checkers, framework idioms, naming conventions in the relevant area.
 - Note non-obvious context you'll want a future-session agent to know.
-- Decide whether subagents would materially help after approval, and set the `delegation:` field accordingly (`strategy-only` vs `authorized` per `.claude/rules/task-management.md`). Do not spawn subagents during the planning lock.
+- If the task may parallelize, record a delegation _strategy_ (decomposition, ownership) in the `delegation:` field + Plan of Work per `.claude/rules/task-management.md` — a hint for execution, not a permission gate (the harness decides whether to delegate). Do not spawn subagents during the planning lock.
 
 If you need clarification from the user before the plan is sensible, ask now. Do not invent answers.
 
@@ -59,7 +59,7 @@ No slug suffix (`-v2`, `-v3`) is needed — the sequence number already guarante
 
 Use the exact skeleton in `.claude/rules/task-management.md`. Fill every section:
 
-- **Frontmatter**: `status: planning`, today's date in `created` and `updated`, `agent: claude`, `delegation:` (`none` default; `strategy-only` if the user only discussed/asked about subagents; `authorized` only if they explicitly authorized subagents for execution — record the choice in the Decision Log), 1-5 lowercase kebab tags.
+- **Frontmatter**: `status: planning`, today's date in `created` and `updated`, `agent: claude`, `delegation:` (`none` default = harness judgment; `strategy-only` if a decomposition is worth recording as a hint; `authorized` if the user recorded a specific delegation plan to follow — record the choice in the Decision Log), 1-5 lowercase kebab tags.
 - **Purpose**: 2-3 sentences. Answer "who gains what, how do they verify it works".
 - **Context & Orientation**: this is your handoff to future-self. Fill all three subsections:
   - _Related Code_: every file path the plan touches or reads, with one-line reason.
@@ -105,7 +105,7 @@ Do NOT begin implementing. Wait for the approval signal defined in `.claude/rule
 Once the user gives an approval signal, follow the protocol in `.claude/rules/task-management.md`:
 
 1. Flip frontmatter `status: planning → in-progress`, bump `updated:`.
-2. Honor the `delegation:` field per `.claude/rules/task-management.md` → "Delegation Authorization": `authorized` → begin delegated work per `.claude/rules/agent-delegation.md` (decompose critical-path vs sidecar, disjoint worker ownership, record outputs in the task file) with no second prompt; `strategy-only` → make a one-line offer before spawning; `none` → solo.
+2. Delegate per harness judgment, following any strategy recorded in the `delegation:` field per `.claude/rules/agent-delegation.md` (decompose critical-path vs sidecar, disjoint worker ownership, record outputs in the task file): `authorized` → follow the recorded plan directly; `strategy-only` → apply the recorded hint where it fits; `none` → harness judgment (delegate if it parallelizes, else solo).
 3. Execute Concrete Steps in order, marking each `[x]` with `(YYYY-MM-DD HH:MMZ)` UTC timestamp on completion.
 4. Update Surprises / Decision Log as needed.
 5. When all Concrete Steps + Validation boxes are checked, run the **Two-Phase Completion Gate** from the rule file:
