@@ -84,6 +84,12 @@ Every worker prompt must include:
 
 Prefer read-only explorers before workers when ownership is unclear.
 
+## Integrating Results
+
+- Integrate returned patches **one at a time, in dependency order**, running the relevant validation after each merge — batch-merging N patches and testing once makes a failure unattributable.
+- Conflicts between two returned patches are resolved by the parent directly. Never spawn another agent to mediate a conflict.
+- When a worker returns a wrong or partial result: retry **once**, with a sharpened prompt that names exactly what the first attempt got wrong; if the retry also fails, pull the unit back and do it locally. Never respawn the identical prompt hoping for a different outcome.
+
 ## Parent Responsibilities
 
 The parent Codex session remains responsible for the final result. **Codex's documented orchestration model is spawn → wait → consolidate** — per the official docs it _"waits until all requested results are available, then returns a consolidated response"_ ([Codex Subagents](https://developers.openai.com/codex/subagents)). So after you delegate, the default is to **wait**, not to stay busy.
@@ -93,6 +99,7 @@ The parent Codex session remains responsible for the final result. **Codex's doc
 - **A silent subagent is not a stalled one.** A healthy explorer/worker on a long task often emits no intermediate signal; treat silence as in-progress, not failure. Misreading liveness and duplicating the work is a known Codex pitfall ([openai/codex#16900](https://github.com/openai/codex/issues/16900)). If you genuinely suspect it is stuck, steer or stop it explicitly via `/agent` — never quietly redo its work.
 - Review subagent outputs quickly and integrate only the useful parts.
 - Run the relevant validation yourself or verify that the validation evidence is trustworthy.
+- Record each delegation **at spawn time** in the active task file (or the CONTEXT micro-handoff for un-planned work): the unit, the agent, the expected output, and where it will be integrated; mark it consumed when integrated. A compaction or handoff must never orphan a running subagent — the file, not session memory, is what remembers outstanding delegations.
 - Record important subagent findings in task files first; use `$codex-checkpoint` for active `CONTEXT.md` handoffs or eventual `JOURNAL.md` entries. Do not rely on subagent thread history for persistence.
 
 ## Task Documents

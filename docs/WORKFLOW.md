@@ -81,17 +81,19 @@ CLAUDART keeps plans in files instead — one markdown document per task, under 
 
 A task file is written to be self-contained: reading it alone should be enough to resume the work days later, after unrelated commits have landed. The sections:
 
-- **Frontmatter** — `slug`, `status`, `created`, `updated`, `agent`, `tags`
-- **Purpose** — who gains what, and how to see it working
+- **Frontmatter** — `slug`, `status`, `created`, `updated`, `agent`, `delegation`, `tags`
+- **Purpose** — opens with the user's request quoted verbatim, then who gains what and how to see it working
 - **Context & Orientation** — `Related Code`, `Related Docs`, and `Memory Hints`
 - **Plan of Work** — prose narrative of the sequence and why it's ordered that way
-- **Concrete Steps** — ordered checklist, UTC timestamps on completed items
+- **Concrete Steps** — ordered checklist, one `(verify: …)` check per step, UTC timestamps on completed items
 - **Validation & Acceptance** — observable success criteria (commands, manual checks)
 - **Decision Log** — non-obvious choices, with the alternatives that were rejected
 - **Surprises & Discoveries** — where reality diverged from the plan
 - **Outcomes & Retrospective** — filled at completion
 
 Memory Hints deserves a special mention: it's free-form notes from this session to the next, and it's the section that saves a future session from re-discovering the same constraint, the same library quirk, the same pitfall. When in doubt, write it down there.
+
+The whole file is written at **plan altitude**: it carries decisions (what was chosen, why, what was rejected), non-obvious constraints, and a verification check per step — never the solution itself. No code snippets, no line-level edit instructions. The executing session derives the _how_, and the per-step `verify:` catches its drift at the step where it happens. Before asking for approval, `/plan` re-reads the file as if the planning conversation never happened and moves any context a step silently depends on into Memory Hints.
 
 The canonical schema and protocol live in [`.claude/rules/task-management.md`](../.claude/rules/task-management.md) and [`.codex/guidelines/task-management.md`](../.codex/guidelines/task-management.md).
 
@@ -137,7 +139,7 @@ Enthusiasm is not approval — "nice plan!" keeps the task in `planning`. Neithe
 A new session resuming a task:
 
 1. Reads the entire task file. It's self-contained by design.
-2. Checks that the completed steps still hold against the current code — unrelated commits may have moved files or changed APIs since.
+2. Checks that the completed steps still hold against the current code — re-running their `verify:` checks where cheap; unrelated commits may have moved files or changed APIs since.
 3. Logs any drift in Surprises & Discoveries and asks whether to adapt the plan or revisit earlier steps.
 4. Only then picks up the next unchecked step.
 
@@ -152,8 +154,9 @@ Each runtime gets a protocol written for its own mechanics (`.claude/rules/agent
 - **Decompose before you fan out.** Before spawning anything, the parent writes down the critical path it will work locally, the bounded sidecar tasks that can run in parallel, exactly which files or questions each subagent owns, and how the results come back. This is strategy guidance, not a permission gate. If the next step is blocked on the subtask, there's nothing to parallelize — do it locally.
 - **Delegate-and-consume vs. delegate-and-continue.** Judged by task structure, not by the user's wording. When the delegated question _is_ the whole task, spawn one agent and wait — running the same investigation yourself in parallel pays twice for one answer. Fan out only when the request splits into units that don't overlap. The reliable tell is overlap: if your own next step answers a question a subagent already owns, that's redundancy, not parallelism. Deliberate redundancy is fine when disclosed (independent cross-review, a hedge the user asked for); silent redundancy never is.
 - **Ownership discipline.** Explorers stay read-only. Parallel writers get disjoint scopes — on Claude, each gets its own git worktree. Reviewer and auditor findings still belong to the parent, who validates before integrating. A subagent patch is never final without parent review.
+- **Results come back one at a time.** Returned patches are integrated in dependency order, with validation after each merge — batch-merging N patches and testing once makes a failure unattributable. A worker that returns a wrong result gets one sharpened retry; after that the parent pulls the unit back and does it locally.
 
-What survives afterwards goes in the task document: the delegation strategy, the roles, the ownership boundaries, the findings, the validation outcomes. Never transient thread ids — `/checkpoint` carries active delegation blockers forward in `CONTEXT.md`, and completed findings live in the task file until they retire to `JOURNAL.md`.
+What survives afterwards goes in the task document: the delegation strategy, the roles, the ownership boundaries, the findings, the validation outcomes — and the delegation itself is recorded there at spawn time, so a compaction or handoff can never orphan a running subagent. Never transient thread ids — `/checkpoint` carries active delegation blockers forward in `CONTEXT.md`, and completed findings live in the task file until they retire to `JOURNAL.md`.
 
 ## Commands and skills
 

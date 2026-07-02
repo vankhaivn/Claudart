@@ -53,6 +53,12 @@ A subagent does not inherit the parent's conversation — it sees only the spawn
 
 Every worker prompt must include: **Goal** (the exact user-visible outcome), **Scope** (files the worker may edit), **Non-overlap** (other agents may be changing nearby code; do not revert their work), **Constraints** (tests, style, security, compatibility), and **Output** (a structured result the parent can consume directly — changed files, the validation command and its result, residual risks; for a read-only explorer, findings anchored to `file:line`, not prose). Prefer read-only explorers before workers when ownership is unclear.
 
+## Integrating Results
+
+- Integrate returned patches **one at a time, in dependency order**, running the relevant validation after each merge — batch-merging N patches and testing once makes a failure unattributable.
+- Conflicts between two returned patches are resolved by the parent directly. Never spawn another agent to mediate a conflict.
+- When a worker returns a wrong or partial result: retry **once**, with a sharpened prompt that names exactly what the first attempt got wrong; if the retry also fails, pull the unit back and do it locally. Never respawn the identical prompt hoping for a different outcome.
+
 ## Parent Responsibilities
 
 The parent session remains responsible for the final result. Beyond the harness mechanics:
@@ -60,6 +66,7 @@ The parent session remains responsible for the final result. Beyond the harness 
 - The subagent's final message returns to you as the tool result and is NOT shown to the user — relay what matters.
 - Review subagent outputs and integrate only the useful parts; do not treat a subagent patch as final without parent review and validation.
 - Run the relevant validation yourself, or verify the validation evidence is trustworthy.
+- Record each delegation **at spawn time** in the active task file (or the CONTEXT micro-handoff for un-planned work): the unit, the agent, the expected output, and where it will be integrated; mark it consumed when integrated. A compaction or handoff must never orphan a running subagent — the file, not session memory, is what remembers outstanding delegations.
 - Persist important subagent findings in task files; use `/checkpoint` for active `CONTEXT.md` handoffs or eventual `JOURNAL.md` entries. Do not rely on subagent thread history for persistence.
 
 ## Task Documents

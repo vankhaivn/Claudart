@@ -48,6 +48,8 @@ tags: [1-5 lowercase kebab-case tags]
 
 ## Purpose
 
+> "<the user's original request, quoted verbatim — paraphrase is where intent bends>"
+
 <2-3 sentences: what someone gains after this change and how they can see it working.>
 
 ## Context & Orientation
@@ -78,7 +80,7 @@ tags: [1-5 lowercase kebab-case tags]
 
 ## Concrete Steps
 
-- [ ] Step 1 — exact action, target file, expected outcome
+- [ ] Step 1 — exact action, target file, expected outcome (verify: <observable check>)
 - [ ] Step 2 — ...
 - [x] (YYYY-MM-DD HH:MMZ) Step 0 — example completed step with UTC timestamp
 
@@ -100,6 +102,15 @@ tags: [1-5 lowercase kebab-case tags]
 
 <Fill only when status flips to `done` or `cancelled`. What was delivered, what gaps remain, what was learned.>
 ```
+
+## Plan Altitude
+
+The task file is the interface between the session that plans and the session that executes — often a cheaper model. The economics only work when the file carries the right cargo:
+
+- **Carry**: decisions (what was chosen, why, what was rejected), non-obvious constraints and pitfalls discovered while exploring, and a `verify:` check per step.
+- **Do not carry**: the solution. No code snippets, pseudo-code, or line-level edit instructions in Concrete Steps. If writing a step required solving the problem first, the plan has overstepped — lift the step back to decision + verify and let the executor derive the how.
+- A step may stay vague about _how_ as long as its `verify:` is sharp about _what success is_. Verification substitutes for detail: it catches executor drift at the step where it happens, at a fraction of the tokens.
+- A well-written step can be handed verbatim to a subagent as the **Goal** of a worker prompt (see `agent-delegation.md`). Self-contained means it carries the decisions, constraints, and verify — not the answer.
 
 ## Status State Machine
 
@@ -234,7 +245,7 @@ Subagent execution is governed by the `delegation:` field and your harness — s
 A new session resuming a task must:
 
 1. Read the entire task file (it is self-contained by design).
-2. Verify Concrete Steps marked `[x]` still hold by spot-checking the current code. Between sessions, unrelated commits may have moved or changed referenced files.
+2. Verify Concrete Steps marked `[x]` still hold — re-run their `(verify: …)` checks where cheap, or spot-check the current code. Between sessions, unrelated commits may have moved or changed referenced files.
 3. If reality drifted from what the file expects, append a Surprises entry and ask the user whether to adapt the plan or revisit prior steps.
 4. Only then proceed with the next unchecked step.
 
@@ -291,3 +302,4 @@ So: a task's existence is signalled in CONTEXT by a pointer line. The task's con
 - Importing task files into `.claude/CLAUDE.md`. Task files are working documents, not always-loaded rules.
 - Deleting completed task files. They are project history.
 - Creating a task without filling Memory Hints if any non-obvious context was discovered during planning.
+- Writing code into the plan. Concrete Steps carry decisions, constraints, and `verify:` checks — never snippets or line-level edits (see "Plan Altitude").

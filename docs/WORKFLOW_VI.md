@@ -81,17 +81,19 @@ CLAUDART giữ plan trong file thay vào đó - mỗi task một markdown docume
 
 Task file được viết để self-contained: chỉ đọc nó thôi cũng đủ resume công việc vài ngày sau, kể cả khi đã có commit không liên quan land vào. Các section:
 
-- **Frontmatter** - `slug`, `status`, `created`, `updated`, `agent`, `tags`
-- **Purpose** - ai nhận được lợi ích gì, và làm sao thấy nó hoạt động
+- **Frontmatter** - `slug`, `status`, `created`, `updated`, `agent`, `delegation`, `tags`
+- **Purpose** - mở đầu bằng yêu cầu của user được quote nguyên văn, rồi ai nhận được lợi ích gì và làm sao thấy nó hoạt động
 - **Context & Orientation** - `Related Code`, `Related Docs`, và `Memory Hints`
 - **Plan of Work** - narrative bằng prose về trình tự và vì sao nó được sắp như vậy
-- **Concrete Steps** - checklist có thứ tự, timestamp UTC trên item đã hoàn tất
+- **Concrete Steps** - checklist có thứ tự, mỗi step một check `(verify: …)`, timestamp UTC trên item đã hoàn tất
 - **Validation & Acceptance** - tiêu chí thành công quan sát được (command, manual check)
 - **Decision Log** - lựa chọn không hiển nhiên, cùng các phương án đã bị loại
 - **Surprises & Discoveries** - nơi thực tế lệch khỏi plan
 - **Outcomes & Retrospective** - điền khi hoàn tất
 
 Memory Hints đáng được nhắc riêng: đó là ghi chú tự do từ session này cho session sau, và chính section này giúp session tương lai không phải tái khám phá cùng constraint, cùng quirk của thư viện, cùng pitfall. Khi phân vân, hãy ghi nó vào đây.
+
+Toàn bộ file được viết ở **plan altitude**: nó chở quyết định (chọn gì, vì sao, đã loại gì), các ràng buộc không hiển nhiên, và một check verify cho mỗi step - không bao giờ chở lời giải. Không code snippet, không chỉ dẫn sửa từng dòng. Session thực thi tự suy ra _cách làm_, và `verify:` per-step bắt drift của nó ngay tại step xảy ra. Trước khi xin approval, `/plan` đọc lại file như thể cuộc hội thoại planning chưa từng tồn tại và chuyển mọi ngữ cảnh mà một step đang ngầm phụ thuộc vào Memory Hints.
 
 Schema và protocol chuẩn nằm trong [`.claude/rules/task-management.md`](../.claude/rules/task-management.md) và [`.codex/guidelines/task-management.md`](../.codex/guidelines/task-management.md).
 
@@ -137,7 +139,7 @@ Hào hứng không phải approval - "nice plan!" giữ task ở `planning`. Câ
 Một session mới khi resume task:
 
 1. Đọc toàn bộ task file. File được thiết kế self-contained.
-2. Kiểm tra các step đã hoàn tất vẫn đúng với code hiện tại - commit không liên quan có thể đã move file hoặc đổi API kể từ đó.
+2. Kiểm tra các step đã hoàn tất vẫn đúng với code hiện tại - chạy lại các check `verify:` của chúng khi rẻ; commit không liên quan có thể đã move file hoặc đổi API kể từ đó.
 3. Ghi drift vào Surprises & Discoveries và hỏi nên adapt plan hay xem lại step cũ.
 4. Chỉ sau đó mới tiếp tục từ step chưa check tiếp theo.
 
@@ -152,8 +154,9 @@ Mỗi runtime có protocol viết theo mechanics riêng (`.claude/rules/agent-de
 - **Decompose trước khi fan out.** Trước khi spawn bất kỳ thứ gì, parent ghi ra critical path nó sẽ làm local, các sidecar task có giới hạn có thể chạy song song, chính xác file hoặc câu hỏi mỗi subagent sở hữu, và kết quả quay về thế nào. Đây là hướng dẫn chiến lược, không phải permission gate. Nếu bước kế tiếp đang bị chặn bởi subtask, không có gì để parallelize - làm local.
 - **Delegate-and-consume vs. delegate-and-continue.** Đánh giá theo cấu trúc task, không theo wording của user. Khi câu hỏi được delegate _chính là_ toàn bộ task, spawn một agent và chờ - tự chạy cùng investigation song song là trả tiền hai lần cho một câu trả lời. Chỉ fan out khi request chia được thành các unit không chồng lấn. Dấu hiệu đáng tin là overlap: nếu bước kế tiếp của bạn trả lời câu hỏi mà subagent đã own, đó là dư thừa, không phải parallelism. Redundancy có chủ đích thì được nếu đã nói rõ (independent cross-review, hedge user yêu cầu); redundancy âm thầm thì không.
 - **Ownership discipline.** Explorer ở read-only. Parallel writer nhận scope tách biệt - với Claude, mỗi writer có git worktree riêng. Findings của reviewer và auditor vẫn thuộc trách nhiệm parent, parent validate trước khi integrate. Patch từ subagent không bao giờ là final nếu chưa được parent review.
+- **Kết quả quay về từng cái một.** Patch trả về được integrate theo thứ tự phụ thuộc, validate sau mỗi lần merge - gộp N patch rồi test một lần khiến lỗi không quy được trách nhiệm. Worker trả kết quả sai được retry đúng một lần với prompt đã siết lại; sau đó parent kéo unit về tự làm local.
 
-Phần sống sót sau đó đi vào task document: delegation strategy, role, ownership boundary, findings, validation outcome. Không bao giờ lưu transient thread id - `/checkpoint` mang active delegation blocker tiếp vào `CONTEXT.md`, và findings đã hoàn tất sống trong task file cho tới khi retire vào `JOURNAL.md`.
+Phần sống sót sau đó đi vào task document: delegation strategy, role, ownership boundary, findings, validation outcome - và bản thân delegation được ghi vào đó ngay lúc spawn, nên compaction hay handoff không bao giờ làm mồ côi một subagent đang chạy. Không bao giờ lưu transient thread id - `/checkpoint` mang active delegation blocker tiếp vào `CONTEXT.md`, và findings đã hoàn tất sống trong task file cho tới khi retire vào `JOURNAL.md`.
 
 ## Command và skill
 

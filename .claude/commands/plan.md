@@ -44,6 +44,8 @@ Use `Read`, `Grep`, `Glob`, and read-only `Bash` (`ls`, `cat`, `git status/log/d
 - Note non-obvious context you'll want a future-session agent to know.
 - If the task may parallelize, record a delegation _strategy_ (decomposition, ownership) in the `delegation:` field + Plan of Work — the field's semantics live in `.claude/rules/agent-delegation.md`. Write-scope subagents must wait for `in-progress`; read-only explorers are fine during the planning lock.
 
+Explore to de-risk the plan's decisions, not to pre-solve the implementation — findings enter the file as decisions, constraints, and `verify:` checks, never as code (see "Plan Altitude" in the rule file).
+
 If you need clarification from the user before the plan is sensible, ask now. Do not invent answers.
 
 ### Step 4 — Generate the slug and filename
@@ -60,13 +62,13 @@ No slug suffix (`-v2`, `-v3`) is needed — the sequence number already guarante
 Use the exact skeleton in `.claude/rules/task-management.md`. Fill every section:
 
 - **Frontmatter**: `status: planning`, today's date in `created` and `updated`, `agent: claude`, `delegation:` (`none` | `strategy-only` | `authorized` — semantics per `.claude/rules/agent-delegation.md`; record the choice in the Decision Log), 1-5 lowercase kebab tags.
-- **Purpose**: 2-3 sentences. Answer "who gains what, how do they verify it works".
+- **Purpose**: open with the user's original request quoted verbatim (paraphrase is where intent bends), then 2-3 sentences answering "who gains what, how do they verify it works".
 - **Context & Orientation**: this is your handoff to future-self. Fill all three subsections:
   - _Related Code_: every file path the plan touches or reads, with one-line reason.
   - _Related Docs_: project docs (`docs/...`) AND external references (URLs, RFCs).
   - _Memory Hints_: free-form notes — every non-obvious thing you discovered during exploration that a fresh agent would otherwise re-discover. This section is the lifeline against "memory loss" across sessions. Be generous. If a hint is a **project-wide durable fact** (not specific to this task), flag it as a `.claude/knowledge/` graduation candidate — on completion, `/checkpoint` or `/learn` can promote it so it survives task archival.
 - **Plan of Work**: 1-3 paragraphs of prose narrating the sequence and rationale.
-- **Concrete Steps**: ordered checklist. Each step is one self-contained action with target file and expected outcome. Steps should be small enough that completing one is a meaningful save point.
+- **Concrete Steps**: ordered checklist. Each step is one self-contained action with target file, expected outcome, and a `(verify: <observable check>)`. Steps should be small enough that completing one is a meaningful save point, and written at plan altitude — decisions and verification, never code.
 - **Validation & Acceptance**: observable success criteria — tests to pass, commands to run, behaviors to verify.
 - **Decision Log**: any non-obvious choice you made while planning (library, approach, trade-off). Include rationale.
 - **Surprises & Discoveries**: anything unexpected found during exploration that informed the plan.
@@ -82,7 +84,9 @@ If `.claude/tasks/index.md` does not exist, create it with the canonical header 
 
 Keep `index.md` under 100 lines.
 
-### Step 7 — Report
+### Step 7 — Fresh-eyes check, then report
+
+Before reporting, re-read the task file as if this conversation never happened. Any step that needs conversation context to execute has an **information gap** — move that context into Memory Hints now. Do not "fix" skill gaps: the executor is expected to derive the how; missing information is a defect, a missing solution is not.
 
 Output a short summary:
 
