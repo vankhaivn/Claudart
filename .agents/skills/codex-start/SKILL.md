@@ -67,9 +67,9 @@ Pick the most recently updated one. The exact prompt depends on its status:
 
 Do not auto-read the task body, auto-resume, or auto-confirm completion. Wait for explicit user direction. When the user confirms a resume, **warm the session**: read the full task file, then read the files in its `Related Code` section (cap ~5 most relevant) so you resume against real code, not the plan's description of it. Then follow the Resumption protocol in `.codex/guidelines/task-management.md` (verify completed steps still hold against current code, surface drift in Surprises section).
 
-### Case B: No active task, but `## Next Session Should Start By` is set in CONTEXT.md
+### Case B: No active task, but CONTEXT.md carries a handoff: `## Next Session Should Start By` is set, or an active `(no task)` micro-handoff sits under `## In Progress`
 
-Surface that line and ask:
+Surface the Next-Session line (or the micro-handoff's label and its `Next:` step) and ask:
 
 > "Next-session handoff says: <line>. Pick that up, or start something new?"
 
@@ -84,5 +84,4 @@ Ask plainly:
 - Keep the report short and actionable.
 - **Warm resume for ad-hoc work:** when the user picks up a `(no task)` micro-handoff from `## In Progress` (Case B), read the files on its `Files:` line (cap ~5) before acting — the same warm-up a task resume gets. This is the `/compact`-style "re-read recent files" applied to un-planned work.
 - If `.codex/CONTEXT.md` items look stale (`<!-- since: -->` more than 30 days old), mention that `$codex-checkpoint` should refresh them after this session.
-- If a task in the Active list has `updated:` more than 7 days old AND `status: in-progress`, flag it as possibly stalled — suggest either resuming or flipping to `blocked`/`cancelled` via `$codex-checkpoint`.
-- If a task has `status: awaiting-review` AND `updated:` more than 3 days old, flag it as awaiting-review stuck — the user likely forgot to confirm. Surface it prominently; the task is not abandoned, it just needs a sign-off.
+- Flag stale Active tasks per the **Staleness Thresholds** table in `.codex/guidelines/task-management.md` (stalled `in-progress`, stuck `awaiting-review`, abandoned `planning`) — surface a stuck `awaiting-review` prominently; it is not abandoned, it just needs the user's sign-off.

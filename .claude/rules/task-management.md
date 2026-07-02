@@ -254,10 +254,21 @@ Never assume the file is still accurate without verification. The Memory Hints s
 - [<slug>](done/<YYYY-MM-DD-NNN-slug>.md) — done <YYYY-MM-DD>
 ```
 
-- Active list shows every file in `tasks/` whose `status` is `planning`, `in-progress`, or `blocked`.
+- Active list shows every file in `tasks/` whose `status` is `planning`, `in-progress`, `awaiting-review`, or `blocked`. Append ` ⏳ awaiting your confirmation` to `awaiting-review` lines so the gate is visible on the dashboard.
 - Recently Done shows files in `tasks/done/` whose `updated:` date is within the last 14 days.
 - Older completed tasks remain on disk in `done/` but drop out of `index.md` to keep it short.
-- **Hard ceiling: 100 lines.** Trim Recently Done first if exceeded.
+- If a section has no entries, write `- _(none)_` instead.
+- **Hard ceiling: 100 lines.** Trim Recently Done first if exceeded (shorten the window to 7 days, then 3, then drop the section).
+
+## Staleness Thresholds
+
+Canonical numbers for flagging stalled tasks. `/start` surfaces them, `/checkpoint` acts on them, `/doctor` audits them — none of those files redefine the numbers.
+
+| Status            | `updated:` older than | Flag as                                                                                                                                              |
+| ----------------- | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `in-progress`     | 7 days                | Stalled work — suggest resuming, or flipping to `blocked`/`cancelled`                                                                                |
+| `awaiting-review` | 3 days                | Stuck awaiting confirmation — not abandoned; the user likely forgot to verify. Surface prominently and ask for the close-out signal (or a rejection) |
+| `planning`        | 14 days               | Abandoned plan — suggest cancellation                                                                                                                |
 
 ## Relationship to `CONTEXT.md`
 

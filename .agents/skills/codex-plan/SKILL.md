@@ -12,7 +12,7 @@ Before doing anything, read `.codex/guidelines/task-management.md`. That guideli
 ## Inputs
 
 - The user's request after `$codex-plan` is the task description. If invoked with no argument, ask one short clarifying question: "What's the task?"
-- If the request is ambiguous or missing critical detail (target files, success criteria), state your interpretation as an explicit assumption in the Decision Log and flag it under **Open questions** in the Step 7 report. Do not block on interactive questions — document the assumption and let the user correct it.
+- If the request is ambiguous (multiple reasonable interpretations) or missing critical detail (target files, success criteria), ask up to 3 clarifying questions BEFORE writing the file. Better to ask than to write a useless plan.
 
 ## Procedure
 
@@ -43,7 +43,7 @@ Use read-only operations to:
 - Identify existing patterns and helpers to reuse (avoid rewriting what already exists).
 - Surface constraints: linters, type checkers, framework idioms, naming conventions in the relevant area.
 - Note non-obvious context worth recording for a future-session agent.
-- Identify whether subagents would materially help after approval, and set the `delegation:` field accordingly (`strategy-only` vs `authorized` per `.codex/guidelines/agent-delegation.md`). Planning may record the strategy, but it must not spawn subagents while the task is `planning`.
+- If the task may parallelize, record a delegation _strategy_ (decomposition, ownership) in the `delegation:` field + Plan of Work — the field's semantics live in `.codex/guidelines/agent-delegation.md`. Write-scope subagents must wait for `in-progress`; read-only explorers are fine during the planning lock.
 
 If you need clarification before the plan is sensible, ask now. Do not invent answers.
 
@@ -60,17 +60,17 @@ No slug suffix (`-v2`, `-v3`) is needed — the sequence number already guarante
 
 Use the exact skeleton in `.codex/guidelines/task-management.md`. Fill every section:
 
-- **Frontmatter**: `status: planning`, today's date in `created` and `updated`, `agent: codex`, `delegation:` (`none` default; `strategy-only` if the user only discussed/asked about subagents; `authorized` only if they explicitly authorized subagents for execution — record the choice in the Decision Log), 1-5 lowercase kebab tags.
+- **Frontmatter**: `status: planning`, today's date in `created` and `updated`, `agent: codex`, `delegation:` (`none` | `strategy-only` | `authorized` — semantics per `.codex/guidelines/agent-delegation.md`; record the choice in the Decision Log), 1-5 lowercase kebab tags.
 - **Purpose**: 2-3 sentences. Answer "who gains what, how do they verify it works".
 - **Context & Orientation**: this is the handoff to future-self. Fill all three subsections:
   - _Related Code_: every file path the plan touches or reads, with one-line reason.
   - _Related Docs_: project docs (`docs/...`) AND external references (URLs, RFCs).
   - _Memory Hints_: free-form notes — every non-obvious thing discovered during exploration that a fresh agent would otherwise re-discover. This section is the lifeline against memory loss across sessions. Be generous. If a hint is a project-wide durable fact (not specific to this task), flag it as a `.codex/knowledge/` graduation candidate — on completion, `$codex-checkpoint` or `$codex-learn` can promote it so it survives task archival.
-- **Plan of Work**: 1-3 paragraphs of prose narrating the sequence and rationale. If subagents are useful, include a concise delegation strategy only when the user explicitly authorized subagents/delegation/parallel work; otherwise mention only the delegation opportunity and the approval needed.
+- **Plan of Work**: 1-3 paragraphs of prose narrating the sequence and rationale.
 - **Concrete Steps**: ordered checklist. Each step is one self-contained action with target file and expected outcome. Steps should be small enough that completing one is a meaningful save point.
 - **Validation & Acceptance**: observable success criteria — tests to pass, commands to run, behaviors to verify.
-- **Decision Log**: any non-obvious choice made while planning (library, approach, trade-off), with rationale. Include assumptions made due to ambiguous input.
-- **Surprises & Discoveries**: anything unexpected found during exploration.
+- **Decision Log**: any non-obvious choice made while planning (library, approach, trade-off), with rationale.
+- **Surprises & Discoveries**: anything unexpected found during exploration that informed the plan.
 - **Outcomes & Retrospective**: leave empty (filled at completion).
 
 ### Step 6: Update `index.md`
@@ -103,24 +103,11 @@ Do not begin implementing. Wait for the approval signal defined in `.codex/guide
 
 ## After Approval
 
-Once the user gives an approval signal, follow the protocol in `.codex/guidelines/task-management.md`:
-
-1. Flip frontmatter `status: planning -> in-progress`, bump `updated:`.
-2. Honor the `delegation:` field per `.codex/guidelines/agent-delegation.md` → "Pre-authorized Delegation": `authorized` → follow that guideline's delegation protocol (decompose critical-path versus sidecar work, spawn only bounded non-blocking tasks, assign disjoint worker ownership, record durable outputs in the task file) with no second prompt; `strategy-only` → make a one-line offer before spawning; `none` → solo.
-3. Execute Concrete Steps in order, marking each `[x]` with `(YYYY-MM-DD HH:MMZ)` UTC timestamp on completion.
-4. Update Surprises / Decision Log as needed, including subagent findings that changed the plan.
-5. When all Concrete Steps + Validation boxes are checked, run the **Two-Phase Completion Gate** from the guideline file:
-   - **Phase 1**: fill draft Outcomes, flip `status: in-progress -> awaiting-review`, report to user, **STOP**. Do not archive, do not write JOURNAL.
-   - **Phase 2a**: only after the user gives a completion signal ("approved", "looks good", "close it", "done", "ship", "ok đóng task") — run the archive flow.
-   - **Phase 2b**: if the user reports a problem, append to Surprises, flip back to `in-progress`, fix, return to Phase 1.
-
-The agent must NEVER skip Phase 1 or self-confirm Phase 2. The completion gate is symmetric with the planning approval gate at the other end.
+Once the user gives an approval signal, the contract in `.codex/guidelines/task-management.md` takes over — this skill adds nothing to it. Flip `status: planning -> in-progress`, execute Concrete Steps while maintaining the task file per "Progress Updates During Implementation", honor the `delegation:` field per `.codex/guidelines/agent-delegation.md`, and finish through the **Two-Phase Completion Gate**: report at `awaiting-review` and stop; the user — not you — confirms `done`.
 
 ## Anti-Patterns
 
-- Do not write code while `status: planning` or `status: awaiting-review`. Both are read-only locks.
-- Do not auto-complete the task. When all boxes are checked, you go to `awaiting-review` and stop. The user — not you — flips it to `done`.
-- Do not skip Memory Hints. A plan with no Memory Hints is a plan that won't survive a context reset.
+- Do not write code while `status: planning` or `status: awaiting-review` — both are read-only locks (see `.codex/guidelines/task-management.md`).
 - Do not put the plan body into chat instead of the file. The file is the plan.
-- Do not spawn subagents from planning lock. Record the strategy and set `delegation:` (including `authorized`); the spawn itself waits until the task is `in-progress`.
-- Do not auto-approve on user enthusiasm ("great idea!") — wait for an explicit approval cue at each gate.
+- Do not skip Memory Hints. A plan with no Memory Hints is a plan that won't survive a context reset.
+- Do not treat enthusiasm ("great idea!") or questions as approval — wait for an explicit signal at each gate.

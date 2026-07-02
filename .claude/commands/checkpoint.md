@@ -15,6 +15,7 @@ You are about to write a session checkpoint. The output is **not a log of what h
    - Task reference: `- Working task \`add-jwt-auth\` (see .claude/tasks/2026-05-13-001-add-jwt-auth.md) <!-- since: YYYY-MM-DD -->`
    - Ad-hoc non-task change the user requested without creating a `/plan` (a quick tweak, a transient pivot): CONTEXT is its **only** home, so it gets a **micro-handoff** — intent in the user's words + files of interest + next step (see Step 4) — not just a one-line pointer.
      Checkpoint _syncs_ `tasks/index.md` AND ensures CONTEXT references the focus task — but never copies a task's Steps/Decisions/Surprises into CONTEXT.
+7. **Subagent threads are not durable project memory.** Do not store subagent ids, nicknames, or transient thread state in CONTEXT. Store only durable outcomes: decisions, unresolved blockers, validated findings, changed ownership boundaries, and next steps.
 
 ## Procedure
 
@@ -43,6 +44,7 @@ Add to `.claude/CONTEXT.md` only what's true _now_:
 - What you are mid-stream on (with `file:line` if applicable). **If the work is being tracked in a task file**, reference it by slug + path (e.g., `Working task \`add-jwt-auth\` (see .claude/tasks/2026-05-13-001-add-jwt-auth.md)`). Do not duplicate the task body here.
 - Ad-hoc changes the user requested _without_ creating a `/plan` (quick fixes, transient tweaks, mid-flight pivots) — these have no task file, so CONTEXT **is** their handoff summary, not just a note. Give each _active_ one a **micro-handoff** (see Step 4 skeleton): the user's intent in their own words, the files of interest with `file:line`, and the next concrete step. Mark them `(no task)`.
 - Decisions just made that are not yet codified in rules
+- Durable subagent outcomes that still matter after this session, such as a validated finding, an unresolved worker/reviewer blocker, or a changed ownership boundary. Do not mention subagent thread ids.
 - Open questions / blockers currently unresolved
 - The single most useful thing the next session should do first
 
@@ -99,6 +101,7 @@ Types (use exactly one):
 - `completed` — a chunk of work finished (link commit if available)
 - `pivot` — direction changed; old approach abandoned
 - `blocker-resolved` — external blocker cleared
+- `cancelled` — a task was abandoned (used by the Step 6b archive flow; Outcomes in the task file explain why)
 
 Examples:
 
@@ -126,35 +129,12 @@ This step is independent of CONTEXT.md. Skip entirely if `.claude/tasks/` does n
 3. Detect any task in the top-level `tasks/` folder whose `status` is `done` or `cancelled`. These have been user-confirmed (or cancelled) and not yet archived. For each:
    - Ensure `Outcomes & Retrospective` is filled (read the body to confirm). If empty, flag in the report — do NOT auto-fill; the user or implementing agent should write it.
    - Move the file to `.claude/tasks/done/`.
-   - Append one line to `.claude/JOURNAL.md`:
-     `YYYY-MM-DD | completed | <slug> — <one-line outcome>, see tasks/done/<filename>`
-     (Use `cancelled` instead of `completed` for cancelled tasks.)
+   - Append the completion line to `.claude/JOURNAL.md` in the Phase 2a format from `.claude/rules/task-management.md` (use type `cancelled` instead of `completed` for cancelled tasks).
    - Before archiving, scan the task's `### Memory Hints` and `### Related Docs`. If they captured project-wide durable facts (not task-specific detail), graduate them to `.claude/knowledge/` in **Step 6c** so they survive archival (project-wide durable facts only — never task-specific detail).
    - **DO NOT archive `awaiting-review` tasks.** Those are explicitly waiting for user confirmation; archiving them defeats the gate. They stay in the top-level `tasks/` folder and appear in the Active list.
-4. Rewrite `.claude/tasks/index.md` from scratch using the canonical skeleton:
-
-   ```markdown
-   <!-- .claude/tasks/index.md — dashboard of task documents. Maintained by /plan and /checkpoint. -->
-
-   ## Active
-
-   - [<slug>](filename) — <status> — updated <YYYY-MM-DD>
-
-   ## Recently Done (last 14 days)
-
-   - [<slug>](done/<filename>) — done <YYYY-MM-DD>
-   ```
-
-   - `Active`: every task in top-level `tasks/` (status: planning, in-progress, **awaiting-review**, blocked).
-   - When listing `awaiting-review` entries, append ` ⏳ awaiting your confirmation` to the line so the dashboard makes the gate visible.
-   - `Recently Done`: every task in `tasks/done/` whose `updated:` date is within the last 14 days. Older completed tasks remain on disk but drop out of the index.
-   - If a section has no entries, write `- _(none)_` instead.
-
-5. Count lines. If `index.md` > 100 lines, trim `Recently Done` first (shorten to last 7 days, then last 3 days, then drop the section).
-6. **Flag stalled tasks**: list each in the report.
-   - `status: in-progress` AND `updated:` > 7 days old → stalled work. Suggest flipping to `blocked`/`cancelled` or resuming.
-   - `status: awaiting-review` AND `updated:` > 3 days old → stuck awaiting confirmation. Suggest the user verify and confirm (or reject) so the task can move forward.
-   - `status: planning` AND `updated:` > 14 days old → abandoned plan. Suggest cancellation.
+4. Rewrite `.claude/tasks/index.md` from scratch per the canonical **"`index.md` Format"** in `.claude/rules/task-management.md` — Active includes `awaiting-review` (with its ⏳ marker); Recently Done covers the last 14 days.
+5. Enforce that section's 100-line ceiling and trim ladder.
+6. **Flag stalled tasks**: apply the **Staleness Thresholds** table in `.claude/rules/task-management.md` (stalled `in-progress`, stuck `awaiting-review`, abandoned `planning`) and list each flagged task in the report.
 
 ### Step 6c — Graduate durable facts to .claude/knowledge/
 
