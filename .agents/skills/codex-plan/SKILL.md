@@ -43,7 +43,7 @@ Use read-only operations to:
 - Identify existing patterns and helpers to reuse (avoid rewriting what already exists).
 - Surface constraints: linters, type checkers, framework idioms, naming conventions in the relevant area.
 - Note non-obvious context worth recording for a future-session agent.
-- Identify whether subagents would materially help after approval, and set the `delegation:` field accordingly (`strategy-only` vs `authorized` per `.codex/guidelines/task-management.md`). Planning may record the strategy, but it must not spawn subagents while the task is `planning`.
+- Identify whether subagents would materially help after approval, and set the `delegation:` field accordingly (`strategy-only` vs `authorized` per `.codex/guidelines/agent-delegation.md`). Planning may record the strategy, but it must not spawn subagents while the task is `planning`.
 
 If you need clarification before the plan is sensible, ask now. Do not invent answers.
 
@@ -106,7 +106,7 @@ Do not begin implementing. Wait for the approval signal defined in `.codex/guide
 Once the user gives an approval signal, follow the protocol in `.codex/guidelines/task-management.md`:
 
 1. Flip frontmatter `status: planning -> in-progress`, bump `updated:`.
-2. Honor the `delegation:` field per `.codex/guidelines/task-management.md` → "Delegation Authorization": `authorized` → follow `.codex/guidelines/agent-delegation.md` (decompose critical-path versus sidecar work, spawn only bounded non-blocking tasks, assign disjoint worker ownership, record durable outputs in the task file) with no second prompt; `strategy-only` → make a one-line offer before spawning; `none` → solo.
+2. Honor the `delegation:` field per `.codex/guidelines/agent-delegation.md` → "Pre-authorized Delegation": `authorized` → follow that guideline's delegation protocol (decompose critical-path versus sidecar work, spawn only bounded non-blocking tasks, assign disjoint worker ownership, record durable outputs in the task file) with no second prompt; `strategy-only` → make a one-line offer before spawning; `none` → solo.
 3. Execute Concrete Steps in order, marking each `[x]` with `(YYYY-MM-DD HH:MMZ)` UTC timestamp on completion.
 4. Update Surprises / Decision Log as needed, including subagent findings that changed the plan.
 5. When all Concrete Steps + Validation boxes are checked, run the **Two-Phase Completion Gate** from the guideline file:

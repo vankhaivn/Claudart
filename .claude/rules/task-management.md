@@ -11,6 +11,8 @@ Plans live as markdown documents in `.claude/tasks/`, not in session memory. One
 
 This rule supersedes the native plan mode workflow. Do not rely on `ExitPlanMode` for persistence; the task file is the persistence layer.
 
+For work that may parallelize, also follow `agent-delegation.md`. The `delegation:` frontmatter field records a delegation strategy at planning time and carries it into execution at the approval signal; its values and whether they gate delegation are defined there, not in this file.
+
 ## File Layout
 
 ```
@@ -38,7 +40,7 @@ status: planning # planning | in-progress | awaiting-review | blocked | done | c
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
 agent: claude # claude | codex | both
-delegation: none # none | strategy-only | authorized — see "Delegation Authorization" below
+delegation: none # none | strategy-only | authorized — see "Delegation strategy" below
 tags: [1-5 lowercase kebab-case tags]
 ---
 
@@ -136,7 +138,7 @@ The agent has reported completion; the user has not yet verified.
 
 - **Do NOT modify any code file.** The work is under user review; if changes are needed, the user will tell you, and you flip status back to `in-progress` first.
 - **Allowed**: refining the draft Outcomes & Retrospective in the task file based on user comments before they give the final signal.
-- If the user reports a problem or requests a code change, follow the "User requests changes" flow in the Completion section — do not patch silently while still in awaiting-review.
+- If the user reports a problem or requests a code change, follow the "User reports a problem" flow in the Completion section — do not patch silently while still in awaiting-review.
 
 Both locks are enforced by convention, not tool restriction. Honor them strictly. They are the safety net replacing native plan mode and replacing blind agent self-completion.
 
@@ -153,17 +155,13 @@ Treat these as NOT approval (still in planning):
 - Questions about the plan
 - Requests to add/remove/reorder steps
 
-On approval: flip frontmatter `status: planning → in-progress`, bump `updated:` to today, then begin executing the first unchecked step. The `delegation:` field records any delegation strategy to carry into execution — see below; it does not gate whether you may delegate (the harness decides that).
+On approval: flip frontmatter `status: planning → in-progress`, bump `updated:` to today, then begin executing the first unchecked step. The `delegation:` field carries any recorded delegation strategy into execution — see "Delegation strategy" below; its values and gating semantics live in `agent-delegation.md`.
 
-## Delegation Authorization (the `delegation:` field)
+## Delegation strategy (the `delegation:` field)
 
-The frontmatter `delegation:` field persists a **delegation strategy** recorded at planning time, so the approval signal ("go") can carry it into execution without re-deriving the decomposition. It is a hint, not a permission switch: per `agent-delegation.md`, the harness decides _whether_ to delegate; this field records _what plan to follow_ when it does.
+The frontmatter `delegation:` field records a delegation strategy at planning time so the approval signal ("go") can carry it into execution without re-deriving the decomposition. Set it during planning and note the choice in the Decision Log.
 
-- **`none`** (default) — no specific strategy recorded. On "go", use harness judgment: delegate if the work genuinely parallelizes, run solo if it doesn't. `none` is _not_ an instruction to avoid subagents.
-- **`strategy-only`** — a decomposition is recorded (in Plan of Work / Memory Hints) as a hint. On "go", proceed by harness judgment, applying the recorded strategy where it fits — no mandatory permission round-trip.
-- **`authorized`** — the user recorded a specific delegation plan they want followed. On "go", flip to `in-progress` and begin per that plan directly; state in your reply that you are following the recorded strategy.
-
-Setting the field is a planning-time judgment, recorded with a Decision Log entry. The field is documentation of intent, not a lock — the harness may still delegate per its own judgment, and the user may record or change a strategy at runtime by updating the field.
+Its values — `none`, `strategy-only`, `authorized` — and **whether they gate execution** are defined in `agent-delegation.md`, which is harness-specific; this file does not redefine them. If the strategy changes at runtime, update the field.
 
 ## Progress Updates During Implementation
 
@@ -229,7 +227,7 @@ The cycle Phase 1 ↔ Phase 2b may repeat. That's correct behavior, not a bug.
 
 The agent must wait for the explicit signal. Enthusiasm ("great!", "nice plan") is NOT approval. Questions are NOT approval. Edits the user makes to the task file are NOT approval.
 
-Subagent execution is not a separate approval gate — the harness decides whether to delegate. The `delegation:` field only records a strategy to follow (see "Delegation Authorization"): `authorized` carries a specific plan, `strategy-only` a hint, `none` leaves it to harness judgment.
+Subagent execution is governed by the `delegation:` field and your harness — see `agent-delegation.md`. The signals in this table concern task _status_ (`planning → in-progress → done`), not whether to delegate.
 
 ## Resumption Across Sessions
 
@@ -273,11 +271,12 @@ So: a task's existence is signalled in CONTEXT by a pointer line. The task's con
 
 ## Anti-Patterns
 
-- ❌ **Agent auto-completing.** Flipping `status` directly from `in-progress` to `done`, moving the file to `done/`, writing to JOURNAL, or updating Recently Done in `index.md` without a user completion signal. The agent's job is to reach `awaiting-review` and stop.
-- ❌ Editing code while `status: planning` or `status: awaiting-review`. Both states are read-only locks.
-- ❌ Treating user enthusiasm or silence as approval. The signals listed in the cheat sheet are explicit and required.
-- ❌ Letting `updated:` go stale (>3 days during in-progress without movement signals abandonment — flip to `blocked` or address it).
-- ❌ Copying a task's body (Steps / Decisions / Surprises / Memory Hints) into `.claude/CONTEXT.md`. CONTEXT may _reference_ the active task by slug + path, but must never duplicate its content.
-- ❌ Importing task files into `.claude/CLAUDE.md`. Task files are working documents, not always-loaded rules.
-- ❌ Deleting completed task files. They are project history.
-- ❌ Creating a task without filling Memory Hints if any non-obvious context was discovered during planning.
+- **Agent auto-completing.** Flipping `status` directly from `in-progress` to `done`, moving the file to `done/`, writing to JOURNAL, or updating Recently Done in `index.md` without a user completion signal. The agent's job is to reach `awaiting-review` and stop.
+- Editing code while `status: planning` or `status: awaiting-review`. Both states are read-only locks.
+- **Spawning write-scope subagents from a planning-locked task.** The lock forbids code edits, so any worker that writes must wait for `in-progress`; read-only exploration subagents are fine.
+- Treating user enthusiasm or silence as approval. The signals listed in the cheat sheet are explicit and required.
+- Letting `updated:` go stale (>3 days during in-progress without movement signals abandonment — flip to `blocked` or address it).
+- Copying a task's body (Steps / Decisions / Surprises / Memory Hints) into `.claude/CONTEXT.md`. CONTEXT may _reference_ the active task by slug + path, but must never duplicate its content.
+- Importing task files into `.claude/CLAUDE.md`. Task files are working documents, not always-loaded rules.
+- Deleting completed task files. They are project history.
+- Creating a task without filling Memory Hints if any non-obvious context was discovered during planning.

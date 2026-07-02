@@ -1,6 +1,6 @@
 ---
 paths: ["**/*"]
-description: How Codex creates, maintains, resumes, and completes persistent implementation plans stored in `.codex/tasks/`. Replaces session-only plan mode with cross-session task documents.
+description: How agents create, maintain, resume, and complete persistent implementation plans stored in `.codex/tasks/`. Replaces session-only plan mode with cross-session task documents.
 when_to_use: Whenever the user invokes `$codex-plan`, when a task file is open or referenced, or when resuming work that may have an active task in `.codex/tasks/`.
 tags: [tasks, planning, persistence, cross-session]
 ---
@@ -9,9 +9,9 @@ tags: [tasks, planning, persistence, cross-session]
 
 Plans live as markdown documents in `.codex/tasks/`, not in session memory. One task per file. The file is self-contained — reading it alone must be enough to resume work in a future session, even after intervening commits.
 
-This guideline supersedes the native `/plan` mode workflow for persistence. Use `$codex-plan` to create a task document instead of relying on session-only plan state.
+This guideline supersedes the native plan mode workflow. Do not rely on session-only plan state for persistence; the task file is the persistence layer.
 
-For tasks that may benefit from Codex subagents, also follow `.codex/guidelines/agent-delegation.md`. Task files may record a delegation strategy, and the `delegation:` frontmatter field persists whether subagents are authorized for execution — set during planning, read by the approval gate (see "Delegation Authorization"). Subagents are used only when that authorization exists, whether recorded at planning time or given at runtime.
+For work that may parallelize, also follow `agent-delegation.md`. The `delegation:` frontmatter field records a delegation strategy at planning time and carries it into execution at the approval signal; its values and whether they gate delegation are defined there, not in this file.
 
 ## File Layout
 
@@ -40,7 +40,7 @@ status: planning # planning | in-progress | awaiting-review | blocked | done | c
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
 agent: codex # claude | codex | both
-delegation: none # none | strategy-only | authorized — see "Delegation Authorization" below
+delegation: none # none | strategy-only | authorized — see "Delegation strategy" below
 tags: [1-5 lowercase kebab-case tags]
 ---
 
@@ -69,7 +69,7 @@ tags: [1-5 lowercase kebab-case tags]
 - Non-obvious constraints discovered while exploring
 - Libraries/tools the project uses (e.g., "uses Zod, not Joi")
 - Pitfalls already encountered
-- Delegation strategy when relevant: authorization status, subagent roles, ownership boundaries, validation responsibilities (mirror the `delegation:` field)
+- Delegation strategy when relevant: subagent roles, ownership boundaries, validation responsibilities (mirror the `delegation:` field)
 - Anything that would save the next session from re-discovering the same thing>
 
 ## Plan of Work
@@ -140,11 +140,11 @@ The agent has reported completion; the user has not yet verified.
 - **Allowed**: refining the draft Outcomes & Retrospective in the task file based on user comments before they give the final signal.
 - If the user reports a problem or requests a code change, follow the "User reports a problem" flow in the Completion section — do not patch silently while still in awaiting-review.
 
-Both locks are enforced by convention, not tool restriction. Honor them strictly. They are the safety net replacing session-only plan mode and replacing blind agent self-completion.
+Both locks are enforced by convention, not tool restriction. Honor them strictly. They are the safety net replacing native plan mode and replacing blind agent self-completion.
 
 ## Approval Signal (planning → in-progress)
 
-Judge from natural-language cues, not a slash command. Treat these as approval:
+The agent must judge from natural-language cues, not require a slash command. Treat these as approval:
 
 - "go", "go ahead", "implement", "approved", "do it", "ok làm đi", "ok start", "proceed", "ship it"
 - Direct instructions referring to a step ("start with step 1")
@@ -155,35 +155,25 @@ Treat these as NOT approval (still in planning):
 - Questions about the plan
 - Requests to add/remove/reorder steps
 
-On approval: flip frontmatter `status: planning → in-progress`, bump `updated:` to today, then begin executing the first unchecked step. The `delegation:` field decides whether "go" also starts delegated work — see below.
+On approval: flip frontmatter `status: planning → in-progress`, bump `updated:` to today, then begin executing the first unchecked step. The `delegation:` field carries any recorded delegation strategy into execution — see "Delegation strategy" below; its values and gating semantics live in `agent-delegation.md`.
 
-## Delegation Authorization (the `delegation:` field)
+## Delegation strategy (the `delegation:` field)
 
-The frontmatter `delegation:` field persists whether subagent / parallel work is authorized **for execution**, so the approval signal ("go") can carry it without a second round-trip. The planner sets it during planning; the approval gate reads it. This is the only place authorization is persisted — `agent-delegation.md` defines _what_ counts as authorization; this field records the _decision_ so it survives into execution.
+The frontmatter `delegation:` field records a delegation strategy at planning time so the approval signal ("go") can carry it into execution without re-deriving the decomposition. Set it during planning and note the choice in the Decision Log.
 
-- **`none`** (default) — delegation was not discussed, or the task does not benefit from it. On "go", work solo.
-- **`strategy-only`** — a delegation strategy is recorded (in Plan of Work / Memory Hints), but the user only _discussed or asked about_ subagents — a capability question ("can subagents handle the non-conflicting parts?"), which is NOT authorization. On "go", flip to `in-progress`, then make **a single one-line offer** before spawning anything ("plan records a subagent strategy — fan out, or run solo?"). Never silently default to solo.
-- **`authorized`** — the user _explicitly authorized subagents for execution_ during planning ("dùng subagents khi làm", "fan out when you implement"). On "go", flip to `in-progress` **and** begin per the recorded delegation plan with **no second prompt**; state in your reply that you are honoring the recorded authorization.
-
-Setting the field is a planning-time judgment, recorded with a Decision Log entry. The `strategy-only` ↔ `authorized` boundary is exactly the _question-vs-authorization_ line drawn in `agent-delegation.md` — persisting it here just lets "go" inherit it. If the user instead authorizes subagents at runtime (after "go"), update the field to `authorized` and proceed.
+Its values — `none`, `strategy-only`, `authorized` — and **whether they gate execution** are defined in `agent-delegation.md`, which is harness-specific; this file does not redefine them. If the strategy changes at runtime, update the field.
 
 ## Progress Updates During Implementation
 
-When `status: in-progress`, maintain the task file as work progresses:
+When `status: in-progress`, the agent maintains the task file as it works:
 
 1. After completing each step, flip `- [ ]` → `- [x]` and prefix with `(YYYY-MM-DD HH:MMZ)` UTC timestamp.
 2. Bump frontmatter `updated:` whenever the file is touched.
-3. Append to **Surprises & Discoveries** when reality diverges from the plan. Prefix each entry with a `(YYYY-MM-DD HH:MMZ)` UTC timestamp.
+3. Append to **Surprises & Discoveries** when reality diverges from the plan (e.g., file moved, dependency missing, existing helper found). Prefix each entry with a `(YYYY-MM-DD HH:MMZ)` UTC timestamp.
 4. Append to **Decision Log** when changing approach mid-flight, prefixed with `(YYYY-MM-DD HH:MMZ, <agent>)`. Include rationale.
 5. **Do not delete or rewrite steps that were skipped or abandoned** — strike them through with `~~text~~` and add a Surprises entry explaining why.
 
 The plan is a living document. Edits to it are part of the work, not an afterthought. Every in-task log entry — a completed step, a Decision Log line, a Surprises line — carries the full `YYYY-MM-DD HH:MMZ` UTC time, never date-only: one task often logs several entries in a single day, and the time is the only thing that keeps them ordered for audit.
-
-If subagents are used while the task is `in-progress`, record durable outputs in the task file instead of relying on subagent thread history:
-
-- Add a Surprises entry for important findings, failed validations, merge conflicts, or scope drift.
-- Add a Decision Log entry when subagent results change the implementation approach.
-- Mark worker-owned Concrete Steps complete only after the parent session reviews the patch and validates it.
 
 ## Completion — Two-Phase Gate
 
@@ -198,7 +188,7 @@ When every Concrete Steps box AND every Validation & Acceptance box is checked:
 3. Bump `updated:`.
 4. Report to the user, explicitly:
    > "All steps and validation done. Task `<slug>` is `awaiting-review`. Please verify (run the app, manual QA, check the diff) and confirm to close — or tell me what didn't work and I'll flip back to in-progress."
-5. **STOP.** Do not move the file, do not write to JOURNAL, do not update `Recently Done` in `index.md`. Honor the Awaiting-Review Lock.
+5. **STOP.** Do NOT move the file, do NOT write to JOURNAL, do NOT update `Recently Done` in `index.md`. Honor the Awaiting-Review Lock.
 
 ### Phase 2a — User confirms (`awaiting-review → done`)
 
@@ -216,7 +206,7 @@ When the user gives a completion signal — "approved", "confirmed", "looks good
 
 ### Phase 2b — User reports a problem (`awaiting-review → in-progress`)
 
-If the user reports something is wrong — "step 3 didn't actually work in build", "the style resets to normal at runtime", "you missed X" — do not defend. The first completion attempt being wrong is normal; the system is designed to catch this. Run the rollback flow:
+If the user reports something is wrong — "step 3 didn't actually work in build", "the style resets to normal at runtime", "you missed X" — do NOT defend. The first completion attempt being wrong is normal; the system is designed to catch this. Run the rollback flow:
 
 1. Append the user's report to **Surprises & Discoveries**, stamped with the current `(YYYY-MM-DD HH:MMZ)` UTC time, verbatim if useful. This is high-signal data for future-self.
 2. Un-check any Concrete Steps or Validation boxes that turned out to be wrong, OR add new steps if the gap is novel.
@@ -224,20 +214,20 @@ If the user reports something is wrong — "step 3 didn't actually work in build
 4. Bump `updated:`.
 5. Begin addressing the issue. When done, return to Phase 1.
 
-The cycle Phase 1 <-> Phase 2b may repeat. That's correct behavior, not a bug.
+The cycle Phase 1 ↔ Phase 2b may repeat. That's correct behavior, not a bug.
 
 ## Approval Signal Cheat Sheet
 
-| Transition                       | What user says                                                                           |
-| -------------------------------- | ---------------------------------------------------------------------------------------- |
-| `planning -> in-progress`        | "go", "approved", "implement", "do it", "ok làm đi", "start"                             |
-| `awaiting-review -> done`        | "approved", "confirmed", "looks good", "close it", "done", "ship", "ok đóng", "merge it" |
-| `awaiting-review -> in-progress` | Any report of a problem — "didn't work", "broken", "missed X", "step Y is wrong"         |
-| `* -> cancelled`                 | "cancel", "abandon", "drop this", "bỏ task"                                              |
+| Transition                      | What user says                                                                           |
+| ------------------------------- | ---------------------------------------------------------------------------------------- |
+| `planning → in-progress`        | "go", "approved", "implement", "do it", "ok làm đi", "start"                             |
+| `awaiting-review → done`        | "approved", "confirmed", "looks good", "close it", "done", "ship", "ok đóng", "merge it" |
+| `awaiting-review → in-progress` | Any report of a problem — "didn't work", "broken", "missed X", "step Y is wrong"         |
+| `* → cancelled`                 | "cancel", "abandon", "drop this", "bỏ task"                                              |
 
 The agent must wait for the explicit signal. Enthusiasm ("great!", "nice plan") is NOT approval. Questions are NOT approval. Edits the user makes to the task file are NOT approval.
 
-Subagent execution is a separate gate carried by the `delegation:` field (see "Delegation Authorization"): `authorized` lets "go" also start delegated work; `strategy-only` makes "go" offer once before spawning; `none` runs solo.
+Subagent execution is governed by the `delegation:` field and your harness — see `agent-delegation.md`. The signals in this table concern task _status_ (`planning → in-progress → done`), not whether to delegate.
 
 ## Resumption Across Sessions
 
@@ -281,12 +271,12 @@ So: a task's existence is signalled in CONTEXT by a pointer line. The task's con
 
 ## Anti-Patterns
 
-- Agent auto-completing. Flipping `status` directly from `in-progress` to `done`, moving the file to `done/`, writing to JOURNAL, or updating Recently Done in `index.md` without a user completion signal. The agent's job is to reach `awaiting-review` and stop.
+- **Agent auto-completing.** Flipping `status` directly from `in-progress` to `done`, moving the file to `done/`, writing to JOURNAL, or updating Recently Done in `index.md` without a user completion signal. The agent's job is to reach `awaiting-review` and stop.
 - Editing code while `status: planning` or `status: awaiting-review`. Both states are read-only locks.
+- **Spawning write-scope subagents from a planning-locked task.** The lock forbids code edits, so any worker that writes must wait for `in-progress`; read-only exploration subagents are fine.
 - Treating user enthusiasm or silence as approval. The signals listed in the cheat sheet are explicit and required.
 - Letting `updated:` go stale (>3 days during in-progress without movement signals abandonment — flip to `blocked` or address it).
 - Copying a task's body (Steps / Decisions / Surprises / Memory Hints) into `.codex/CONTEXT.md`. CONTEXT may _reference_ the active task by slug + path, but must never duplicate its content.
 - Auto-loading task files via `AGENTS.md`. Task files are working documents, not always-loaded guidelines.
 - Deleting completed task files. They are project history.
 - Creating a task without filling Memory Hints if any non-obvious context was discovered during planning.
-- Spawning subagents from a planning-locked task. Planning may _record_ a delegation strategy and set `delegation:` (including `authorized`), but no subagent spawns until the task is `in-progress`.

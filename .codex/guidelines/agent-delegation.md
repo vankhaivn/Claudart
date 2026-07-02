@@ -7,7 +7,7 @@ tags: [subagents, delegation, parallelism, orchestration]
 
 # Agent Delegation
 
-Codex subagents are a parallel-work capability, not a default behavior. Use them only when the user explicitly asks for subagents, delegation, or parallel agent work. Requests for depth, thoroughness, investigation, or "be comprehensive" are not authorization by themselves.
+Codex subagents are a parallel-work capability, not a default behavior. Use them only when the user explicitly asks for subagents, delegation, or parallel agent work. Requests for depth, thoroughness, investigation, or "be comprehensive" are not authorization by themselves. This conservatism is the Codex harness default (`explicitRequestOnly`), not merely a project choice — editing this guideline cannot make Codex auto-delegate; proactive delegation is a harness/client-level setting, not something this file turns on.
 
 This protocol governs the built-in `explorer`/`worker` delegation pattern. Project-specific custom agents (defined under `.codex/agents/`) carry their own instructions and are invoked directly by name when the user asks for them; they are out of scope here.
 
@@ -24,7 +24,13 @@ Do not spawn if the next parent step is blocked on the subtask. Do that work loc
 
 ## Pre-authorized Delegation (task-file `delegation:` field)
 
-The "explicit authorization" requirement above can be satisfied **at planning time** and persisted, not only at runtime. When a `$codex-plan` task records `delegation: authorized` in its frontmatter, the user authorized subagents for execution during planning — the approval signal ("go") then activates delegation **without a second request**. `delegation: strategy-only` means a strategy is recorded but only _discussed_, not authorized: make a single one-line offer at "go" before spawning. See `task-management.md` → "Delegation Authorization" for the field's full semantics.
+The "explicit authorization" requirement above can be satisfied **at planning time** and persisted, not only at runtime. The `delegation:` field records the decision during planning so the approval signal ("go") inherits it without a second round-trip:
+
+- **`none`** — delegation was not discussed, or the task does not benefit from it. On "go", work solo.
+- **`strategy-only`** — a strategy is recorded but subagents were only _discussed_, not authorized (e.g. a capability question). On "go", make **a single one-line offer** before spawning anything; never silently default to solo.
+- **`authorized`** — the user explicitly authorized subagents for execution during planning. On "go", begin per the recorded plan **without a second request**, and say you are honoring the recorded authorization.
+
+This section is the single source of truth for the field's values; `task-management.md` → "Approval Signal" only describes how "go" carries the field into execution.
 
 The authorization bar itself is unchanged. A _question_ about subagents ("can they handle the non-conflicting parts?") is `strategy-only`, not `authorized`; only an explicit instruction to use them for the work sets `authorized`. Persisting the decision removes the redundant re-confirmation, not the gate.
 

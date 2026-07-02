@@ -32,7 +32,7 @@ The `/plan` task-file `delegation:` field carries a **recorded delegation strate
 - **`strategy-only`** — a decomposition is recorded as a hint (in Plan of Work / Memory Hints). On "go", proceed by harness judgment, applying the recorded strategy where it fits. No mandatory permission round-trip.
 - **`authorized`** — the user recorded a specific delegation plan they want followed. On "go", begin per that plan directly and say you are following the recorded strategy.
 
-See `task-management.md` → "Delegation Authorization" for how the field rides the approval signal.
+This section is the single source of truth for the field's values; `task-management.md` → "Approval Signal" only describes how "go" carries the field into execution.
 
 ## Delegate-and-Consume vs. Delegate-and-Continue
 
