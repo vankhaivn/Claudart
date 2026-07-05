@@ -16,7 +16,7 @@ Distill. Never dump transcript.
    - the quote anchoring where work stopped (see Hard Rule 7).
      Everything else gets distilled.
 4. **Route durable content out FIRST.** The baton holds conversational residue only — content with no durable home. Before writing it: durable project facts → `.claude/knowledge/` (+ register in `INDEX.md`); discoveries tied to an active task → that task file's `Memory Hints` / `Surprises & Discoveries`; a recurring behavioral lesson → name it in chat as a `/learn` candidate. Whatever you routed out does NOT also go into the baton.
-5. **Active task wins.** If an active task file covers this session's work, most content belongs THERE. The baton then holds only a pointer to the task plus live reasoning not yet written into it. Never duplicate task content into the baton.
+5. **Active task wins.** If an active task file covers this session's work, most content belongs THERE. The baton then holds only a pointer to the task plus live reasoning not yet written into it. Never duplicate task content into the baton. An active spec mission (`.claude/specs/`) wins the same way — route into its NOTES/LEDGER; a routine spec pause needs no baton at all, `/spec-run` re-orients from the folder.
 6. **No code edits.** This command writes memory only — `HANDOFF.md`, and optionally a task file and knowledge entries. Never code, and never `CONTEXT.md` (that is `/checkpoint`'s file).
 7. **Next Step is anchored, not invented.** It must trace directly to the user's most recent explicit request and the work in flight immediately before this handoff, with a verbatim quote proving it. Never list tangential ideas, speculative improvements, or already-completed work.
 

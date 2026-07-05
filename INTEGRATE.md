@@ -25,17 +25,18 @@ This file is a **protocol, not a script** — follow it top to bottom. It exists
 
 **Claude layer** (`.claude/`):
 
-- `commands/` — slash commands: `start`, `plan`, `checkpoint`, `handoff`, `learn`, `refactor-memory`, `doctor`, `project-discovery`
+- `commands/` — slash commands: `start`, `plan`, `spec`, `spec-run`, `checkpoint`, `handoff`, `learn`, `refactor-memory`, `doctor`, `project-discovery`
 - `agents/` — review agents: `clean-code-reviewer`, `security-auditor` (read-only on user code)
-- `rules/` — **prescriptive**, path-scoped behavior (`ai-behavior`, `task-management`)
+- `rules/` — **prescriptive**, path-scoped behavior (`ai-behavior`, `task-management`, `spec-workflow`)
 - `knowledge/INDEX.md` — **descriptive** durable project facts (a map; detail files read on demand)
 - `CONTEXT.md` (state now), `JOURNAL.md` (history, append-only), `CLAUDE.md` (memory index)
 - `tasks/` — persistent plan documents (`index.md` + `done/`)
+- `specs/` — mission-scale spec workspaces (only `INDEX.md` ships; mission folders are created by `/spec`)
 
 **Codex layer** (`.codex/` + `.agents/`):
 
 - `.agents/skills/codex-*` — the same commands as Codex skills
-- `.codex/guidelines/` (= rules), `.codex/knowledge/`, `.codex/agents/*.toml`, `.codex/config.toml`, `.codex/CONTEXT.md`, `.codex/JOURNAL.md`, `.codex/tasks/`
+- `.codex/guidelines/` (= rules), `.codex/knowledge/`, `.codex/agents/*.toml`, `.codex/config.toml`, `.codex/CONTEXT.md`, `.codex/JOURNAL.md`, `.codex/tasks/`, `.codex/specs/`
 - `AGENTS.md` at repo root (Codex memory index; the installer copies it from `.codex/AGENTS.md`)
 
 Every Claude command has a mirrored Codex skill. If you integrate both layers, keep them consistent.
@@ -81,8 +82,8 @@ Present the full add / merge / skip plan and ask before writing.
 ## Step 3 — Conflict protocol (every scenario)
 
 - **Never** overwrite a file the user created or modified without showing a diff and getting an explicit "yes."
-- Index / memory files (`CLAUDE.md`, `AGENTS.md`, `knowledge/INDEX.md`, `tasks/index.md`) are **spliced**, never wholesale-replaced — preserve the user's content and ordering.
-- `CONTEXT.md` and `JOURNAL.md` are live user state — **never** import them from the template; only create them empty (from the template header) if missing. `HANDOFF.md` (when present) is a live one-shot session baton — never import, overwrite, or create it.
+- Index / memory files (`CLAUDE.md`, `AGENTS.md`, `knowledge/INDEX.md`, `tasks/index.md`, `specs/INDEX.md`) are **spliced**, never wholesale-replaced — preserve the user's content and ordering.
+- `CONTEXT.md` and `JOURNAL.md` are live user state — **never** import them from the template; only create them empty (from the template header) if missing. `HANDOFF.md` (when present) is a live one-shot session baton — never import, overwrite, or create it. Spec mission folders (`specs/<slug>/`) are likewise live state — only the `specs/INDEX.md` registry ships from the template.
 - Do not touch `.env`, secrets, or anything matched by `.gitignore`.
 - If integrating both layers, keep the Claude command and its Codex skill mirror consistent.
 

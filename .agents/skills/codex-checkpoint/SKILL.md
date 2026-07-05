@@ -1,6 +1,6 @@
 ---
 name: codex-checkpoint
-description: Update Codex current state by rewriting .codex/CONTEXT.md, syncing .codex/tasks/index.md with task file states, and appending meaningful retired items to .codex/JOURNAL.md. Graduate durable project facts to .codex/knowledge/.
+description: Update Codex current state by rewriting .codex/CONTEXT.md, syncing .codex/tasks/index.md and .codex/specs/INDEX.md with current file states, and appending meaningful retired items to .codex/JOURNAL.md. Graduate durable project facts to .codex/knowledge/.
 ---
 
 # CodexCheckpoint
@@ -73,6 +73,9 @@ Use this skeleton. Omit any section that has nothing to say.
 <!-- planned work → one-line pointer; the task file holds the depth -->
 
 - Working task `<slug>` (see .codex/tasks/<file>) <!-- since: YYYY-MM-DD -->
+<!-- mission work → one-line pointer; the spec folder holds the depth -->
+
+- Running spec `<slug>` (see .codex/specs/<slug>/SPEC.md) <!-- since: YYYY-MM-DD -->
 <!-- un-planned work → CONTEXT is the only handoff, so each live thread gets a micro-handoff -->
 - <short label> (no task) <!-- since: YYYY-MM-DD -->
   > "<the user's intent, quoted in their own words>"
@@ -143,6 +146,16 @@ This step is independent of CONTEXT.md. Skip entirely if `.codex/tasks/` does no
 5. Enforce that section's 100-line ceiling and trim ladder.
 6. Flag stalled tasks: apply the **Staleness Thresholds** table in `.codex/guidelines/task-management.md` (stalled `in-progress`, stuck `awaiting-review`, abandoned `planning`) and list each flagged task in the report.
 
+### Step 6b2: Sync .codex/specs/INDEX.md
+
+Skip entirely if `.codex/specs/` does not exist.
+
+1. For each `.codex/specs/<slug>/SPEC.md`, read frontmatter only (`slug`, `status`, `updated`).
+2. Rewrite `INDEX.md` per the canonical format in `.codex/guidelines/spec-workflow.md` — every status except `done`/`cancelled` stays under `## Active` (with the ⏳ marker on `poc-review` and `awaiting-final-review`); `done`/`cancelled` move to `## Done`.
+3. Flag stalled specs per the Staleness Thresholds table in `.codex/guidelines/task-management.md`, mapped as: `running` ↔ `in-progress`, `poc-review`/`awaiting-final-review` ↔ `awaiting-review`, `drafting` ↔ `planning`. List flagged specs in the report.
+4. Scan each Active spec's `NOTES.md` for `→ graduate:` flags: route `knowledge/` flags into Step 6c, surface `$codex-learn` flags as proposals in the report, and clear each flag once routed.
+5. Do NOT tick roadmap boxes, write LEDGER entries, or change any spec `status` — those transitions belong to `$codex-spec`, `$codex-spec-run`, and the user.
+
 ### Step 6c: Graduate Durable Facts to .codex/knowledge/
 
 Skip if no durable project fact surfaced this session (the common case for routine checkpoints).
@@ -164,7 +177,7 @@ Output a 5-line summary:
 1. Lines in new `.codex/CONTEXT.md`.
 2. Items kept, dropped, and added.
 3. JOURNAL entries appended, or `none`.
-4. Tasks synced: active=<n>, archived this run=<n>, stalled=<n>.
+4. Tasks synced: active=<n>, archived this run=<n>, stalled=<n>; specs synced: active=<n>, stalled=<n>.
 5. Knowledge entries written/updated this run (list slugs, or `none`); plus anything proposed for `$codex-learn` (recurring behavior → guidelines).
 
 Do not run `git commit` yourself. Do not mention uncommitted changes — the user commits independently.

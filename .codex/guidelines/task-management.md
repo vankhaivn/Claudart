@@ -13,6 +13,8 @@ This guideline supersedes the native plan mode workflow. Do not rely on session-
 
 For work that may parallelize, also follow `agent-delegation.md`. The `delegation:` frontmatter field records a delegation strategy at planning time and carries it into execution at the approval signal; its values and whether they gate delegation are defined there, not in this file.
 
+Mission-scale work runs one layer up, in `.codex/specs/` (see `spec-workflow.md`), and **supersedes this guideline within its scope**: an approved spec's standing approval replaces the per-task approval and review gates below, and a spec executor never creates task files. Never run both layers over the same work.
+
 ## File Layout
 
 ```

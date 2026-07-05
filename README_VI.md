@@ -33,6 +33,7 @@ curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh 
 | -------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | Session nào cũng bắt đầu mù mờ               | `/start` đọc trạng thái hiện tại, task đang mở và các commit gần đây trước khi đụng vào bất kỳ thứ gì |
 | Kế hoạch mất khi session đóng                | `/plan` ghi kế hoạch vào task file để session sau có thể tiếp tục đúng chỗ bạn dừng                   |
+| Mission quá lớn cho một session hay một plan | `/spec` đóng băng ý định thành POC + roadmap bạn approve một lần; `/spec-run` chạy lặp tới khi xong   |
 | Session hiệu quả chạm trần context           | `/handoff` lưu suy luận của session - giả thuyết, evidence, dead ends - cho lần `/start` kế tiếp      |
 | Cùng quyết định bị tái khám phá hằng tuần    | `/learn` biến các chỉnh sửa lặp lại thành rule có scope theo path                                     |
 | Fact bền của dự án không có chỗ đúng để sống | `knowledge/` giữ chúng; index được hiển thị mỗi session, chi tiết được đọc khi cần                    |
@@ -64,6 +65,8 @@ vào context      (chỉ audit)         path phù hợp           chi tiết đ�
 # Trong project đã cài CLAUDART
 /start                          # định hướng session
 /plan add JWT middleware        # ghi task file; agent chờ bạn approve trước khi code
+/spec build the demo game       # mission quá lớn cho một plan? phỏng vấn → POC → roadmap, approve một lần
+/spec-run demo-game             # session mới thực thi mission đã approve tự chủ tới khi xong
 /handoff                        # context gần đầy? lưu suy luận, resume fresh bằng /start
 /checkpoint                     # rebuild CONTEXT.md cuối session
 /learn                          # thăng cấp quyết định lặp lại thành rule

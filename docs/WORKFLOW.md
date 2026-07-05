@@ -13,6 +13,7 @@ This is the manual. The [README](../README.md) is the pitch; this document expla
   - [Two-phase completion gate](#two-phase-completion-gate)
   - [Approval signals](#approval-signals)
   - [Cross-session resumption](#cross-session-resumption)
+- [Spec workflow — missions above the task layer](#spec-workflow--missions-above-the-task-layer)
 - [Subagent delegation](#subagent-delegation)
 - [Commands and skills](#commands-and-skills)
 - [Directory layout](#directory-layout)
@@ -145,6 +146,28 @@ A new session resuming a task:
 
 The file is a snapshot, not a guarantee. Verifying before continuing is what keeps a three-day-old plan from quietly executing against a codebase that no longer matches it.
 
+## Spec workflow — missions above the task layer
+
+A task file fits one feature. Some work doesn't — a whole game, a feature system, a client-demo POC. For those, CLAUDART adds a layer above `tasks/`: a **spec** is a mission living in `.claude/specs/<slug>/` (Codex: `.codex/specs/<slug>/`), written once by an expensive planning session and then executed to completion across many sessions — often on a cheaper model — without per-task approval. A spec supersedes `/plan` for its scope: the executor never creates task files, and the two layers never run over the same work.
+
+Each mission is one folder:
+
+- **`SPEC.md`** — what "done" means: the mission, binary acceptance scenarios ("open artifacts/poc.html → wave counter advances", not "game works"), and a Must-NOT-Have scope fence that stops a cheaper executor from gold-plating. Frozen at approval; only you change it.
+- **`ROADMAP.md`** — phases of checkbox tasks, each with its own `verify:`. The checkboxes are the loop counter: work continues while any box is unticked, so stop/continue is mechanical, not a judgment call.
+- **`NOTES.md`** — the mission's working memory: orientation, constraints and pitfalls, mid-run decisions. Curated and re-read every iteration — the spec-layer equivalent of a task file's Memory Hints + Decision Log.
+- **`LEDGER.md`** — append-only evidence and history, never rewritten. A fresh session reads its tail to learn what actually happened; an unmatched `task-started` entry marks work that was in flight when a session died.
+- **`artifacts/`** — the POC and other frozen references. UI work is verified against the approved artifact, not against memory of a conversation.
+
+`specs/INDEX.md` is the registry — one line per mission, surfaced by `/start`. The flow:
+
+1. **`/spec <mission>`** interviews you and writes every confirmed decision into SPEC.md as it lands — the folder, not the chat, is what survives compaction. It then proves the intent with POC artifacts at the fidelity you pick: a self-contained HTML page by default; for complex missions, several narrow artifacts (core interaction with primitive placeholders, a separate visual-style reference) rather than one high-fidelity build. The review loop runs until you say "that's it", each iteration updating SPEC and POC together. Approved artifacts are frozen as references, then a **decision-complete** roadmap is written: exact paths, chosen approaches with the alternatives that were rejected, a `verify:` per task. The bar is that a session with zero interview context can execute it — if a task would require asking "what did the user mean?", the roadmap is defective.
+2. **You approve once.** Saying "go" on the SPEC + ROADMAP is a _standing approval_ covering every task and phase — the explicit exception to the task workflow's per-task gates. From here the executor doesn't ask permission per task or per phase; blockers and scope questions still stop the loop with a report rather than being resolved by guessing. Approval also fixes the commit policy (`commits:` in SPEC frontmatter): by default the loop never runs `git commit`; opt into per-task or per-phase commits if you want git restore points during a long run — push is never granted either way.
+3. **`/spec-run <slug>`** — best run in a fresh session — drives the loop: re-orient from the three files (never from session memory), pick the first unticked task, execute, verify on a real surface, tick the box, log evidence to the LEDGER. Circuit breakers stop the loop instead of letting it thrash: a task failing the same way three times is marked blocked and skipped for independent work; five iterations on one phase with no new tick stops with a report. Unblocking is the same command from a stronger session — it reads the diagnosis, solves or re-plans the stuck task in the roadmap itself, and hands the loop back; no prompt-pasting between agents.
+4. **Rotation, not compaction.** At every phase boundary the executor reports progress (`n/m` tasks) and offers to checkpoint and rotate — you open a fresh session, `/start`, then `/spec-run <slug>` again. SPEC + ROADMAP + LEDGER _are_ the baton; spec work never writes `HANDOFF.md`. You can also just kill the session at any point — an interrupt is indistinguishable from a crash, and re-orientation handles it.
+5. **Final gate.** When every box is ticked, every acceptance scenario is re-run fresh, the spec flips to `awaiting-final-review`, and the executor stops. You — not the agent — confirm `done`, exactly as in the two-phase task gate. Closing a mission also sweeps NOTES: discoveries flagged as project-wide graduate to `knowledge/`, recurring lessons become `/learn` proposals — nothing durable dies inside the mission folder.
+
+The canonical contract — folder schema, status state machine, circuit breakers, rotation — lives in [`.claude/rules/spec-workflow.md`](../.claude/rules/spec-workflow.md) and [`.codex/guidelines/spec-workflow.md`](../.codex/guidelines/spec-workflow.md).
+
 ## Subagent delegation
 
 Both layers can fan work out to subagents — parallel exploration, bounded implementation, review, audits. **Who decides _whether_ to delegate differs by runtime, on purpose.** Claude's Agent tool decides for itself when work parallelizes, so the Claude layer trusts the harness and does not gate delegation: "be thorough" is fair grounds to fan out. Codex never delegates on its own (it spawns only from an explicit named request), so the Codex layer keeps the stricter rule — authorized parallelism, never a default: "be thorough" doesn't spawn agents; "use subagents" does.
@@ -164,6 +187,8 @@ What survives afterwards goes in the task document: the delegation strategy, the
 | -------------------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `/start`             | `$codex-start`             | Lightweight session boot — reads CONTEXT, active tasks, the knowledge INDEX, and the last 3 git commits                                                                                                    |
 | `/plan <task>`       | `$codex-plan <task>`       | Creates a persistent implementation plan in `tasks/` — replaces native plan mode                                                                                                                           |
+| `/spec <mission>`    | `$codex-spec <mission>`    | Mission-scale planning — interview → POC artifact iterated with you → decision-complete SPEC + ROADMAP in `specs/`, approved once as a standing approval                                                   |
+| `/spec-run <slug>`   | `$codex-spec-run <slug>`   | Executes an approved spec autonomously until done — self-QA against the SPEC, ticks the ROADMAP, logs evidence to the LEDGER, offers rotation at phase boundaries                                          |
 | `/project-discovery` | `$codex-project-discovery` | Interview-first planning — turns rough ideas into project docs before any code                                                                                                                             |
 | `/refactor-memory`   | `$codex-refactor-memory`   | Trims CLAUDE.md/AGENTS.md to a lean index; routes durable content by type (behavior → rules/guidelines, facts → knowledge); bootstraps + re-verifies the knowledge tier                                    |
 | `/checkpoint`        | `$codex-checkpoint`        | Declarative CONTEXT rebuild + `tasks/index.md` sync + JOURNAL append + durable facts → `knowledge/`                                                                                                        |
@@ -194,9 +219,12 @@ your-project/
 │   ├── guidelines/                 # Codex-native semantic guidance
 │   │   ├── ai-behavior.md
 │   │   ├── agent-delegation.md
+│   │   ├── spec-workflow.md
 │   │   └── task-management.md
 │   ├── knowledge/                  # Durable descriptive facts + external-doc pointers
 │   │   └── INDEX.md                # Map surfaced by $codex-start; topic files read on demand
+│   ├── specs/                      # Mission-scale spec workspaces (SPEC + ROADMAP + LEDGER + artifacts/ per mission)
+│   │   └── INDEX.md                # Registry surfaced by $codex-start; one line per mission
 │   └── tasks/                      # Persistent implementation plans (one file per task)
 │       ├── index.md                # Active + recently-done dashboard, ≤ 100 lines
 │       └── done/                   # Archived completed/cancelled tasks
@@ -214,7 +242,10 @@ your-project/
     ├── rules/
     │   ├── agent-delegation.md
     │   ├── ai-behavior.md
+    │   ├── spec-workflow.md
     │   └── task-management.md
+    ├── specs/                      # Mission-scale spec workspaces (SPEC + ROADMAP + LEDGER + artifacts/ per mission)
+    │   └── INDEX.md                # Registry surfaced by /start; one line per mission
     └── tasks/                      # Persistent implementation plans (one file per task)
         ├── index.md                # Active + recently-done dashboard, ≤ 100 lines
         └── done/                   # Archived completed/cancelled tasks

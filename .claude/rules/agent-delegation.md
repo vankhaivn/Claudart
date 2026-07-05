@@ -66,7 +66,7 @@ The parent session remains responsible for the final result. Beyond the harness 
 - The subagent's final message returns to you as the tool result and is NOT shown to the user — relay what matters.
 - Review subagent outputs and integrate only the useful parts; do not treat a subagent patch as final without parent review and validation.
 - Run the relevant validation yourself, or verify the validation evidence is trustworthy.
-- Record each delegation **at spawn time** in the active task file (or the CONTEXT micro-handoff for un-planned work): the unit, the agent, the expected output, and where it will be integrated; mark it consumed when integrated. A compaction or handoff must never orphan a running subagent — the file, not session memory, is what remembers outstanding delegations.
+- Record each delegation **at spawn time** in the active task file (the CONTEXT micro-handoff for un-planned work; the spec LEDGER as a `delegated` entry for mission work): the unit, the agent, the expected output, and where it will be integrated; mark it consumed when integrated. A compaction or handoff must never orphan a running subagent — the file, not session memory, is what remembers outstanding delegations.
 - Persist important subagent findings in task files; use `/checkpoint` for active `CONTEXT.md` handoffs or eventual `JOURNAL.md` entries. Do not rely on subagent thread history for persistence.
 
 ## Task Documents

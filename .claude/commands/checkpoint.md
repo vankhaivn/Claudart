@@ -1,5 +1,5 @@
 ---
-description: Update .claude/CONTEXT.md to reflect the CURRENT state of work (declarative overwrite). Sync .claude/tasks/index.md with current task file states. Append graduated items to .claude/JOURNAL.md. Graduate durable project facts to .claude/knowledge/. Run at the end of meaningful sessions.
+description: Update .claude/CONTEXT.md to reflect the CURRENT state of work (declarative overwrite). Sync .claude/tasks/index.md and .claude/specs/INDEX.md with current file states. Append graduated items to .claude/JOURNAL.md. Graduate durable project facts to .claude/knowledge/. Run at the end of meaningful sessions.
 ---
 
 You are about to write a session checkpoint. The output is **not a log of what happened** — it is a **declarative snapshot of what is true right now**. Lifelong append is the failure mode this command exists to prevent.
@@ -66,6 +66,9 @@ Use this skeleton; **omit any section that has nothing to say**:
 <!-- planned work → one-line pointer; the task file holds the depth -->
 
 - Working task `<slug>` (see .claude/tasks/<file>) <!-- since: YYYY-MM-DD -->
+<!-- mission work → one-line pointer; the spec folder holds the depth -->
+
+- Running spec `<slug>` (see .claude/specs/<slug>/SPEC.md) <!-- since: YYYY-MM-DD -->
 <!-- un-planned work → CONTEXT is the only handoff, so each live thread gets a micro-handoff -->
 - <short label> (no task) <!-- since: YYYY-MM-DD -->
   > "<the user's intent, quoted in their own words>"
@@ -136,6 +139,16 @@ This step is independent of CONTEXT.md. Skip entirely if `.claude/tasks/` does n
 5. Enforce that section's 100-line ceiling and trim ladder.
 6. **Flag stalled tasks**: apply the **Staleness Thresholds** table in `.claude/rules/task-management.md` (stalled `in-progress`, stuck `awaiting-review`, abandoned `planning`) and list each flagged task in the report.
 
+### Step 6b2 — Sync .claude/specs/INDEX.md
+
+Skip entirely if `.claude/specs/` does not exist.
+
+1. For each `.claude/specs/<slug>/SPEC.md`, read frontmatter only (`slug`, `status`, `updated`).
+2. Rewrite `INDEX.md` per the canonical format in `.claude/rules/spec-workflow.md` — every status except `done`/`cancelled` stays under `## Active` (with the ⏳ marker on `poc-review` and `awaiting-final-review`); `done`/`cancelled` move to `## Done`.
+3. Flag stalled specs per the Staleness Thresholds table in `.claude/rules/task-management.md`, mapped as: `running` ↔ `in-progress`, `poc-review`/`awaiting-final-review` ↔ `awaiting-review`, `drafting` ↔ `planning`. List flagged specs in the report.
+4. Scan each Active spec's `NOTES.md` for `→ graduate:` flags: route `knowledge/` flags into Step 6c, surface `/learn` flags as proposals in the report, and clear each flag once routed.
+5. Do NOT tick roadmap boxes, write LEDGER entries, or change any spec `status` — those transitions belong to `/spec`, `/spec-run`, and the user.
+
 ### Step 6c — Graduate durable facts to .claude/knowledge/
 
 Skip if no durable project fact surfaced this session (the common case for routine checkpoints).
@@ -157,7 +170,7 @@ Output a 6-line summary:
 1. Lines in new .claude/CONTEXT.md
 2. Items kept / dropped / added (counts)
 3. JOURNAL entries appended (or "none")
-4. Tasks synced: active=<n>, archived this run=<n>, stalled=<n>
+4. Tasks synced: active=<n>, archived this run=<n>, stalled=<n>; specs synced: active=<n>, stalled=<n>
 5. Knowledge entries written/updated this run (list slugs, or "none"); plus anything proposed for `/learn` (recurring behavior → rules)
 6. Reminder for the user to commit so the checkpoint enters git history
 

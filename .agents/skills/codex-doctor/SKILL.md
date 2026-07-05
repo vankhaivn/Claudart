@@ -14,12 +14,13 @@ Run a read-only health check on this repository's CLAUDART installation from the
 - A Codex memory index exists: root `AGENTS.md` for an installed downstream project, or `.codex/AGENTS.md` for the CLAUDART source template copied by the installer. If both exist, compare them and flag drift.
 - `.codex/CONTEXT.md` exists. Warn if missing because the user may not have run checkpoint yet.
 - `.codex/JOURNAL.md` exists. Warn if missing.
-- `.codex/guidelines/` exists and contains at least `ai-behavior.md`, `task-management.md`, and `agent-delegation.md`.
+- `.codex/guidelines/` exists and contains at least `ai-behavior.md`, `task-management.md`, `agent-delegation.md`, and `spec-workflow.md`.
 - `.codex/knowledge/` exists with `INDEX.md` (warn if missing — `$codex-refactor-memory` will recreate it).
 - `.codex/agents/` exists, even if the user removed shipped agents.
 - `.codex/config.toml` exists and contains an `[agents]` table with conservative delegation limits.
 - `.codex/tasks/` exists with `index.md` and `done/` subdirectory (warn if missing — `$codex-plan` will create on first use).
-- `.agents/skills/` exists and contains `codex-start`, `codex-checkpoint`, `codex-learn`, `codex-doctor`, `codex-refactor-memory`, `codex-plan`, and `codex-handoff`.
+- `.codex/specs/` exists with `INDEX.md` (informational if missing — `$codex-spec` creates it on first use).
+- `.agents/skills/` exists and contains `codex-start`, `codex-checkpoint`, `codex-learn`, `codex-doctor`, `codex-refactor-memory`, `codex-plan`, `codex-handoff`, `codex-spec`, and `codex-spec-run`.
 
 For each missing path, report which workflow would create or repair it.
 
@@ -143,6 +144,20 @@ Skip this section if `.codex/tasks/` does not exist.
 - Search the active memory index (`AGENTS.md` / `.codex/AGENTS.md`) and `.codex/guidelines/` for any operational auto-load instruction for `.codex/HANDOFF.md`. If found, flag as Critical — the baton is consumed once by `$codex-start`, never auto-loaded into every session.
 - Multiple handoff artifacts (`HANDOFF-*.md`, dated copies, a `handoff/` directory under `.codex/`) -> flag as Medium — violates the single-slot contract; suggest consolidating into one `HANDOFF.md` or deleting stale copies.
 
+### 6d. Spec Workspace Health (`.codex/specs/`)
+
+Skip this section if `.codex/specs/` does not exist.
+
+- Confirm `.codex/specs/INDEX.md` exists. If missing, flag as Medium — `$codex-spec` or `$codex-checkpoint` should regenerate it.
+- INDEX ↔ folders match (both directions): every `<slug>/` folder under `.codex/specs/` must be listed in `INDEX.md` (unlisted -> Medium, invisible to `$codex-start`); every INDEX entry must point to an existing `<slug>/SPEC.md` (dead -> Low).
+- For every spec folder, confirm the core files exist: `SPEC.md`, `ROADMAP.md`, `NOTES.md`, `LEDGER.md`. Missing -> Medium.
+- `NOTES.md` line count ≤ 150 (`wc -l`). Exceeded -> Medium — the working memory is drifting toward a log; distill it or graduate project-wide facts to `knowledge/`.
+- `SPEC.md` frontmatter: required keys `slug`, `status`, `created`, `updated`, `agent`; `status` in {drafting, poc-review, ready, running, blocked, awaiting-final-review, done, cancelled}; `slug` must match the folder name; `commits` (if present) in {user, per-task, per-phase}.
+- For specs at `poc-review` or later: every `artifacts/` path referenced under `## POC Artifacts` must exist on disk. Missing -> Medium (the executor's frozen UI reference is gone).
+- Consistency: every top-level ROADMAP box ticked but `status` still `running` -> Medium (the final gate never ran). `status: done`/`cancelled` still listed under `## Active` in INDEX -> Low (resync via `$codex-checkpoint`).
+- Staleness (mirror the Staleness Thresholds table in `.codex/guidelines/task-management.md`; do not redefine the numbers): `running` stale as `in-progress`; `poc-review` and `awaiting-final-review` stale as `awaiting-review` — surface prominently, these wait on the user's verdict; `drafting` stale as `planning`.
+- `LEDGER.md` spot-check via `tail -n 15`: recent entries match the `### YYYY-MM-DD HH:MMZ — <event>` heading format. Do not slurp the whole file.
+
 ### 7. Anti-Patterns
 
 - Inlined code blocks longer than about 5 lines inside guideline or agent files. These usually violate the no-stale-snippets rule.
@@ -195,7 +210,7 @@ If two agents share more than 50% of trigger keywords or review scope, flag poss
 If everything passes, output:
 
 ```text
-CLAUDART Codex installation healthy. <n> guidelines, <n> knowledge entries, <n> agents, <n> skills. Delegation wiring: <ok/warnings>.
+CLAUDART Codex installation healthy. <n> guidelines, <n> knowledge entries, <n> agents, <n> skills, <n> specs. Delegation wiring: <ok/warnings>.
 ```
 
 Reminder: this command is read-only. Never modify files.

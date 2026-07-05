@@ -15,6 +15,8 @@ This repository contains CLAUDART, a markdown-based operating layer for AI codin
 
 - `$codex-start` — orients a new session from `.codex/CONTEXT.md`, `.codex/tasks/index.md`, `.codex/knowledge/INDEX.md`, and the last three git commits.
 - `$codex-plan <description>` — creates a persistent implementation plan in `.codex/tasks/`. Use instead of session-only `/plan` for any multi-session or multi-file work.
+- `$codex-spec <mission>` — creates a mission-scale spec workspace in `.codex/specs/` — interview → POC artifact → decision-complete SPEC + ROADMAP, approved once as a standing approval.
+- `$codex-spec-run <slug>` — executes an approved spec autonomously until done — self-QA against the SPEC, ticks the ROADMAP, logs evidence, offers session rotation at phase boundaries.
 - `$codex-project-discovery` — interviews the user about a rough project idea and creates a raw synthesis plus structured project docs.
 - `$codex-checkpoint` — updates `.codex/CONTEXT.md`, syncs `.codex/tasks/index.md`, and appends meaningful retired items to `.codex/JOURNAL.md`.
 - `$codex-handoff` — writes a single-slot session baton (`.codex/HANDOFF.md`) distilling the session's reasoning state when the context window is nearly full or an investigation pauses mid-flight; the next `$codex-start` consumes and deletes it.
@@ -33,6 +35,7 @@ This repository contains CLAUDART, a markdown-based operating layer for AI codin
 See `.codex/guidelines/ai-behavior.md` for universal AI behavior guidelines.
 See `.codex/guidelines/task-management.md` for the persistent task-document workflow that replaces session-only plan mode.
 See `.codex/guidelines/agent-delegation.md` for Codex subagent and parallel delegation protocol. Only use subagents when the user explicitly authorizes subagents, delegation, or parallel agent work.
+See `.codex/guidelines/spec-workflow.md` for mission-scale spec workspaces in `.codex/specs/` — the loop-engineering layer above tasks, executed autonomously by `$codex-spec-run` under a standing approval.
 Project knowledge: see `.codex/knowledge/INDEX.md` for durable project facts and pointers to external docs. Surfaced by `$codex-start`; not auto-loaded — read entries on demand.
 
 ## Agent Self-Evolution & Context Maintenance

@@ -13,6 +13,7 @@
   - [Cổng hoàn tất hai pha](#cổng-hoàn-tất-hai-pha)
   - [Tín hiệu phê duyệt](#tín-hiệu-phê-duyệt)
   - [Resume qua session khác](#resume-qua-session-khác)
+- [Spec workflow - mission trên tầng task](#spec-workflow---mission-trên-tầng-task)
 - [Subagent delegation](#subagent-delegation)
 - [Command và skill](#command-và-skill)
 - [Layout thư mục](#layout-thư-mục)
@@ -145,6 +146,28 @@ Một session mới khi resume task:
 
 File là snapshot, không phải bảo đảm. Verify trước khi tiếp tục là cách giữ một plan ba ngày tuổi khỏi âm thầm chạy trên codebase đã không còn khớp.
 
+## Spec workflow - mission trên tầng task
+
+Một task file vừa cho một feature. Có những việc không vừa - cả một game, một hệ thống feature, một POC demo cho khách. Cho những việc đó, CLAUDART thêm một tầng phía trên `tasks/`: một **spec** là một mission sống trong `.claude/specs/<slug>/` (Codex: `.codex/specs/<slug>/`), được viết một lần bởi một session planning đắt tiền rồi được thực thi tới hoàn tất qua nhiều session - thường trên model rẻ hơn - mà không cần approval từng task. Spec thay thế `/plan` trong phạm vi của nó: executor không bao giờ tạo task file, và hai tầng không bao giờ chạy chồng lên cùng một việc.
+
+Mỗi mission là một folder:
+
+- **`SPEC.md`** - "xong" nghĩa là gì: mission, các acceptance scenario nhị phân ("mở artifacts/poc.html → wave counter tăng", không phải "game chạy được"), và hàng rào scope Must-NOT-Have để chặn executor rẻ hơn khỏi gold-plating. Đóng băng khi approve; chỉ bạn được đổi nó.
+- **`ROADMAP.md`** - các phase gồm task dạng checkbox, mỗi task có `verify:` riêng. Checkbox là loop counter: công việc tiếp tục khi còn box chưa tick, nên dừng/tiếp là chuyện cơ học, không phải phán đoán.
+- **`NOTES.md`** - working memory của mission: orientation, ràng buộc và bẫy, các quyết định giữa chừng. Được chăm sóc (curated) và đọc lại mỗi vòng lặp - tương đương Memory Hints + Decision Log của một task file, ở tầng spec.
+- **`LEDGER.md`** - evidence và lịch sử append-only, không bao giờ được viết lại. Session mới đọc phần đuôi của nó để biết chuyện gì đã thật sự xảy ra; một entry `task-started` chưa có `task-completed` tương ứng đánh dấu việc đang dở dang khi session trước chết.
+- **`artifacts/`** - POC và các reference đã đóng băng khác. Việc UI được verify với artifact đã approve, không phải với trí nhớ về một cuộc hội thoại.
+
+`specs/INDEX.md` là registry - mỗi mission một dòng, được `/start` hiển thị. Flow như sau:
+
+1. **`/spec <mission>`** phỏng vấn bạn và ghi ngay mỗi quyết định đã chốt vào SPEC.md - folder, chứ không phải cuộc chat, mới là thứ sống sót qua compaction. Sau đó nó chứng minh intent bằng POC artifact ở mức fidelity bạn chọn: mặc định là một trang HTML self-contained; với mission phức tạp thì là vài artifact hẹp (interaction lõi bằng placeholder thô, một reference style hình ảnh riêng) thay vì một bản high-fidelity duy nhất. Vòng review lặp tới khi bạn nói "đúng nó rồi", mỗi lượt cập nhật SPEC và POC cùng nhau. Artifact đã approve được đóng băng làm reference, rồi một roadmap **decision-complete** được viết ra: path chính xác, cách tiếp cận đã chọn kèm các phương án đã loại, một `verify:` cho mỗi task. Chuẩn là một session không có chút ngữ cảnh phỏng vấn nào vẫn thực thi được - nếu một task khiến phải hỏi "ý user là gì?", roadmap bị lỗi.
+2. **Bạn approve một lần.** Nói "go" với SPEC + ROADMAP là một _standing approval_ phủ mọi task và phase - ngoại lệ tường minh so với các cổng per-task của workflow task. Từ đây executor không xin phép theo từng task hay từng phase; blocker và câu hỏi về scope vẫn dừng loop kèm báo cáo thay vì được giải quyết bằng đoán. Approve cũng chốt luôn commit policy (`commits:` trong frontmatter SPEC): mặc định loop không bao giờ chạy `git commit`; chọn per-task hoặc per-phase nếu bạn muốn có điểm khôi phục git trong một run dài - push thì không bao giờ được cấp, bất kể policy nào.
+3. **`/spec-run <slug>`** - tốt nhất chạy trong session mới - dẫn dắt loop: định hướng lại từ ba file (không bao giờ từ trí nhớ session), chọn task chưa tick đầu tiên, thực thi, verify trên bề mặt thật, tick box, ghi evidence vào LEDGER. Circuit breaker dừng loop thay vì để nó quẫy: một task fail cùng một kiểu ba lần bị đánh dấu blocked và bỏ qua để làm việc độc lập khác; năm iteration trên một phase mà không có tick mới thì dừng kèm báo cáo. Gỡ kẹt là chạy đúng lệnh đó từ một session mạnh hơn - nó đọc chẩn đoán, tự xử hoặc re-plan task bí ngay trong roadmap, rồi trả loop lại; không có chuyện paste prompt giữa các agent.
+4. **Rotation, không phải compaction.** Ở mỗi ranh giới phase, executor báo tiến độ (`n/m` task) và đề nghị checkpoint rồi rotate - bạn mở session mới, `/start`, rồi `/spec-run <slug>` lần nữa. SPEC + ROADMAP + LEDGER _chính là_ baton; spec work không bao giờ ghi `HANDOFF.md`. Bạn cũng có thể ngắt session bất cứ lúc nào - một cú ngắt không khác gì crash, và bước re-orientation xử lý được.
+5. **Cổng cuối.** Khi mọi box đã tick, mọi acceptance scenario được chạy lại từ đầu, spec chuyển sang `awaiting-final-review`, và executor dừng. Bạn - không phải agent - xác nhận `done`, y hệt cổng hoàn tất hai pha của task. Đóng mission cũng quét NOTES: phát hiện được gắn cờ project-wide graduate lên `knowledge/`, bài học lặp lại thành đề xuất `/learn` - không có gì bền vững chết kẹt trong folder mission.
+
+Contract chuẩn - schema folder, state machine trạng thái, circuit breaker, rotation - nằm trong [`.claude/rules/spec-workflow.md`](../.claude/rules/spec-workflow.md) và [`.codex/guidelines/spec-workflow.md`](../.codex/guidelines/spec-workflow.md).
+
 ## Subagent delegation
 
 Cả hai layer đều có thể fan work out cho subagent - khảo sát song song, triển khai có giới hạn, review, audit. **Ai quyết định _có nên_ delegate hay không khác nhau giữa hai runtime, một cách có chủ đích.** Agent tool của Claude tự quyết khi nào việc parallelize được, nên layer Claude tin harness và không gate delegation: "be thorough" là cơ sở hợp lý để fan out. Codex không bao giờ tự delegate (chỉ spawn khi có yêu cầu nêu tên rõ ràng), nên layer Codex giữ luật chặt hơn - parallelism đã được cho phép, không phải mặc định: "be thorough" không spawn agent; "use subagents" thì có.
@@ -164,6 +187,8 @@ Phần sống sót sau đó đi vào task document: delegation strategy, role, o
 | -------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `/start`             | `$codex-start`             | Boot session nhẹ - đọc CONTEXT, active tasks, knowledge INDEX và 3 commit gần nhất                                                                                                                |
 | `/plan <task>`       | `$codex-plan <task>`       | Tạo implementation plan bền trong `tasks/` - thay cho plan mode gốc                                                                                                                               |
+| `/spec <mission>`    | `$codex-spec <mission>`    | Planning quy mô mission - phỏng vấn → POC artifact lặp cùng bạn → SPEC + ROADMAP decision-complete trong `specs/`, approve một lần như standing approval                                          |
+| `/spec-run <slug>`   | `$codex-spec-run <slug>`   | Thực thi spec đã approve tự chủ tới khi xong - tự QA với SPEC, tick ROADMAP, ghi evidence vào LEDGER, đề nghị rotation ở ranh giới phase                                                          |
 | `/project-discovery` | `$codex-project-discovery` | Planning theo kiểu phỏng vấn trước - biến ý tưởng thô thành project docs trước khi code                                                                                                           |
 | `/refactor-memory`   | `$codex-refactor-memory`   | Gọt CLAUDE.md/AGENTS.md thành index nhẹ; đưa durable content về đúng loại (behavior → rules/guidelines, facts → knowledge); bootstrap + kiểm chứng lại knowledge tier                             |
 | `/checkpoint`        | `$codex-checkpoint`        | Rebuild CONTEXT declarative + sync `tasks/index.md` + append JOURNAL + fact bền → `knowledge/`                                                                                                    |
@@ -194,9 +219,12 @@ your-project/
 │   ├── guidelines/                 # Codex-native semantic guidance
 │   │   ├── ai-behavior.md
 │   │   ├── agent-delegation.md
+│   │   ├── spec-workflow.md
 │   │   └── task-management.md
 │   ├── knowledge/                  # Fact mô tả bền + external-doc pointers
 │   │   └── INDEX.md                # Map hiển thị bởi $codex-start; topic files đọc khi cần
+│   ├── specs/                      # Workspace spec quy mô mission (SPEC + ROADMAP + LEDGER + artifacts/ mỗi mission)
+│   │   └── INDEX.md                # Registry hiển thị bởi $codex-start; mỗi mission một dòng
 │   └── tasks/                      # Implementation plan bền (mỗi task một file)
 │       ├── index.md                # Dashboard active + recently-done, ≤ 100 dòng
 │       └── done/                   # Task completed/cancelled đã archive
@@ -214,7 +242,10 @@ your-project/
     ├── rules/
     │   ├── agent-delegation.md
     │   ├── ai-behavior.md
+    │   ├── spec-workflow.md
     │   └── task-management.md
+    ├── specs/                      # Workspace spec quy mô mission (SPEC + ROADMAP + LEDGER + artifacts/ mỗi mission)
+    │   └── INDEX.md                # Registry hiển thị bởi /start; mỗi mission một dòng
     └── tasks/                      # Implementation plan bền (mỗi task một file)
         ├── index.md                # Dashboard active + recently-done, ≤ 100 dòng
         └── done/                   # Task completed/cancelled đã archive

@@ -11,14 +11,15 @@ Start this session with a lightweight CLAUDART orientation. This command is read
 3. Read `.claude/tasks/index.md` if it exists. If missing, treat as "no active tasks". If present, extract entries under `## Active`.
 4. For each Active entry, verify the underlying file exists in `.claude/tasks/` (the index is a cache; the file is truth). Read its frontmatter (`status`, `updated`, `slug`) only — do not full-read task bodies in `/start`.
 5. Read `.claude/knowledge/INDEX.md` if it exists — the INDEX only. Count the entries under `## Knowledge`. Do NOT read individual knowledge detail files, and do NOT validate freshness or dead links (that is `/doctor`'s job). The index makes durable project facts discoverable; read a detail file only if a later task needs it.
-6. Run `git log -3 --oneline`. If the directory is not a git repo or has fewer than three commits, report what is available.
-7. Extract only these sections from `.claude/CONTEXT.md` when present:
+6. Read `.claude/specs/INDEX.md` if it exists — the INDEX only. Extract entries under `## Active`. Do NOT read SPEC/ROADMAP/LEDGER bodies in `/start`.
+7. Run `git log -3 --oneline`. If the directory is not a git repo or has fewer than three commits, report what is available.
+8. Extract only these sections from `.claude/CONTEXT.md` when present:
    - `## In Progress`
    - `## Next Session Should Start By`
    - `## Open Questions / Blockers`
-8. Do not read `.claude/JOURNAL.md`.
-9. Do not read task bodies in `.claude/tasks/done/`.
-10. Do not run `/doctor`; that is a heavier health check.
+9. Do not read `.claude/JOURNAL.md`.
+10. Do not read task bodies in `.claude/tasks/done/`.
+11. Do not run `/doctor`; that is a heavier health check.
 
 ## Output Format
 
@@ -29,14 +30,15 @@ Start this session with a lightweight CLAUDART orientation. This command is read
 **Current focus:** [In Progress section, or "None recorded"]
 **Last 3 commits:** [git log -3 --oneline output, compact]
 **Active tasks:** [list of "<slug> (<status>, updated <date>)" from tasks/index.md, or "None"]
+**Active specs:** [list of "<slug> (<status>, updated <date>)" from specs/INDEX.md, or "None"]
 **Project knowledge:** [N entries in knowledge/INDEX.md, or "none"]
-**Start by:** [Next Session Should Start By section, or see "Four Cases" below]
+**Start by:** [Next Session Should Start By section, or see "Five Cases" below]
 **Open blockers:** [Open Questions / Blockers section, or "None recorded"]
 ```
 
-## Four Cases — What to Ask After the Report
+## Five Cases — What to Ask After the Report
 
-Decide based on what was found in steps 1-4. Case H takes precedence over all others.
+Decide based on what was found in steps 1-6. Case H takes precedence over all others; Case S coexists with Case A (report both, lead with whichever is awaiting the user).
 
 ### Case H — `.claude/HANDOFF.md` exists (a previous session handed off mid-flight)
 
@@ -50,6 +52,21 @@ A reasoning baton is waiting. Surface it before anything else:
 - **If the user starts unrelated work instead**: ask once whether to keep the baton for later or delete it. If kept, it stays on disk untouched — `/doctor` will flag it when stale.
 
 Never act on baton content without verifying it against the current code first — it is a point-in-time snapshot, and commits may have landed since.
+
+### Case S — `.claude/specs/INDEX.md` lists an Active spec (mission in flight)
+
+For the most relevant spec (prefer `poc-review`/`awaiting-final-review`, then `running`, then `ready`, then `blocked`):
+
+- **`poc-review`**: say:
+  > "Spec `<slug>` is waiting for your review — open `.claude/specs/<slug>/` (POC in `artifacts/`, then SPEC.md and ROADMAP.md). Approving is a standing approval: `/spec-run` will then execute the whole roadmap without asking again until the final review."
+- **`awaiting-final-review`**: say:
+  > "Spec `<slug>` finished its roadmap and is waiting for your demo verification — the final LEDGER.md entry has the demo steps. Confirm to close, or tell me what failed."
+- **`ready` / `running`**: say:
+  > "Spec `<slug>` is <status> (updated <date>). Run `/spec-run <slug>` to continue the loop — a fresh session like this one is the designed unit of work."
+- **`blocked`**: say:
+  > "Spec `<slug>` is blocked — the last LEDGER.md entry records why. Has the blocker cleared?"
+
+Do NOT auto-start the loop; `/spec-run` is the user's call.
 
 ### Case A — At least one task with `status: awaiting-review`, `in-progress`, or `blocked`
 
