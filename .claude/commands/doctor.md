@@ -14,7 +14,7 @@ Please run a health check on this repository's CLAUDART installation. Your job i
 - `.claude/rules/` exists (may be empty before the user runs `/refactor-memory`)
 - `.claude/knowledge/` exists with `INDEX.md` (warn if missing — `/refactor-memory` will recreate it)
 - `.claude/tasks/` exists with `index.md` and `done/` subdirectory (warn if missing — `/plan` will create on first use)
-- `.claude/specs/` exists with `INDEX.md` (informational if missing — `/spec` creates it on first use)
+- `.claude/specs/` exists with `INDEX.md` and `done/` archive folder (informational if missing — `/spec` creates it on first use)
 - `.claude/CLAUDE.md` exists
 - `.claude/CONTEXT.md` exists (warn if missing — the user may not have run `/checkpoint` yet)
 - `.claude/JOURNAL.md` exists (warn if missing)
@@ -124,12 +124,14 @@ Skip this section if `.claude/knowledge/` does not exist.
 Skip this section if `.claude/specs/` does not exist.
 
 - Confirm `.claude/specs/INDEX.md` exists. If missing, flag as **Medium** — `/spec` or `/checkpoint` should regenerate it.
-- **INDEX ↔ folders match** (both directions): every `<slug>/` folder under `.claude/specs/` must be listed in `INDEX.md` (unlisted → **Medium**, invisible to `/start`); every INDEX entry must point to an existing `<slug>/SPEC.md` (dead → **Low**).
-- For every spec folder, confirm the core files exist: `SPEC.md`, `ROADMAP.md`, `NOTES.md`, `LEDGER.md`. Missing → **Medium**.
+- Confirm `.claude/specs/done/` exists. If missing, flag as **Low** — `/spec` or `/checkpoint` should create it.
+- **INDEX ↔ folders match** (both directions): every active `YYYY-MM-DD-<slug>/` folder directly under `.claude/specs/` with an active status must be listed under `## Active`; every archived `done/YYYY-MM-DD-<slug>/` folder with `status: done` or `status: cancelled` must be listed under `## Done`; every INDEX entry must point to an existing `SPEC.md` (dead → **Low**).
+- Ignore `.claude/specs/done/` itself when enumerating active spec folders.
+- For every active or archived spec folder, confirm the core files exist: `SPEC.md`, `ROADMAP.md`, `NOTES.md`, `LEDGER.md`. Missing → **Medium**.
 - `NOTES.md` line count ≤ 150 (`wc -l`). Exceeded → **Medium** — the working memory is drifting toward a log; distill it or graduate project-wide facts to `knowledge/`.
-- `SPEC.md` frontmatter: required keys `slug`, `status`, `created`, `updated`, `agent`; `status` ∈ {drafting, poc-review, ready, running, blocked, awaiting-final-review, done, cancelled}; `slug` must match the folder name; `commits` (if present) ∈ {user, per-task, per-phase}.
+- `SPEC.md` frontmatter: required keys `slug`, `status`, `created`, `updated`, `agent`; `status` ∈ {drafting, poc-review, ready, running, blocked, awaiting-final-review, done, cancelled}; folder name must be `created` + `-` + `slug`; `commits` (if present) ∈ {user, per-task, per-phase}.
 - For specs at `poc-review` or later: every `artifacts/` path referenced under `## POC Artifacts` must exist on disk. Missing → **Medium** (the executor's frozen UI reference is gone).
-- **Consistency**: every top-level ROADMAP box ticked but `status` still `running` → **Medium** (the final gate never ran). `status: done`/`cancelled` still listed under `## Active` in INDEX → **Low** (resync via `/checkpoint`).
+- **Consistency**: every top-level ROADMAP box ticked but `status` still `running` → **Medium** (the final gate never ran). Top-level spec folder with `status: done`/`cancelled` → **Low** (resync via `/checkpoint` to archive it under `done/`). Archived spec folder whose status is not `done`/`cancelled` → **Medium** (it is shelved in the wrong place). `status: done`/`cancelled` still listed under `## Active` in INDEX → **Low** (resync via `/checkpoint`).
 - **Staleness** (mirror the Staleness Thresholds table in `.claude/rules/task-management.md`; do not redefine the numbers): `running` stale as `in-progress`; `poc-review` and `awaiting-final-review` stale as `awaiting-review` — surface prominently, these wait on the user's verdict; `drafting` stale as `planning`.
 - `LEDGER.md` spot-check via `tail -n 15`: recent entries match the `### YYYY-MM-DD HH:MMZ — <event>` heading format. Do not slurp the whole file.
 

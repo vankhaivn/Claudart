@@ -214,6 +214,12 @@ For `.claude/tasks/`:
 - If `.claude/tasks/done/.gitkeep` exists AND `.claude/tasks/done/` contains at least one real `.md` file, delete the `.gitkeep` — once real archives live there, the placeholder is redundant. Report what was removed.
 - Do not modify or move any task `.md` file content. Task files are working documents owned by `/plan` and `/checkpoint`; refactor-memory only touches the `.gitkeep` placeholder and (if missing) the seed `index.md`.
 
+For `.claude/specs/`:
+
+- If the folder does not exist but `/spec` is documented in `.claude/commands/`, create it with a seed `INDEX.md` (canonical header plus empty `## Active` and `## Done` sections) and a `done/.gitkeep`.
+- If `.claude/specs/` exists but `.claude/specs/done/` is missing, create `.claude/specs/done/.gitkeep`.
+- Do not modify or move any spec folder content. Spec folders are mission documents owned by `/spec`, `/spec-run`, and `/checkpoint`; refactor-memory only touches the archive placeholder and (if missing) the seed `INDEX.md`.
+
 For `.claude/knowledge/`:
 
 - If the folder does not exist, create it with a seed `INDEX.md` (header comment + empty `## Knowledge` section).

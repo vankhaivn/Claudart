@@ -8,7 +8,7 @@ CLAUDART keeps the Claude-specific operating layer inside `.claude/`, including 
 
 - `/start` orients a new session from `.claude/CONTEXT.md`, `.claude/tasks/index.md`, `.claude/knowledge/INDEX.md`, and the last three git commits.
 - `/plan <description>` creates a persistent implementation plan in `.claude/tasks/` — use instead of native plan mode for any multi-session or multi-file work.
-- `/spec <mission>` creates a mission-scale spec workspace in `.claude/specs/` — interview → POC artifact → decision-complete SPEC + ROADMAP, approved once as a standing approval.
+- `/spec <mission>` creates a dated mission-scale spec workspace in `.claude/specs/` — interview → POC artifact → decision-complete SPEC + ROADMAP, approved once as a standing approval.
 - `/spec-run <slug>` executes an approved spec autonomously until done — self-QA against the SPEC, ticks the ROADMAP, logs evidence, offers session rotation at phase boundaries.
 - `/refactor-memory` consolidates this file, `.claude/rules/`, and `.claude/agents/` into a coherent Modular Rules System.
 - `/project-discovery` interviews the user about a rough project idea and creates a raw synthesis plus structured project docs.
@@ -23,7 +23,7 @@ See @.claude/CONTEXT.md for the current state of work (updated by /checkpoint).
 See @.claude/rules/ai-behavior.md for universal AI behavior guidelines.
 See @.claude/rules/task-management.md for the persistent task-document workflow that replaces native plan mode.
 See @.claude/rules/agent-delegation.md for how to delegate well to subagents (decomposition, worker prompts, anti-shadow-run, persistence) — the harness decides _whether_ to delegate; the rule adds the project's _how_.
-See @.claude/rules/spec-workflow.md for mission-scale spec workspaces in `.claude/specs/` — the loop-engineering layer above tasks, executed autonomously by /spec-run under a standing approval.
+See @.claude/rules/spec-workflow.md for dated mission-scale spec workspaces in `.claude/specs/` with `done/` archives — the loop-engineering layer above tasks, executed autonomously by /spec-run under a standing approval.
 
 Project knowledge: see `.claude/knowledge/INDEX.md` for durable project facts and pointers to external docs. Surfaced by `/start`; NOT auto-loaded (no `@`) — read entries on demand.
 

@@ -1,13 +1,13 @@
 ---
 paths: ["**/*"]
-description: Mission-scale spec workspaces in `.claude/specs/` — a POC-frozen SPEC plus a decision-complete ROADMAP that any later session (often a cheaper model) executes autonomously until done, with self-QA, circuit breakers, and session rotation.
+description: Dated mission-scale spec workspaces in `.claude/specs/` with `done/` archives — a POC-frozen SPEC plus a decision-complete ROADMAP that any later session (often a cheaper model) executes autonomously until done, with self-QA, circuit breakers, and session rotation.
 when_to_use: Whenever the user invokes `/spec` or `/spec-run`, when a spec folder under `.claude/specs/` is open or referenced, or when resuming mission-scale work that spans many sessions.
 tags: [specs, loop-engineering, autonomy, cross-session, missions]
 ---
 
 # Spec Workflow (Loop Engineering)
 
-A **spec** is a mission: work too large for one task file — a whole game, a feature system, a client-demo POC. It lives as a folder in `.claude/specs/<slug>/` written once by an expensive planning session (`/spec`), then executed to completion across many sessions by `/spec-run` — often on a cheaper model — **without per-task human approval**. The folder, not any session, is the source of truth; every iteration assumes total amnesia and re-orients from files.
+A **spec** is a mission: work too large for one task file — a whole game, a feature system, a client-demo POC. While active, it lives as a dated folder in `.claude/specs/YYYY-MM-DD-<slug>/` written once by an expensive planning session (`/spec`), then executed to completion across many sessions by `/spec-run` — often on a cheaper model — **without per-task human approval**. Completed and cancelled missions are archived under `.claude/specs/done/YYYY-MM-DD-<slug>/`. The folder, not any session, is the source of truth; every iteration assumes total amnesia and re-orients from files.
 
 Missions sit **above** the task layer (`task-management.md`): a spec supersedes `/plan` for its scope, and its executor never creates `.claude/tasks/` files. Use `/plan` for a single feature or fix; use `/spec` when the deliverable is a demoable whole.
 
@@ -16,7 +16,9 @@ Missions sit **above** the task layer (`task-management.md`): a spec supersedes 
 ```
 .claude/specs/
 ├── INDEX.md                    # Registry: one line per spec
-└── <slug>/
+├── done/                       # Archive for done/cancelled spec folders
+│   └── YYYY-MM-DD-<slug>/
+└── YYYY-MM-DD-<slug>/
     ├── SPEC.md                 # What "done" means. Frozen at approval; only the user changes it.
     ├── ROADMAP.md              # Phases → checkbox tasks. The loop counter.
     ├── NOTES.md                # Working memory: orientation, pitfalls, decisions. Curated, re-read every iteration.
@@ -24,14 +26,15 @@ Missions sit **above** the task layer (`task-management.md`): a spec supersedes 
     └── artifacts/              # POC HTML, mockups, generated references
 ```
 
-- **Naming**: slug is 2-5 lowercase kebab-case words. One folder per mission; never nest specs.
+- **Naming**: folder id is `YYYY-MM-DD-<slug>`, using the spec creation date and a slug of 2-5 lowercase kebab-case words. `SPEC.md` frontmatter keeps the short `slug: <slug>`; the folder name must equal `<created>-<slug>`. One folder per mission; never nest specs except the single archive folder `done/`.
+- **Resolving a spec**: `/spec-run <arg>` accepts either a full folder id (`YYYY-MM-DD-<slug>`) or the short slug. Match active top-level folders first; if a short slug matches more than one active folder, ask the user to choose the dated folder. If the match exists only under `done/`, report its archived status and do not run it.
 - **`SPEC.md` holds intent, `ROADMAP.md` holds the plan, `NOTES.md` holds the knowledge, `LEDGER.md` holds the proof.** Cross-link, never duplicate.
 
 ## SPEC.md
 
 ```markdown
 ---
-slug: <kebab-slug-matching-folder>
+slug: <kebab-slug>
 status: drafting # drafting | poc-review | ready | running | blocked | awaiting-final-review | done | cancelled
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
@@ -197,7 +200,7 @@ When every roadmap box is ticked:
 1. Re-run **every** Acceptance Scenario in SPEC.md fresh (not from memory of phase validations) and tick them; append a `final-gate` LEDGER entry with the evidence.
 2. Flip status → `awaiting-final-review`, sync INDEX, and report: how to demo (exact steps), scenario results, anything deferred.
 3. **STOP.** `awaiting-final-review` is a read-only lock (as `awaiting-review` in `task-management.md`).
-4. User confirms → `done`: update INDEX, append one line to `.claude/JOURNAL.md` (`YYYY-MM-DD | completed | spec <slug> — <one-line outcome>`), and sweep `NOTES.md` before shelving — graduate remaining `→ graduate: knowledge/` facts (register in its INDEX), propose `/learn` for flagged behavioral lessons. The folder stays as archive; its durable cargo leaves first. User reports a problem → back to `running`: un-tick the affected tasks/scenarios, log the report verbatim in LEDGER, resume the loop.
+4. User confirms → `done`: flip `status: done`, append one line to `.claude/JOURNAL.md` (`YYYY-MM-DD | completed | spec <slug> — <one-line outcome>, see specs/done/YYYY-MM-DD-<slug>/SPEC.md`), and sweep `NOTES.md` before shelving — graduate remaining `→ graduate: knowledge/` facts (register in its INDEX), propose `/learn` for flagged behavioral lessons. Then move the entire folder from `.claude/specs/YYYY-MM-DD-<slug>/` to `.claude/specs/done/YYYY-MM-DD-<slug>/` and sync INDEX. User reports a problem → back to `running`: un-tick the affected tasks/scenarios, log the report verbatim in LEDGER, resume the loop.
 
 If any scenario fails at step 1, the mission is **not** complete: append failing tasks to the roadmap and keep looping. Never present a failing scenario as "done with caveats".
 
@@ -226,19 +229,19 @@ running ──(blocker; nothing independent left)──▶ blocked ──(cleare
 
 ## Active
 
-- [<slug>](<slug>/SPEC.md) — <status> — updated <YYYY-MM-DD> — <goal one-liner>
+- [<slug>](YYYY-MM-DD-<slug>/SPEC.md) — <status> — updated <YYYY-MM-DD> — <goal one-liner>
 
 ## Done
 
-- [<slug>](<slug>/SPEC.md) — done <YYYY-MM-DD>
+- [<slug>](done/YYYY-MM-DD-<slug>/SPEC.md) — <done|cancelled> <YYYY-MM-DD>
 ```
 
-SPEC frontmatter is the source of truth; INDEX is a cache. Active lists status ∈ {drafting, poc-review, ready, running, blocked, awaiting-final-review} — append ` ⏳ awaiting your review` to `poc-review` and `awaiting-final-review` lines. Spec folders are never deleted; `done`/`cancelled` move to the Done list.
+SPEC frontmatter is the source of truth; INDEX is a cache. Active lists status ∈ {drafting, poc-review, ready, running, blocked, awaiting-final-review} from top-level dated folders — append ` ⏳ awaiting your review` to `poc-review` and `awaiting-final-review` lines. Done lists status ∈ {done, cancelled} from `.claude/specs/done/`. A top-level folder whose SPEC status is `done` or `cancelled` is stale and must be archived before INDEX is rewritten. Spec folders are never deleted.
 
 ## Relationship to the Rest of CLAUDART
 
 - **Tasks**: a spec replaces `/plan` for its scope. Never mirror roadmap tasks into `.claude/tasks/`; never run both layers over the same work.
-- **CONTEXT.md**: may carry one pointer line (`Running spec \`<slug>\` (see .claude/specs/<slug>/SPEC.md)`); never absorbs spec content.
+- **CONTEXT.md**: may carry one pointer line (`Running spec \`<slug>\` (see .claude/specs/YYYY-MM-DD-<slug>/SPEC.md)`); never absorbs spec content.
 - **`/start`**: surfaces Active specs from INDEX and offers `/spec-run` for `ready`/`running` ones.
 - **`/checkpoint`**: syncs INDEX from SPEC frontmatter, same as it syncs `tasks/index.md`.
 - **knowledge/**: read at `/spec` planning time (INDEX first; relevant entries feed SPEC/ROADMAP/NOTES). Mid-run, a discovery that is true project-wide — beyond this mission — is recorded in NOTES **flagged `→ graduate: knowledge/`**. The executor never writes `knowledge/` directly; flags are collected at the rotation `/checkpoint` and the mission-close sweep.

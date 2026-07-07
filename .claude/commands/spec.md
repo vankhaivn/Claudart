@@ -1,5 +1,5 @@
 ---
-description: Create a mission-scale spec workspace in .claude/specs/ — interview the user, freeze the intent in a reviewable POC artifact, then write a decision-complete SPEC + ROADMAP that a later (often cheaper) session can execute autonomously via /spec-run.
+description: Create a dated mission-scale spec workspace in .claude/specs/ — interview the user, freeze the intent in a reviewable POC artifact, then write a decision-complete SPEC + ROADMAP that a later (often cheaper) session can execute autonomously via /spec-run.
 ---
 
 You are the expensive planning session. Everything you learn from the user in this conversation dies with it — the spec folder you produce is the only thing the executor will ever see. Spend the tokens here so `/spec-run` doesn't have to.
@@ -17,7 +17,9 @@ Before doing anything, read `.claude/rules/spec-workflow.md`. That rule defines 
 
 In parallel: `.claude/CONTEXT.md`, `.claude/specs/INDEX.md` (if an active spec already covers this mission, surface it and ask whether to continue it instead), `.claude/knowledge/INDEX.md`, `docs/project/` if present, and `git log -5 --oneline`.
 
-Create `.claude/specs/<slug>/` (slug per the rule file), write a minimal `SPEC.md` with `status: drafting`, and register it in `INDEX.md`. From here on, the folder is where everything lands — not chat.
+Ensure `.claude/specs/done/` exists. Before deciding whether an existing spec is active, check its `SPEC.md` frontmatter status; a top-level spec folder with `status: done` or `status: cancelled` is stale archive state, not an active collision, and should be moved to `.claude/specs/done/` when syncing INDEX.
+
+Create `.claude/specs/YYYY-MM-DD-<slug>/` using today's date and the slug rules from the rule file, write a minimal `SPEC.md` with `slug: <slug>` and `status: drafting`, and register it in `INDEX.md` with the dated folder link. From here on, the folder is where everything lands — not chat.
 
 **Drafting lock**: while `status` is `drafting` or `poc-review`, write nothing outside the spec folder and `INDEX.md`. No implementation code, no scaffolding "to save time later".
 
@@ -55,7 +57,7 @@ Re-read SPEC.md and ROADMAP.md as if this conversation never happened, pretendin
 ```
 ## Spec Ready for Review
 
-**Folder**: `.claude/specs/<slug>/`
+**Folder**: `.claude/specs/YYYY-MM-DD-<slug>/`
 **POC**: `artifacts/<file>` — open it and check it still matches your intent
 **Scenarios**: <n> acceptance scenarios | **Roadmap**: <m> phases, <k> tasks
 **Commit policy**: `commits: user` — the loop never commits; say "per-task" or "per-phase" before approving if you want git checkpoints during the run
@@ -63,7 +65,7 @@ Re-read SPEC.md and ROADMAP.md as if this conversation never happened, pretendin
 
 Review SPEC.md (especially Must-NOT-Have) and ROADMAP.md. When you approve, that is a STANDING
 approval: /spec-run will execute the whole roadmap without asking again until the final review.
-Say "go" to approve — then open a fresh session, /start, and /spec-run <slug>.
+Say "go" to approve — then open a fresh session, /start, and /spec-run <slug> (or the dated folder id if there are multiple active specs with the same short slug).
 ```
 
 Do NOT begin implementing, even after approval — on "go", flip `status → ready`, sync INDEX, and stop. Execution belongs to `/spec-run`.

@@ -75,7 +75,7 @@ Use this skeleton. Omit any section that has nothing to say.
 - Working task `<slug>` (see .codex/tasks/<file>) <!-- since: YYYY-MM-DD -->
 <!-- mission work → one-line pointer; the spec folder holds the depth -->
 
-- Running spec `<slug>` (see .codex/specs/<slug>/SPEC.md) <!-- since: YYYY-MM-DD -->
+- Running spec `<slug>` (see .codex/specs/YYYY-MM-DD-<slug>/SPEC.md) <!-- since: YYYY-MM-DD -->
 <!-- un-planned work → CONTEXT is the only handoff, so each live thread gets a micro-handoff -->
 - <short label> (no task) <!-- since: YYYY-MM-DD -->
   > "<the user's intent, quoted in their own words>"
@@ -150,11 +150,18 @@ This step is independent of CONTEXT.md. Skip entirely if `.codex/tasks/` does no
 
 Skip entirely if `.codex/specs/` does not exist.
 
-1. For each `.codex/specs/<slug>/SPEC.md`, read frontmatter only (`slug`, `status`, `updated`).
-2. Rewrite `INDEX.md` per the canonical format in `.codex/guidelines/spec-workflow.md` — every status except `done`/`cancelled` stays under `## Active` (with the ⏳ marker on `poc-review` and `awaiting-final-review`); `done`/`cancelled` move to `## Done`.
-3. Flag stalled specs per the Staleness Thresholds table in `.codex/guidelines/task-management.md`, mapped as: `running` ↔ `in-progress`, `poc-review`/`awaiting-final-review` ↔ `awaiting-review`, `drafting` ↔ `planning`. List flagged specs in the report.
-4. Scan each Active spec's `NOTES.md` for `→ graduate:` flags: route `knowledge/` flags into Step 6c, surface `$codex-learn` flags as proposals in the report, and clear each flag once routed.
-5. Do NOT tick roadmap boxes, write LEDGER entries, or change any spec `status` — those transitions belong to `$codex-spec`, `$codex-spec-run`, and the user.
+1. Ensure `.codex/specs/done/` exists.
+2. List `.codex/specs/*/SPEC.md` from top-level dated folders only (exclude `INDEX.md` and the `done/` subfolder). For each, read frontmatter only (`slug`, `status`, `created`, `updated`).
+3. Detect any top-level spec whose `status` is `done` or `cancelled`. These have passed their user gate (or were cancelled) and were not yet archived. For each:
+   - Move the entire folder to `.codex/specs/done/<folder-id>/`, preserving the existing dated folder name.
+   - Append the completion/cancellation line to `.codex/JOURNAL.md` only if the recent journal tail does not already contain that spec completion/cancellation.
+   - Before archiving, scan `NOTES.md` for `→ graduate:` flags: route `knowledge/` flags into Step 6c, surface `$codex-learn` flags as proposals in the report, and clear each flag once routed.
+   - DO NOT archive `awaiting-final-review` specs. Those are explicitly waiting for user confirmation; archiving them defeats the final gate. They stay in the top-level specs folder and appear in the Active list.
+4. List `.codex/specs/done/*/SPEC.md`. For each, read frontmatter only (`slug`, `status`, `created`, `updated`). If any archived spec is not `done` or `cancelled`, flag it in the report and do not move it automatically.
+5. Rewrite `INDEX.md` per the canonical format in `.codex/guidelines/spec-workflow.md` — Active entries link to top-level dated folders and include every status except `done`/`cancelled` (with the ⏳ marker on `poc-review` and `awaiting-final-review`); Done entries link to `done/<folder-id>/SPEC.md` and include `done`/`cancelled`.
+6. Flag stalled specs per the Staleness Thresholds table in `.codex/guidelines/task-management.md`, mapped as: `running` ↔ `in-progress`, `poc-review`/`awaiting-final-review` ↔ `awaiting-review`, `drafting` ↔ `planning`. List flagged specs in the report.
+7. Scan each Active spec's `NOTES.md` for `→ graduate:` flags: route `knowledge/` flags into Step 6c, surface `$codex-learn` flags as proposals in the report, and clear each flag once routed.
+8. Do NOT tick roadmap boxes, write LEDGER entries, or change any spec `status` — those transitions belong to `$codex-spec`, `$codex-spec-run`, and the user.
 
 ### Step 6c: Graduate Durable Facts to .codex/knowledge/
 
@@ -177,7 +184,7 @@ Output a 5-line summary:
 1. Lines in new `.codex/CONTEXT.md`.
 2. Items kept, dropped, and added.
 3. JOURNAL entries appended, or `none`.
-4. Tasks synced: active=<n>, archived this run=<n>, stalled=<n>; specs synced: active=<n>, stalled=<n>.
+4. Tasks synced: active=<n>, archived this run=<n>, stalled=<n>; specs synced: active=<n>, archived this run=<n>, stalled=<n>.
 5. Knowledge entries written/updated this run (list slugs, or `none`); plus anything proposed for `$codex-learn` (recurring behavior → guidelines).
 
 Do not run `git commit` yourself. Do not mention uncommitted changes — the user commits independently.

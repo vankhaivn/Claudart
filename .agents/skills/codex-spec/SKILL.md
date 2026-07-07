@@ -1,6 +1,6 @@
 ---
 name: codex-spec
-description: Create a mission-scale spec workspace in .codex/specs/ — interview the user, freeze the intent in a reviewable POC artifact, then write a decision-complete SPEC + ROADMAP that a later (often cheaper) session can execute autonomously via $codex-spec-run.
+description: Create a dated mission-scale spec workspace in .codex/specs/ — interview the user, freeze the intent in a reviewable POC artifact, then write a decision-complete SPEC + ROADMAP that a later (often cheaper) session can execute autonomously via $codex-spec-run.
 ---
 
 # Codex Spec
@@ -20,7 +20,9 @@ Before doing anything, read `.codex/guidelines/spec-workflow.md`. That guideline
 
 Read: `.codex/CONTEXT.md`, `.codex/specs/INDEX.md` (if an active spec already covers this mission, surface it and ask whether to continue it instead), `.codex/knowledge/INDEX.md`, `docs/project/` if present, and `git log -5 --oneline`.
 
-Create `.codex/specs/<slug>/` (slug per the guideline file), write a minimal `SPEC.md` with `status: drafting`, and register it in `INDEX.md`. From here on, the folder is where everything lands — not chat.
+Ensure `.codex/specs/done/` exists. Before deciding whether an existing spec is active, check its `SPEC.md` frontmatter status; a top-level spec folder with `status: done` or `status: cancelled` is stale archive state, not an active collision, and should be moved to `.codex/specs/done/` when syncing INDEX.
+
+Create `.codex/specs/YYYY-MM-DD-<slug>/` using today's date and the slug rules from the guideline file, write a minimal `SPEC.md` with `slug: <slug>` and `status: drafting`, and register it in `INDEX.md` with the dated folder link. From here on, the folder is where everything lands — not chat.
 
 **Drafting lock**: while `status` is `drafting` or `poc-review`, write nothing outside the spec folder and `INDEX.md`. No implementation code, no scaffolding "to save time later".
 
@@ -58,7 +60,7 @@ Re-read SPEC.md and ROADMAP.md as if this conversation never happened, pretendin
 ```
 ## Spec Ready for Review
 
-**Folder**: `.codex/specs/<slug>/`
+**Folder**: `.codex/specs/YYYY-MM-DD-<slug>/`
 **POC**: `artifacts/<file>` — open it and check it still matches your intent
 **Scenarios**: <n> acceptance scenarios | **Roadmap**: <m> phases, <k> tasks
 **Commit policy**: `commits: user` — the loop never commits; say "per-task" or "per-phase" before approving if you want git checkpoints during the run
@@ -66,7 +68,7 @@ Re-read SPEC.md and ROADMAP.md as if this conversation never happened, pretendin
 
 Review SPEC.md (especially Must-NOT-Have) and ROADMAP.md. When you approve, that is a STANDING
 approval: $codex-spec-run will execute the whole roadmap without asking again until the final review.
-Say "go" to approve — then open a fresh session, $codex-start, and $codex-spec-run <slug>.
+Say "go" to approve — then open a fresh session, $codex-start, and $codex-spec-run <slug> (or the dated folder id if there are multiple active specs with the same short slug).
 ```
 
 Do NOT begin implementing, even after approval — on "go", flip `status → ready`, sync INDEX, and stop. Execution belongs to `$codex-spec-run`.

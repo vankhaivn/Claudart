@@ -232,6 +232,12 @@ For `.codex/tasks/`:
 - If `.codex/tasks/done/.gitkeep` exists AND `.codex/tasks/done/` contains at least one real `.md` file, delete the `.gitkeep` — once real archives live there, the placeholder is redundant. Report what was removed.
 - Do not modify or move any task `.md` file content. Task files are working documents owned by `$codex-plan` and `$codex-checkpoint`; refactor-memory only touches the `.gitkeep` placeholder and (if missing) the seed `index.md`.
 
+For `.codex/specs/`:
+
+- If the folder does not exist but `codex-spec` is present in `.agents/skills/`, create it with a seed `INDEX.md` (canonical header plus empty `## Active` and `## Done` sections) and a `done/.gitkeep`.
+- If `.codex/specs/` exists but `.codex/specs/done/` is missing, create `.codex/specs/done/.gitkeep`.
+- Do not modify or move any spec folder content. Spec folders are mission documents owned by `$codex-spec`, `$codex-spec-run`, and `$codex-checkpoint`; refactor-memory only touches the archive placeholder and (if missing) the seed `INDEX.md`.
+
 For Codex delegation state:
 
 - Do not store subagent ids or transient thread names in `.codex/CONTEXT.md`.

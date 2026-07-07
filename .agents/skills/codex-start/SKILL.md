@@ -61,11 +61,11 @@ Never act on baton content without verifying it against the current code first �
 For the most relevant spec (prefer `poc-review`/`awaiting-final-review`, then `running`, then `ready`, then `blocked`):
 
 - **`poc-review`**: say:
-  > "Spec `<slug>` is waiting for your review — open `.codex/specs/<slug>/` (POC in `artifacts/`, then SPEC.md and ROADMAP.md). Approving is a standing approval: `$codex-spec-run` will then execute the whole roadmap without asking again until the final review."
+  > "Spec `<slug>` is waiting for your review — open its dated folder from `.codex/specs/INDEX.md` (POC in `artifacts/`, then SPEC.md and ROADMAP.md). Approving is a standing approval: `$codex-spec-run` will then execute the whole roadmap without asking again until the final review."
 - **`awaiting-final-review`**: say:
   > "Spec `<slug>` finished its roadmap and is waiting for your demo verification — the final LEDGER.md entry has the demo steps. Confirm to close, or tell me what failed."
 - **`ready` / `running`**: say:
-  > "Spec `<slug>` is <status> (updated <date>). Run `$codex-spec-run <slug>` to continue the loop — a fresh session like this one is the designed unit of work."
+  > "Spec `<slug>` is <status> (updated <date>). Run `$codex-spec-run <slug>` (or the dated folder id if needed) to continue the loop — a fresh session like this one is the designed unit of work."
 - **`blocked`**: say:
   > "Spec `<slug>` is blocked — the last LEDGER.md entry records why. Has the blocker cleared?"
 

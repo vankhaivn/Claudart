@@ -1,6 +1,6 @@
 ---
 name: codex-spec-run
-description: Execute an approved spec mission from .codex/specs/ autonomously until done — self-plan each task, delegate where the roadmap authorizes it, self-QA against the SPEC, tick the ROADMAP, log evidence to the LEDGER, and offer session rotation at phase boundaries.
+description: Execute an approved dated spec mission from .codex/specs/ autonomously until done — self-plan each task, delegate where the roadmap authorizes it, self-QA against the SPEC, tick the ROADMAP, log evidence to the LEDGER, and offer session rotation at phase boundaries.
 ---
 
 # Codex Spec Run
@@ -15,7 +15,7 @@ The loop is model-agnostic: run it on a cheap model for routine execution, and r
 
 ## Inputs
 
-- The argument after `$codex-spec-run` is the spec slug. If omitted, read `.codex/specs/INDEX.md`: exactly one spec with status `ready` or `running` → run it; several → ask which; none → say so and suggest `$codex-spec`.
+- The argument after `$codex-spec-run` is either the short spec slug or the dated folder id (`YYYY-MM-DD-<slug>`). Resolve it by scanning `.codex/specs/*/SPEC.md` excluding `.codex/specs/done/`: exact folder-id match first, then `slug:` frontmatter match. If a short slug matches several active folders, ask which dated folder to run. If the match exists only under `.codex/specs/done/`, report its archived `done`/`cancelled` status and stop. If omitted, read `.codex/specs/INDEX.md`: exactly one active spec with status `ready` or `running` → run it; several → ask which; none → say so and suggest `$codex-spec`.
 
 ## Procedure
 
@@ -27,8 +27,8 @@ Read in full: `SPEC.md`, `ROADMAP.md`, `NOTES.md`, and the tail of `LEDGER.md` (
 - `ready` — flip to `running`, sync INDEX, append a `run-started` LEDGER entry, go to Step 2.
 - `running` — resuming. If the LEDGER tail shows activity only minutes old, another session may still be driving this spec — confirm with the user before proceeding. Check the tail for an unmatched `task-started` or `delegated` entry — that is work that was in flight when the previous session died; verify its partial state on disk before redoing anything. Then verify the last completed entry against reality (spot-check its `verify:`; unrelated commits may have landed). Drift → log it, adapt, continue.
 - `blocked` — enter unblock mode. Read the last `task-blocked`/`circuit-breaker` diagnosis. External blocker → ask the user whether it cleared (cleared → flip to `running` and continue; not → stop). A task that defeated a previous session → investigate and either execute it directly or re-plan it per the guideline file (strike + decision-complete replacements + NOTES decision + `replanned` entry), flip to `running`, then offer: continue here, or rotate so a cheaper session resumes.
-- `awaiting-final-review` — don't run: surface the pending demo and ask the user to verify (or report what failed).
-- `done` / `cancelled` — say so; nothing to run.
+- `awaiting-final-review` — if the user's current message is an explicit completion confirmation, run the guideline's closeout flow: flip `status: done`, append the JOURNAL completion line, sweep `NOTES.md` graduation flags, move the dated folder to `.codex/specs/done/`, sync INDEX, and stop. Otherwise don't run: surface the pending demo and ask the user to verify (or report what failed).
+- `done` / `cancelled` — say so, including whether the folder is archived under `.codex/specs/done/`; nothing to run.
 
 ### Step 2 — Loop
 
