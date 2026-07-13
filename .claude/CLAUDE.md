@@ -9,7 +9,7 @@ CLAUDART keeps the Claude-specific operating layer inside `.claude/`, including 
 - `/start` orients a new session from `.claude/CONTEXT.md`, `.claude/tasks/index.md`, `.claude/knowledge/INDEX.md`, and the last three git commits.
 - `/plan <description>` creates a persistent implementation plan in `.claude/tasks/` — use instead of native plan mode for any multi-session or multi-file work.
 - `/spec <mission>` creates a dated mission-scale spec workspace in `.claude/specs/` — interview → POC artifact → decision-complete SPEC + ROADMAP, approved once as a standing approval.
-- `/spec-run <slug>` executes an approved spec autonomously until done — self-QA against the SPEC, ticks the ROADMAP, logs evidence, offers session rotation at phase boundaries.
+- `/spec-run <slug>` executes an approved spec autonomously until final review — verifies acceptance, records ROADMAP task dispositions and evidence, blocks unchanged failure loops, and offers session rotation at phase boundaries.
 - `/refactor-memory` consolidates this file, `.claude/rules/`, and `.claude/agents/` into a coherent Modular Rules System.
 - `/project-discovery` interviews the user about a rough project idea and creates a raw synthesis plus structured project docs.
 - `/checkpoint` rewrites `.claude/CONTEXT.md` as the current state, syncs `.claude/tasks/index.md`, and appends meaningful retired items to `.claude/JOURNAL.md`.

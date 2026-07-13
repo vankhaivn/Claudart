@@ -16,7 +16,7 @@ This repository contains CLAUDART, a markdown-based operating layer for AI codin
 - `$codex-start` — orients a new session from `.codex/CONTEXT.md`, `.codex/tasks/index.md`, `.codex/knowledge/INDEX.md`, and the last three git commits.
 - `$codex-plan <description>` — creates a persistent implementation plan in `.codex/tasks/`. Use instead of session-only `/plan` for any multi-session or multi-file work.
 - `$codex-spec <mission>` — creates a mission-scale spec workspace in `.codex/specs/` — interview → POC artifact → decision-complete SPEC + ROADMAP, approved once as a standing approval.
-- `$codex-spec-run <slug>` — executes an approved spec autonomously until done — self-QA against the SPEC, ticks the ROADMAP, logs evidence, offers session rotation at phase boundaries.
+- `$codex-spec-run <slug>` — executes an approved spec autonomously until final review — verifies acceptance, records ROADMAP task dispositions and evidence, blocks unchanged failure loops, and offers session rotation at phase boundaries.
 - `$codex-project-discovery` — interviews the user about a rough project idea and creates a raw synthesis plus structured project docs.
 - `$codex-checkpoint` — updates `.codex/CONTEXT.md`, syncs `.codex/tasks/index.md`, and appends meaningful retired items to `.codex/JOURNAL.md`.
 - `$codex-handoff` — writes a single-slot session baton (`.codex/HANDOFF.md`) distilling the session's reasoning state when the context window is nearly full or an investigation pauses mid-flight; the next `$codex-start` consumes and deletes it.

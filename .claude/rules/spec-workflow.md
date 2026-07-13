@@ -1,13 +1,13 @@
 ---
 paths: ["**/*"]
-description: Dated mission-scale spec workspaces in `.claude/specs/` with `done/` archives — a POC-frozen SPEC plus a decision-complete ROADMAP that any later session (often a cheaper model) executes autonomously until done, with self-QA, circuit breakers, and session rotation.
+description: Dated mission-scale spec workspaces in `.claude/specs/` with `done/` archives — a POC-frozen SPEC plus a decision-complete ROADMAP that any later session (often a cheaper model) executes autonomously until final review, with self-QA, circuit breakers, and session rotation.
 when_to_use: Whenever the user invokes `/spec` or `/spec-run`, when a spec folder under `.claude/specs/` is open or referenced, or when resuming mission-scale work that spans many sessions.
 tags: [specs, loop-engineering, autonomy, cross-session, missions]
 ---
 
 # Spec Workflow (Loop Engineering)
 
-A **spec** is a mission: work too large for one task file — a whole game, a feature system, a client-demo POC. While active, it lives as a dated folder in `.claude/specs/YYYY-MM-DD-<slug>/` written once by an expensive planning session (`/spec`), then executed to completion across many sessions by `/spec-run` — often on a cheaper model — **without per-task human approval**. Completed and cancelled missions are archived under `.claude/specs/done/YYYY-MM-DD-<slug>/`. The folder, not any session, is the source of truth; every iteration assumes total amnesia and re-orients from files.
+A **spec** is a mission: work too large for one task file — a whole game, a feature system, a client-demo POC. While active, it lives as a dated folder in `.claude/specs/YYYY-MM-DD-<slug>/` written once by an expensive planning session (`/spec`), then executed to the final-review gate across many sessions by `/spec-run` — often on a cheaper model — **without per-task human approval**. Completed and cancelled missions are archived under `.claude/specs/done/YYYY-MM-DD-<slug>/`. The folder, not any session, is the source of truth; every iteration assumes total amnesia and re-orients from files.
 
 Missions sit **above** the task layer (`task-management.md`): a spec supersedes `/plan` for its scope, and its executor never creates `.claude/tasks/` files. Use `/plan` for a single feature or fix; use `/spec` when the deliverable is a demoable whole.
 
@@ -20,7 +20,7 @@ Missions sit **above** the task layer (`task-management.md`): a spec supersedes 
 │   └── YYYY-MM-DD-<slug>/
 └── YYYY-MM-DD-<slug>/
     ├── SPEC.md                 # What "done" means. Frozen at approval; only the user changes it.
-    ├── ROADMAP.md              # Phases → checkbox tasks. The loop counter.
+    ├── ROADMAP.md              # Phases → checkbox tasks with explicit dispositions.
     ├── NOTES.md                # Working memory: orientation, pitfalls, decisions. Curated, re-read every iteration.
     ├── LEDGER.md               # Append-only evidence & history. Never rewritten.
     └── artifacts/              # POC HTML, mockups, generated references
@@ -70,7 +70,7 @@ this as hard as the acceptance list.>
 
 ## Definition of Done
 
-Every ROADMAP checkbox ticked AND every Acceptance Scenario re-run PASS.
+Every ROADMAP task completed or explicitly superseded, no unresolved blocked task remains, AND every Acceptance Scenario re-run PASS.
 ```
 
 POC artifacts are not decoration: they are the **frozen references for intent**, at whatever fidelity the user chose during drafting — often several narrow artifacts, each locking one aspect (core interaction with primitive placeholders, a visual-style reference, a flow demo) rather than one high-fidelity build. UI and UX tasks verify against them (side-by-side comparison, or feeding one to an art-generation skill), which is what lets a cheaper executor make presentation-quality calls without re-interviewing the user.
@@ -98,9 +98,16 @@ Goal: <one line — what is demoable when this phase closes>
 ## Phase 2 — ...
 ```
 
-- Top-level checkboxes are the **loop counter**: continue while any box is unticked; stop/continue is mechanical, not a judgment call.
+- Top-level checkbox state is mechanical:
+  - `- [ ] <task>` is pending work; it is runnable only when its dependencies are satisfied and it carries no `⚠ blocked` marker.
+  - `- [x] <task>` is completed work backed by a `task-completed` evidence entry.
+  - `- [x] ~~<task>~~ — superseded by <task-id or reason>` is terminal superseded work backed by a `replanned` entry.
+  - `- [ ] <task> — ⚠ blocked: <condition>; unlock: <required input/change>` is unresolved and **not runnable**. It stays unticked, is skipped by selection, and prevents the final gate.
+  - `- [ ] ~~<task>~~` is an invalid legacy state, never runnable. Reconcile it from LEDGER/NOTES into one of the valid forms above before selection; if its disposition is ambiguous, mark it blocked with the exact evidence or user decision needed to unlock it.
+- Continue while a runnable pending task exists. A blocked task does not make later work runnable by itself; normal phase dependencies still apply.
 - Size each task to fit comfortably in one iteration of one context window.
-- The executor may **append** tasks discovered mid-flight (log the addition in LEDGER) and strike dead tasks with `~~text~~` + LEDGER entry — but never rewrites phase goals or deletes history. Scope changes (SPEC edits) belong to the user alone.
+- The executor may **append** genuinely missing implementation work discovered mid-flight (log the addition in LEDGER), but never appends a separate fix task plus replay/verification task for the same defect — verification stays with the implementation task. Supersede dead work only with the checked + struck form above; never rewrite phase goals or delete history. Scope changes (SPEC edits) belong to the user alone.
+- Reopening responsible work means un-ticking only the current non-superseded owner whose completion evidence was invalidated. If none exists, append one genuine implementation task under the rule above. Never un-tick a superseded row.
 
 ## LEDGER.md — append-only
 
@@ -113,9 +120,9 @@ The roadmap holds _what_; the ledger holds _evidence and learnings_. Ticking nev
 - Surprise/Decision: <optional — what diverged from the roadmap and why>
 ```
 
-Events: `run-started`, `task-started`, `task-completed`, `phase-validated`, `task-blocked`, `replanned`, `delegated`, `circuit-breaker`, `rotation-checkpoint`, `scope-change` (user-initiated only), `final-gate`. Never edit or delete prior entries.
+Events: `run-started`, `task-started`, `task-completed`, `validation-failed`, `phase-validated`, `task-blocked`, `replanned`, `delegated`, `circuit-breaker`, `rotation-checkpoint`, `scope-change` (user-initiated only), `final-gate`. Never edit or delete prior entries.
 
-An unmatched `task-started` or `delegated` (no later `task-completed` / consumed result) is the crash-recovery marker: it tells a resuming session exactly what was in flight when the previous one died or compacted.
+An unmatched `task-started` or `delegated` (no later `task-completed`, `validation-failed`, `task-blocked`, supersession, or consumed delegated result) is the crash-recovery marker: it tells a resuming session exactly what was in flight when the previous one died or compacted.
 
 ## NOTES.md — the mission's working memory
 
@@ -132,6 +139,10 @@ The ledger answers _what happened, in order_; NOTES answers _what every future i
 
 - <non-obvious constraint or trap discovered, and how to avoid it>
 
+## Current Acceptance Delta
+
+- None. <!-- Or: <S# or named phase/final-gate check>: <observed failure>; owner: <task-id>; last attempt: <material change> → <result>; next: <materially different hypothesis/check, or blocked> -->
+
 ## Decisions
 
 - (YYYY-MM-DD HH:MMZ) <what was chosen> — <why; what was rejected>
@@ -144,6 +155,7 @@ The ledger answers _what happened, in order_; NOTES answers _what every future i
 - **Seeded by `/spec`** from planning-time exploration; **grown by the executor** whenever a finding or mid-flight decision is durable. Route by kind: evidence → LEDGER, knowledge → NOTES (the LEDGER entry records _that_ it landed; NOTES records _it_).
 - **Scope-check as you write**: knowledge that outlives the mission gets flagged in place — `→ graduate: knowledge/` for project-wide facts, `→ graduate: /learn` for recurring behavior. Flags are collected at rotation checkpoints and mission close (see Relationship below), then cleared.
 - **Curated, not append-only**: rewrite or drop entries that stopped being true. Hard ceiling 150 lines — past it, distill, and graduate project-wide facts to `knowledge/` via `/checkpoint`.
+- **Current Acceptance Delta is not a score or a second roadmap.** Keep only currently contradicted/unproven acceptance surfaces, keyed by stable SPEC scenario id or named phase/final-gate check. Record the responsible task as `owner`, never as the key, so replanning cannot erase failure history. Keep the last material attempt and result plus the next materially different attempt; reset to `None` when the evidence clears. A new task, owner, or tick alone does not shrink the delta.
 - Decisions that change _approach_ belong here; decisions that change _scope_ belong to the user in SPEC.md — never blur the two.
 
 ## Standing Approval — the one human gate that replaces many
@@ -152,42 +164,44 @@ The user approves **SPEC + ROADMAP once** ("go" / "approved" / "ok làm đi" →
 
 Approval also fixes the **commit policy** (`commits:` in SPEC frontmatter): `user` (default — the executor never runs `git commit`; the user commits at rotations and gates), `per-task` or `per-phase` (the executor commits at each tick / phase close, message `spec(<slug>): <summary>`, so a long run always has restore points). The grant covers `git commit` only — never push, never history rewrites, regardless of policy.
 
-Human interaction points are exactly three:
+Planned human interaction points are exactly three:
 
 1. **Approval** — user reviews POC + SPEC + ROADMAP, says go.
 2. **Rotation offers** — see Session Rotation below (user picks the stopping moment; the work itself never blocks on them).
 3. **Final gate** — `awaiting-final-review` at mission end; the user, not the agent, confirms `done`.
 
-Everything else — blockers, scope questions, SPEC-acceptance ambiguity discovered mid-run — stops the loop with a report; the executor never resolves scope by guessing.
+Everything else stays autonomous. A task blocker stops that task; it stops the whole loop with a report only when no independent runnable work remains. Treat scope questions and SPEC-acceptance ambiguity as blockers on the affected work: record the missing decision and exact unlock condition in its ROADMAP row and Current Acceptance Delta, continue independent runnable work, and take the canonical `blocked` transition below when none remains. The executor never resolves scope by guessing.
 
 ## The Loop (per iteration)
 
 1. **Re-orient.** Read `SPEC.md`, `ROADMAP.md`, `NOTES.md`, and the LEDGER tail (~30 lines). Never trust session memory of earlier iterations — after any compaction, these files are the only truth.
-2. **Pick** the first unticked task in the earliest incomplete phase, respecting the roadmap's dependency notes. Independent tasks in the same wave may fan out in parallel.
+2. **Pick** the first runnable pending task whose dependencies are satisfied. Skip tasks marked `⚠ blocked` and invalid legacy struck-unticked rows; they are not runnable and keep their phase incomplete. Independent tasks in the same wave may fan out in parallel.
 3. **Execute.** Append `task-started` to the LEDGER before touching code — a mid-task compaction must be able to see what was in flight. Work solo, or delegate per `agent-delegation.md`, recording each spawn as a `delegated` LEDGER entry (unit, expected output) so a compaction never orphans a running worker — the LEDGER plays the role the active task file plays for `/plan` work. Worker prompts are self-contained (Goal / Scope / Constraints / Output — carry the roadmap task text and relevant SPEC lines; the worker has no other context).
 4. **Verify on a real surface.** Run the task's `verify:`. Tests alone never prove user-facing behavior — drive the app, open the page, compare UI against the POC artifact. A worker's "done" is a claim to check, not a result to record.
-5. **Tick and log.** Flip `- [ ]` → `- [x]`, re-read to confirm the unticked count decreased, append a `task-completed` LEDGER entry with evidence, bump `updated:` in SPEC frontmatter. Route anything durable the task surfaced — a constraint, a pitfall, an approach decision — into `NOTES.md` now; the next iteration re-reads NOTES, not this conversation.
-6. **Phase boundary**: run the phase validation, tick the SPEC scenarios it proves, append `phase-validated`, then make a rotation offer. A failing phase validation never closes the phase: append fix tasks to it, log the failure as evidence, and keep looping — the circuit breakers still apply.
+5. **Tick and log.** Flip `- [ ]` → `- [x]`, re-read to confirm the intended task changed state, append a `task-completed` LEDGER entry with evidence, bump `updated:` in SPEC frontmatter. Clear any Current Acceptance Delta this evidence actually resolves. Route anything durable the task surfaced — a constraint, a pitfall, an approach decision — into `NOTES.md` now; the next iteration re-reads NOTES, not this conversation.
+6. **Phase boundary**: run the phase validation. On PASS, tick the SPEC scenarios it proves, clear the resolved delta, append `phase-validated`, then make a rotation offer. On FAIL, do not close the phase: append `validation-failed`, update Current Acceptance Delta, and reopen responsible work under the ROADMAP rule above. Never create a separate replay/verification task. Then continue under the convergence rules below.
 
-## Circuit Breakers
+## Convergence & Circuit Breakers
 
-- **Same task fails the same way 3×** → mark it `⚠ blocked` in the roadmap, append `task-blocked` with a diagnosis, and move to the next _independent_ task. If nothing independent remains, stop and report.
-- **5 iterations on one phase with no new tick** → stop, append `circuit-breaker` with a diagnosis, report to the user.
-- **Two exploration passes with no new facts** → stop researching and act on what is known.
+- **Progress means an acceptance surface cleared, or its remaining failure/diagnosis narrowed enough to change the next action.** Appending a task, ticking a checkbox, renaming/replacing its owner, or gathering more evidence that only confirms the same gap does not count.
+- **A retry must be materially different.** Before retrying a failed acceptance, record in Current Acceptance Delta what changes in the hypothesis, implementation, or verification. If there is no evidence-backed difference to try, do not repeat the attempt: mark the responsible roadmap task `⚠ blocked` with its condition and unlock requirement, append `task-blocked` plus the diagnosis, and move to the next independent runnable task.
+- **Stronger contradictory evidence invalidates a green check.** "Stronger" means it exercises the SPEC's exact action and observable more directly or under more representative conditions; disagreement alone is not evidence. Un-tick the affected scenario, reopen responsible work under the ROADMAP rule, append `validation-failed`, and treat the old verifier as insufficient. Do not use that same check as the sole proof again until its coverage is repaired or replaced.
+- **Two exploration passes with no new facts** → stop researching and act on what is known; if no defensible action remains, block as above.
+- **No runnable task remains while a blocker is unresolved** → append `circuit-breaker`, set SPEC status to `blocked`, sync INDEX, and stop with the diagnosis and exact unlock condition.
 
-A tripped breaker is a stop-and-report, never a silent retry loop and never a reason to weaken a `verify:`.
+A tripped breaker is a stop-and-report, never a silent retry loop and never a reason to weaken a `verify:`. An explicit user- or runtime-level budget remains authoritative, but this workflow does not invent mandatory resource estimates or a separate attempt-accounting system.
 
-**Unblocking is `/spec-run` again — typically from a stronger session.** The executor is model-agnostic: run the loop on a cheap model for routine work; when a task defeats it, the escalation is the _same command_ in a stronger session, not a side-channel. That session's `blocked` gate enters unblock mode: read the `task-blocked`/`circuit-breaker` diagnosis, investigate, then either execute the stuck task directly (the standing approval already covers it) or **re-plan it** — strike the stuck task, append decision-complete replacements, record the decision and why in NOTES, log a `replanned` LEDGER entry — flip back to `running`, and offer rotation so a cheaper session resumes the routine work. Never hand the fix over as a pasted prompt or chat instructions: the amendment travels through ROADMAP/NOTES/LEDGER like everything else, and the next `/spec-run` picks it up from disk.
+**Unblocking is `/spec-run` again — typically from a stronger session.** The executor is model-agnostic: run the loop on a cheap model for routine work; when a task defeats it, the escalation is the _same command_ in a stronger session, not a side-channel. That session's `blocked` gate enters unblock mode: read the `task-blocked`/`circuit-breaker` diagnosis and Current Acceptance Delta, then investigate. If it has a materially different path, clear the task's `⚠ blocked` marker, keep it unticked, flip back to `running`, sync INDEX, and execute it under the standing approval. If the old task is no longer the right approach, mark it `- [x] ~~...~~ — superseded by <replacement/reason>`, append only the decision-complete replacement work actually needed, record the decision and why in NOTES, log `replanned`, flip back to `running`, and sync INDEX. Then offer: continue here, or rotate so a cheaper session resumes. Never hand the fix over as a pasted prompt or chat instructions: the amendment travels through ROADMAP/NOTES/LEDGER like everything else, and the next `/spec-run` picks it up from disk.
 
 ## Session Rotation
 
 Long sessions degrade (context pressure, compaction, host lag). Rotation is the designed unit of work, not an emergency:
 
 - **Offer rotation** at every phase boundary; mid-phase whenever a compaction occurred or context feels degraded (finish the in-flight task first); and in any case after ~8-10 completed tasks inside a long phase — don't wait for degradation to show.
-- The offer: report progress (`n/m` tasks, current phase) and ask: _checkpoint and rotate now, or continue?_
+- The offer: report current phase, task inventory (`n/m`), and Current Acceptance Delta, then ask: _checkpoint and rotate now, or continue?_
 - **On yes**: append a `rotation-checkpoint` LEDGER entry (one-line state + exact next task), bump `updated:`, then run the `/checkpoint` flow — it syncs the specs INDEX, refreshes CONTEXT's spec pointer, and collects NOTES' `→ graduate:` flags — and tell the user: open a fresh session, orient with `/start`, and run `/spec-run <slug>`.
 - **On no**: continue the loop.
-- Do **not** write `.claude/HANDOFF.md` for spec work — SPEC + ROADMAP + LEDGER _are_ the baton, and the loop is amnesia-first by design.
+- Do **not** write `.claude/HANDOFF.md` for spec work — SPEC + ROADMAP + NOTES + LEDGER _are_ the baton, and the loop is amnesia-first by design.
 
 ## Pausing & Interrupting
 
@@ -195,14 +209,14 @@ Long sessions degrade (context pressure, compaction, host lag). Rotation is the 
 
 ## Completion — Final Gate
 
-When every roadmap box is ticked:
+When every roadmap task is completed or explicitly superseded and no unresolved blocked task remains:
 
-1. Re-run **every** Acceptance Scenario in SPEC.md fresh (not from memory of phase validations) and tick them; append a `final-gate` LEDGER entry with the evidence.
+1. Re-run **every** Acceptance Scenario in SPEC.md fresh (not from memory of phase validations) and tick only those that PASS. If any fail, follow the failure path below. Only after the full set passes, reset Current Acceptance Delta to `None` and append `final-gate` with evidence.
 2. Flip status → `awaiting-final-review`, sync INDEX, and report: how to demo (exact steps), scenario results, anything deferred.
 3. **STOP.** `awaiting-final-review` is a read-only lock (as `awaiting-review` in `task-management.md`).
-4. User confirms → `done`: flip `status: done`, append one line to `.claude/JOURNAL.md` (`YYYY-MM-DD | completed | spec <slug> — <one-line outcome>, see specs/done/YYYY-MM-DD-<slug>/SPEC.md`), and sweep `NOTES.md` before shelving — graduate remaining `→ graduate: knowledge/` facts (register in its INDEX), propose `/learn` for flagged behavioral lessons. Then move the entire folder from `.claude/specs/YYYY-MM-DD-<slug>/` to `.claude/specs/done/YYYY-MM-DD-<slug>/` and sync INDEX. User reports a problem → back to `running`: un-tick the affected tasks/scenarios, log the report verbatim in LEDGER, resume the loop.
+4. User confirms → `done`: flip `status: done`, append one line to `.claude/JOURNAL.md` (`YYYY-MM-DD | completed | spec <slug> — <one-line outcome>, see specs/done/YYYY-MM-DD-<slug>/SPEC.md`), and sweep `NOTES.md` before shelving — graduate remaining `→ graduate: knowledge/` facts (register in its INDEX), propose `/learn` for flagged behavioral lessons. Then move the entire folder from `.claude/specs/YYYY-MM-DD-<slug>/` to `.claude/specs/done/YYYY-MM-DD-<slug>/` and sync INDEX. If the user reports a problem, first compare it with the frozen SPEC and POC artifacts. A contradiction of approved intent → back to `running`: batch the reported defects under an affected scenario or a named final-gate check anchored to an exact SPEC/POC clause, un-tick any affected scenarios, reopen responsible work under the ROADMAP rule, append `validation-failed`, update Current Acceptance Delta, sync INDEX, and resume the convergence flow; after the batch, run one cumulative final gate. A request that changes intent, extends scope, or has no approved anchor → remain `awaiting-final-review`, surface the scope delta, and ask whether to amend the SPEC. On explicit yes, flip to `drafting`, sync INDEX, and return control to `/spec` for the amendment and renewed approval before implementation. Never append fix/replay task pairs.
 
-If any scenario fails at step 1, the mission is **not** complete: append failing tasks to the roadmap and keep looping. Never present a failing scenario as "done with caveats".
+If any scenario fails at step 1, the mission is **not** complete: append `validation-failed`, update Current Acceptance Delta, and reopen responsible work under the ROADMAP rule. Never add validation bookkeeping as a task. Keep looping under the convergence rules. Never present a failing scenario as "done with caveats".
 
 ## Status State Machine
 
@@ -211,9 +225,10 @@ drafting ──(POC + SPEC + ROADMAP written, presented)──▶ poc-review
 poc-review ──(user requests changes)──▶ drafting
 poc-review ──(user approves: standing "go")──▶ ready
 ready ──(/spec-run picks it up)──▶ running
-running ──(all boxes ticked + final gate PASS)──▶ awaiting-final-review
+running ──(all tasks completed/superseded; no blocker; final gate PASS)──▶ awaiting-final-review
 awaiting-final-review ──(user confirms)──▶ done
-awaiting-final-review ──(user reports a problem)──▶ running
+awaiting-final-review ──(user reports a problem within approved intent)──▶ running
+awaiting-final-review ──(user approves a scope amendment)──▶ drafting
 running ──(blocker; nothing independent left)──▶ blocked ──(cleared)──▶ running
 {any active} ──(user cancels)──▶ cancelled
 ```
@@ -242,7 +257,7 @@ SPEC frontmatter is the source of truth; INDEX is a cache. Active lists status �
 
 - **Tasks**: a spec replaces `/plan` for its scope. Never mirror roadmap tasks into `.claude/tasks/`; never run both layers over the same work.
 - **CONTEXT.md**: may carry one pointer line (`Running spec \`<slug>\` (see .claude/specs/YYYY-MM-DD-<slug>/SPEC.md)`); never absorbs spec content.
-- **`/start`**: surfaces Active specs from INDEX and offers `/spec-run` for `ready`/`running` ones.
+- **`/start`**: surfaces Active specs from INDEX and directs the user to `/spec`, `/spec-run`, or final verification according to status.
 - **`/checkpoint`**: syncs INDEX from SPEC frontmatter, same as it syncs `tasks/index.md`.
 - **knowledge/**: read at `/spec` planning time (INDEX first; relevant entries feed SPEC/ROADMAP/NOTES). Mid-run, a discovery that is true project-wide — beyond this mission — is recorded in NOTES **flagged `→ graduate: knowledge/`**. The executor never writes `knowledge/` directly; flags are collected at the rotation `/checkpoint` and the mission-close sweep.
 - **rules/**: the executor obeys them but never edits them mid-loop. A recurring behavioral lesson (the same correction needed twice) gets a NOTES flag `→ graduate: /learn`, proposed at rotation or mission close — rule changes stay user-gated.
@@ -256,5 +271,9 @@ SPEC frontmatter is the source of truth; INDEX is a cache. Active lists status �
 - Rewriting or deleting LEDGER history; rewriting phase goals instead of appending/striking tasks.
 - Burying durable knowledge in the LEDGER tail instead of NOTES.md — the ledger scrolls away; NOTES is what every iteration re-reads.
 - Writing `HANDOFF.md` for spec work, or mirroring spec state into `tasks/index.md`.
-- Continuing past a tripped circuit breaker, or retrying an identical failing approach a fourth time.
+- Counting appended tasks or fresh ticks as progress while the same acceptance failure remains.
+- Retrying a failed acceptance without a materially different hypothesis, implementation, or verification.
+- Reusing a green check as sole proof after stronger evidence contradicted it.
+- Appending fix/replay task pairs instead of keeping verification with the responsible implementation task.
+- Continuing past a tripped circuit breaker or selecting a task marked `⚠ blocked`.
 - Marking the mission done (or presenting the demo) while any Acceptance Scenario is unproven.

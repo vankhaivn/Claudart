@@ -29,16 +29,16 @@ curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh 
 
 ## What it solves
 
-| Pain                                          | What CLAUDART does about it                                                                        |
-| --------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| Every session starts blind                    | `/start` reads the current state, open tasks, and recent commits before touching anything          |
-| Plans die when the session closes             | `/plan` writes the plan to a task file that any later session can pick up where you left off       |
-| A mission is too big for one session or plan  | `/spec` freezes the intent in a POC + roadmap you approve once; `/spec-run` loops it to done       |
-| A productive session hits the context ceiling | `/handoff` saves the session's reasoning — hypothesis, evidence, dead ends — for the next `/start` |
-| The same decisions get re-discovered weekly   | `/learn` turns recurring corrections into path-scoped rules                                        |
-| Durable facts have nowhere to live            | `knowledge/` holds them; an index is surfaced each session, details are read on demand             |
-| `CLAUDE.md` bloats into a token sink          | `/refactor-memory` trims it back to an index and files the content where it belongs                |
-| Memory rots silently                          | `/doctor` is a read-only health check that flags drift, dead links, and misfiled content           |
+| Pain                                          | What CLAUDART does about it                                                                          |
+| --------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Every session starts blind                    | `/start` reads the current state, open tasks, and recent commits before touching anything            |
+| Plans die when the session closes             | `/plan` writes the plan to a task file that any later session can pick up where you left off         |
+| A mission is too big for one session or plan  | `/spec` freezes the intent in a POC + roadmap you approve once; `/spec-run` loops it to final review |
+| A productive session hits the context ceiling | `/handoff` saves the session's reasoning — hypothesis, evidence, dead ends — for the next `/start`   |
+| The same decisions get re-discovered weekly   | `/learn` turns recurring corrections into path-scoped rules                                          |
+| Durable facts have nowhere to live            | `knowledge/` holds them; an index is surfaced each session, details are read on demand               |
+| `CLAUDE.md` bloats into a token sink          | `/refactor-memory` trims it back to an index and files the content where it belongs                  |
+| Memory rots silently                          | `/doctor` is a read-only health check that flags drift, dead links, and misfiled content             |
 
 Two review agents ship alongside the commands — `clean-code-reviewer` and `security-auditor` — plus a delegation protocol that keeps parallel subagent work bounded instead of letting it sprawl.
 
@@ -66,7 +66,7 @@ in context       (audit only)           a matching path        detail on demand
 /start                          # orient the session
 /plan add JWT middleware        # write a task file; the agent waits for your approval before coding
 /spec build the demo game       # mission too big for one plan? interview → POC → roadmap, approved once
-/spec-run demo-game             # fresh sessions execute the approved mission autonomously until done
+/spec-run demo-game             # fresh sessions execute the approved mission autonomously until final review
 /handoff                        # context nearly full? save your reasoning, resume fresh with /start
 /checkpoint                     # rebuild CONTEXT.md at session end
 /learn                          # promote recurring decisions into rules

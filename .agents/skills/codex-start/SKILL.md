@@ -14,7 +14,7 @@ Start a Codex session with a lightweight CLAUDART orientation. This skill is rea
 3. Read `.codex/tasks/index.md` if it exists. If missing, treat as "no active tasks". If present, extract entries under `## Active`.
 4. For each Active entry, verify the underlying file exists in `.codex/tasks/` (the index is a cache; the file is truth). Read its frontmatter (`status`, `updated`, `slug`) only — do not full-read task bodies in `$codex-start`.
 5. Read `.codex/knowledge/INDEX.md` if it exists — the INDEX only. Count the entries under `## Knowledge`. Do NOT read individual knowledge detail files, and do NOT validate freshness or dead links (that is `$codex-doctor`'s job). The index makes durable project facts discoverable; read a detail file only if a later task needs it.
-6. Read `.codex/specs/INDEX.md` if it exists — the INDEX only. Extract entries under `## Active`. Do NOT read SPEC/ROADMAP/LEDGER bodies in `$codex-start`.
+6. Read `.codex/specs/INDEX.md` if it exists — the INDEX only. Extract entries under `## Active`. Do NOT read SPEC/ROADMAP/NOTES/LEDGER bodies in `$codex-start`.
 7. Run `git log -3 --oneline`. If the directory is not a git repo or has fewer than three commits, report what is available.
 8. Extract only these sections from `.codex/CONTEXT.md` when present:
    - `## In Progress`
@@ -58,16 +58,18 @@ Never act on baton content without verifying it against the current code first �
 
 ### Case S: `.codex/specs/INDEX.md` lists an Active spec (mission in flight)
 
-For the most relevant spec (prefer `poc-review`/`awaiting-final-review`, then `running`, then `ready`, then `blocked`):
+For the most relevant spec (prefer `drafting`/`poc-review`/`awaiting-final-review`, then `running`, then `ready`, then `blocked`):
 
+- **`drafting`**: say:
+  > "Spec `<slug>` is being drafted or amended. Run `$codex-spec` to continue in its existing dated folder."
 - **`poc-review`**: say:
   > "Spec `<slug>` is waiting for your review — open its dated folder from `.codex/specs/INDEX.md` (POC in `artifacts/`, then SPEC.md and ROADMAP.md). Approving is a standing approval: `$codex-spec-run` will then execute the whole roadmap without asking again until the final review."
 - **`awaiting-final-review`**: say:
-  > "Spec `<slug>` finished its roadmap and is waiting for your demo verification — the final LEDGER.md entry has the demo steps. Confirm to close, or tell me what failed."
+  > "Spec `<slug>` passed its final gate and is waiting for your demo verification. Run `$codex-spec-run <slug>` to surface the demo steps and final-gate evidence, then confirm to close or report what failed."
 - **`ready` / `running`**: say:
   > "Spec `<slug>` is <status> (updated <date>). Run `$codex-spec-run <slug>` (or the dated folder id if needed) to continue the loop — a fresh session like this one is the designed unit of work."
 - **`blocked`**: say:
-  > "Spec `<slug>` is blocked — the last LEDGER.md entry records why. Has the blocker cleared?"
+  > "Spec `<slug>` is blocked — the last LEDGER.md entry records why and what unlocks it. Run `$codex-spec-run <slug>` to investigate with a materially different path, or tell me if the external blocker cleared."
 
 Do NOT auto-start the loop; `$codex-spec-run` is the user's call.
 

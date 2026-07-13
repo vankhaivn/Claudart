@@ -4,7 +4,7 @@ description: Create a dated mission-scale spec workspace in .claude/specs/ — i
 
 You are the expensive planning session. Everything you learn from the user in this conversation dies with it — the spec folder you produce is the only thing the executor will ever see. Spend the tokens here so `/spec-run` doesn't have to.
 
-Before doing anything, read `.claude/rules/spec-workflow.md`. That rule defines the folder schema, the SPEC/ROADMAP/LEDGER formats, the decision-complete bar, the status state machine, and the standing-approval semantics. This command does not duplicate that contract; it orchestrates drafting.
+Before doing anything, read `.claude/rules/spec-workflow.md`. That rule defines the folder schema, the SPEC/ROADMAP/NOTES/LEDGER formats, the decision-complete bar, the status state machine, and the standing-approval semantics. This command does not duplicate that contract; it orchestrates drafting.
 
 ## Inputs
 
@@ -15,11 +15,11 @@ Before doing anything, read `.claude/rules/spec-workflow.md`. That rule defines 
 
 ### Step 1 — Read project context
 
-In parallel: `.claude/CONTEXT.md`, `.claude/specs/INDEX.md` (if an active spec already covers this mission, surface it and ask whether to continue it instead), `.claude/knowledge/INDEX.md`, `docs/project/` if present, and `git log -5 --oneline`.
+In parallel: `.claude/CONTEXT.md`, `.claude/specs/INDEX.md` (if an active spec already covers this mission, surface it and ask whether to continue it instead), `.claude/knowledge/INDEX.md`, `docs/project/` if present, and `git log -5 --oneline`. If the user continues an existing `drafting` spec — including an approved final-review scope amendment returned by `/spec-run` — reuse its dated folder; never create a duplicate mission folder.
 
 Ensure `.claude/specs/done/` exists. Before deciding whether an existing spec is active, check its `SPEC.md` frontmatter status; a top-level spec folder with `status: done` or `status: cancelled` is stale archive state, not an active collision, and should be moved to `.claude/specs/done/` when syncing INDEX.
 
-Create `.claude/specs/YYYY-MM-DD-<slug>/` using today's date and the slug rules from the rule file, write a minimal `SPEC.md` with `slug: <slug>` and `status: drafting`, and register it in `INDEX.md` with the dated folder link. From here on, the folder is where everything lands — not chat.
+For a new mission, create `.claude/specs/YYYY-MM-DD-<slug>/` using today's date and the slug rules from the rule file, write a minimal `SPEC.md` with `slug: <slug>` and `status: drafting`, and register it in `INDEX.md` with the dated folder link. For a resumed draft, keep its existing dated id and history. From here on, the folder is where everything lands — not chat.
 
 **Drafting lock**: while `status` is `drafting` or `poc-review`, write nothing outside the spec folder and `INDEX.md`. No implementation code, no scaffolding "to save time later".
 
@@ -48,7 +48,7 @@ Explore the codebase read-only first (existing patterns, constraints, files each
 
 Then write phases per the rule file. Hold the decision-complete bar: exact paths, chosen approaches with the _why_, per-task `verify:`, phase validation commands, parallelizable waves marked for fan-out. Phase 1 should reach something demoable early — the mission must produce visible progress every phase, not a big-bang integration at the end.
 
-Seed `LEDGER.md` with its header and no entries, and `NOTES.md` with what exploration surfaced: how to run, build, and verify the project (dev server, test commands), key files and helpers, non-obvious constraints, pitfalls, planning-time decisions with their rejected alternatives. NOTES is the executor's Memory Hints — a roadmap without it forces the executor to re-discover everything you just learned.
+For a new mission, seed `LEDGER.md` with its header and no entries, and `NOTES.md` with what exploration surfaced: how to run, build, and verify the project (dev server, test commands), key files and helpers, non-obvious constraints, pitfalls, planning-time decisions with their rejected alternatives. Include `## Current Acceptance Delta` with `- None.`; it stays compact during execution and is never a second roadmap. For a resumed scope amendment, preserve LEDGER history and existing NOTES, then amend ROADMAP using its disposition rules rather than erasing completed or superseded work. NOTES is the executor's Memory Hints — a roadmap without it forces the executor to re-discover everything you just learned.
 
 ### Step 6 — Fresh-eyes check, then present for review
 
