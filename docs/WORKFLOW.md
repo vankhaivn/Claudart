@@ -196,7 +196,7 @@ What survives afterwards goes in the task document: the delegation strategy, the
 | `/learn`             | `$codex-learn`             | Retrospective — promotes recurring lessons into rules/guidelines with loophole-closing language                                                                                                            |
 | `/doctor`            | `$codex-doctor`            | Read-only health check: structure, frontmatter, token hygiene, wiring, task & knowledge hygiene                                                                                                            |
 
-Both layers also ship two review agents. `clean-code-reviewer` enforces scope and Clean Code discipline. `security-auditor` runs an OWASP-mapped audit — read-only on your code, writing its findings to a `security-audit-<date>.md` report at the project root and printing only the summary to chat. Claude names agents in kebab-case Markdown; Codex uses snake_case TOML `name` values.
+Both layers also ship three review agents, each **invoked by name on explicit request only — never automatically, not even inside a task or spec loop**. `clean-code-reviewer` enforces scope and Clean Code discipline. `security-auditor` runs an OWASP-mapped audit — read-only on your code, writing its findings to a `security-audit-<date>.md` report at the project root and printing only the summary to chat. `ui-visual-critic` is an adversarial "human-eye" design review of rendered UI or visuals (vision-heavy and quota-expensive, which is why it stays strictly on-demand). Claude names agents in kebab-case Markdown; Codex uses snake_case TOML `name` values.
 
 The shipped Codex config (`.codex/config.toml`) keeps `[agents] max_depth = 1` and `max_threads = 6` — Codex's default — so a downstream project gets useful parallelism without a small request accidentally fanning out into recursive subagent trees.
 
@@ -214,7 +214,8 @@ your-project/
 │   ├── JOURNAL.md                  # Append-only audit log — never auto-loaded
 │   ├── agents/                     # Codex TOML subagents
 │   │   ├── clean-code-reviewer.toml
-│   │   └── security-auditor.toml
+│   │   ├── security-auditor.toml
+│   │   └── ui-visual-critic.toml
 │   ├── config.toml                 # Codex project defaults
 │   ├── guidelines/                 # Codex-native semantic guidance
 │   │   ├── ai-behavior.md
@@ -235,7 +236,8 @@ your-project/
     ├── JOURNAL.md                  # Append-only audit log — never auto-loaded
     ├── agents/
     │   ├── clean-code-reviewer.md
-    │   └── security-auditor.md
+    │   ├── security-auditor.md
+    │   └── ui-visual-critic.md
     ├── commands/                   # Slash command protocols
     ├── knowledge/                  # Durable descriptive facts + external-doc pointers
     │   └── INDEX.md                # Map surfaced by /start; topic files read on demand

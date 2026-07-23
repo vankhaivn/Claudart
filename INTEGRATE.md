@@ -26,7 +26,7 @@ This file is a **protocol, not a script** — follow it top to bottom. It exists
 **Claude layer** (`.claude/`):
 
 - `commands/` — slash commands: `start`, `plan`, `spec`, `spec-run`, `checkpoint`, `handoff`, `learn`, `refactor-memory`, `doctor`, `project-discovery`
-- `agents/` — review agents: `clean-code-reviewer`, `security-auditor` (read-only on user code)
+- `agents/` — review agents: `clean-code-reviewer`, `security-auditor`, `ui-visual-critic` (read-only on user code; invoked on explicit request only, never automatically)
 - `rules/` — **prescriptive**, path-scoped behavior (`ai-behavior`, `task-management`, `spec-workflow`)
 - `knowledge/INDEX.md` — **descriptive** durable project facts (a map; detail files read on demand)
 - `CONTEXT.md` (state now), `JOURNAL.md` (history, append-only), `CLAUDE.md` (memory index)

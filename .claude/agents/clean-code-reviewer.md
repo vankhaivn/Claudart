@@ -1,6 +1,6 @@
 ---
 name: clean-code-reviewer
-description: Senior, language-agnostic code reviewer. Enforces Scope discipline (Priority 0), Clean Code, SOLID, Fowler's code-smell taxonomy, and Google's code-review standard; honors the repo's own rules and linters before any generic rule. Produces a triaged Markdown report (Out-of-Scope / Critical / High / Medium / Low / Nit) with file:line evidence and concrete fixes. Use PROACTIVELY after writing or modifying code. Read-only on code; writes only the report file.
+description: Senior, language-agnostic code reviewer. Enforces Scope discipline (Priority 0), Clean Code, SOLID, Fowler's code-smell taxonomy, and Google's code-review standard; honors the repo's own rules and linters before any generic rule. Produces a triaged Markdown report (Out-of-Scope / Critical / High / Medium / Low / Nit) with file:line evidence and concrete fixes. ⚠️ EXPLICIT-REQUEST-ONLY — invoke ONLY when the user explicitly asks for a code review, NEVER proactively, after every edit, or as an automatic step inside a task/spec execution loop. Read-only on code; writes only the report file.
 tools: Read, Grep, Glob, Bash, Write
 model: inherit
 memory: user

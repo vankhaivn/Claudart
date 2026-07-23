@@ -40,7 +40,7 @@ curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh 
 | `CLAUDE.md` phình thành bồn đốt token        | `/refactor-memory` gọt nó lại thành một index và đưa nội dung về đúng nơi                               |
 | Memory âm thầm mục ruỗng                     | `/doctor` là health check read-only để flag drift, link chết và nội dung đặt sai tầng                   |
 
-Hai review agent được ship kèm các command - `clean-code-reviewer` và `security-auditor` - cùng một delegation protocol để giữ việc subagent song song có biên rõ ràng thay vì lan rộng mất kiểm soát.
+Ba review agent được ship kèm các command - `clean-code-reviewer`, `security-auditor` và `ui-visual-critic`, mỗi cái chỉ chạy khi được yêu cầu rõ ràng (không bao giờ tự động, kể cả bên trong một task hay spec loop) - cùng một delegation protocol để giữ việc subagent song song có biên rõ ràng thay vì lan rộng mất kiểm soát.
 
 ## Mô hình memory
 

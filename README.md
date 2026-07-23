@@ -40,7 +40,7 @@ curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh 
 | `CLAUDE.md` bloats into a token sink          | `/refactor-memory` trims it back to an index and files the content where it belongs                  |
 | Memory rots silently                          | `/doctor` is a read-only health check that flags drift, dead links, and misfiled content             |
 
-Two review agents ship alongside the commands — `clean-code-reviewer` and `security-auditor` — plus a delegation protocol that keeps parallel subagent work bounded instead of letting it sprawl.
+Three review agents ship alongside the commands — `clean-code-reviewer`, `security-auditor`, and `ui-visual-critic`, each invoked on explicit request only (never automatically, not even inside a task or spec loop) — plus a delegation protocol that keeps parallel subagent work bounded instead of letting it sprawl.
 
 ## The memory model
 

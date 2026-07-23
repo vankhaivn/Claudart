@@ -196,7 +196,7 @@ Phần sống sót sau đó đi vào task document: delegation strategy, role, o
 | `/learn`             | `$codex-learn`             | Retrospective - thăng cấp lesson lặp lại thành rules/guidelines với ngôn ngữ đóng loophole                                                                                                        |
 | `/doctor`            | `$codex-doctor`            | Health check read-only: cấu trúc, frontmatter, token hygiene, wiring, task hygiene và knowledge hygiene                                                                                           |
 
-Cả hai layer cũng ship hai review agent. `clean-code-reviewer` enforce scope và kỷ luật Clean Code. `security-auditor` chạy audit map theo OWASP - read-only trên code của bạn, ghi findings vào report `security-audit-<date>.md` ở project root và chỉ in summary ra chat. Claude đặt tên agent bằng Markdown kebab-case; Codex dùng giá trị TOML `name` dạng snake_case.
+Cả hai layer cũng ship ba review agent, mỗi cái **chỉ được gọi đích danh theo yêu cầu rõ ràng - không bao giờ tự động, kể cả bên trong một task hay spec loop**. `clean-code-reviewer` enforce scope và kỷ luật Clean Code. `security-auditor` chạy audit map theo OWASP - read-only trên code của bạn, ghi findings vào report `security-audit-<date>.md` ở project root và chỉ in summary ra chat. `ui-visual-critic` là bản review thiết kế kiểu "con mắt người" đối kháng cho UI hoặc visual đã render (nặng về thị giác và tốn quota, nên nó luôn chỉ chạy on-demand). Claude đặt tên agent bằng Markdown kebab-case; Codex dùng giá trị TOML `name` dạng snake_case.
 
 Config Codex được ship kèm (`.codex/config.toml`) giữ `[agents] max_depth = 1` và `max_threads = 6` - mặc định của Codex - để downstream project có parallelism hữu ích mà một request nhỏ không vô tình fan out thành cây subagent đệ quy.
 
@@ -214,7 +214,8 @@ your-project/
 │   ├── JOURNAL.md                  # Append-only audit log - không auto-load
 │   ├── agents/                     # Codex TOML subagents
 │   │   ├── clean-code-reviewer.toml
-│   │   └── security-auditor.toml
+│   │   ├── security-auditor.toml
+│   │   └── ui-visual-critic.toml
 │   ├── config.toml                 # Codex project defaults
 │   ├── guidelines/                 # Codex-native semantic guidance
 │   │   ├── ai-behavior.md
@@ -235,7 +236,8 @@ your-project/
     ├── JOURNAL.md                  # Append-only audit log - không auto-load
     ├── agents/
     │   ├── clean-code-reviewer.md
-    │   └── security-auditor.md
+    │   ├── security-auditor.md
+    │   └── ui-visual-critic.md
     ├── commands/                   # Slash command protocols
     ├── knowledge/                  # Fact mô tả bền + external-doc pointers
     │   └── INDEX.md                # Map hiển thị bởi /start; topic files đọc khi cần
