@@ -291,7 +291,7 @@ Before the final summary, run or perform:
 - Confirm `.codex/knowledge/INDEX.md` exists, lists every topic file, and is referenced by a plain pointer in `AGENTS.md`.
 - Confirm every knowledge entry you created this run (bootstrap or migration) carries a `sources:` anchor; drop or flag any that does not.
 - Confirm `.codex/guidelines/agent-delegation.md` is referenced when `.codex/agents/` exists.
-- Confirm `.codex/config.toml` keeps `[agents] max_depth = 1` unless recursive delegation is explicitly documented.
+- Confirm `.codex/config.toml` keeps the subagent concurrency cap (`[agents] max_concurrent_threads_per_session`) at 6 or below unless a higher fan-out is explicitly documented.
 - Confirm semantic guideline findings were classified as accurate, guideline-stale, source-debt, open-work, or needs-user-decision.
 
 Do not run `git commit`, `git push`, `git merge`, `git rebase`, or similar history/remote-writing commands yourself.

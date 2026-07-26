@@ -7,14 +7,16 @@ Source of truth: <https://github.com/vankhaivn/Claudart> (branch `main`).
 This file is a **protocol, not a script** — follow it top to bottom. It exists because the one-line `install.sh` does a _fresh copy_ and will clobber an existing setup. You are smarter than that: you can read the repo, compare it to this project, and merge surgically.
 
 > **Golden rule — read freely, write only what is approved.** NEVER overwrite or delete anything the user authored or customized. When CLAUDART and the project disagree, show a diff and ASK. Default to preserving the user's work, even when taking CLAUDART's version "seems obviously better."
+>
+> **"Customized" means content the user wrote — not any local file that happens to differ from upstream.** A CLAUDART-shipped file whose local copy merely lags the current template is **stale, not custom** — upgrading it is the point of this protocol. When the user says "don't touch what I customized," that protects their authored content, and is never a reason to skip upgrading stale template files. Apply the stale-vs-custom test in Scenario C before calling anything custom.
 
 ---
 
 ## Step 0 — Fetch the source and understand the intent
 
-1. Get a clean copy of CLAUDART so you can diff against it precisely. Prefer a shallow clone:
+1. Get a clean copy of CLAUDART so you can diff against it precisely. Clone with full history — the repo is small, and you will need `git log` to tell stale template copies apart from real user customizations:
    ```bash
-   rm -rf /tmp/claudart-src && git clone --depth 1 https://github.com/vankhaivn/Claudart /tmp/claudart-src
+   rm -rf /tmp/claudart-src && git clone https://github.com/vankhaivn/Claudart /tmp/claudart-src
    ```
    If you cannot clone (no git, or no network for clone), fetch files on demand from
    `https://raw.githubusercontent.com/vankhaivn/Claudart/main/<path>` instead.
@@ -74,14 +76,16 @@ Present the full add / merge / skip plan and ask before writing.
 
 1. Diff the project's CLAUDART files against the clone and bucket every difference:
    - **New upstream** (absent locally, e.g. `.claude/knowledge/`) → propose adding, with a one-line "what it's for."
-   - **Updated upstream, untouched locally** (local matches an older CLAUDART version) → propose replacing with the new version.
-   - **Diverged** (the user edited this file locally) → **3-way reconcile**: show the upstream change beside their version and ASK how to merge. Never discard their edits.
-2. For _why_ things changed, skim recent commit messages in the clone: `git -C /tmp/claudart-src log --oneline -20`.
-3. Produce a **"What's new since your version"** summary first, then apply only what the user approves.
+   - **Stale local** (the local copy is an older CLAUDART version with no user-authored content) → propose replacing with upstream **verbatim**. This is the default recommendation for the core workflow files — rules/guidelines (`task-management`, `agent-delegation`, `spec-workflow`, `ai-behavior`) and command/skill protocols (`plan`, `spec`, `spec-run`, `checkpoint`, `start`, `doctor`, …): they are designed to be adopted unmodified, and a difference in them is almost always staleness, not customization.
+   - **Genuinely diverged** (the local file contains user-authored content that never shipped in any CLAUDART version — e.g. a section "Additional rules for project X") → take upstream as the **base** and **re-apply the user's additions on top**: show exactly which local sections you would carry over, and ASK before writing. Never discard their edits — and never let their edits become a reason to skip the upstream upgrade of the rest of the file.
+2. **Stale-vs-custom test — never classify by "differs from upstream" alone.** A difference is _custom_ only if you can point at the specific local lines the user authored. Use the clone's history to check: if the local content matches (or nearly matches) some past upstream version (`git -C /tmp/claudart-src log --oneline --all -- <path>`, or `git -C /tmp/claudart-src log -S"<distinctive local phrase>" -- <path>` to see whether a phrase ever existed upstream), the file is stale — take upstream. Content that names this project, its domain, or rules found in no upstream version is custom — preserve it per the diverged bucket above. When in doubt, show the specific lines and ask about **those lines**, not the whole file.
+3. For _why_ things changed, skim recent commit messages in the clone: `git -C /tmp/claudart-src log --oneline -20`.
+4. Produce a **"What's new since your version"** summary first, then apply only what the user approves.
 
 ## Step 3 — Conflict protocol (every scenario)
 
-- **Never** overwrite a file the user created or modified without showing a diff and getting an explicit "yes."
+- **Never** overwrite a file the user created or modified without showing a diff and getting an explicit "yes." (A stale template copy is not "modified by the user" — see the stale-vs-custom test in Scenario C.)
+- For CLAUDART-shipped core files, prefer **verbatim upstream + relocated customizations**: project-specific behavior belongs in its own rule/guideline file, `knowledge/`, or the project's `CLAUDE.md`/`AGENTS.md` — not inline edits to core protocol files. When you find genuinely custom lines inside a core file, offer to move them to the right home so the core file can track upstream cleanly.
 - Index / memory files (`CLAUDE.md`, `AGENTS.md`, `knowledge/INDEX.md`, `tasks/index.md`, `specs/INDEX.md`) are **spliced**, never wholesale-replaced — preserve the user's content and ordering.
 - `CONTEXT.md` and `JOURNAL.md` are live user state — **never** import them from the template; only create them empty (from the template header) if missing. `HANDOFF.md` (when present) is a live one-shot session baton — never import, overwrite, or create it. Spec mission folders (`specs/<slug>/`) are likewise live state — only the `specs/INDEX.md` registry ships from the template.
 - Do not touch `.env`, secrets, or anything matched by `.gitignore`.

@@ -170,7 +170,7 @@ Contract chuẩn - schema folder, state machine trạng thái, circuit breaker, 
 
 ## Subagent delegation
 
-Cả hai layer đều có thể fan work out cho subagent - khảo sát song song, triển khai có giới hạn, review, audit. **Ai quyết định _có nên_ delegate hay không khác nhau giữa hai runtime, một cách có chủ đích.** Agent tool của Claude tự quyết khi nào việc parallelize được, nên layer Claude tin harness và không gate delegation: "be thorough" là cơ sở hợp lý để fan out. Codex không bao giờ tự delegate (chỉ spawn khi có yêu cầu nêu tên rõ ràng), nên layer Codex giữ luật chặt hơn - parallelism đã được cho phép, không phải mặc định: "be thorough" không spawn agent; "use subagents" thì có.
+Cả hai layer đều có thể fan work out cho subagent - khảo sát song song, triển khai có giới hạn, review, audit - và **cả hai đều tin harness về chuyện _có nên_ delegate hay không.** Agent tool của Claude tự quyết khi nào việc parallelize được; Codex hiện tại spawn agent từ yêu cầu trực tiếp hoặc từ project/skill instruction phù hợp, và tự delegate chủ động ở mức intelligence Ultra. "Be thorough" là cơ sở hợp lý để fan out trên cả hai runtime. Khác biệt còn lại nằm ở mechanics: parent của Claude có thể tiếp tục các lane thật sự độc lập trong khi agent chạy, còn mô hình được document của Codex là spawn → chờ → consolidate, nên protocol của nó mặc định chờ kết quả đã delegate.
 
 Mỗi runtime có protocol viết theo mechanics riêng (`.claude/rules/agent-delegation.md` cho Agent tool của Claude, `.codex/guidelines/agent-delegation.md` cho mô hình explorer/worker của Codex). Một khi delegation _đang_ diễn ra, chúng chia sẻ một xương sống:
 
@@ -198,7 +198,7 @@ Phần sống sót sau đó đi vào task document: delegation strategy, role, o
 
 Cả hai layer cũng ship ba review agent, mỗi cái **chỉ được gọi đích danh theo yêu cầu rõ ràng - không bao giờ tự động, kể cả bên trong một task hay spec loop**. `clean-code-reviewer` enforce scope và kỷ luật Clean Code. `security-auditor` chạy audit map theo OWASP - read-only trên code của bạn, ghi findings vào report `security-audit-<date>.md` ở project root và chỉ in summary ra chat. `ui-visual-critic` là bản review thiết kế kiểu "con mắt người" đối kháng cho UI hoặc visual đã render (nặng về thị giác và tốn quota, nên nó luôn chỉ chạy on-demand). Claude đặt tên agent bằng Markdown kebab-case; Codex dùng giá trị TOML `name` dạng snake_case.
 
-Config Codex được ship kèm (`.codex/config.toml`) giữ `[agents] max_depth = 1` và `max_threads = 6` - mặc định của Codex - để downstream project có parallelism hữu ích mà một request nhỏ không vô tình fan out thành cây subagent đệ quy.
+Config Codex được ship kèm (`.codex/config.toml`) giới hạn `[agents] max_concurrent_threads_per_session` ở 6 để downstream project có parallelism hữu ích mà một request nhỏ không vô tình fan out thành cây subagent tốn kém. Delegation giữ ở một cấp theo protocol trừ khi user yêu cầu đệ quy rõ ràng.
 
 ## Layout thư mục
 

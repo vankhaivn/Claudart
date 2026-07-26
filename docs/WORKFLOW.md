@@ -170,7 +170,7 @@ The canonical contract — folder schema, status state machine, circuit breakers
 
 ## Subagent delegation
 
-Both layers can fan work out to subagents — parallel exploration, bounded implementation, review, audits. **Who decides _whether_ to delegate differs by runtime, on purpose.** Claude's Agent tool decides for itself when work parallelizes, so the Claude layer trusts the harness and does not gate delegation: "be thorough" is fair grounds to fan out. Codex never delegates on its own (it spawns only from an explicit named request), so the Codex layer keeps the stricter rule — authorized parallelism, never a default: "be thorough" doesn't spawn agents; "use subagents" does.
+Both layers can fan work out to subagents — parallel exploration, bounded implementation, review, audits — and **both trust their harness on _whether_ to delegate.** Claude's Agent tool decides for itself when work parallelizes; current Codex spawns agents from a direct request or an applicable project/skill instruction, and delegates proactively at the Ultra intelligence level. "Be thorough" is fair grounds to fan out on either runtime. What still differs is the mechanics: Claude's parent may keep working on genuinely independent lanes while agents run, while Codex's documented model is spawn → wait → consolidate, so its protocol defaults to waiting on delegated results.
 
 Each runtime gets a protocol written for its own mechanics (`.claude/rules/agent-delegation.md` for Claude's Agent tool, `.codex/guidelines/agent-delegation.md` for Codex's explorer/worker model). Once delegation _is_ happening, they share one spine:
 
@@ -198,7 +198,7 @@ What survives afterwards goes in the task document: the delegation strategy, the
 
 Both layers also ship three review agents, each **invoked by name on explicit request only — never automatically, not even inside a task or spec loop**. `clean-code-reviewer` enforces scope and Clean Code discipline. `security-auditor` runs an OWASP-mapped audit — read-only on your code, writing its findings to a `security-audit-<date>.md` report at the project root and printing only the summary to chat. `ui-visual-critic` is an adversarial "human-eye" design review of rendered UI or visuals (vision-heavy and quota-expensive, which is why it stays strictly on-demand). Claude names agents in kebab-case Markdown; Codex uses snake_case TOML `name` values.
 
-The shipped Codex config (`.codex/config.toml`) keeps `[agents] max_depth = 1` and `max_threads = 6` — Codex's default — so a downstream project gets useful parallelism without a small request accidentally fanning out into recursive subagent trees.
+The shipped Codex config (`.codex/config.toml`) caps `[agents] max_concurrent_threads_per_session` at 6 so a downstream project gets useful parallelism without a small request accidentally fanning out into an expensive subagent tree. Delegation stays one level deep by protocol unless the user explicitly asks for recursion.
 
 ## Directory layout
 

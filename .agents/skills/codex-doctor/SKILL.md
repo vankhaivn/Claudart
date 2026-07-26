@@ -78,9 +78,8 @@ For every guideline file in `.codex/guidelines/*.md`:
 
 - Confirm `.codex/guidelines/agent-delegation.md` exists.
 - Confirm the active memory index references `.codex/guidelines/agent-delegation.md`.
-- Confirm `.codex/config.toml` has `[agents] max_depth = 1`. If higher, flag as Medium unless the repo explicitly documents recursive delegation.
-- Confirm `.codex/config.toml` has `[agents] max_threads` set to a positive integer. Flag values above 6 as Medium unless documented, because broad fan-out can create token cost and merge-conflict risk.
-- Confirm delegation guidance says subagents require explicit user authorization. If missing, flag as High because Codex may over-delegate on vague prompts.
+- Confirm `.codex/config.toml` caps subagent concurrency: `[agents] max_concurrent_threads_per_session` set to a positive integer. Flag values above 6 as Medium unless documented, because broad fan-out can create token cost and merge-conflict risk.
+- Confirm delegation guidance covers the "how" of delegation: decomposition before fan-out, self-contained worker prompts, no shadow-running a delegated question, and one-level delegation depth unless the user asks for recursion. If missing, flag as High because delegated work may be duplicated or unbounded.
 
 ### 5c. Knowledge Base Wiring (`.codex/knowledge/`)
 
