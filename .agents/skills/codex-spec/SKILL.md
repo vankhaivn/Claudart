@@ -45,19 +45,19 @@ A POC exists so the user can _judge intent_ — it is a reference the executor w
 
 ### Step 4 — Finalize SPEC.md
 
-The skeleton is already half-full from Steps 2-3; finish it. The hard part is **Acceptance Scenarios**: each one a literal action plus a binary observable, executable by someone who never saw this conversation. Push every rejected option and deferred feature into **Must-NOT-Have** — that section is what stops a cheaper executor from gold-plating or wandering.
+The skeleton is already half-full from Steps 2-3; finish it. The hard part is **Acceptance Scenarios**: each one a literal action plus a binary observable, executable by someone who never saw this conversation. Keep scenarios non-redundant. When one composite command genuinely exercises several scenario actions/observables with failure propagation, name that coverage instead of planning to replay the same leaf checks mechanically; keep a direct run where the literal user-facing entrypoint itself is part of acceptance. Push every rejected option and deferred feature into **Must-NOT-Have** — that section is what stops a cheaper executor from gold-plating or wandering.
 
 ### Step 5 — Write ROADMAP.md (decision-complete)
 
 Explore the codebase read-only first (existing patterns, constraints, files each phase will touch) — de-risk decisions, don't pre-solve implementation. Use read-only `explorer` subagents for a broad survey when the active harness policy and `.codex/guidelines/agent-delegation.md` make that decomposition useful.
 
-Then write phases per the guideline file. Hold the decision-complete bar: exact paths, chosen approaches with the _why_, per-task `verify:`, phase validation commands, parallelizable waves marked for fan-out. Mark a wave only where the prepared decomposition genuinely helps; it records strategy for a later harness, not permission. Phase 1 should reach something demoable early — the mission must produce visible progress every phase, not a big-bang integration at the end.
+Then write phases per the guideline file. Hold the decision-complete bar: exact paths, chosen approaches with the _why_, per-task `verify:`, phase validation commands, the SPEC scenarios each phase advances, any composite verification coverage, and the smallest non-redundant final verification set. Mark parallelizable waves for fan-out only where the prepared decomposition genuinely helps; a wave records strategy for a later harness, not permission. Phase 1 should reach something demoable early — the mission must produce visible progress every phase, not a big-bang integration at the end.
 
 For a new mission, seed `LEDGER.md` with its header and no entries, and `NOTES.md` with what exploration surfaced: how to run, build, and verify the project (dev server, test commands), key files and helpers, non-obvious constraints, pitfalls, planning-time decisions with their rejected alternatives. Include `## Current Acceptance Delta` with `- None.`; it stays compact during execution and is never a second roadmap. For a resumed scope amendment, preserve LEDGER history and existing NOTES, then amend ROADMAP using its disposition rules rather than erasing completed or superseded work. NOTES is the executor's Memory Hints — a roadmap without it forces the executor to re-discover everything you just learned.
 
 ### Step 6 — Fresh-eyes check, then present for review
 
-Re-read SPEC.md and ROADMAP.md as if this conversation never happened, pretending you are the cheaper executor. Any task that needs interview context, any scenario that isn't binary, any "as discussed" — fix it in the file now. Flip `status: drafting → poc-review`, sync INDEX, and report:
+Re-read SPEC.md and ROADMAP.md as if this conversation never happened, pretending you are the cheaper executor. Any task that needs interview context, any scenario that isn't binary, any duplicated leaf/composite verification with no distinct observable, any ambiguous coverage, or any "as discussed" — fix it in the file now. Flip `status: drafting → poc-review`, sync INDEX, and report:
 
 ```
 ## Spec Ready for Review
@@ -82,5 +82,6 @@ Do NOT begin implementing, even after approval — on "go", flip `status → rea
 - Presenting a spec for approval that no POC ever proved — prose alone drifts; the artifact is how intent gets frozen.
 - One monolithic high-fidelity POC when narrow artifacts would answer the same questions — fidelity is the user's call, never the default.
 - Acceptance scenarios that need judgment ("looks polished") instead of observation ("HUD matches artifacts/poc.html layout").
+- Acceptance scenarios or phase gates that mechanically repeat checks already covered by a composite verifier without proving a distinct observable.
 - Leaving decisions in chat instead of the spec folder. The folder is the plan.
 - Treating enthusiasm ("great POC!") as the standing approval — wait for an explicit go signal.

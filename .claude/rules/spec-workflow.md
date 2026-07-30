@@ -19,7 +19,7 @@ Missions sit **above** the task layer (`task-management.md`): a spec supersedes 
 ├── done/                       # Archive for done/cancelled spec folders
 │   └── YYYY-MM-DD-<slug>/
 └── YYYY-MM-DD-<slug>/
-    ├── SPEC.md                 # What "done" means. Frozen at approval; only the user changes it.
+    ├── SPEC.md                 # What "done" means. Frozen at approval; changes require an explicit user-approved patch or amendment.
     ├── ROADMAP.md              # Phases → checkbox tasks with explicit dispositions.
     ├── NOTES.md                # Working memory: orientation, pitfalls, decisions. Curated, re-read every iteration.
     ├── LEDGER.md               # Append-only evidence & history. Never rewritten.
@@ -54,7 +54,10 @@ commits: user # user | per-task | per-phase — the executor's git-commit grant,
 
 <Defined at spec time, each one binary. A scenario names the exact action and the exact observable —
 "open artifacts/poc.html → wave counter advances and enemies spawn within 3s", not "game works".
-These are re-run at the final gate; vague scenarios are rejected at approval, not discovered at the end.>
+Every scenario receives fresh evidence at the initial final gate. A later review back-edge may carry forward
+unaffected baseline evidence under the scoped-gate contract below. Vague scenarios are rejected at approval,
+not discovered at the end. Keep scenarios non-redundant; when a composite check covers several scenarios,
+name that coverage explicitly.>
 
 - [ ] S1 — <literal action / command> → <binary observable>
 - [ ] S2 — ...
@@ -70,7 +73,7 @@ this as hard as the acceptance list.>
 
 ## Definition of Done
 
-Every ROADMAP task completed or explicitly superseded, no unresolved blocked task remains, AND every Acceptance Scenario re-run PASS.
+Every ROADMAP task completed or explicitly superseded, no unresolved blocked task remains, AND every Acceptance Scenario has valid final-gate PASS evidence.
 ```
 
 POC artifacts are not decoration: they are the **frozen references for intent**, at whatever fidelity the user chose during drafting — often several narrow artifacts, each locking one aspect (core interaction with primitive placeholders, a visual-style reference, a flow demo) rather than one high-fidelity build. UI and UX tasks verify against them (side-by-side comparison, or feeding one to an art-generation skill), which is what lets a cheaper executor make presentation-quality calls without re-interviewing the user.
@@ -93,7 +96,7 @@ Goal: <one line — what is demoable when this phase closes>
 - [ ] P1.1 <action, target files, decisions it carries> (verify: <observable check>)
 - [ ] P1.2 ... (verify: ...)
 
-**Phase validation**: <commands/scenarios proving the phase goal on a real surface — which SPEC scenarios it advances>
+**Phase validation**: <commands/scenarios proving the phase goal on a real surface — which SPEC scenarios it advances and any composite coverage it provides>
 
 ## Phase 2 — ...
 ```
@@ -106,7 +109,8 @@ Goal: <one line — what is demoable when this phase closes>
   - `- [ ] ~~<task>~~` is an invalid legacy state, never runnable. Reconcile it from LEDGER/NOTES into one of the valid forms above before selection; if its disposition is ambiguous, mark it blocked with the exact evidence or user decision needed to unlock it.
 - Continue while a runnable pending task exists. A blocked task does not make later work runnable by itself; normal phase dependencies still apply.
 - Size each task to fit comfortably in one iteration of one context window.
-- The executor may **append** genuinely missing implementation work discovered mid-flight (log the addition in LEDGER), but never appends a separate fix task plus replay/verification task for the same defect — verification stays with the implementation task. Supersede dead work only with the checked + struck form above; never rewrite phase goals or delete history. Scope changes (SPEC edits) belong to the user alone.
+- Verification plans prove acceptance with the **smallest non-redundant** command set. A composite check may provide fresh evidence for every scenario whose action and observable it actually exercises with failure propagation; do not rerun covered leaf checks for bookkeeping. A literal user-facing action still runs directly when transitive invocation would not prove that entrypoint.
+- The executor may **append** genuinely missing implementation work discovered mid-flight (log the addition in LEDGER), but never appends a separate fix task plus replay/verification task for the same defect — verification stays with the implementation task. Supersede dead work only with the checked + struck form above; never rewrite phase goals or delete history. Scope changes belong to the user alone; the executor may record only an explicit bounded review patch under the Completion flow, exactly within the user's stated delta.
 - Reopening responsible work means un-ticking only the current non-superseded owner whose completion evidence was invalidated. If none exists, append one genuine implementation task under the rule above. Never un-tick a superseded row.
 
 ## LEDGER.md — append-only
@@ -121,6 +125,8 @@ The roadmap holds _what_; the ledger holds _evidence and learnings_. Ticking nev
 ```
 
 Events: `run-started`, `task-started`, `task-completed`, `validation-failed`, `phase-validated`, `task-blocked`, `replanned`, `delegated`, `circuit-breaker`, `rotation-checkpoint`, `scope-change` (user-initiated only), `final-gate`. Never edit or delete prior entries.
+
+Every `final-gate` entry records `mode: full-baseline | scoped-review`. A full baseline names why it ran (`initial`, `material-amendment`, or conservative fallback), the fresh scenario evidence, and the revision or worktree state proved. A scoped review names the latest successful `final-gate` evidence state it extends, the actual changed surface, `executed` checks, scenarios `covered` by those checks, evidence `reused` from that state, and why each reused scenario is outside the impact closure. Every successful gate also records the resulting revision or bounded worktree fingerprint it proved, then becomes the cumulative baseline for the next review change; the chain must remain rooted in an identifiable full baseline. For a dirty worktree, the fingerprint is the base revision plus mission-relevant changed paths and content digests; exclude secrets, ignored live state, and unrelated user files. This record, not chat memory, makes repeated evidence reuse auditable.
 
 An unmatched `task-started` or `delegated` (no later `task-completed`, `validation-failed`, `task-blocked`, supersession, or consumed delegated result) is the crash-recovery marker: it tells a resuming session exactly what was in flight when the previous one died or compacted.
 
@@ -141,7 +147,7 @@ The ledger answers _what happened, in order_; NOTES answers _what every future i
 
 ## Current Acceptance Delta
 
-- None. <!-- Or: <S# or named phase/final-gate check>: <observed failure>; owner: <task-id>; last attempt: <material change> → <result>; next: <materially different hypothesis/check, or blocked> -->
+- None. <!-- Or: <S# or named review/final-gate check>: <observed failure or user-approved bounded delta>; baseline: <latest successful final-gate>; provisional impact: <S#/checks>; owner: <task-id>; last attempt: <material change> → <result>; next: <materially different hypothesis/check, or blocked> -->
 
 ## Decisions
 
@@ -155,7 +161,7 @@ The ledger answers _what happened, in order_; NOTES answers _what every future i
 - **Seeded by `/spec`** from planning-time exploration; **grown by the executor** whenever a finding or mid-flight decision matters to this mission. Route evidence to LEDGER and mission state, WIP, proposals, and uncertain claims to NOTES.
 - **NOTES is the candidate surface.** Flag descriptive claims that may outlive the mission as `→ graduate: knowledge/` and recurring behavior as `→ graduate: /learn`. Local scope does not disqualify a fact. The executor may promote a grounded durable fact immediately only when the full capture gate and one of `knowledge-management.md`'s immediate-promotion triggers pass; apply that rule, then clear the flag.
 - **Curated, not append-only**: rewrite or drop entries that stopped being true. Hard ceiling 150 lines — past it, distill; `/checkpoint` bulk-maintains remaining flags but is not the sole knowledge write gate.
-- **Current Acceptance Delta is not a score or a second roadmap.** Keep only currently contradicted/unproven acceptance surfaces, keyed by stable SPEC scenario id or named phase/final-gate check. Record the responsible task as `owner`, never as the key, so replanning cannot erase failure history. Keep the last material attempt and result plus the next materially different attempt; reset to `None` when the evidence clears. A new task, owner, or tick alone does not shrink the delta.
+- **Current Acceptance Delta is not a score or a second roadmap.** Keep only currently contradicted/unproven acceptance surfaces, keyed by stable SPEC scenario id or named phase/final-gate check. For a review back-edge, also keep the latest successful `final-gate` baseline and provisional impact set so a rotated session cannot silently broaden or shrink verification; recompute that set from the actual changed surface before the scoped gate. Record the responsible task as `owner`, never as the key, so replanning cannot erase failure history. Keep the last material attempt and result plus the next materially different attempt; reset to `None` only when every scenario again has valid evidence. A new task, owner, or tick alone does not shrink the delta.
 - Decisions that change _approach_ belong here; decisions that change _scope_ belong to the user in SPEC.md — never blur the two.
 
 ## Standing Approval — the one human gate that replaces many
@@ -186,6 +192,7 @@ Everything else stays autonomous. A task blocker stops that task; it stops the w
 - **Progress means an acceptance surface cleared, or its remaining failure/diagnosis narrowed enough to change the next action.** Appending a task, ticking a checkbox, renaming/replacing its owner, or gathering more evidence that only confirms the same gap does not count.
 - **A retry must be materially different.** Before retrying a failed acceptance, record in Current Acceptance Delta what changes in the hypothesis, implementation, or verification. If there is no evidence-backed difference to try, do not repeat the attempt: mark the responsible roadmap task `⚠ blocked` with its condition and unlock requirement, append `task-blocked` plus the diagnosis, and move to the next independent runnable task.
 - **Stronger contradictory evidence invalidates a green check.** "Stronger" means it exercises the SPEC's exact action and observable more directly or under more representative conditions; disagreement alone is not evidence. Un-tick the affected scenario, reopen responsible work under the ROADMAP rule, append `validation-failed`, and treat the old verifier as insufficient. Do not use that same check as the sole proof again until its coverage is repaired or replaced.
+- **Evidence follows semantic impact, its verifier, and its dependency surface.** Changing a verifier invalidates the evidence it produced. A change that can alter a shared runtime, public interface, dependency resolution, persistent data/schema, authentication/security boundary, global build/test behavior, or another cross-cutting contract expands the impact set accordingly; merely touching a broadly named path does not. If the executor cannot defend the boundary from the actual semantic change, it falls back to the full baseline gate.
 - **Two exploration passes with no new facts** → stop researching and act on what is known; if no defensible action remains, block as above.
 - **No runnable task remains while a blocker is unresolved** → append `circuit-breaker`, set SPEC status to `blocked`, sync INDEX, and stop with the diagnosis and exact unlock condition.
 
@@ -209,14 +216,38 @@ Long sessions degrade (context pressure, compaction, host lag). Rotation is the 
 
 ## Completion — Final Gate
 
-When every roadmap task is completed or explicitly superseded and no unresolved blocked task remains:
+When every roadmap task is completed or explicitly superseded and no unresolved blocked task remains, choose the gate from mission state rather than replaying checks mechanically.
 
-1. Re-run **every** Acceptance Scenario in SPEC.md fresh (not from memory of phase validations) and tick only those that PASS. If any fail, follow the failure path below. Only after the full set passes, reset Current Acceptance Delta to `None` and append `final-gate` with evidence.
-2. Flip status → `awaiting-final-review`, sync INDEX, and report: how to demo (exact steps), scenario results, anything deferred.
-3. **STOP.** `awaiting-final-review` is a read-only lock (as `awaiting-review` in `task-management.md`).
-4. User confirms → `done`: flip `status: done`, append one line to `.claude/JOURNAL.md` (`YYYY-MM-DD | completed | spec <slug> — <one-line outcome>, see specs/done/YYYY-MM-DD-<slug>/SPEC.md`), and sweep `NOTES.md` before shelving — route eligible `→ graduate: knowledge/` claims under `knowledge-management.md`, keep unresolved claims as candidates, and propose `/learn` for behavioral lessons. Run the checker if knowledge changed. Then move the entire folder from `.claude/specs/YYYY-MM-DD-<slug>/` to `.claude/specs/done/YYYY-MM-DD-<slug>/` and sync INDEX. If the user reports a problem, first compare it with the frozen SPEC and POC artifacts. A contradiction of approved intent → back to `running`: batch the reported defects under an affected scenario or a named final-gate check anchored to an exact SPEC/POC clause, un-tick any affected scenarios, reopen responsible work under the ROADMAP rule, append `validation-failed`, update Current Acceptance Delta, sync INDEX, and resume the convergence flow; after the batch, run one cumulative final gate. A request that changes intent, extends scope, or has no approved anchor → remain `awaiting-final-review`, surface the scope delta, and ask whether to amend the SPEC. On explicit yes, flip to `drafting`, sync INDEX, and return control to `/spec` for the amendment and renewed approval before implementation. Never append fix/replay task pairs.
+### Full baseline
 
-If any scenario fails at step 1, the mission is **not** complete: append `validation-failed`, update Current Acceptance Delta, and reopen responsible work under the ROADMAP rule. Never add validation bookkeeping as a task. Keep looping under the convergence rules. Never present a failing scenario as "done with caveats".
+A `full-baseline` gate is required for the mission's first final gate and after an approved material amendment. It is also the conservative fallback when a later review change cannot use scoped evidence safely:
+
+1. Map every Acceptance Scenario to concrete verification evidence, then run the **smallest non-redundant verification set** whose combined fresh results cover the full map. A composite check may cover its leaf checks only when its output proves those checks ran and their failures propagate. Do not run both composite and leaf checks unless a leaf is itself the SPEC's literal action/observable or is needed to diagnose a failure.
+2. Tick only scenarios that PASS. If any fail, append `validation-failed`, update Current Acceptance Delta, and reopen responsible work under the ROADMAP rule. Never add validation bookkeeping as a task or present a failing scenario as "done with caveats".
+3. After the complete fresh set passes, reset Current Acceptance Delta to `None` and append a `full-baseline` `final-gate` entry with the scenario-to-evidence coverage and reason (`initial`, `material-amendment`, or `conservative-fallback`).
+4. Flip status → `awaiting-final-review`, sync INDEX, report exact demo steps, scenario results, and anything deferred, then **STOP**. `awaiting-final-review` is a read-only lock until the user confirms completion or gives one of the explicit review instructions below.
+
+### Final-review feedback
+
+First compare feedback with the frozen SPEC, POC artifacts, and Must-NOT-Have:
+
+- **Anchored defect** — the report contradicts an exact approved SPEC scenario, Must-NOT-Have clause, or POC observable. Batch the reported defects under the affected scenarios or named final-gate checks; record the latest successful `final-gate` baseline and provisional impact in Current Acceptance Delta, un-tick affected scenarios, reopen responsible work under the ROADMAP rule, append `validation-failed`, flip to `running`, and sync INDEX.
+- **Explicit bounded review patch** — the user's current message unambiguously requests one concrete, decision-complete change that fits one narrow implementation unit; it does not contradict the frozen intent or Must-NOT-Have, require an unresolved product/design decision, or have effects that escape a defensible local boundary. The message grants approval for that patch only. Quote it in a `scope-change` entry, update SPEC with the exact binary observable, append only the smallest complete implementation task, record the baseline and provisional impact in Current Acceptance Delta, flip to `running`, and sync INDEX. Keep the patch minimal: implement only the stated observable, its direct dependency closure, and its proof. Do not add speculative hardening, adjacent documentation, refactors, frameworks, tooling, or quality gates merely because they seem beneficial.
+- **Material or ambiguous change** — anything else that changes intent, extends scope, lacks both an approved anchor and an explicit bounded request, conflicts with the POC/Must-NOT-Have, or requires a new design decision stays locked at `awaiting-final-review`. Surface the scope delta and ask whether to amend the SPEC. On explicit yes, flip to `drafting`, sync INDEX, and return control to `/spec` for amendment and renewed approval before implementation.
+
+Never infer a defect from broad language such as "quality", "production-ready", or Definition of Done alone: quote the exact approved anchor. Never append fix/replay task pairs for either accepted review path.
+
+### Scoped cumulative gate after review work
+
+After an anchored defect or bounded review patch is implemented:
+
+1. Anchor the latest successful `final-gate` cumulative evidence state, verify that its chain still reaches an identifiable `full-baseline`, and inspect the **actual changed surface** — changed files, interfaces, configuration/data, and their dependents. Do not infer impact from the task label alone.
+2. Run fresh the affected scenarios or named checks plus the smallest direct dependency, integration, or consumer checks needed to prove the change. Apply the same composite-versus-leaf deduplication rule as the initial gate.
+3. Carry forward each unaffected scenario's baseline evidence only with a recorded reason that its exercised surface and verifier remain unchanged. Cumulative PASS means all acceptance surfaces have valid evidence, not that every command was replayed in this run.
+4. Fall back to a new `full-baseline` gate whenever impact cannot be bounded confidently, the cumulative baseline chain is not identifiable, or a semantic change to a shared verifier, acceptance harness, or other cross-cutting surface could invalidate unrelated evidence. Record the fallback reason and replace the old baseline with the new fresh one. Cross-cutting surfaces include semantic changes to shared runtime/build behavior, dependency resolution, public contracts, persistent data/schema, and security boundaries; the list is illustrative, not exhaustive. A shared file path alone is not a fallback reason — the change must plausibly alter how unrelated acceptance surfaces execute or are verified.
+5. On complete PASS, clear Current Acceptance Delta, append a `scoped-review` `final-gate` entry with baseline, resulting revision or bounded worktree fingerprint, changed-surface analysis, fresh results, carried evidence and rationale, flip back to `awaiting-final-review`, sync INDEX, report the revised demo/evidence, and stop. On failure, follow the normal convergence path.
+
+User confirmation closes either kind of successful final gate: flip `status: done`, append one line to `.claude/JOURNAL.md` (`YYYY-MM-DD | completed | spec <slug> — <one-line outcome>, see specs/done/YYYY-MM-DD-<slug>/SPEC.md`), and sweep `NOTES.md` before shelving — route eligible `→ graduate: knowledge/` claims under `knowledge-management.md`, keep unresolved claims as candidates, and propose `/learn` for behavioral lessons. Run the checker if knowledge changed. Then move the entire folder from `.claude/specs/YYYY-MM-DD-<slug>/` to `.claude/specs/done/YYYY-MM-DD-<slug>/` and sync INDEX.
 
 ## Status State Machine
 
@@ -225,17 +256,17 @@ drafting ──(POC + SPEC + ROADMAP written, presented)──▶ poc-review
 poc-review ──(user requests changes)──▶ drafting
 poc-review ──(user approves: standing "go")──▶ ready
 ready ──(/spec-run picks it up)──▶ running
-running ──(all tasks completed/superseded; no blocker; final gate PASS)──▶ awaiting-final-review
+running ──(all tasks completed/superseded; no blocker; full-baseline/scoped-review PASS)──▶ awaiting-final-review
 awaiting-final-review ──(user confirms)──▶ done
-awaiting-final-review ──(user reports a problem within approved intent)──▶ running
-awaiting-final-review ──(user approves a scope amendment)──▶ drafting
+awaiting-final-review ──(anchored defect or explicit bounded review patch)──▶ running
+awaiting-final-review ──(user approves a material scope amendment)──▶ drafting
 running ──(blocker; nothing independent left)──▶ blocked ──(cleared)──▶ running
 {any active} ──(user cancels)──▶ cancelled
 ```
 
 - `drafting` / `poc-review`: `/spec` owns these; **no implementation code may be written** — only spec-folder files and artifacts.
 - `ready`: approved, not yet started. `running`: the loop is live. Both belong to `/spec-run`.
-- `awaiting-final-review`: read-only lock; waiting on the user's demo verification.
+- `awaiting-final-review`: read-only lock; waiting on the user's demo verification. Only completion confirmation, an anchored defect, an explicit bounded review patch, or an approved return to drafting changes state.
 
 ## INDEX.md
 
@@ -275,5 +306,7 @@ SPEC frontmatter is the source of truth; INDEX is a cache. Active lists status �
 - Retrying a failed acceptance without a materially different hypothesis, implementation, or verification.
 - Reusing a green check as sole proof after stronger evidence contradicted it.
 - Appending fix/replay task pairs instead of keeping verification with the responsible implementation task.
+- Replaying the whole baseline after a bounded review change without a recorded fallback reason, or carrying evidence forward without changed-surface rationale.
+- Expanding a bounded review patch into speculative hardening, unrelated documentation, refactors, frameworks, or tooling.
 - Continuing past a tripped circuit breaker or selecting a task marked `⚠ blocked`.
 - Marking the mission done (or presenting the demo) while any Acceptance Scenario is unproven.

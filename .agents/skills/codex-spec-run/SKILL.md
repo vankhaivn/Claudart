@@ -27,7 +27,7 @@ Read in full: `SPEC.md`, `ROADMAP.md`, `NOTES.md`, and the tail of `LEDGER.md` (
 - `ready` — flip to `running`, sync INDEX, append a `run-started` LEDGER entry, go to Step 2.
 - `running` — resuming. If the LEDGER tail shows activity only minutes old, another session may still be driving this spec — confirm with the user before proceeding. Check the tail for an unmatched `task-started` or `delegated` entry per the guideline's terminal-event rule — that is work that was in flight when the previous session died; verify its partial state on disk before redoing anything. Then verify the last completed entry against reality (spot-check its `verify:`; unrelated commits may have landed). Drift or stronger contradictory evidence → append `validation-failed`, reopen the affected scenario and responsible work under the guideline's ROADMAP disposition contract, update Current Acceptance Delta, and continue from current reality.
 - `blocked` — enter unblock mode. Read the last `task-blocked`/`circuit-breaker` diagnosis and `NOTES.md → Current Acceptance Delta`. External blocker → ask the user whether it cleared (cleared → remove the task's blocker marker, flip to `running`, sync INDEX, and continue; not → stop). A task that defeated a previous session → investigate first. Resume it only with a materially different path: clear `⚠ blocked`, keep it unticked, flip to `running`, and sync INDEX; or supersede it using the guideline's checked + struck form, append only the replacement work actually needed, record the NOTES decision and `replanned` entry, flip to `running`, and sync INDEX. Then offer: continue here, or rotate so a cheaper session resumes.
-- `awaiting-final-review` — branch on the user's current message: explicit completion confirmation → run the guideline's closeout flow, flip `status: done`, append the JOURNAL completion line, sweep `NOTES.md` graduation flags, move the dated folder to `.codex/specs/done/`, sync INDEX, and stop; explicit problem report that contradicts the frozen SPEC/POC → apply the guideline's review back-edge, flip to `running`, sync INDEX, and resume the convergence flow; intent/scope change or a report with no approved anchor → keep the read-only lock, surface the scope delta, and ask whether to amend the SPEC (on explicit yes, flip to `drafting`, sync INDEX, and hand control to `$codex-spec` for renewed review/approval); neither → keep the lock, surface the pending demo, and ask the user to verify or report what failed.
+- `awaiting-final-review` — branch on the user's current message: explicit completion confirmation → run the guideline's closeout flow, flip `status: done`, append the JOURNAL completion line, sweep `NOTES.md` graduation flags, move the dated folder to `.codex/specs/done/`, sync INDEX, and stop; explicit problem report with an exact approved SPEC/POC anchor → apply the anchored-defect back-edge, record the latest successful `final-gate` baseline plus provisional impact set, flip to `running`, sync INDEX, and resume; explicit concrete change that satisfies the guideline's bounded-review-patch test → record the user-approved delta verbatim, update SPEC with its exact binary observable, append only the smallest necessary ROADMAP work, record that latest baseline + provisional impact, flip to `running`, sync INDEX, and resume; material, ambiguous, or unanchored scope change → keep the read-only lock, surface the delta, and ask whether to amend the SPEC (on explicit yes, flip to `drafting`, sync INDEX, and hand control to `$codex-spec` for renewed review/approval); neither → keep the lock, surface the pending demo, and ask the user to verify or report what failed. Broad claims such as "quality" or Definition of Done are not exact defect anchors.
 - `done` / `cancelled` — say so, including whether the folder is archived under `.codex/specs/done/`; nothing to run.
 
 ### Step 2 — Loop
@@ -41,6 +41,7 @@ Execute **The Loop** from the guideline file, iteration after iteration, without
 - On passed verification, tick, log evidence to LEDGER, bump `updated:`, clear any delta the evidence resolves, and route mission-local/WIP/uncertain findings into NOTES.md. Promote a durable descriptive fact directly only under `spec-workflow.md`'s narrow knowledge-maintenance exception; then follow the knowledge guideline's atomic owner/map write and checker. Continue to the next runnable task.
 - Honor the SPEC's `commits:` policy: `user` → never run `git commit`; `per-task`/`per-phase` → commit at each tick / phase close with message `spec(<slug>): <summary>`. Push is never granted.
 - Honor the circuit breakers exactly as written. An out-of-scope question (anything Must-NOT-Have doesn't settle) blocks the affected task with its exact unlock condition; continue independent runnable work, and stop the whole loop only through the canonical no-runnable-work breaker. Never resolve scope by guessing or weaken a `verify:` to get past it.
+- For a bounded review patch, implement only the user's stated observable, its direct dependency closure, and the proof needed for that observable. Do not add adjacent hardening, documentation, refactors, or quality gates merely because they seem beneficial; a wider necessary change fails the bounded-patch test and returns to amendment.
 
 ### Step 3 — Phase boundary
 
@@ -48,7 +49,13 @@ Run the phase validation. On PASS, tick the SPEC scenarios it proves and append 
 
 ### Step 4 — Final gate
 
-When every roadmap task is completed or explicitly superseded and no unresolved blocked task remains, run the Completion flow from the guideline file: re-run every Acceptance Scenario fresh. Only a full PASS clears Current Acceptance Delta, gets a `final-gate` entry, and reaches `awaiting-final-review`; a failure reopens responsible work under the ROADMAP disposition contract. Report demo steps + evidence and **stop** only after the full gate passes. The user closes the mission, not you.
+When every roadmap task is completed or explicitly superseded and no unresolved blocked task remains, run the Completion flow from the guideline file:
+
+- No successful full baseline for the mission, or a material amendment was newly approved → run `full-baseline`: establish fresh evidence for every Acceptance Scenario with the smallest non-redundant verification set.
+- Returning from final review for an anchored defect or bounded review patch → run `scoped-review`: start from the latest successful cumulative `final-gate` evidence state, verify that its chain reaches an identifiable `full-baseline`, recompute the impact closure from the actual changed surface, run fresh only that closure plus the smallest relevant integration checks, and carry forward unaffected evidence with explicit rationale.
+- Unidentifiable cumulative baseline, uncertain impact, a semantically changed shared verifier/harness, or another cross-cutting change that may invalidate unrelated evidence → fall back to `full-baseline`.
+
+Append a `final-gate` entry that records the resulting revision or bounded worktree fingerprint and distinguishes `executed`, `covered`, and `reused` evidence. Only when every scenario has valid PASS evidence does the spec clear Current Acceptance Delta and return to `awaiting-final-review`. Report demo steps + evidence and **stop**; the user closes the mission, not you.
 
 ## Anti-Patterns
 
@@ -57,8 +64,10 @@ When every roadmap task is completed or explicitly superseded and no unresolved 
 - Creating `.codex/tasks/` files, `HANDOFF.md`, or parallel plans — the spec folder is the only state.
 - Treating roadmap wave markings as a delegation permission switch, spawning overlapping work, or pausing the loop to ask for delegation permission.
 - Ticking without running `verify:`; trusting a subagent's "done"; presenting a demo with unproven scenarios.
-- Editing SPEC.md scope (Acceptance Scenarios, Must-NOT-Have) — only the user changes intent.
+- Editing SPEC.md scope without an explicit user-approved bounded review patch or the formal amendment flow — only the user changes intent.
 - Counting appended tasks or ticks as progress while Current Acceptance Delta is unchanged.
 - Retrying a failed acceptance without a materially different hypothesis, implementation, or verifier.
 - Selecting a task marked `⚠ blocked`, silently dropping its diagnosis, or leaving a superseded task unticked.
 - Appending separate fix/replay tasks for one defect or reusing a contradicted green check as sole proof.
+- Replaying unrelated scenarios after a bounded change, duplicating leaf checks already covered by a qualifying composite check, or reusing baseline evidence without an impact rationale.
+- Expanding a bounded request into speculative hardening, documentation, cleanup, refactors, or extra gates.

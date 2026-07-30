@@ -40,19 +40,19 @@ A POC exists so the user can _judge intent_ — it is a reference the executor w
 
 ### Step 4 — Finalize SPEC.md
 
-The skeleton is already half-full from Steps 2-3; finish it. The hard part is **Acceptance Scenarios**: each one a literal action plus a binary observable, executable by someone who never saw this conversation. Push every rejected option and deferred feature into **Must-NOT-Have** — that section is what stops a cheaper executor from gold-plating or wandering.
+The skeleton is already half-full from Steps 2-3; finish it. The hard part is **Acceptance Scenarios**: each one a literal action plus a binary observable, executable by someone who never saw this conversation. Keep scenarios independently traceable without manufacturing duplicate commands: one concrete verifier may cover several scenarios when its output proves each observable, while a scenario whose literal user action matters keeps that action as direct evidence. Push every rejected option and deferred feature into **Must-NOT-Have** — that section is what stops a cheaper executor from gold-plating or wandering.
 
 ### Step 5 — Write ROADMAP.md (decision-complete)
 
 Explore the codebase read-only first (existing patterns, constraints, files each phase will touch) — de-risk decisions, don't pre-solve implementation. Fan out read-only `Explore` subagents if the survey is broad.
 
-Then write phases per the rule file. Hold the decision-complete bar: exact paths, chosen approaches with the _why_, per-task `verify:`, phase validation commands, parallelizable waves marked for fan-out. Phase 1 should reach something demoable early — the mission must produce visible progress every phase, not a big-bang integration at the end.
+Then write phases per the rule file. Hold the decision-complete bar: exact paths, chosen approaches with the _why_, per-task `verify:`, phase validation commands, parallelizable waves marked for fan-out. Make final verification coverage legible enough that a future executor can select the smallest non-redundant set: identify which checks prove which scenarios and when a composite check already includes leaf checks. Do not require a second direct run of an included leaf unless the leaf is itself a scenario action or serves a distinct observable. Phase 1 should reach something demoable early — the mission must produce visible progress every phase, not a big-bang integration at the end.
 
 For a new mission, seed `LEDGER.md` with its header and no entries, and `NOTES.md` with what exploration surfaced: how to run, build, and verify the project (dev server, test commands), key files and helpers, non-obvious constraints, pitfalls, planning-time decisions with their rejected alternatives. Include `## Current Acceptance Delta` with `- None.`; it stays compact during execution and is never a second roadmap. For a resumed scope amendment, preserve LEDGER history and existing NOTES, then amend ROADMAP using its disposition rules rather than erasing completed or superseded work. NOTES is the executor's Memory Hints — a roadmap without it forces the executor to re-discover everything you just learned.
 
 ### Step 6 — Fresh-eyes check, then present for review
 
-Re-read SPEC.md and ROADMAP.md as if this conversation never happened, pretending you are the cheaper executor. Any task that needs interview context, any scenario that isn't binary, any "as discussed" — fix it in the file now. Flip `status: drafting → poc-review`, sync INDEX, and report:
+Re-read SPEC.md and ROADMAP.md as if this conversation never happened, pretending you are the cheaper executor. Any task that needs interview context, any scenario that isn't binary, any duplicated leaf/composite verification with no distinct observable, any ambiguous coverage, or any "as discussed" — fix it in the file now. Flip `status: drafting → poc-review`, sync INDEX, and report:
 
 ```
 ## Spec Ready for Review
@@ -77,5 +77,6 @@ Do NOT begin implementing, even after approval — on "go", flip `status → rea
 - Presenting a spec for approval that no POC ever proved — prose alone drifts; the artifact is how intent gets frozen.
 - One monolithic high-fidelity POC when narrow artifacts would answer the same questions — fidelity is the user's call, never the default.
 - Acceptance scenarios that need judgment ("looks polished") instead of observation ("HUD matches artifacts/poc.html layout").
+- Duplicating acceptance commands merely to give every scenario a separate verifier, or listing composite and included leaf checks as mandatory final-gate replays without distinct coverage.
 - Leaving decisions in chat instead of the spec folder. The folder is the plan.
 - Treating enthusiasm ("great POC!") as the standing approval — wait for an explicit go signal.
