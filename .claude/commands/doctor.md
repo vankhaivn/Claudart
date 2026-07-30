@@ -6,13 +6,25 @@ Please run a health check on this repository's CLAUDART installation. Your job i
 
 ## What to Check
 
+### 0. Knowledge Checker First
+
+Before the semantic audit, run:
+
+```bash
+bash .claude/scripts/knowledge-check.sh
+```
+
+Record its exit status and every finding. The checker is read-only and owns mechanical knowledge validation; do not reproduce or reinterpret its parser. Exit `1` means contract findings were reported; preserve their stated severity and continue the semantic audit. Exit `2` means checker usage, precondition, or internal/runtime failure; report **High** and continue only with the semantic audit. If the script is missing, report **High** and continue with the bounded semantic audit using `.claude/rules/knowledge-management.md`. A missing or exit-`2` checker means this installation cannot be declared healthy.
+
 ### 1. Required Structure
 
 - `.claude/` exists at the repository root
-- `.claude/commands/` exists and contains at least: `start.md`, `learn.md`, `refactor-memory.md`, `doctor.md`, `checkpoint.md`, `plan.md`, `handoff.md`, `spec.md`, `spec-run.md`
+- `.claude/commands/` exists and contains at least: `start.md`, `learn.md`, `refactor-memory.md`, `doctor.md`, `checkpoint.md`, `plan.md`, `handoff.md`, `project-discovery.md`, `spec.md`, `spec-run.md`
 - `.claude/agents/` exists (may be empty if user removed shipped agents)
 - `.claude/rules/` exists (may be empty before the user runs `/refactor-memory`)
+- `.claude/rules/knowledge-management.md` exists and is referenced from `.claude/CLAUDE.md`
 - `.claude/knowledge/` exists with `INDEX.md` (warn if missing — `/refactor-memory` will recreate it)
+- `.claude/scripts/knowledge-check.sh` exists (missing is **High**, not a routine warning)
 - `.claude/tasks/` exists with `index.md` and `done/` subdirectory (warn if missing — `/plan` will create on first use)
 - `.claude/specs/` exists with `INDEX.md` and `done/` archive folder (informational if missing — `/spec` creates it on first use)
 - `.claude/CLAUDE.md` exists
@@ -94,21 +106,15 @@ Skip this section if `.claude/tasks/` does not exist.
 
 Skip this section if `.claude/knowledge/` does not exist.
 
-- Confirm `.claude/knowledge/INDEX.md` exists. If missing, flag as **Medium** — `/refactor-memory` should regenerate it.
-- **Empty tier** (informational — not a Warning): if `INDEX.md` lists no entries and no topic files exist, note that the tier is wired but unused. For a fresh adopter this is normal — do NOT flag it as a problem. If the project plausibly has durable facts worth capturing, surface a gentle nudge (under Passing or Recommended Next Step): `/refactor-memory` will seed it from existing docs (grounded drafts you review in the diff), and `/checkpoint` fills it over time.
-- **INDEX ↔ files match** (both directions):
-  - Every `.md` file under `.claude/knowledge/` (excluding `INDEX.md`) must be listed in `INDEX.md`. Unlisted files → flag as **Medium** (invisible to `/start`, defeats the tier).
-  - Every entry in `INDEX.md` must point to a file that exists on disk. Dead entries → flag as **Low**.
-- For every knowledge file (excluding `INDEX.md`), check frontmatter: required `name`, `description`, `type`, `updated`; `type` ∈ {domain, architecture, integration, glossary, reference, agent-context}. Missing/invalid → flag as **Low**.
-- **Dead local references**: for each `sources:` entry that is a relative path, confirm the target exists on disk; missing → flag as **Low** (stale pointer). Do NOT fetch URLs — only list `sources:` that are neither a valid `http(s)` URL nor an existing path as malformed.
-- **Staleness**: flag any knowledge file whose `updated:` is more than 90 days old, or whose stated `verify:` condition no longer holds, as a **Low** review candidate.
-- **Descriptive-only separation**: knowledge is facts, not behavior. If a knowledge file contains prescriptive language (`MUST`, `NEVER`, `YOU MUST`, `always do`/`never do`), flag as **Medium** — that content belongs in `.claude/rules/`. The boundary runs both ways — §6 flags the reverse (a purely descriptive _rule_ that belongs in knowledge).
-- **INDEX stays a map**: `INDEX.md` should be one line per entry. If it grows prose paragraphs or deep sections, flag as **Low** (knowledge belongs in topic files, not the index).
-- **Not auto-loaded**: run `grep -n '@.claude/knowledge/' .claude/CLAUDE.md`. A plain (non-`@`) pointer line is fine; an `@`-import of `INDEX.md` or any detail file → flag as **Medium** (knowledge is surfaced by `/start`, not force-loaded every turn).
-- **Unanchored entries** (staleness cannot be checked): a knowledge file with neither a `sources:` path nor a `verify:` condition can't be staleness-checked deterministically → flag as **Low**, suggest adding a `verify:` anchor or a `sources:` path so future runs can catch rot.
-- **Dead code references in the body**: for each backtick-quoted repo path in a knowledge body (e.g. `` `src/auth/legacy.ts` ``), use Glob to confirm it still exists; missing → flag as **Low** (the fact may describe deleted code). Bounded & offline — check only backtick'd path-like tokens, never free prose.
-- **Dangling `related:` links**: for each `[[slug]]` in a knowledge file's `related:`, confirm it resolves to an existing knowledge topic (`<slug>.md`) or rule; unresolved → flag as **Low**.
-- **Duplication signal**: if two knowledge entries share most of their `description` keywords, or an entry's keywords strongly overlap a rule's `description`/`tags`, flag as **Low** — possible intra-tier or cross-tier duplication (`/refactor-memory` can consolidate). Keyword-overlap only; do not deep-read to confirm.
+Read `.claude/rules/knowledge-management.md` and use the checker output as the mechanical baseline. Then audit only what requires semantic judgment:
+
+- Confirm the root is a compact router and routing is root → optional domain map → topic, with no nested maps. Preserve intentional external routes. If active topics exceed 24 or the root exceeds 1,200 visible words without domain maps, flag **Low**.
+- Treat an empty tier as informational. An unindexed file with ambiguous intent is a review candidate, not automatically active, retired, or orphaned.
+- Verify sampled concrete claims against their stated sources/current repository evidence. If evidence is insufficient, stale, or conflicting while status is `active`, flag **Medium** and recommend `review-needed` plus a `status_note`; do not change the file.
+- Flag prescriptive behavior, WIP, proposals, roadmap/acceptance state, or task chronology in knowledge as **Medium** tier leakage. A locally scoped durable fact is valid and must not be rejected merely because it is not project-wide.
+- Flag likely duplicate owners or unsupported supersession/retirement as **Low** for controlled curation. Never recommend automatic deletion.
+- Treat a topic over 10 KiB as an outline/section-first split candidate, not an automatic split.
+- Confirm no knowledge topic or INDEX is `@`-imported into `.claude/CLAUDE.md`; the plain root-router pointer is valid.
 
 ### 5e. Session Handoff Hygiene (`.claude/HANDOFF.md`)
 
@@ -128,7 +134,7 @@ Skip this section if `.claude/specs/` does not exist.
 - **INDEX ↔ folders match** (both directions): every active `YYYY-MM-DD-<slug>/` folder directly under `.claude/specs/` with an active status must be listed under `## Active`; every archived `done/YYYY-MM-DD-<slug>/` folder with `status: done` or `status: cancelled` must be listed under `## Done`; every INDEX entry must point to an existing `SPEC.md` (dead → **Low**).
 - Ignore `.claude/specs/done/` itself when enumerating active spec folders.
 - For every active or archived spec folder, confirm the core files exist: `SPEC.md`, `ROADMAP.md`, `NOTES.md`, `LEDGER.md`. Missing → **Medium**.
-- `NOTES.md` line count ≤ 150 (`wc -l`). Exceeded → **Medium** — the working memory is drifting toward a log; distill it or graduate project-wide facts to `knowledge/`.
+- `NOTES.md` line count ≤ 150 (`wc -l`). Exceeded → **Medium** — the working memory is drifting toward a log; distill it and route eligible durable descriptive facts under the knowledge rule.
 - `SPEC.md` frontmatter: required keys `slug`, `status`, `created`, `updated`, `agent`; `status` ∈ {drafting, poc-review, ready, running, blocked, awaiting-final-review, done, cancelled}; folder name must be `created` + `-` + `slug`; `commits` (if present) ∈ {user, per-task, per-phase}.
 - For specs at `poc-review` or later: every `artifacts/` path referenced under `## POC Artifacts` must exist on disk. Missing → **Medium** (the executor's frozen UI reference is gone).
 - **ROADMAP disposition consistency**: `- [ ] ~~task~~` → **Medium** (invalid legacy state; reconcile it to checked + superseded or an explicit blocker before `/spec-run`); a checked + struck row missing `superseded by <task-id or reason>` → **Medium**; a blocked row missing either its condition or `unlock:` requirement → **Medium**. Do not equate every plain unticked row with runnable work — honor dependency notes. `running` where dependency inspection finds no runnable pending row and at least one blocker → **Medium** (the circuit-breaker/status transition was missed); `running` with every row terminal → **Medium** (the final gate never ran); `blocked` with no explicit blocked row → **Medium** (the diagnosis/unlock state is not durable); `blocked` where dependency inspection finds any independent runnable row → **Medium** (the whole-loop transition happened too early); `awaiting-final-review` or `done` with any unticked row → **Medium** (the final gate contradicts ROADMAP state). Top-level spec folder with `status: done`/`cancelled` → **Low** (resync via `/checkpoint` to archive it under `done/`). Archived spec folder whose status is not `done`/`cancelled` → **Medium** (it is shelved in the wrong place). `status: done`/`cancelled` still listed under `## Active` in INDEX → **Low** (resync via `/checkpoint`).
@@ -180,6 +186,8 @@ Skip this section if `.claude/specs/` does not exist.
 [Single actionable suggestion: e.g., "Run /refactor-memory to extract domains and create missing ai-behavior import."]
 ```
 
-If everything passes, output a one-line summary: `✅ CLAUDART installation healthy. <n> rules, <n> knowledge entries, <n> agents, <n> commands, <n> specs.`
+Only if the checker exists, exits successfully, and every semantic/structural check passes, output: `✅ CLAUDART installation healthy. <n> rules, <n> knowledge entries, <n> agents, <n> commands, <n> specs.` Otherwise never claim healthy.
 
 **Reminder**: this command is read-only. Never modify files.
+
+For an existing project that needs normalization, keep the upgrade flow explicit: `/doctor` → `/refactor-memory` → `/doctor`.

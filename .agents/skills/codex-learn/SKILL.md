@@ -1,68 +1,68 @@
 ---
 name: codex-learn
-description: Run a Codex retrospective and promote recurring decisions into Codex guidelines and memory.
+description: Run a behavior-first Codex retrospective, strengthen relevant guidelines, and route any durable descriptive facts to the canonical knowledge workflow.
 ---
 
 # Codex Learn
 
-Run a Retrospective & Learning Protocol on the work you just completed.
+Turn corrections and repeated lessons from completed work into durable behavior. Use the narrowest owner and keep facts, live state, and behavior in their correct tiers.
 
-Based on the "Agent Self-Evolution & Context Maintenance" section in `AGENTS.md`, perform this 3-phase protocol. Do not skip Phase 0. Without re-reading the active rules, you cannot reliably detect what was violated.
-
-## Phase 0: Re-Ground in the Rule Set
-
-Before any retrospective:
+## 1. Re-Ground Selectively
 
 1. Read `AGENTS.md` in full.
-2. Read every file in `.codex/guidelines/*.md` in full. Use `rg --files .codex/guidelines` first if you do not already know what exists.
-3. Read every `.codex/agents/*.toml` file whose role or instructions mattered during this session.
-4. Read every `.agents/skills/*/SKILL.md` file whose skill you used during this session.
-5. Read `.codex/CONTEXT.md` to know the current shared state.
-6. Build a short mental index: guideline name -> core constraint -> loophole keyword if any.
+2. Read the guideline, skill, and agent files that governed this session. Use frontmatter and targeted `rg` to find relevant owners; do not read every guideline blindly.
+3. Read `.codex/CONTEXT.md` for current shared state.
+4. If the retrospective may retrieve or mutate project knowledge, read `.codex/guidelines/knowledge-management.md` in full. Otherwise do not load it.
+5. For recurrence evidence, tail at most ~200 lines of `.codex/JOURNAL.md`, then use targeted `rg` for matching decisions or pivots. Never full-read JOURNAL by default.
+6. Build a compact rule index: owner → core constraint → known loophole. Include every agent/skill instruction that materially governed the session.
 
-You cannot judge deviations against rules you have not re-read. If `.codex/guidelines/` is empty or missing, note that and continue with `AGENTS.md` only.
+## 2. Extract Behavioral Lessons
 
-## Phase 1: Rule Refinement
+Walk the session chronologically. Compare every assistant turn against the rule index and identify:
 
-Walk the conversation chronologically, comparing each assistant turn against the rule index from Phase 0.
+- explicit user corrections or rule violations;
+- the specific rationalization used to bypass each constraint, not merely “I missed the rule”;
+- happy-path rules whose wording left an obvious loophole;
+- repeated failure or workaround patterns;
+- quiet confirmations: unusual judgment calls the user accepted and that should repeat;
+- delegation boundaries, validation gaps, or ownership mistakes worth repeating or preventing.
 
-1. List every moment the human corrected you or you deviated from a rule. For each one, answer: "What rationalization did I use to justify the deviation?" Do not just say "I missed the rule".
-2. Did any rule fail because it only described the happy path without closing obvious loopholes?
-3. For each identified gap, update the relevant guideline using this pattern: `NEVER do X, even when Y seems like a good reason`.
-4. If rules contradict each other, resolve the contradiction immediately in `.codex/guidelines/` or `AGENTS.md`.
-5. Save quiet confirmations. If the human accepted an unusual judgment call without pushback, record it when it should repeat in future sessions.
+Use JOURNAL recurrence as evidence: if the same decision or pivot appears at least twice, surface it as a behavioral candidate. Separate one-off environment failures and task-local narrative from reusable behavior. Do not turn a single unverified observation into a rule.
 
-## Phase 2: New Knowledge Integration
+## 3. Patch The Canonical Owner
 
-1. Identify core bug root causes, architectural decisions, or design patterns validated in this session.
-   - If subagents were used, identify delegation patterns that should repeat or be avoided: authorization wording, task decomposition, ownership boundaries, merge conflicts, validation gaps, and reviewer usefulness.
-2. Pattern check via JOURNAL:
-   - `.codex/JOURNAL.md` can grow to thousands of lines, so never full-read it.
-   - Tail first: read only the last ~200 lines with `tail -n 200 .codex/JOURNAL.md`.
-   - Search when targeted: if you suspect a recurring pattern, search for matching `decision` or `pivot` lines instead of loading the whole file.
-   - If the same decision or pivot recurs 2+ times, surface it as a candidate to graduate into `.codex/guidelines/`.
-   - Skip this step if `.codex/JOURNAL.md` does not exist or has fewer than 5 entries.
-3. Decide where new knowledge belongs:
-   - Existing domain with a strong match -> update the exact file in `.codex/guidelines/`.
-   - Codex subagent/delegation behavior -> update `.codex/guidelines/agent-delegation.md` when it exists.
-   - New domain with no strong match -> create a new guideline file in `.codex/guidelines/` with complete frontmatter, then reference it from `AGENTS.md`.
-   - Global Codex standard -> update `AGENTS.md` directly.
-   - Durable project _fact_ (descriptive, not behavior — how a subsystem works, an integration detail, a domain term, a pointer to a doc in another folder) -> this is knowledge, not a guideline. Create or update a topic file in `.codex/knowledge/` (frontmatter `name`/`description`/`type`/`updated`; optional `sources`/`related`/`verify`) and register it in `.codex/knowledge/INDEX.md` in the same step. Guidelines prescribe behavior; knowledge describes facts. (Routine fact-capture is `$codex-checkpoint`'s job; `$codex-learn` writes knowledge only when a retrospective surfaces a durable fact checkpoint missed.)
+For each validated behavior:
 
-Critical constraint: do not shoehorn a new concept into an existing guideline if the match is weaker than 80%. Prefer creating a new domain file over polluting a specific guideline.
+1. Update the strongest matching existing guideline first.
+2. Close the observed loophole with a verifiable constraint; when useful, state that the constraint still applies under the rationalization that caused the violation.
+3. Resolve contradictions between guidelines or `AGENTS.md` immediately when evidence identifies the winner. If neither wins, surface the decision instead of silently choosing.
+4. Use an existing guideline only when the semantic match is at least 80%. Create a focused owner instead of polluting a weak match; add canonical frontmatter and reference it from `AGENTS.md` when globally relevant.
+5. Put delegation behavior in `.codex/guidelines/agent-delegation.md`.
+6. Put a repository-wide Codex standard in `AGENTS.md`.
 
-## Boundary
+Guideline frontmatter uses `paths:`, `description:`, `when_to_use:`, and `tags:`. Keep `paths:` and `tags:` as compact flow sequences. Keep bodies prescriptive and concise; cite stable source paths instead of pasting code.
 
-`$codex-learn` updates rules, guidelines, `.codex/knowledge/`, skills, agents, and `AGENTS.md`.
+## 4. Route Non-Behavioral Material
 
-It does not modify `.codex/CONTEXT.md`; checkpoint owns that file.
+- Descriptive, durable-beyond-current-work, current, evidenced fact → follow the full knowledge guideline now. Patch the existing topic owner first, update its reachable route atomically, and run `bash .codex/scripts/knowledge-check.sh --root .` after the mutation.
+- WIP, proposal, acceptance state, or task-local discovery → keep it in the active task, spec, or `CONTEXT.md`.
+- Uncertain or conflicting observation → keep it as a candidate, or mark a contradicted canonical owner `review-needed` with evidence and `status_note`.
+- Retired chronology → leave it in JOURNAL; do not rewrite JOURNAL.
 
-It does not rewrite `.codex/JOURNAL.md`; JOURNAL is append-only. You may read it as evidence using the token-efficient strategy above.
+`$codex-learn` may write an eligible fact immediately. `$codex-checkpoint` performs bulk maintenance but is not an exclusive knowledge write gate.
 
-## Output Standard
+## 5. Output Standard
 
-- Rules must be verifiable from the codebase. If a reader cannot check whether the rule was followed, rewrite it.
-- New or updated guideline files must include frontmatter with `paths:`, `description:`, `when_to_use:`, and `tags:`. Write `paths:` as a YAML flow sequence, e.g. `paths: ["src/**/*.ts", "test/**/*.ts"]`; never use block-list style. Write `tags:` as an inline YAML array on one line, e.g. `tags: [architecture, nestjs, boundaries]`; never use block-list style. Use 1-5 lowercase kebab-case tags that describe the domain or scope.
-- Use `NEVER`, `YOU MUST`, or `IMPORTANT` for constraints that have been violated before.
-- Do not paste long code snippets into guideline files. Cite source file paths and line numbers instead.
-- Execute safe file changes autonomously, then summarize each file touched and why.
+- Make every rule verifiable from repository evidence.
+- Keep guideline frontmatter complete, with flow-style `paths:` and `tags:` containing 1-5 lowercase kebab-case values.
+- Use unambiguous critical language for constraints proven easy to violate.
+- Do not paste long code snippets; cite stable sources.
+- Summarize each file changed, the lesson it owns, knowledge checker results when applicable, and unresolved contradictions.
+
+## Boundaries
+
+- Do not modify `.codex/CONTEXT.md`; checkpoint owns it.
+- Do not rewrite or delete `.codex/JOURNAL.md`.
+- Do not auto-delete, retire, supersede, or promote ambiguous knowledge.
+- Do not create a guideline for a descriptive fact or a knowledge topic for behavior.
+- Execute safe, in-scope memory changes, validate them, and report each file touched and why.

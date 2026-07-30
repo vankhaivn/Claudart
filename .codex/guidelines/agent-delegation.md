@@ -39,7 +39,7 @@ This section is the single source of truth for the field's values; `task-managem
 The deciding signal is **task structure, not the user's exact words.** Before spawning, ask: _does the request decompose into work genuinely separate from the delegated question, or IS the delegated question the whole task?_
 
 - **Whole task** — the delegated question is the entire request (a single read-only investigation, one bounded fix) → **spawn, then wait and consume the result.** Do NOT shadow-run the same investigation in the parent thread. Codex already pauses to consolidate subagent results (_"waits until all requested results are available"_); racing it locally pays for one answer twice and duplicates the subagent's work.
-- **Decomposable** — the request splits into disjoint units → **fan out one subagent per unit** (each owning a non-overlapping file set or sub-question) and let Codex consolidate, rather than answering one unit in the parent while a subagent answers another. Multi-subagent fan-out — not parent-vs-subagent racing — is Codex's native parallel idiom.
+- **Decomposable** — the request splits into disjoint units → either **fan out one subagent per unit** (each owning a non-overlapping file set or sub-question), or advance a parent-owned lane that was named before spawning and provably needs nothing from delegated output. Multi-subagent fan-out is the normal parallel idiom; parent work is valid only under that independence test.
 
 Infer this from what the request _decomposes into_, never from a magic phrase. "Spawn an explorer to check X and tell me what it finds", "giao cho 1 agent điều tra repo Y", "delegate this audit and read its output" all describe **one delegated unit with no separate parent work** — the same shape, regardless of wording. The reliable tell is **overlap of the same sub-question**: if your own next step (or another subagent) would answer the _same_ sub-question this subagent owns, that is redundancy, not parallelism — collapse it.
 
@@ -100,7 +100,9 @@ The parent Codex session remains responsible for the final result. **Codex's doc
 - Review subagent outputs quickly and integrate only the useful parts.
 - Run the relevant validation yourself or verify that the validation evidence is trustworthy.
 - Record each delegation **at spawn time** in the active task file (the CONTEXT micro-handoff for un-planned work; the spec LEDGER as a `delegated` entry for mission work): the unit, the agent, the expected output, and where it will be integrated; mark it consumed when integrated. A compaction or handoff must never orphan a running subagent — the file, not session memory, is what remembers outstanding delegations.
-- Record important subagent findings in task files first; use `$codex-checkpoint` for active `CONTEXT.md` handoffs or eventual `JOURNAL.md` entries. Do not rely on subagent thread history for persistence.
+- Classify returned findings before persistence. WIP, proposals, task state, and uncertainty stay in the task/spec/CONTEXT candidate surface; reusable behavior goes through `$codex-learn`. Immediate fact promotion requires the full capture gate plus a user request, a verified correction needed to avoid continued reliance on known-wrong canonical knowledge, confirmed source drift, or a lifecycle promotion boundary. Otherwise persist the finding as a candidate. For a promotion, read `knowledge-management.md`, patch the existing owner plus reachable route atomically, and run the checker.
+- Treat a subagent's knowledge claim as evidence to verify, not canonical truth. If a worker is explicitly assigned a knowledge mutation, its ownership must include both the topic and reachable map so no other agent splits the atomic write; the parent re-runs `bash .codex/scripts/knowledge-check.sh --root .` after integration.
+- Do not rely on subagent thread history for persistence.
 
 ## Task Documents
 

@@ -1,6 +1,6 @@
 ---
 name: codex-spec-run
-description: Execute an approved dated spec mission from .codex/specs/ autonomously until final review — self-plan runnable tasks, delegate where the roadmap authorizes it, verify acceptance, record ROADMAP dispositions and evidence, and offer session rotation at phase boundaries.
+description: Execute an approved dated spec mission from .codex/specs/ autonomously until final review — self-plan runnable tasks, delegate under the active harness policy, verify acceptance, record ROADMAP dispositions and evidence, and offer session rotation at phase boundaries.
 ---
 
 # Codex Spec Run
@@ -35,10 +35,10 @@ Read in full: `SPEC.md`, `ROADMAP.md`, `NOTES.md`, and the tail of `LEDGER.md` (
 Execute **The Loop** from the guideline file, iteration after iteration, without asking permission — the standing approval already covers every roadmap task. In practice:
 
 - Pick the first runnable pending task whose dependencies are satisfied; never select a task marked `⚠ blocked` or an invalid legacy struck-unticked row. Derive the _how_ yourself from the roadmap's decisions — the plan carries decisions and `verify:`, not solutions.
-- Delegate only where the approved roadmap marks waves for fan-out — per `agent-delegation.md`'s explicit-authorization gate and `spec-workflow.md`, the standing approval of that marking is the recorded authorization; unmarked tasks run solo, and the loop never pauses to offer delegation. Worker prompts follow the Worker Prompt Contract (including the Boundary line) and carry the roadmap task text and relevant SPEC lines verbatim. Re-verify every worker result yourself before ticking.
+- Delegate under the active harness policy and `agent-delegation.md`; roadmap wave markings provide a prepared strategy but are not a permission switch. The loop does not pause merely to offer delegation. Worker prompts follow the Worker Prompt Contract (including the Boundary line) and carry the roadmap task text and relevant SPEC lines verbatim. Re-verify every worker result yourself before ticking.
 - Verify on a real surface; UI tasks compare against the frozen POC artifact (`SPEC.md → POC Artifacts`). Use an art-generation skill against that artifact when the roadmap calls for generated assets.
 - On failed verification, do not tick: append `validation-failed`, update Current Acceptance Delta, and retry only with a materially different hypothesis, implementation, or verifier. Stronger evidence that contradicts an earlier pass invalidates that pass per the guideline.
-- On passed verification, tick, log evidence to LEDGER, bump `updated:`, clear any delta the evidence resolves, and route durable findings into NOTES.md (evidence → LEDGER, knowledge → NOTES). Then next runnable task.
+- On passed verification, tick, log evidence to LEDGER, bump `updated:`, clear any delta the evidence resolves, and route mission-local/WIP/uncertain findings into NOTES.md. Promote a durable descriptive fact directly only under `spec-workflow.md`'s narrow knowledge-maintenance exception; then follow the knowledge guideline's atomic owner/map write and checker. Continue to the next runnable task.
 - Honor the SPEC's `commits:` policy: `user` → never run `git commit`; `per-task`/`per-phase` → commit at each tick / phase close with message `spec(<slug>): <summary>`. Push is never granted.
 - Honor the circuit breakers exactly as written. An out-of-scope question (anything Must-NOT-Have doesn't settle) blocks the affected task with its exact unlock condition; continue independent runnable work, and stop the whole loop only through the canonical no-runnable-work breaker. Never resolve scope by guessing or weaken a `verify:` to get past it.
 
@@ -55,7 +55,7 @@ When every roadmap task is completed or explicitly superseded and no unresolved 
 - Asking "should I continue?" between tasks or phases (rotation offers and blockers are the only pause points).
 - Working from memory of a previous iteration instead of re-reading the files after compaction.
 - Creating `.codex/tasks/` files, `HANDOFF.md`, or parallel plans — the spec folder is the only state.
-- Spawning subagents for tasks the roadmap never marked for fan-out, or pausing the loop to ask for delegation permission.
+- Treating roadmap wave markings as a delegation permission switch, spawning overlapping work, or pausing the loop to ask for delegation permission.
 - Ticking without running `verify:`; trusting a subagent's "done"; presenting a demo with unproven scenarios.
 - Editing SPEC.md scope (Acceptance Scenarios, Must-NOT-Have) — only the user changes intent.
 - Counting appended tasks or ticks as progress while Current Acceptance Delta is unchanged.

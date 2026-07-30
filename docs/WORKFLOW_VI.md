@@ -6,6 +6,9 @@
 
 - [Hai layer](#hai-layer)
 - [Mô hình memory - pipeline thăng cấp](#mô-hình-memory---pipeline-thăng-cấp)
+  - [Routing và capture knowledge](#routing-và-capture-knowledge)
+  - [Knowledge contract và lifecycle](#knowledge-contract-và-lifecycle)
+  - [Checker và đối soát project hiện hữu](#checker-và-đối-soát-project-hiện-hữu)
 - [Session handoff - sống sót qua tràn context](#session-handoff---sống-sót-qua-tràn-context)
 - [Workflow task bền](#workflow-task-bền)
   - [Cấu trúc task file](#cấu-trúc-task-file)
@@ -20,7 +23,7 @@
 
 ## Hai layer
 
-CLAUDART cài thành hai layer song song. Chúng không phụ thuộc vào nhau - cài một layer, hoặc cả hai, và thứ duy nhất chúng chia sẻ là lịch sử git nơi chúng được commit.
+CLAUDART cài thành hai layer song song. Chúng không phụ thuộc vào nhau - cài một layer hoặc cả hai. Mỗi layer mang một bản Bash knowledge checker byte-identical, nên từng runtime vẫn tự hoạt động độc lập.
 
 - **Claude layer** (`.claude/`): slash command, rule, review agent, session state
 - **Codex layer** (`.codex/` + `.agents/skills/`): guideline, TOML subagent, repo skill
@@ -42,13 +45,84 @@ CONTEXT.md       JOURNAL.md          rules/ · guidelines/      knowledge/
 
 `rules/` (Claude) và `guidelines/` (Codex) giữ hành vi: những pattern prescriptive kiểu "luôn làm X" đã lặp lại đủ nhiều để xứng đáng có chỗ vĩnh viễn. `/learn` là cách chúng đi vào đó.
 
-`knowledge/` giữ fact: dự án là gì, được nối dây ra sao, các thuật ngữ nghĩa là gì. Rule quy định, knowledge mô tả - tách hai thứ này ra là cách ngăn cả hai mục ruỗng. Mỗi topic một file, và chỉ `knowledge/INDEX.md` được hiển thị lúc bắt đầu session; file chi tiết chờ tới khi task thật sự cần. Khi đã có canonical doc ở nơi khác, knowledge entry trỏ tới nó thay vì copy lại, để không stale vì bản sao.
+`knowledge/` giữ fact: dự án là gì, được nối dây ra sao, và thuật ngữ có nghĩa gì. Rule quy định; knowledge mô tả. Mỗi cụm fact có một topic owner, còn root `INDEX.md` và các `_maps/<domain>.md` tùy chọn route agent mà không load mọi topic. Reference topic trỏ tới canonical document đã tồn tại thay vì copy nó.
 
-Đường thăng cấp: một ghi chú bắt đầu đời trong `CONTEXT.md`. Nếu nó ổn định thành lịch sử, một dòng đi vào `JOURNAL.md`. Nếu hóa ra là fact bền, `/checkpoint` đưa nó vào `knowledge/`. Nếu đó là hành vi đáng lặp lại, `/learn` biến nó thành rule. Chỉ `CONTEXT.md` và rules được auto-load - mọi thứ khác chờ được hỏi tới.
+Checkpoint là boundary bảo trì hàng loạt, không phải cách duy nhất để ghi knowledge. User có thể nói “hãy cập nhật knowledge từ phần vừa xác minh rồi tiếp tục” bất kỳ lúc nào. Agent distill trước khi ghi: fact current, có evidence và sống lâu hơn phần việc hiện tại vào knowledge; task/WIP/proposed state ở task, spec hoặc `CONTEXT.md`; behavior lặp lại đi qua `/learn`; phần chưa chắc thành candidate hoặc hạ topic hiện hữu xuống `review-needed`.
 
-Không phần nào trong hệ này sống sót nếu không được bảo trì, nên có hai command để chống mục ruỗng. `/doctor` là read-only: nó flag fact stale, link `sources:`/`related:` chết, nội dung trùng lặp và những thứ bị đặt sai tầng. `/refactor-memory` xử lý các flag đó - nó kiểm lại từng fact với code hiện tại, gom duplicate, và chuyển nội dung qua lại qua ranh giới descriptive/prescriptive theo cả hai chiều (fact trốn trong rule thì về `knowledge/`; rule lọt vào knowledge thì quay lại). Không có gì bị xóa tự động. Drift được đưa ra ánh sáng; bạn quyết định.
+### Routing và capture knowledge
 
-Một chi tiết khiến việc kiểm tra khả thi: mỗi knowledge entry mang anchor `sources:` hoặc `verify:` trỏ tới thứ nó tóm tắt, để `/doctor` có thể test claim thay vì đoán.
+`/start` chỉ đọc root INDEX. Các turn sau route theo từng tầng:
+
+1. match topic id, alias, path/scope, trigger, rồi description/type;
+2. load tối đa 2 domain map, 3 direct topic và 2 related topic một hop;
+3. đọc frontmatter và heading outline trước body;
+4. đọc section nhỏ nhất liên quan trước khi cân nhắc toàn topic hoặc canonical source.
+
+Khi routed knowledge chưa đủ, agent có thể tìm actual evidence trong knowledge, archive task/spec, JOURNAL và Git bằng query `rg`/Git có giới hạn. Đây là fallback nội bộ, không phải command `/recall`, và không bao giờ write-on-read.
+
+Phép thử capture không phụ thuộc bất kỳ project cụ thể nào:
+
+> Nếu task hiện tại bị hủy ngày mai, claim đã verify này vẫn đúng và giúp một task khác không?
+
+“Không” nghĩa là nó thuộc task/spec/session state. Fact vẫn có thể có scope thay vì global; dùng typed selector như `path:`, `component:`, `platform:`, `environment:`, `version:` hoặc `symbol:`.
+
+Mỗi mutation patch owner hiện hữu trước khi tạo topic, cập nhật topic và route reachable trong cùng diff, rồi chạy checker của layer đó. Không workflow nào tự xóa knowledge hoặc đoán file unindexed mơ hồ là active, retired hay orphan.
+
+### Knowledge contract và lifecycle
+
+Mỗi topic dùng một grammar frontmatter tương thích YAML nhưng được giới hạn có chủ đích:
+
+```yaml
+---
+name: example-service-contract
+description: "Boundary minh họa cho một service giả lập."
+type: domain
+status: active
+updated: YYYY-MM-DD
+last_verified: YYYY-MM-DD
+scope:
+  - "path:examples/service/**"
+sources:
+  - "../../docs/example-service.md"
+related:
+  - "knowledge:example-adjacent-contract"
+verify: "Kiểm tra lại khi contract của service giả lập thay đổi."
+sensitivity: internal
+---
+```
+
+Field bắt buộc là `name`, `description`, `type`, `status` và `updated`. Topic `active` còn cần `last_verified` cùng ít nhất một anchor `sources` hoặc `verify`. Field routing/lifecycle tùy chọn gồm `aliases`, `triggers`, `scope`, `sources`, `related`, `supersedes`, `verify`, `status_note` và `sensitivity`.
+
+Free-text scalar là chuỗi double-quoted một dòng. List dùng block item thụt hai space, mỗi item double-quoted. Folded text, flow/multiline array, single quote, nested map, YAML anchor và inline comment nằm ngoài contract. Giới hạn này là cố ý: Bash checker hoặc parse field chính xác, hoặc báo lỗi; nó không giả làm general YAML parser.
+
+Lifecycle:
+
+- `active` - authority đã verify và reachable từ root router;
+- `review-needed` - uncertainty/conflict hiển thị rõ cùng `status_note`; có thể vẫn được route nhưng không là authority trước khi verify;
+- `superseded` - được thay qua typed edge `supersedes` và bỏ khỏi active routing;
+- `retired` - lịch sử có chủ ý cùng `status_note`, không bao giờ là active route.
+
+Root và domain map dùng dòng:
+
+```text
+- [Title](relative.md) — compact routing hook · <type|map> · <status>
+```
+
+Map được tạo khi store có hơn 24 active topic hoặc root vượt 1.200 visible words. Map không lồng nhau: root → map → topic. Topic trên 10 KiB thành candidate đọc outline/section trước và cân nhắc split; nó không bị tự split.
+
+### Checker và đối soát project hiện hữu
+
+`doctor` gọi `knowledge-check.sh` cho check deterministic - bounded frontmatter, route reachability, source/relation existence, lifecycle, source đổi sau `last_verified`, size và sensitivity budget - rồi mới audit phần ngữ nghĩa script không làm được. `refactor-memory` chạy checker trước và sau khi sửa. `start` không bao giờ chạy checker.
+
+Checker read-only, offline, tương thích Bash 3.2 và không phụ thuộc Node, `jq`, `yq`, database, daemon hay network. Nó không quyết định claim đúng sai, merge/retire/xóa topic, fetch URL hoặc generate INDEX.
+
+Với installation hiện hữu, `INTEGRATE.md` derive delta thực tế giữa upstream và downstream thay vì giả định bản khởi đầu. Khi knowledge contract cần đối soát, flow do upstream hiện tại khai báo giữ nguyên body topic cùng curated routing:
+
+```text
+doctor → refactor-memory → doctor
+```
+
+Bước giữa scan mọi topic và map, đối soát frontmatter đang có trên disk với contract hiện tại, đánh dấu fact đã verify là `active`, phần chưa giải quyết/conflict là `review-needed`, tạo domain map khi grouping có đủ evidence, và giữ file unindexed mơ hồ ở trạng thái chưa promote. Chạy lần hai khi source không đổi phải không tạo thêm diff.
 
 ## Session handoff - sống sót qua tràn context
 
@@ -148,7 +222,7 @@ File là snapshot, không phải bảo đảm. Verify trước khi tiếp tục 
 
 ## Spec workflow - mission trên tầng task
 
-Một task file vừa cho một feature. Có những việc không vừa - cả một game, một hệ thống feature, một POC demo cho khách. Cho những việc đó, CLAUDART thêm một tầng phía trên `tasks/`: một **spec** là một mission sống trong `.claude/specs/YYYY-MM-DD-<slug>/` (Codex: `.codex/specs/YYYY-MM-DD-<slug>/`), được viết một lần bởi một session planning đắt tiền rồi được thực thi tới cổng final review qua nhiều session - thường trên model rẻ hơn - mà không cần approval từng task. Spec thay thế `/plan` trong phạm vi của nó: executor không bao giờ tạo task file, và hai tầng không bao giờ chạy chồng lên cùng một việc.
+Một task file vừa cho một feature. Có những việc không vừa - cả một game, một hệ thống feature, một POC demo cho khách. Cho những việc đó, CLAUDART có một tầng phía trên `tasks/`: một **spec** là một mission sống trong `.claude/specs/YYYY-MM-DD-<slug>/` (Codex: `.codex/specs/YYYY-MM-DD-<slug>/`), được viết một lần bởi một session planning đắt tiền rồi được thực thi tới cổng final review qua nhiều session - thường trên model rẻ hơn - mà không cần approval từng task. Spec thay thế `/plan` trong phạm vi của nó: executor không bao giờ tạo task file, và hai tầng không bao giờ chạy chồng lên cùng một việc.
 
 Mỗi mission là một folder:
 
@@ -164,13 +238,13 @@ Mỗi mission là một folder:
 2. **Bạn approve một lần.** Nói "go" với SPEC + ROADMAP là một _standing approval_ phủ mọi task và phase - ngoại lệ tường minh so với các cổng per-task của workflow task. Từ đây executor không xin phép theo từng task hay từng phase. Blocker hoặc câu hỏi về scope chặn phần việc bị ảnh hưởng kèm điều kiện gỡ chặn chính xác, còn việc độc lập vẫn có thể tiếp tục; cả loop chỉ dừng khi không còn gì runnable. Approve cũng chốt luôn commit policy (`commits:` trong frontmatter SPEC): mặc định loop không bao giờ chạy `git commit`; chọn per-task hoặc per-phase nếu bạn muốn có điểm khôi phục git trong một run dài - push thì không bao giờ được cấp, bất kể policy nào.
 3. **`/spec-run <slug>`** - tốt nhất chạy trong session mới - dẫn dắt loop: định hướng lại từ file (không bao giờ từ trí nhớ session), chọn task pending đầu tiên còn runnable, thực thi, verify trên bề mặt thật, ghi disposition và evidence vào LEDGER. Một acceptance fail chỉ được retry khi hypothesis, implementation hoặc verifier thay đổi đáng kể. Nếu không còn đường mới có cơ sở, task phụ trách được đánh dấu blocked và bỏ qua để làm việc độc lập khác; nếu không còn gì runnable, SPEC chuyển `blocked` kèm điều kiện gỡ chặn chính xác. Một check về sau đi qua acceptance trực tiếp hơn có thể vô hiệu kết quả false-green trước đó.
 4. **Rotation, không phải compaction.** Ở mỗi ranh giới phase, executor báo phase hiện tại, inventory task và acceptance delta chưa giải quyết nếu có, rồi đề nghị checkpoint và rotate - bạn mở session mới, `/start`, rồi `/spec-run <slug>` lần nữa. SPEC + ROADMAP + NOTES + LEDGER _chính là_ baton; spec work không bao giờ ghi `HANDOFF.md`. Bạn cũng có thể ngắt session bất cứ lúc nào - một cú ngắt không khác gì crash, và bước re-orientation xử lý được.
-5. **Cổng cuối.** Khi mọi task đã hoàn tất hoặc được supersede tường minh và không còn blocker, mọi acceptance scenario được chạy lại từ đầu. Chỉ khi tất cả PASS thì acceptance delta mới được xoá và spec chuyển sang `awaiting-final-review`; executor dừng để bạn - không phải agent - xác nhận `done`. Gate fail hoặc defect user báo có anchor trong SPEC/POC đã approve sẽ mở lại implementation work hiện đang phụ trách; các defect được gom thành một batch trước một cumulative gate, không sinh cặp task fix/replay cơ học. Feedback đổi intent hoặc không có anchor đã approve phải quay lại sửa SPEC và approve lại, không âm thầm nới standing approval. Đóng mission cũng quét NOTES: phát hiện được gắn cờ project-wide graduate lên `knowledge/`, bài học lặp lại thành đề xuất `/learn` - không có gì bền vững chết kẹt trong folder mission.
+5. **Cổng cuối.** Khi mọi task đã hoàn tất hoặc được supersede tường minh và không còn blocker, mọi acceptance scenario được chạy lại từ đầu. Chỉ khi tất cả PASS thì acceptance delta mới được xoá và spec chuyển sang `awaiting-final-review`; executor dừng để bạn - không phải agent - xác nhận `done`. Gate fail hoặc defect user báo có anchor trong SPEC/POC đã approve sẽ mở lại implementation work hiện đang phụ trách; các defect được gom thành một batch trước một cumulative gate, không sinh cặp task fix/replay cơ học. Feedback đổi intent hoặc không có anchor đã approve phải quay lại sửa SPEC và approve lại, không âm thầm nới standing approval. Đóng mission cũng quét NOTES: các phát hiện vượt qua knowledge capture gate, kể cả fact được scope chính xác, sẽ graduate lên `knowledge/`; bài học lặp lại thành đề xuất `/learn` - không có gì bền vững chết kẹt trong folder mission.
 
 Contract chuẩn - schema folder, state machine trạng thái, circuit breaker, rotation - nằm trong [`.claude/rules/spec-workflow.md`](../.claude/rules/spec-workflow.md) và [`.codex/guidelines/spec-workflow.md`](../.codex/guidelines/spec-workflow.md).
 
 ## Subagent delegation
 
-Cả hai layer đều có thể fan work out cho subagent - khảo sát song song, triển khai có giới hạn, review, audit - và **cả hai đều tin harness về chuyện _có nên_ delegate hay không.** Agent tool của Claude tự quyết khi nào việc parallelize được; Codex hiện tại spawn agent từ yêu cầu trực tiếp hoặc từ project/skill instruction phù hợp, và tự delegate chủ động ở mức intelligence Ultra. "Be thorough" là cơ sở hợp lý để fan out trên cả hai runtime. Khác biệt còn lại nằm ở mechanics: parent của Claude có thể tiếp tục các lane thật sự độc lập trong khi agent chạy, còn mô hình được document của Codex là spawn → chờ → consolidate, nên protocol của nó mặc định chờ kết quả đã delegate.
+Cả hai layer đều có thể fan work out cho subagent - khảo sát song song, triển khai có giới hạn, review, audit - và **cả hai giao quyết định _có nên_ delegate cho active harness cùng project/skill instruction phù hợp.** CLAUDART ghi strategy và ownership nhưng không hardcode model tier hoặc biến strategy thành permission switch. Protocol được ship xử lý mechanics của từng runtime: parent Claude có thể tiếp tục lane thật sự độc lập trong lúc agent chạy, còn protocol Codex mặc định spawn → chờ → consolidate cho phần việc đã delegate.
 
 Mỗi runtime có protocol viết theo mechanics riêng (`.claude/rules/agent-delegation.md` cho Agent tool của Claude, `.codex/guidelines/agent-delegation.md` cho mô hình explorer/worker của Codex). Một khi delegation _đang_ diễn ra, chúng chia sẻ một xương sống:
 
@@ -185,16 +259,16 @@ Phần sống sót sau đó đi vào task document: delegation strategy, role, o
 
 | Claude Code          | Codex CLI                  | Tác dụng                                                                                                                                                                                          |
 | -------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/start`             | `$codex-start`             | Boot session nhẹ - đọc CONTEXT, active tasks, knowledge INDEX và 3 commit gần nhất                                                                                                                |
+| `/start`             | `$codex-start`             | Boot session nhẹ - đọc CONTEXT, active tasks, root knowledge router (không đọc hết topic) và 3 commit gần nhất                                                                                    |
 | `/plan <task>`       | `$codex-plan <task>`       | Tạo implementation plan bền trong `tasks/` - thay cho plan mode gốc                                                                                                                               |
 | `/spec <mission>`    | `$codex-spec <mission>`    | Planning quy mô mission - phỏng vấn → POC artifact lặp cùng bạn → SPEC + ROADMAP decision-complete trong `specs/`, approve một lần như standing approval                                          |
 | `/spec-run <slug>`   | `$codex-spec-run <slug>`   | Thực thi spec đã approve tự chủ tới cổng final review - verify acceptance, ghi disposition ROADMAP và evidence, chặn loop fail không đổi, đề nghị rotation ở ranh giới phase                      |
 | `/project-discovery` | `$codex-project-discovery` | Planning theo kiểu phỏng vấn trước - biến ý tưởng thô thành project docs trước khi code                                                                                                           |
-| `/refactor-memory`   | `$codex-refactor-memory`   | Gọt CLAUDE.md/AGENTS.md thành index nhẹ; đưa durable content về đúng loại (behavior → rules/guidelines, facts → knowledge); bootstrap + kiểm chứng lại knowledge tier                             |
-| `/checkpoint`        | `$codex-checkpoint`        | Rebuild CONTEXT declarative + sync `tasks/index.md` + append JOURNAL + fact bền → `knowledge/`                                                                                                    |
+| `/refactor-memory`   | `$codex-refactor-memory`   | Chuẩn hóa in-place, idempotent: gọt root index, phân loại durable content, curate map, chạy knowledge checker trước và sau                                                                        |
+| `/checkpoint`        | `$codex-checkpoint`        | Rebuild CONTEXT declarative + sync index task/spec + append JOURNAL + bulk-distill các fact bền còn lại; không phải knowledge write boundary duy nhất                                             |
 | `/handoff`           | `$codex-handoff`           | Baton session single-slot (`HANDOFF.md`) distill trạng thái suy luận - giả thuyết, evidence, dead ends, next step có anchor - khi context window gần đầy; được lần start kế tiếp tiêu thụ rồi xóa |
-| `/learn`             | `$codex-learn`             | Retrospective - thăng cấp lesson lặp lại thành rules/guidelines với ngôn ngữ đóng loophole                                                                                                        |
-| `/doctor`            | `$codex-doctor`            | Health check read-only: cấu trúc, frontmatter, token hygiene, wiring, task hygiene và knowledge hygiene                                                                                           |
+| `/learn`             | `$codex-learn`             | Retrospective về behavior - thăng cấp cách làm việc lặp lại thành rules/guidelines; fact dự án ở lại knowledge                                                                                    |
+| `/doctor`            | `$codex-doctor`            | Health check read-only: Bash checker deterministic trước, rồi audit drift ngữ nghĩa, phân loại, wiring, task và token hygiene                                                                     |
 
 Cả hai layer cũng ship ba review agent, mỗi cái **chỉ được gọi đích danh theo yêu cầu rõ ràng - không bao giờ tự động, kể cả bên trong một task hay spec loop**. `clean-code-reviewer` enforce scope và kỷ luật Clean Code. `security-auditor` chạy audit map theo OWASP - read-only trên code của bạn, ghi findings vào report `security-audit-<date>.md` ở project root và chỉ in summary ra chat. `ui-visual-critic` là bản review thiết kế kiểu "con mắt người" đối kháng cho UI hoặc visual đã render (nặng về thị giác và tốn quota, nên nó luôn chỉ chạy on-demand). Claude đặt tên agent bằng Markdown kebab-case; Codex dùng giá trị TOML `name` dạng snake_case.
 
@@ -220,10 +294,14 @@ your-project/
 │   ├── guidelines/                 # Codex-native semantic guidance
 │   │   ├── ai-behavior.md
 │   │   ├── agent-delegation.md
+│   │   ├── knowledge-management.md
 │   │   ├── spec-workflow.md
 │   │   └── task-management.md
 │   ├── knowledge/                  # Fact mô tả bền + external-doc pointers
-│   │   └── INDEX.md                # Map hiển thị bởi $codex-start; topic files đọc khi cần
+│   │   ├── INDEX.md                # Root router hiển thị bởi $codex-start; topic files đọc khi cần
+│   │   └── _maps/                  # Domain map tùy chọn cho knowledge store lớn
+│   ├── scripts/
+│   │   └── knowledge-check.sh      # Checker cấu trúc read-only, không dependency
 │   ├── specs/                      # Workspace spec quy mô mission (SPEC + ROADMAP + NOTES + LEDGER + artifacts/ mỗi mission)
 │   │   └── INDEX.md                # Registry hiển thị bởi $codex-start; mỗi mission một dòng
 │   └── tasks/                      # Implementation plan bền (mỗi task một file)
@@ -240,12 +318,16 @@ your-project/
     │   └── ui-visual-critic.md
     ├── commands/                   # Slash command protocols
     ├── knowledge/                  # Fact mô tả bền + external-doc pointers
-    │   └── INDEX.md                # Map hiển thị bởi /start; topic files đọc khi cần
+    │   ├── INDEX.md                # Root router hiển thị bởi /start; topic files đọc khi cần
+    │   └── _maps/                  # Domain map tùy chọn cho knowledge store lớn
     ├── rules/
     │   ├── agent-delegation.md
     │   ├── ai-behavior.md
+    │   ├── knowledge-management.md
     │   ├── spec-workflow.md
     │   └── task-management.md
+    ├── scripts/
+    │   └── knowledge-check.sh      # Checker cấu trúc read-only, không dependency
     ├── specs/                      # Workspace spec quy mô mission (SPEC + ROADMAP + NOTES + LEDGER + artifacts/ mỗi mission)
     │   └── INDEX.md                # Registry hiển thị bởi /start; mỗi mission một dòng
     └── tasks/                      # Implementation plan bền (mỗi task một file)

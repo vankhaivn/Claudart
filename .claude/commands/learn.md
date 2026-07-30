@@ -1,12 +1,12 @@
 ---
-description: Force the Agent to reflect on rules and self-learn after completing a task
+description: Reflect on completed work, promote validated behavioral learning, and route durable descriptive facts correctly
 ---
 
 Please execute a Retrospective & Learning Protocol on the work you just completed.
 
-Based on the "Agent Self-Evolution & Context Maintenance" section in `.claude/CLAUDE.md`, you must perform a 3-phase protocol. **Do not skip Phase 0** — without re-reading the rules, you cannot reliably detect what was violated.
+Based on the "Agent Self-Evolution & Context Maintenance" section in `.claude/CLAUDE.md`, perform this protocol. `/learn` may run mid-session. It primarily owns behavioral learning; it is not a required detour before an eligible descriptive fact can enter knowledge.
 
-## Phase 0: Re-Ground in the Rule Set (MANDATORY first step)
+## Re-Ground In The Rule Set
 
 Before any retrospective:
 
@@ -18,9 +18,9 @@ Before any retrospective:
 
 You cannot judge deviations against rules you haven't re-read. If `.claude/rules/` is empty or missing, note that and continue with `.claude/CLAUDE.md` only.
 
-## Phase 1: Rule Refinement (Retrospective)
+## Rule Refinement
 
-Walk the conversation chronologically, comparing each assistant turn against the rule index from Phase 0.
+Walk the conversation chronologically, comparing each assistant turn against the rule index from the re-grounding pass.
 
 1. List every moment the human corrected you OR you deviated from a rule. For each one, answer: _"What rationalization did I use to justify the deviation?"_ — do not just say "I missed the rule".
 2. Did any rule fail because it only described the happy path without closing obvious loopholes?
@@ -28,7 +28,7 @@ Walk the conversation chronologically, comparing each assistant turn against the
 4. If rules contradict each other, resolve the contradiction immediately in `.claude/rules/` or `.claude/CLAUDE.md`.
 5. Also save quiet _confirmations_: if the human accepted an unusual judgment call without pushback, that's a validated approach — record it so you don't drift away from it next time.
 
-## Phase 2: New Knowledge Integration (Self-Evolution)
+## Route What Was Learned
 
 1. Identify any core bug root-causes, architectural decisions, or new design patterns successfully validated in this session.
 2. **Pattern check via JOURNAL** — `.claude/JOURNAL.md` can grow to thousands of lines, so NEVER full-read it. Use this token-efficient strategy:
@@ -36,17 +36,19 @@ Walk the conversation chronologically, comparing each assistant turn against the
    - **Grep when targeted**: if you suspect a specific pattern is recurring, use `grep '| decision |' .claude/JOURNAL.md` (or `pivot`) to surface only matching lines without loading the rest.
    - Look for the same `decision` or `pivot` recurring 2+ times in what you read. A repeating decision is a strong signal that the underlying principle should graduate from CONTEXT/JOURNAL into `.claude/rules/`. Surface these candidates explicitly.
    - Skip this step entirely if `.claude/JOURNAL.md` doesn't exist or has fewer than 5 entries.
-3. Use Chain of Thought before updating files:
-   - First, list all existing files in `.claude/rules/` (already done in Phase 0).
+3. Before updating files:
+   - First, use the rule-file list from the re-grounding pass.
    - Compare the new knowledge with the scope of these existing files.
    - **CRITICAL CONSTRAINT**: DO NOT shoehorn or force new concepts into an existing file if the match is less than 80%. It is strictly PREFERRED to create a new domain file rather than polluting existing specific rules.
    - Then, decide:
      - Existing domain (perfect match) → Update the exact file in `.claude/rules/`.
      - New domain (no strong match) → Create a new `.md` file in `.claude/rules/` with complete YAML frontmatter and append the `@` import to `.claude/CLAUDE.md`.
      - Global standard (applies universally) → Update `.claude/CLAUDE.md` (or `.claude/rules/ai-behavior.md` if it's a behavioral rather than structural rule).
-     - Durable project _fact_ (descriptive, not behavior — how a subsystem works, an integration detail, a domain term, a pointer to a doc in another folder) → this is **knowledge, not a rule**. Create or update a topic file in `.claude/knowledge/` (frontmatter `name`/`description`/`type`/`updated`; optional `sources`/`related`/`verify`) and register it in `.claude/knowledge/INDEX.md` in the same step. Rules prescribe behavior; knowledge describes facts. (Routine fact-capture is `/checkpoint`'s job; `/learn` writes knowledge only when a retrospective surfaces a durable fact checkpoint missed.)
+     - Descriptive fact → apply `.claude/rules/knowledge-management.md`. Promote it directly only if it is durable beyond the current work, current, evidenced, and correctly scoped. Patch the existing owner and reachable map atomically; leave WIP/proposals in the task/spec/CONTEXT surface and uncertainty/conflict as a candidate or `review-needed`.
 
-**Boundary**: `/learn` updates **rules, `.claude/knowledge/`, and `.claude/CLAUDE.md` only**. Do NOT modify `.claude/CONTEXT.md` (that's `/checkpoint`'s job) and do NOT rewrite `.claude/JOURNAL.md` entries (it's append-only). You may _read_ both as evidence.
+4. If knowledge changed, run `bash .claude/scripts/knowledge-check.sh`. Report checker failures and never claim the mutation healthy while they remain.
+
+**Boundary**: `/learn` updates **rules, `.claude/knowledge/`, and `.claude/CLAUDE.md` only**. Do NOT modify `.claude/CONTEXT.md` (that's `/checkpoint`'s job) and do NOT rewrite `.claude/JOURNAL.md` entries (it's append-only). You may read both as evidence. `/checkpoint` bulk-maintains remaining candidates but is not the sole knowledge write gate.
 
 ## Output Standard
 

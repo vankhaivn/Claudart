@@ -74,6 +74,7 @@ tags: [1-5 lowercase kebab-case tags]
 - Libraries/tools the project uses (e.g., "uses Zod, not Joi")
 - Pitfalls already encountered
 - Delegation strategy when relevant: subagent roles, ownership boundaries, validation responsibilities (mirror the `delegation:` field)
+- Knowledge candidates not yet eligible for promotion, labeled with their evidence gap or conflict
 - Anything that would save the next session from re-discovering the same thing>
 
 ## Plan of Work
@@ -135,7 +136,7 @@ blocked ──(blocker cleared)──▶ in-progress
 
 ## Read-only Locks (Critical)
 
-Two task states forbid code edits — the agent may only touch the task file (and `index.md`):
+Two task states forbid code edits. The agent may touch the task file and `index.md`, plus the knowledge-maintenance exception below:
 
 ### Planning Lock — `status: planning`
 
@@ -152,6 +153,10 @@ The agent has reported completion; the user has not yet verified.
 - **Do NOT modify any code file.** The work is under user review; if changes are needed, the user will tell you, and you flip status back to `in-progress` first.
 - **Allowed**: refining the draft Outcomes & Retrospective in the task file based on user comments before they give the final signal.
 - If the user reports a problem or requests a code change, follow the "User reports a problem" flow in the Completion section — do not patch silently while still in awaiting-review.
+
+### Knowledge-maintenance exception
+
+The locks protect implementation code; they do not block knowledge maintenance. Immediate promotion requires the full capture gate plus one trigger: the user asks in natural language, a verified correction must land to avoid continued reliance on known-wrong canonical knowledge, confirmed source drift requires an owner trust/content update, or a lifecycle workflow reaches its promotion boundary. Otherwise keep the observation as a task candidate. WIP, proposals, acceptance state, and task-local or uncertain discoveries stay in the task file. Read `.codex/guidelines/knowledge-management.md` in full, patch the existing owner first, update the topic plus its reachable route atomically, and run `bash .codex/scripts/knowledge-check.sh --root .`. This exception never authorizes code edits or automatic capture after every exploration.
 
 Both locks are enforced by convention, not tool restriction. Honor them strictly. They are the safety net replacing native plan mode and replacing blind agent self-completion.
 
@@ -188,6 +193,8 @@ When `status: in-progress`, the agent maintains the task file as it works:
 
 The plan is a living document. Edits to it are part of the work, not an afterthought. Every in-task log entry — a completed step, a Decision Log line, a Surprises line — carries the full `YYYY-MM-DD HH:MMZ` UTC time, never date-only: one task often logs several entries in a single day, and the time is the only thing that keeps them ordered for audit.
 
+Default discoveries to the task file. Promote one immediately only under the knowledge-maintenance exception; checkpoint can bulk-evaluate the remaining candidates later.
+
 ## Completion — Two-Phase Gate
 
 Completion is a **two-phase** process: agent reports, user verifies. The agent **NEVER** unilaterally archives a task. This mirrors the planning-approval gate at the other end of the workflow.
@@ -216,6 +223,7 @@ When the user gives a completion signal — "approved", "confirmed", "looks good
    ```
 5. Update `.codex/tasks/index.md`: remove from Active, add to Recently Done.
 6. If a recurring pattern emerged, propose `$codex-learn` to graduate it into a guideline.
+7. Leave task-local outcomes in the archived task. At this lifecycle boundary, promote only descriptive claims that pass the full knowledge gate; update owner + reachable route atomically and run the checker after a mutation. Keep unresolved claims as candidates in the archive.
 
 ### Phase 2b — User reports a problem (`awaiting-review → in-progress`)
 
@@ -251,7 +259,7 @@ A new session resuming a task must:
 3. If reality drifted from what the file expects, append a Surprises entry and ask the user whether to adapt the plan or revisit prior steps.
 4. Only then proceed with the next unchecked step.
 
-Never assume the file is still accurate without verification. The Memory Hints section is the future-session's lifeline — treat it as authoritative recall.
+Never assume the file is still accurate without verification. Memory Hints are a routing aid, not authority; verify them against current code and use bounded `rg`/Git evidence search only when routed context is insufficient.
 
 ## `index.md` Format
 

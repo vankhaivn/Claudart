@@ -1,19 +1,20 @@
 ---
-description: Auto-refactor .claude/CLAUDE.md, rules, and agents into a coherent Modular Rules System
+description: Consolidate Claude memory and perform one idempotent in-place normalization of knowledge topics and maps
 ---
 
 Analyze the existing Claude memory layer in this repository and refactor it into a coherent Claude-native Modular Rules System.
 
 The target shape is:
 
-- a concise `.claude/CLAUDE.md` as the sole Claude memory index and instruction entrypoint;
-- durable domain knowledge in scoped files under `.claude/rules/`;
+- a concise `.claude/CLAUDE.md` as the Claude instruction index and entrypoint;
+- durable prescriptive behavior in scoped files under `.claude/rules/`;
+- durable descriptive facts under `.claude/knowledge/`;
 - current live state in `.claude/CONTEXT.md`;
 - append-only history in `.claude/JOURNAL.md`;
 - self-contained skills in `.agents/skills/` or `.claude/commands/`;
 - optional read-only reviewer/explorer agents in `.claude/agents/`.
 
-> **Pre-flight check**: confirm `git status --short` is clean or that the user understands there is in-progress work before you begin. Refuse to proceed if unrelated uncommitted changes could be swallowed by the refactor.
+> **Pre-flight checks**: confirm `git status --short` is clean or that the user understands there is in-progress work before you begin. Refuse to proceed if unrelated uncommitted changes could be swallowed by the refactor. Confirm `.claude/scripts/knowledge-check.sh` exists, then run `bash .claude/scripts/knowledge-check.sh` and retain its complete output as the mechanical baseline. Exit `1` is the finding baseline. Exit `2` is a checker usage/runtime failure and blocks all knowledge mutation. A missing checker is also a blocker.
 
 Execute the following steps systematically, without losing essential project context.
 
@@ -84,7 +85,7 @@ For every non-universal rule under `.claude/rules/`:
    - Claims include named files, modules, classes, functions, commands, config keys, environment variables, endpoints, schemas, database models, event names, message/queue topics, feature flags, UI routes, document contracts, or operational workflows.
    - Ignore purely stylistic rules unless they contradict the codebase's current conventions.
 2. Verify each concrete claim against the actual repository.
-   - Use repository-native source files, package manifests, schemas, migrations, generated types, tests, docs/contracts, and config loaders as evidence.
+   - Use repository-native source files, package manifests, schemas, database change history, generated types, tests, docs/contracts, and config loaders as evidence.
    - Prefer structured files and source-of-truth contracts over comments or stale prose.
    - Use `rg` / `rg --files` first; use language/framework tooling only when it materially improves confidence.
 3. Classify each finding:
@@ -116,7 +117,7 @@ Semantic audit output must list:
 - source-debt items intentionally left as code/doc follow-up;
 - split/merge actions performed;
 - split/merge actions that still need user confirmation;
-- rules proposed for migration to `.claude/knowledge/` (descriptive content misfiled as behavior).
+- rules proposed for reclassification into `.claude/knowledge/` (descriptive content misfiled as behavior).
 
 ## 6. Refactor .claude/CLAUDE.md
 
@@ -150,7 +151,7 @@ See @.claude/rules/architecture.md for architecture boundaries.
 
 **NEVER add `@.claude/JOURNAL.md`** as a loaded context reference. JOURNAL is intentionally excluded from session context to save tokens. If you find such an import or auto-load instruction in `.claude/CLAUDE.md` or `.claude/rules/`, remove it and warn the user in the final summary.
 
-For the knowledge tier, add a **plain pointer line** (not an `@` import), e.g. `Project knowledge: see .claude/knowledge/INDEX.md (surfaced by /start; read entries on demand).` Only `/start` loads the index; knowledge detail files are never auto-loaded.
+For the knowledge tier, add a **plain pointer line** (not an `@` import), e.g. `Project knowledge: see .claude/knowledge/INDEX.md (surfaced by /start; route entries on demand).` `/start` reads only the root router; later workflows may route bounded detail under `knowledge-management.md`. Knowledge files are never auto-imported.
 
 ## 8. Wire Up AI Behavior Guidelines
 
@@ -181,8 +182,8 @@ For every file in `.agents/skills/*/SKILL.md` and `.claude/commands/*.md`:
 
 - Verify the file starts with YAML frontmatter.
 - Confirm `name:` (for SKILL.md) and `description:` are present.
-- Confirm the skill contains sufficient procedure detail to execute the workflow without referencing external files.
-- Keep skills complete and actionable. A future Claude session should know exactly what to do and which files it may update.
+- Confirm the skill contains sufficient procedure and routing detail to execute the workflow. Shared canonical contracts may be referenced one hop instead of copied; resolve and validate every required reference.
+- Keep skills complete and actionable without duplicating canonical rules. A future Claude session should know exactly what to do, which contract to read, and which files it may update.
 - Remove stale generated-marker comments or references to deleted memory files.
 
 For every file in `.claude/agents/`:
@@ -222,15 +223,17 @@ For `.claude/specs/`:
 
 For `.claude/knowledge/`:
 
-- If the folder does not exist, create it with a seed `INDEX.md` (header comment + empty `## Knowledge` section).
-- **Bootstrap an empty tier — discover and write grounded drafts.** If `knowledge/` is empty (the common case right after adopting the tier), do NOT skip it: running `/refactor-memory` IS the trigger to seed it. Proactively (a) discover durable facts you can ground from the project `README`, `docs/`, architecture/contract files, `Makefile`/`package.json`, and descriptive content pulled out of `.claude/CLAUDE.md` in Steps 4/6 (build on your Step 2 analysis); (b) **write** a **small** set of draft entries (domain, architecture, key integrations, glossary — a handful, not an exhaustive dump) into `knowledge/` and register them in `INDEX.md`. **Every entry MUST carry a `sources:` anchor** to the real file it summarizes — no source, no entry. This is an auto-write like the CONTEXT/JOURNAL writes: the **git diff is the review gate** — report exactly what you created so the user can revert anything they dislike. NEVER invent facts by reading raw source code (summarize existing docs/contracts only); if there is genuinely nothing groundable, say so and skip.
-- **Reconcile the index**: every `.md` file (excluding `INDEX.md`) must have an `INDEX.md` entry, and every entry must point to a real file. Add missing entries; flag dead entries.
-- Audit each knowledge file: frontmatter present (`name`/`description`/`type`/`updated`); `sources:` relative paths still exist (dead → report); `updated:` older than 90 days → flag for review.
-- Enforce the boundary: knowledge is **descriptive**. If a file carries prescriptive rules (`MUST`/`NEVER`), propose moving that content to `.claude/rules/`. The boundary is bidirectional — Step 5 handles the reverse (a purely descriptive rule that belongs here).
-- **Verify concrete claims against the repo** — apply the same rigor as Step 5, on knowledge bodies: extract concrete claims (named files, modules, symbols, endpoints, config keys, paths) and confirm they still exist. Classify accurate / stale / needs-user-decision. Knowledge is descriptive fact about the codebase, so it rots faster than rules — flag stale facts for user review, never auto-delete. Recommend a `sources:` or `verify:` anchor for any entry that has neither (unanchored facts can't be checked deterministically by `/doctor`).
-- **Overlap detection** (`knowledge ↔ knowledge` and `knowledge ↔ rules`): use `description`/`type` keywords as a cheap overlap signal (as Step 9 uses tag overlap for rules); read bodies only when keywords collide. Two knowledge entries on the same topic → propose merging into the most specific owner + a `[[link]]`. A fact restated inside a rule's prose → propose keeping the _behavior_ in the rule and the _fact_ in knowledge, cross-linked — never duplicated. Propose only; merge after user confirmation.
-- **Reconcile `related:` links**: confirm each `[[slug]]` in a knowledge file's `related:` resolves to an existing knowledge topic or rule; repair or report dead links.
-- Do not auto-delete or rewrite knowledge bodies — flag staleness and dead pointers for user review. Keep `INDEX.md` a one-line-per-entry map.
+- Read `.claude/rules/knowledge-management.md`; it is the semantic source of truth. If the folder or root router is missing, create the lean canonical scaffold.
+- Perform **one in-place normalization pass** over every topic and `_maps/*.md`, including unindexed files. Preserve every body verbatim and preserve curated root/map titles, hooks, grouping, ordering, and external routes.
+- Normalize frontmatter and routes to the rule's current grammar without inventing aliases, triggers, scope, relations, evidence, or lifecycle. `updated` changes only where this pass edits content; `last_verified` changes only after an actual evidence check.
+- Verify concrete claims against current sources/repository evidence. For a current canonical claim with sufficient evidence, set `status: active`, set `last_verified` to the verification date, and retain at least one `sources` or `verify` anchor. With insufficient or conflicting evidence, set `status: review-needed` and add a concise `status_note`; do not fabricate certainty. Preserve an explicitly evidenced `superseded` or `retired` lifecycle and its explanation.
+- Patch an existing owner before creating a topic. On an empty tier, create only a small grounded set whose claims pass every capture gate; otherwise leave the tier empty. Never convert WIP, proposals, task/spec state, or unsupported inference into knowledge.
+- Reconcile each already-reachable topic with its root or domain-map route atomically. Preserve ambiguous unindexed files as unindexed: normalize the file itself where safe, report it for review, and neither promote nor remove it.
+- When active topics exceed 24 or the root exceeds 1,200 visible words, create `_maps/<domain>.md` routes with root → map → topic only, using existing scope/grouping evidence while preserving curated and external routes. If ownership cannot be grouped safely, preserve the direct routes and report the decision instead of guessing. Never nest maps. A topic over 10 KiB is a reported split candidate; do not split it automatically.
+- Detect overlap and lifecycle tension, but never auto-merge, auto-retire, auto-supersede, delete, or rewrite bodies without unambiguous evidence and the required user decision.
+- Do not add a recall command, write-on-read behavior, telemetry, database, or daemon.
+- Make the result idempotent: running `/refactor-memory` again against unchanged sources must produce no knowledge diff.
+- After all mutations, run `bash .claude/scripts/knowledge-check.sh --fail-on warning`. Exit `1` means findings remain and normalization cannot be claimed complete; exit `2` is a checker failure and blocks completion.
 
 ## 11. Base Template Notes
 
@@ -250,7 +253,7 @@ Include these rules:
 - "Do not assume a human will document your code patterns. If you build it, document it."
 - Existing rules change → update the relevant file in `.claude/rules/`.
 - New domains/layers → CREATE a new rule file in `.claude/rules/` (with flow-style `paths: [...]`, `description:`, `when_to_use:`, and inline `tags: [...]` frontmatter) AND APPEND its `@` import to `.claude/CLAUDE.md`'s Domain Rules section.
-- Durable project facts (domain, architecture, integration, glossary, external-doc pointers) → CREATE or update a topic file in `.claude/knowledge/` and register it in `.claude/knowledge/INDEX.md`. Knowledge is descriptive; rules are prescriptive.
+- Durable descriptive facts that pass `.claude/rules/knowledge-management.md` → patch the canonical owner and reachable map atomically, then run the checker. Scope may be local; task/spec state stays local.
 - Global changes → update `.claude/CLAUDE.md` directly.
 - Shared live state → update `.claude/CONTEXT.md` through `/checkpoint`, not through refactor-memory.
 
@@ -264,8 +267,9 @@ Before the final summary, run or perform:
 - Search for stale references to deleted memory files.
 - Search `.claude/CLAUDE.md` and `.claude/rules/` for JOURNAL auto-load instructions.
 - Confirm every rule listed in `.claude/CLAUDE.md` exists on disk.
-- Confirm `.claude/knowledge/INDEX.md` exists, lists every topic file, and is referenced by a plain (non-`@`) pointer in `.claude/CLAUDE.md`.
-- Confirm every knowledge entry you created this run (bootstrap or migration) carries a `sources:` anchor; drop or flag any that does not.
+- Confirm `.claude/knowledge/INDEX.md` exists and is referenced by a plain (non-`@`) pointer in `.claude/CLAUDE.md`; ambiguous unindexed files remain reported rather than silently routed.
+- Run `bash .claude/scripts/knowledge-check.sh --fail-on warning` as the post-check even when the pre-check passed; record both outcomes and block completion on exit `2`.
+- Confirm the in-place knowledge normalization is idempotent and every `active` entry has `last_verified` plus `sources` or `verify`.
 - Confirm semantic rule findings were classified as accurate, rule-stale, source-debt, open-work, or needs-user-decision.
 
 Do not run `git commit`, `git push`, `git merge`, `git rebase`, or similar history/remote-writing commands yourself.
@@ -274,7 +278,7 @@ Do not run `git commit`, `git push`, `git merge`, `git rebase`, or similar histo
 
 Output a concise summary covering:
 
-1. Rule files and `.claude/knowledge/` entries created, updated, or migrated between tiers (including any bootstrap of an empty tier).
+1. Rule files and `.claude/knowledge/` entries created, updated, or reclassified between tiers, including the in-place normalization result.
 2. `.claude/CLAUDE.md` changes and final line count.
 3. Audit findings from Step 9, separated into auto-fixed and needs user decision.
 4. Semantic drift findings from Step 5, including source-debt items not fixed in memory.
@@ -284,3 +288,5 @@ Output a concise summary covering:
 8. Suggest the user run `git diff` to review every change before committing.
 
 Confirm completion only after every relevant step has been completed or explicitly marked not applicable.
+
+For an existing installation, preserve the upgrade sequence: `/doctor` → `/refactor-memory` → `/doctor`.

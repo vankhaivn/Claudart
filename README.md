@@ -27,6 +27,8 @@ curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh 
 
 > Read https://raw.githubusercontent.com/vankhaivn/Claudart/main/INTEGRATE.md and follow it to integrate CLAUDART into this project. Ask me before touching anything I've customized.
 
+Existing installations use `INTEGRATE.md` to derive their actual delta against current upstream instead of assuming a starting release. For the knowledge contract currently declared upstream, reconciliation runs `doctor → refactor-memory → doctor`; no additional recall or migration command is part of that workflow.
+
 ## What it solves
 
 | Pain                                          | What CLAUDART does about it                                                                          |
@@ -35,10 +37,10 @@ curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh 
 | Plans die when the session closes             | `/plan` writes the plan to a task file that any later session can pick up where you left off         |
 | A mission is too big for one session or plan  | `/spec` freezes the intent in a POC + roadmap you approve once; `/spec-run` loops it to final review |
 | A productive session hits the context ceiling | `/handoff` saves the session's reasoning — hypothesis, evidence, dead ends — for the next `/start`   |
-| The same decisions get re-discovered weekly   | `/learn` turns recurring corrections into path-scoped rules                                          |
-| Durable facts have nowhere to live            | `knowledge/` holds them; an index is surfaced each session, details are read on demand               |
+| The same decisions get re-discovered weekly   | `/learn` turns recurring behavior corrections into path-scoped rules                                 |
+| Durable facts have nowhere to live            | `knowledge/` maps them; the agent loads the matching map, topic outline, then only relevant sections |
 | `CLAUDE.md` bloats into a token sink          | `/refactor-memory` trims it back to an index and files the content where it belongs                  |
-| Memory rots silently                          | `/doctor` is a read-only health check that flags drift, dead links, and misfiled content             |
+| Memory rots silently                          | `/doctor` runs a shipped read-only checker, then audits semantic drift and misfiled content          |
 
 Three review agents ship alongside the commands — `clean-code-reviewer`, `security-auditor`, and `ui-visual-critic`, each invoked on explicit request only (never automatically, not even inside a task or spec loop) — plus a delegation protocol that keeps parallel subagent work bounded instead of letting it sprawl.
 
@@ -57,7 +59,9 @@ always loaded    never loaded           auto-loads on          INDEX on /start,
 in context       (audit only)           a matching path        detail on demand
 ```
 
-`/checkpoint` rebuilds `CONTEXT.md` at the end of a session and retires history to `JOURNAL.md`, which is never loaded into context — it exists for audits, not recall. Facts that turn out to be durable graduate to `knowledge/`; behavior that keeps recurring graduates to `rules/` via `/learn`. When something looks stale, `/doctor` flags it, and `/refactor-memory` re-checks each fact against the actual code before keeping it.
+`/checkpoint` rebuilds `CONTEXT.md` at the end of a session, retires history to `JOURNAL.md`, and bulk-promotes remaining durable facts. It is not the only knowledge write boundary: during a long exploration, saying “update knowledge from what we just verified, then continue” triggers an immediate distillation pass. Verified, current project facts go to `knowledge/`; task/WIP/proposed state stays in its task, spec, or context; uncertain claims remain candidates unless evidence invalidates an existing owner, in which case that topic becomes `review-needed`; recurring behavior goes to rules through `/learn`.
+
+Retrieval is map-first and bounded: root `INDEX.md`, at most the relevant domain maps, then topic frontmatter/outline and the smallest useful section. Full files and source-history search are fallbacks, not the default. `/doctor` and `/refactor-memory` call a dependency-free Bash checker internally; users do not add another command to normal prompts.
 
 ## Quick start
 
@@ -89,7 +93,7 @@ Codex CLI runs the same flow with `$codex-` instead of `/` (e.g. `$codex-start`)
 | **PR-reviewable memory**       |           ✅           |               ❌                |          ❌           |          ❌           |            ✅ JSON committed to git             |            ❌ ChromaDB + SQLite binary             |
 | **Tool support**               | Claude Code, Codex CLI |            API only             |       API only        |    LangGraph only     | Claude, Codex, Cursor, Copilot, Gemini + 6 more | Claude Code, Codex CLI, Gemini CLI, MCP-compatible |
 
-Plain markdown in the repo won this argument: `AGENTS.md` is a Linux Foundation standard now, used in over 60,000 public repositories. CLAUDART assumes that convention and builds the missing workflow on top of it — orientation, planning, learning, hygiene, and review.
+Plain markdown in the repo won this argument: `AGENTS.md` provides a versioned convention that multiple coding agents can share. CLAUDART builds the missing workflow on top of it — orientation, planning, learning, hygiene, and review.
 
 ## License
 

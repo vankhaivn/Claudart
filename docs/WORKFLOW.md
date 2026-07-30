@@ -6,6 +6,9 @@ This is the manual. The [README](../README.md) is the pitch; this document expla
 
 - [Two layers](#two-layers)
 - [Memory model — the graduation pipeline](#memory-model--the-graduation-pipeline)
+  - [Knowledge routing and capture](#knowledge-routing-and-capture)
+  - [Knowledge contract and lifecycle](#knowledge-contract-and-lifecycle)
+  - [Checker and existing-project reconciliation](#checker-and-existing-project-reconciliation)
 - [Session handoff — surviving a context overflow](#session-handoff--surviving-a-context-overflow)
 - [Persistent task workflow](#persistent-task-workflow)
   - [Task file structure](#task-file-structure)
@@ -20,7 +23,7 @@ This is the manual. The [README](../README.md) is the pitch; this document expla
 
 ## Two layers
 
-CLAUDART installs as two parallel layers. They don't depend on each other — install one, or both, and the only thing they share is the git history they're committed to.
+CLAUDART installs as two parallel layers. They do not depend on each other — install one or both. Each layer carries its own byte-identical Bash knowledge checker, so either runtime remains usable by itself.
 
 - **Claude layer** (`.claude/`): slash commands, rules, review agents, session state
 - **Codex layer** (`.codex/` + `.agents/skills/`): guidelines, TOML subagents, repo skills
@@ -42,13 +45,84 @@ CONTEXT.md       JOURNAL.md          rules/ · guidelines/      knowledge/
 
 `rules/` (Claude) and `guidelines/` (Codex) hold behavior: the prescriptive "always do X" patterns that earned a permanent place by recurring. `/learn` is how they get there.
 
-`knowledge/` holds facts: what the project is, how it's wired, what the words mean. Rules prescribe, knowledge describes — keeping the two apart is what stops both from rotting. One topic per file, and only `knowledge/INDEX.md` is surfaced at session start; detail files wait until a task actually needs them. Where a canonical doc already exists elsewhere, a knowledge entry points at it instead of copying it, so it can't go stale by copy.
+`knowledge/` holds facts: what the project is, how it is wired, and what its terms mean. Rules prescribe; knowledge describes. One topic owns each fact cluster, while the root `INDEX.md` and optional `_maps/<domain>.md` files route the agent without loading every topic. A reference topic points to an existing canonical document instead of copying it.
 
-The graduation path: a note starts life in `CONTEXT.md`. If it settles into history, one line goes to `JOURNAL.md`. If it turns out to be a durable fact, `/checkpoint` files it under `knowledge/`. If it's a behavior worth repeating, `/learn` makes it a rule. Only `CONTEXT.md` and rules are auto-loaded — everything else waits to be asked.
+Checkpoint is the bulk maintenance boundary, not the only knowledge write boundary. The user can say “update knowledge from what we just verified, then continue” at any point. The agent distils the exploration before writing: current, evidenced facts that outlive the current work go to knowledge; task/WIP/proposed state stays in the task, spec, or `CONTEXT.md`; recurring behavior goes through `/learn`; uncertainty becomes a candidate or an existing topic is lowered to `review-needed`.
 
-None of this survives without maintenance, so two commands exist to fight rot. `/doctor` is read-only: it flags stale facts, dead `sources:`/`related:` links, duplicated content, and things filed in the wrong tier. `/refactor-memory` acts on those flags — it re-verifies each fact against the current code, consolidates duplicates, and moves content across the descriptive/prescriptive boundary in both directions (a fact hiding in a rule goes to `knowledge/`; a rule that leaked into knowledge goes back). Nothing is deleted automatically. Drift is surfaced; you decide.
+### Knowledge routing and capture
 
-One detail makes the checking possible at all: every knowledge entry carries a `sources:` or `verify:` anchor pointing at what it summarizes, so `/doctor` can test the claim instead of guessing at it.
+`/start` reads the root INDEX only. Later turns route progressively:
+
+1. match exact topic ids, aliases, paths/scopes, triggers, then description/type;
+2. load at most 2 domain maps, 3 direct topics, and 2 one-hop related topics;
+3. read frontmatter and heading outline before a body;
+4. read the smallest relevant section before considering the full topic or canonical source.
+
+When routed knowledge is insufficient, the agent may search actual evidence in knowledge, task/spec archives, JOURNAL, and Git with bounded `rg`/Git queries. This is an internal fallback, not a `/recall` command, and it never writes on read.
+
+The capture test is deliberately independent of any one project:
+
+> If the current task were cancelled tomorrow, would this verified claim still be true and help another task?
+
+“No” means it belongs in task/spec/session state. A fact can still be scoped rather than global; use typed `scope` selectors such as `path:`, `component:`, `platform:`, `environment:`, `version:`, or `symbol:`.
+
+Every mutation patches an existing owner before creating a topic, updates the topic and its reachable route in the same diff, then runs the layer's checker. No workflow auto-deletes knowledge or guesses whether an ambiguous unindexed file is active, retired, or orphaned.
+
+### Knowledge contract and lifecycle
+
+Every topic uses a deliberately bounded YAML-compatible frontmatter grammar:
+
+```yaml
+---
+name: example-service-contract
+description: "Illustrative boundaries for a synthetic service."
+type: domain
+status: active
+updated: YYYY-MM-DD
+last_verified: YYYY-MM-DD
+scope:
+  - "path:examples/service/**"
+sources:
+  - "../../docs/example-service.md"
+related:
+  - "knowledge:example-adjacent-contract"
+verify: "Recheck when the synthetic example service contract changes."
+sensitivity: internal
+---
+```
+
+Required fields are `name`, `description`, `type`, `status`, and `updated`. An `active` topic also needs `last_verified` plus at least one `sources` or `verify` anchor. Optional routing/lifecycle fields are `aliases`, `triggers`, `scope`, `sources`, `related`, `supersedes`, `verify`, `status_note`, and `sensitivity`.
+
+Free-text scalars are one-line double-quoted strings. Lists use two-space block items, each double-quoted. Folded text, flow/multiline arrays, single quotes, nested maps, YAML anchors, and inline comments are outside the contract. The restriction is intentional: the shipped Bash checker either parses a field exactly or reports it; it never approximates general YAML.
+
+Lifecycle states:
+
+- `active` — verified authority and reachable from the root router;
+- `review-needed` — visible uncertainty/conflict, with `status_note`; it may remain routed but cannot be treated as authority without verification;
+- `superseded` — replaced through a typed `supersedes` edge and removed from active routing;
+- `retired` — intentionally historical, with `status_note`, never an active route.
+
+Root and domain-map lines use:
+
+```text
+- [Title](relative.md) — compact routing hook · <type|map> · <status>
+```
+
+Maps are introduced when the store has more than 24 active topics or the root exceeds 1,200 visible words. Maps never nest: root → map → topic. A topic over 10 KiB becomes an outline/section-first split candidate; it is not automatically split.
+
+### Checker and existing-project reconciliation
+
+`doctor` invokes `knowledge-check.sh` for deterministic checks — bounded frontmatter, route reachability, source/relation existence, lifecycle, source changes after `last_verified`, and size/sensitivity budgets — then performs the semantic audit a script cannot do. `refactor-memory` runs the checker before and after its changes. `start` never runs it.
+
+The checker is read-only, offline, Bash 3.2-compatible, and has no Node, `jq`, `yq`, database, daemon, or network dependency. It does not decide whether a claim is true, merge/retire/delete topics, fetch URLs, or generate INDEX.
+
+For an existing installation, `INTEGRATE.md` derives the actual upstream/downstream delta instead of assuming a starting release. When its knowledge contract needs reconciliation, the flow declared by current upstream preserves live topic bodies and curated routing:
+
+```text
+doctor → refactor-memory → doctor
+```
+
+The middle step scans every topic and map, reconciles frontmatter found on disk with the current contract, marks verified facts `active`, marks unresolved/conflicting facts `review-needed`, creates domain maps when routing evidence is sufficient, and leaves ambiguous unindexed files unpromoted. A second run with unchanged sources must produce no further diff.
 
 ## Session handoff — surviving a context overflow
 
@@ -148,7 +222,7 @@ The file is a snapshot, not a guarantee. Verifying before continuing is what kee
 
 ## Spec workflow — missions above the task layer
 
-A task file fits one feature. Some work doesn't — a whole game, a feature system, a client-demo POC. For those, CLAUDART adds a layer above `tasks/`: a **spec** is a mission living in `.claude/specs/YYYY-MM-DD-<slug>/` (Codex: `.codex/specs/YYYY-MM-DD-<slug>/`), written once by an expensive planning session and then executed to the final-review gate across many sessions — often on a cheaper model — without per-task approval. A spec supersedes `/plan` for its scope: the executor never creates task files, and the two layers never run over the same work.
+A task file fits one feature. Some work doesn't — a whole game, a feature system, a client-demo POC. For those, CLAUDART has a layer above `tasks/`: a **spec** is a mission living in `.claude/specs/YYYY-MM-DD-<slug>/` (Codex: `.codex/specs/YYYY-MM-DD-<slug>/`), written once by an expensive planning session and then executed to the final-review gate across many sessions — often on a cheaper model — without per-task approval. A spec supersedes `/plan` for its scope: the executor never creates task files, and the two layers never run over the same work.
 
 Each mission is one folder:
 
@@ -164,13 +238,13 @@ Each mission is one folder:
 2. **You approve once.** Saying "go" on the SPEC + ROADMAP is a _standing approval_ covering every task and phase — the explicit exception to the task workflow's per-task gates. From here the executor doesn't ask permission per task or per phase. A blocker or scope question stops the affected work with an exact unlock condition, while independent work may continue; the whole loop stops only when nothing runnable remains. Approval also fixes the commit policy (`commits:` in SPEC frontmatter): by default the loop never runs `git commit`; opt into per-task or per-phase commits if you want git restore points during a long run — push is never granted either way.
 3. **`/spec-run <slug>`** — best run in a fresh session — drives the loop: re-orient from the files (never from session memory), pick the first runnable pending task, execute, verify on a real surface, record its disposition, and log evidence to the LEDGER. A failed acceptance is retried only when the hypothesis, implementation, or verifier materially changes. If no defensible new path exists, the responsible task is marked blocked and skipped for independent work; if nothing runnable remains, the SPEC becomes `blocked` with an exact unlock condition. A later check that exercises the acceptance more directly can invalidate an earlier false-green result.
 4. **Rotation, not compaction.** At every phase boundary the executor reports the current phase, task inventory, and any unresolved acceptance delta, then offers to checkpoint and rotate — you open a fresh session, `/start`, then `/spec-run <slug>` again. SPEC + ROADMAP + NOTES + LEDGER _are_ the baton; spec work never writes `HANDOFF.md`. You can also just kill the session at any point — an interrupt is indistinguishable from a crash, and re-orientation handles it.
-5. **Final gate.** When every task is completed or explicitly superseded and no blocker remains, every acceptance scenario is re-run fresh. Only a full pass clears the acceptance delta and moves the spec to `awaiting-final-review`, where the executor stops and you — not the agent — confirm `done`. A failed gate or a reported defect anchored in the approved SPEC/POC reopens the current responsible implementation work; reported defects are batched before one cumulative gate, without mechanical fix/replay task pairs. Feedback that changes intent or lacks an approved anchor returns to SPEC amendment and renewed approval instead of silently widening the standing approval. Closing a mission also sweeps NOTES: discoveries flagged as project-wide graduate to `knowledge/`, recurring lessons become `/learn` proposals — nothing durable dies inside the mission folder.
+5. **Final gate.** When every task is completed or explicitly superseded and no blocker remains, every acceptance scenario is re-run fresh. Only a full pass clears the acceptance delta and moves the spec to `awaiting-final-review`, where the executor stops and you — not the agent — confirm `done`. A failed gate or a reported defect anchored in the approved SPEC/POC reopens the current responsible implementation work; reported defects are batched before one cumulative gate, without mechanical fix/replay task pairs. Feedback that changes intent or lacks an approved anchor returns to SPEC amendment and renewed approval instead of silently widening the standing approval. Closing a mission also sweeps NOTES: discoveries that pass the knowledge capture gate, including accurately scoped facts, graduate to `knowledge/`; recurring lessons become `/learn` proposals — nothing durable dies inside the mission folder.
 
 The canonical contract — folder schema, status state machine, circuit breakers, rotation — lives in [`.claude/rules/spec-workflow.md`](../.claude/rules/spec-workflow.md) and [`.codex/guidelines/spec-workflow.md`](../.codex/guidelines/spec-workflow.md).
 
 ## Subagent delegation
 
-Both layers can fan work out to subagents — parallel exploration, bounded implementation, review, audits — and **both trust their harness on _whether_ to delegate.** Claude's Agent tool decides for itself when work parallelizes; current Codex spawns agents from a direct request or an applicable project/skill instruction, and delegates proactively at the Ultra intelligence level. "Be thorough" is fair grounds to fan out on either runtime. What still differs is the mechanics: Claude's parent may keep working on genuinely independent lanes while agents run, while Codex's documented model is spawn → wait → consolidate, so its protocol defaults to waiting on delegated results.
+Both layers can fan work out to subagents — parallel exploration, bounded implementation, review, audits — and **both defer _whether_ to delegate to the active harness plus applicable project/skill instructions.** CLAUDART records strategy and ownership but does not hardcode a model tier or turn that strategy into a permission switch. The shipped protocols account for runtime mechanics: Claude's parent may keep working on genuinely independent lanes while agents run, while the Codex protocol defaults to spawn → wait → consolidate for delegated work.
 
 Each runtime gets a protocol written for its own mechanics (`.claude/rules/agent-delegation.md` for Claude's Agent tool, `.codex/guidelines/agent-delegation.md` for Codex's explorer/worker model). Once delegation _is_ happening, they share one spine:
 
@@ -185,16 +259,16 @@ What survives afterwards goes in the task document: the delegation strategy, the
 
 | Claude Code          | Codex CLI                  | What it does                                                                                                                                                                                               |
 | -------------------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/start`             | `$codex-start`             | Lightweight session boot — reads CONTEXT, active tasks, the knowledge INDEX, and the last 3 git commits                                                                                                    |
+| `/start`             | `$codex-start`             | Lightweight session boot — reads CONTEXT, active tasks, the root knowledge router (not every topic), and the last 3 git commits                                                                            |
 | `/plan <task>`       | `$codex-plan <task>`       | Creates a persistent implementation plan in `tasks/` — replaces native plan mode                                                                                                                           |
 | `/spec <mission>`    | `$codex-spec <mission>`    | Mission-scale planning — interview → POC artifact iterated with you → decision-complete SPEC + ROADMAP in `specs/`, approved once as a standing approval                                                   |
 | `/spec-run <slug>`   | `$codex-spec-run <slug>`   | Executes an approved spec autonomously until final review — verifies acceptance, records ROADMAP dispositions and evidence, blocks unchanged failure loops, offers rotation at phase boundaries            |
 | `/project-discovery` | `$codex-project-discovery` | Interview-first planning — turns rough ideas into project docs before any code                                                                                                                             |
-| `/refactor-memory`   | `$codex-refactor-memory`   | Trims CLAUDE.md/AGENTS.md to a lean index; routes durable content by type (behavior → rules/guidelines, facts → knowledge); bootstraps + re-verifies the knowledge tier                                    |
-| `/checkpoint`        | `$codex-checkpoint`        | Declarative CONTEXT rebuild + `tasks/index.md` sync + JOURNAL append + durable facts → `knowledge/`                                                                                                        |
+| `/refactor-memory`   | `$codex-refactor-memory`   | Idempotent in-place normalization: trims the root index, classifies durable content, curates maps, and runs the knowledge checker before and after                                                         |
+| `/checkpoint`        | `$codex-checkpoint`        | Declarative CONTEXT rebuild + task/spec index sync + JOURNAL append + bulk distillation of remaining durable facts; not the only knowledge write boundary                                                  |
 | `/handoff`           | `$codex-handoff`           | Single-slot session baton (`HANDOFF.md`) distilling reasoning state — hypothesis, evidence, dead ends, anchored next step — when the context window is nearly full; consumed and deleted by the next start |
-| `/learn`             | `$codex-learn`             | Retrospective — promotes recurring lessons into rules/guidelines with loophole-closing language                                                                                                            |
-| `/doctor`            | `$codex-doctor`            | Read-only health check: structure, frontmatter, token hygiene, wiring, task & knowledge hygiene                                                                                                            |
+| `/learn`             | `$codex-learn`             | Behavior retrospective — promotes recurring ways of working into rules/guidelines; project facts stay in knowledge                                                                                         |
+| `/doctor`            | `$codex-doctor`            | Read-only health check: deterministic Bash checker first, then semantic drift, classification, wiring, task, and token-hygiene audits                                                                      |
 
 Both layers also ship three review agents, each **invoked by name on explicit request only — never automatically, not even inside a task or spec loop**. `clean-code-reviewer` enforces scope and Clean Code discipline. `security-auditor` runs an OWASP-mapped audit — read-only on your code, writing its findings to a `security-audit-<date>.md` report at the project root and printing only the summary to chat. `ui-visual-critic` is an adversarial "human-eye" design review of rendered UI or visuals (vision-heavy and quota-expensive, which is why it stays strictly on-demand). Claude names agents in kebab-case Markdown; Codex uses snake_case TOML `name` values.
 
@@ -220,10 +294,14 @@ your-project/
 │   ├── guidelines/                 # Codex-native semantic guidance
 │   │   ├── ai-behavior.md
 │   │   ├── agent-delegation.md
+│   │   ├── knowledge-management.md
 │   │   ├── spec-workflow.md
 │   │   └── task-management.md
 │   ├── knowledge/                  # Durable descriptive facts + external-doc pointers
-│   │   └── INDEX.md                # Map surfaced by $codex-start; topic files read on demand
+│   │   ├── INDEX.md                # Root router surfaced by $codex-start; topic files read on demand
+│   │   └── _maps/                  # Optional domain maps for large knowledge stores
+│   ├── scripts/
+│   │   └── knowledge-check.sh      # Dependency-free, read-only structural checker
 │   ├── specs/                      # Mission-scale spec workspaces (SPEC + ROADMAP + NOTES + LEDGER + artifacts/ per mission)
 │   │   └── INDEX.md                # Registry surfaced by $codex-start; one line per mission
 │   └── tasks/                      # Persistent implementation plans (one file per task)
@@ -240,12 +318,16 @@ your-project/
     │   └── ui-visual-critic.md
     ├── commands/                   # Slash command protocols
     ├── knowledge/                  # Durable descriptive facts + external-doc pointers
-    │   └── INDEX.md                # Map surfaced by /start; topic files read on demand
+    │   ├── INDEX.md                # Root router surfaced by /start; topic files read on demand
+    │   └── _maps/                  # Optional domain maps for large knowledge stores
     ├── rules/
     │   ├── agent-delegation.md
     │   ├── ai-behavior.md
+    │   ├── knowledge-management.md
     │   ├── spec-workflow.md
     │   └── task-management.md
+    ├── scripts/
+    │   └── knowledge-check.sh      # Dependency-free, read-only structural checker
     ├── specs/                      # Mission-scale spec workspaces (SPEC + ROADMAP + NOTES + LEDGER + artifacts/ per mission)
     │   └── INDEX.md                # Registry surfaced by /start; one line per mission
     └── tasks/                      # Persistent implementation plans (one file per task)

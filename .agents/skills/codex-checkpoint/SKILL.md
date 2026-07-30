@@ -1,6 +1,6 @@
 ---
 name: codex-checkpoint
-description: Update Codex current state by rewriting .codex/CONTEXT.md, syncing .codex/tasks/index.md and .codex/specs/INDEX.md with current file states, and appending meaningful retired items to .codex/JOURNAL.md. Graduate durable project facts to .codex/knowledge/.
+description: Bulk-maintain Codex current state, task/spec indexes, JOURNAL history, and eligible durable project knowledge at a session boundary.
 ---
 
 # CodexCheckpoint
@@ -9,12 +9,14 @@ Update `.codex/CONTEXT.md` to reflect the current state of work from a Codex ses
 
 The output is not a log of what happened. It is a declarative snapshot of what is true right now. Lifelong append is the failure mode this command exists to prevent.
 
+Checkpoint is a bulk-maintenance boundary, not the only way to write knowledge. A user may request an eligible knowledge update in natural language at any point; that update follows `.codex/guidelines/knowledge-management.md` immediately and does not require checkpoint.
+
 ## Hard Rules
 
 1. `.codex/CONTEXT.md` is overwritten, not appended. Anything not still true right now must be removed.
 2. `.codex/CONTEXT.md` hard ceiling: 150 lines, target under 100. If your draft exceeds 150, stop and ask the user to trim manually or run `$codex-refactor-memory`.
 3. `.codex/JOURNAL.md` is append-only. Never edit or delete prior entries. Each new entry is a single line.
-4. Never add `.codex/JOURNAL.md` as auto-loaded context in `AGENTS.md` or `.codex/guidelines/`.
+4. Never add `.codex/JOURNAL.md` as auto-loaded context in `AGENTS.md` or `.codex/guidelines/`. If such an auto-load already exists, remove that wiring and warn the user; JOURNAL remains append-only and outside session context.
 5. Skip JOURNAL entirely when there is nothing meaningful to record. Empty entries pollute the file.
 6. Task files keep their own bodies; CONTEXT.md never absorbs a task body. But CONTEXT.md should still reference the currently-focused task by slug + path in `## In Progress` so `$codex-start` sees both task and non-task work in one place. Two valid CONTEXT entries:
    - Task reference: `- Working task \`add-jwt-auth\` (see .codex/tasks/2026-05-13-001-add-jwt-auth.md) <!-- since: YYYY-MM-DD -->`
@@ -34,13 +36,14 @@ The output is not a log of what happened. It is a declarative snapshot of what i
 
 For each item currently in `.codex/CONTEXT.md`, decide one of:
 
-| Status                                                                                                                   | Action                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Still true right now                                                                                                     | Keep it, refreshing wording if needed. Preserve any existing `<!-- since: YYYY-MM-DD -->` comment.                                                        |
-| Done / resolved / merged                                                                                                 | Drop it from `.codex/CONTEXT.md`. Candidate for JOURNAL if it was a real decision, completion, or pivot.                                                  |
-| Superseded by newer state                                                                                                | Drop the old item and write the new current state.                                                                                                        |
-| Broadly relevant to all future work                                                                                      | Propose moving it into `.codex/guidelines/` via `$codex-learn`, then drop it from CONTEXT.                                                                |
-| A durable project _fact_ (domain, architecture, integration, glossary, external-doc pointer — descriptive, not behavior) | Flag for **Step 6c** — checkpoint writes it into `.codex/knowledge/` itself (descriptive, distinct from prescriptive guidelines), then drop from CONTEXT. |
+| Status                                                                                              | Action                                                                                                   |
+| --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Still true right now                                                                                | Keep it, refreshing wording if needed. Preserve any existing `<!-- since: YYYY-MM-DD -->` comment.       |
+| Done / resolved / merged                                                                            | Drop it from `.codex/CONTEXT.md`. Candidate for JOURNAL if it was a real decision, completion, or pivot. |
+| Superseded by newer state                                                                           | Drop the old item and write the new current state.                                                       |
+| Broad recurring behavior relevant to future work                                                    | Propose moving it into `.codex/guidelines/` via `$codex-learn`, then drop it from CONTEXT.               |
+| Descriptive, durable-beyond-current-work, current, and evidenced project fact (scope may be narrow) | Flag for **Step 6c**, then drop it from CONTEXT after the knowledge write validates.                     |
+| WIP, proposed future state, task/acceptance state, or an uncertain/conflicting observation          | Keep it in the task/spec/CONTEXT candidate surface; never promote it as an active fact.                  |
 
 Pure tactical noise is dropped silently.
 
@@ -55,7 +58,7 @@ Add to `.codex/CONTEXT.md` only what is true now:
 - Open questions or blockers currently unresolved.
 - The single most useful thing the next session should do first.
 
-A durable project _fact_ surfaced this session (how a subsystem works, an integration detail, a pointer to a doc in another folder) does NOT belong in CONTEXT — flag it for **Step 6c**, which writes it into `.codex/knowledge/`. CONTEXT holds transient state, not reference knowledge.
+A fact that passes the full knowledge capture gate does not belong in CONTEXT — flag it for **Step 6c**. Proposed, uncertain, conflicting, or current-work-only observations remain in their working artifact until verified; CONTEXT holds transient state, not canonical reference knowledge.
 
 Be terse: task references, decisions, and blockers are one short sentence each. Only _active_ `(no task)` work earns the 3-line micro-handoff, and only while it is live — the moment it ships or is abandoned, drop it this same checkpoint (JOURNAL it if it was a real decision/completion). That triage is what keeps CONTEXT under the ceiling.
 
@@ -88,7 +91,7 @@ Use this skeleton. Omit any section that has nothing to say.
 
 ## Recent Decisions (not yet promoted to guidelines)
 
-- [Decision + brief why; promote when it stabilizes — behavior → .codex/guidelines/ via $codex-learn, durable fact → .codex/knowledge/ via $codex-checkpoint] <!-- since: YYYY-MM-DD -->
+- [Decision + brief why; promote when it stabilizes — behavior → .codex/guidelines/ via $codex-learn, eligible descriptive fact → knowledge under its guideline] <!-- since: YYYY-MM-DD -->
 
 ## Next Session Should Start By
 
@@ -140,7 +143,7 @@ This step is independent of CONTEXT.md. Skip entirely if `.codex/tasks/` does no
    - Ensure `Outcomes & Retrospective` is filled (read the body to confirm). If empty, flag in the report — do not auto-fill; the user or implementing agent should write it.
    - Move the file to `.codex/tasks/done/`.
    - Append the completion line to `.codex/JOURNAL.md` in the Phase 2a format from `.codex/guidelines/task-management.md` (use type `cancelled` instead of `completed` for cancelled tasks).
-   - Before archiving, scan the task's `### Memory Hints` and `### Related Docs`. If they captured project-wide durable facts (not task-specific detail), graduate them to `.codex/knowledge/` in **Step 6c** so they survive archival (project-wide durable facts only — never task-specific detail).
+   - Before archiving, scan the task's `### Memory Hints` and `### Related Docs`. Route only claims that pass the knowledge guideline's full capture gate into **Step 6c**; leave uncertain or task-specific material in the archived task.
    - DO NOT archive `awaiting-review` tasks. Those are explicitly waiting for user confirmation; archiving them defeats the gate. They stay in the top-level `tasks/` folder and appear in the Active list.
 4. Rewrite `.codex/tasks/index.md` from scratch per the canonical **"`index.md` Format"** in `.codex/guidelines/task-management.md` — Active includes `awaiting-review` (with its ⏳ marker); Recently Done covers the last 14 days.
 5. Enforce that section's 100-line ceiling and trim ladder.
@@ -155,39 +158,42 @@ Skip entirely if `.codex/specs/` does not exist.
 3. Detect any top-level spec whose `status` is `done` or `cancelled`. These have passed their user gate (or were cancelled) and were not yet archived. For each:
    - Move the entire folder to `.codex/specs/done/<folder-id>/`, preserving the existing dated folder name.
    - Append the completion/cancellation line to `.codex/JOURNAL.md` only if the recent journal tail does not already contain that spec completion/cancellation.
-   - Before archiving, scan `NOTES.md` for `→ graduate:` flags: route `knowledge/` flags into Step 6c, surface `$codex-learn` flags as proposals in the report, and clear each flag once routed.
+   - Before archiving, scan `NOTES.md` for `→ graduate:` flags: evaluate `knowledge/` flags against the capture gate in Step 6c, surface `$codex-learn` flags as proposals in the report, and clear only flags successfully routed or explicitly retained as candidates.
    - DO NOT archive `awaiting-final-review` specs. Those are explicitly waiting for user confirmation; archiving them defeats the final gate. They stay in the top-level specs folder and appear in the Active list.
 4. List `.codex/specs/done/*/SPEC.md`. For each, read frontmatter only (`slug`, `status`, `created`, `updated`). If any archived spec is not `done` or `cancelled`, flag it in the report and do not move it automatically.
 5. Rewrite `INDEX.md` per the canonical format in `.codex/guidelines/spec-workflow.md` — Active entries link to top-level dated folders and include every status except `done`/`cancelled` (with the ⏳ marker on `poc-review` and `awaiting-final-review`); Done entries link to `done/<folder-id>/SPEC.md` and include `done`/`cancelled`.
 6. Flag stalled specs per the Staleness Thresholds table in `.codex/guidelines/task-management.md`, mapped as: `running` ↔ `in-progress`, `poc-review`/`awaiting-final-review` ↔ `awaiting-review`, `drafting` ↔ `planning`. List flagged specs in the report.
-7. Scan each Active spec's `NOTES.md` for `→ graduate:` flags: route `knowledge/` flags into Step 6c, surface `$codex-learn` flags as proposals in the report, and clear each flag once routed.
+7. Scan each Active spec's `NOTES.md` for `→ graduate:` flags: evaluate `knowledge/` flags in Step 6c, surface `$codex-learn` flags as proposals in the report, and clear only flags successfully routed or explicitly retained as candidates.
 8. Do NOT tick roadmap boxes, write LEDGER entries, or change any spec `status` — those transitions belong to `$codex-spec`, `$codex-spec-run`, and the user.
 
 ### Step 6c: Graduate Durable Facts to .codex/knowledge/
 
-Skip if no durable project fact surfaced this session (the common case for routine checkpoints).
+Skip if no candidate fact surfaced; do not run the knowledge checker for a checkpoint that makes no knowledge mutation.
 
-A **durable project fact** is descriptive, project-wide, and outlives this session: how a subsystem works, an integration detail, a domain/glossary term, or a pointer to a doc in another folder. It is NOT transient state (that stays in CONTEXT) and NOT a behavioral guideline (that graduates to `.codex/guidelines/` via `$codex-learn`). When unsure whether a fact is durable, leave it in CONTEXT/JOURNAL — do not write a speculative entry. Never write secrets.
+Before evaluating or writing any candidate, read `.codex/guidelines/knowledge-management.md` in full. It is the source of truth for capture, frontmatter, routing, lifecycle, and validation; do not recreate a second schema here.
 
-For each durable fact flagged in Step 2, Step 3, or Step 6b:
+For candidates from Step 2, Step 3, task close, or spec NOTES:
 
-1. Read `.codex/knowledge/INDEX.md` (the map). If `.codex/knowledge/` is missing, create it with the INDEX scaffold first.
-2. If an existing entry already covers the topic, update it (merge the fact, bump `updated:` to today). Otherwise create `.codex/knowledge/<kebab-slug>.md` using the frontmatter template in INDEX (`name`/`description`/`type`/`updated`; optional `sources`/`related`/`verify`). Keep it descriptive — never `MUST`/`NEVER` (that belongs in guidelines).
-3. In the same step, add or update the one-line INDEX entry so the map never drifts from the files: `- [Title](<slug>.md) — <hook> · <type> · updated YYYY-MM-DD`.
+1. Distill claims rather than copying chronology or task prose. Promote only claims that are descriptive, durable beyond the current work, current, and evidenced. A fact may be narrowly scoped when its typed `scope` records that boundary.
+2. Keep WIP/proposals/state in task/spec/CONTEXT. Route behavior to `$codex-learn`. Keep uncertainty as a candidate; when evidence contradicts an existing canonical owner, mark that owner `review-needed` with a `status_note` instead of asserting a replacement.
+3. Read the root router and the smallest relevant maps/topics within the guideline's budget. Patch the existing owner first; create a focused topic only when no owner exists.
+4. Write canonical frontmatter and update the topic plus its reachable root/domain-map route atomically. Preserve curated hooks, grouping, ordering, and external routes. Never auto-delete, retire, supersede, or promote an ambiguous unindexed file.
+5. After all knowledge mutations in this checkpoint, run `bash .codex/scripts/knowledge-check.sh --root .`. Repair in-scope mechanical failures before reporting success. If the checker is missing, stop the knowledge mutation and report a High-severity installation problem.
 
-This is an automatic write, like the CONTEXT/JOURNAL/index writes above — the git diff is the review gate. Do not duplicate an entry that already exists.
+The Git diff remains the review surface. Checkpoint may bulk-promote eligible facts, but it is not an exclusive write boundary.
 
 ### Step 7: Report
 
-Output a 5-line summary:
+Output a 6-line summary:
 
 1. Lines in new `.codex/CONTEXT.md`.
 2. Items kept, dropped, and added.
 3. JOURNAL entries appended, or `none`.
 4. Tasks synced: active=<n>, archived this run=<n>, stalled=<n>; specs synced: active=<n>, archived this run=<n>, stalled=<n>.
-5. Knowledge entries written/updated this run (list slugs, or `none`); plus anything proposed for `$codex-learn` (recurring behavior → guidelines).
+5. Knowledge entries written/updated (list slugs, or `none`), candidates retained/review-needed, checker result, and anything proposed for `$codex-learn`.
+6. Reminder that the user must commit when they want this checkpoint persisted in Git history.
 
-Do not run `git commit` yourself. Do not mention uncommitted changes — the user commits independently.
+Do not run `git commit` yourself or diagnose unrelated uncommitted work during this summary.
 
 ## When to Run This Command
 
@@ -202,3 +208,4 @@ Bad triggers:
 
 - After every tool call.
 - During active debugging where state is not stable yet.
+- A natural-language request to distill eligible knowledge mid-session; perform that update directly instead of forcing an unrelated checkpoint.

@@ -176,8 +176,8 @@ if [[ "$INSTALL_CODEX" == true ]]; then
     (( SKIPPED++ )) || true
   fi
 
-  # .codex/CODEX.md was removed in a prior CLAUDART release; AGENTS.md is now
-  # the sole Codex memory index. Remove the stale file if still present.
+  # .codex/CODEX.md is deprecated when present; the template uses AGENTS.md as
+  # the sole Codex memory index. Remove the stale path during reconciliation.
   if [[ -f "$DEST/.codex/CODEX.md" ]]; then
     rm "$DEST/.codex/CODEX.md"
     printf '  %s  .codex/CODEX.md (deprecated; content consolidated into AGENTS.md)\n' "$(green "clean")"
@@ -194,9 +194,11 @@ fi
 
 printf '%s\n' "$(bold "Next steps:")"
 if [[ "$INSTALL_CLAUDE" == true ]]; then
-  printf '  Claude Code  →  open project, run /doctor to verify, then /refactor-memory\n'
+  printf '  Claude Code  →  open project, run /doctor → /refactor-memory → /doctor once\n'
 fi
 if [[ "$INSTALL_CODEX" == true ]]; then
-  printf '  Codex        →  open project, run $codex-doctor to verify\n'
+  # The dollar-prefixed skill names are intentional literals.
+  # shellcheck disable=SC2016
+  printf '  Codex        →  open project, run $codex-doctor → $codex-refactor-memory → $codex-doctor once\n'
 fi
 printf '\n'

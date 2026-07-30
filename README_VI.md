@@ -27,6 +27,8 @@ curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh 
 
 > Đọc https://raw.githubusercontent.com/vankhaivn/Claudart/main/INTEGRATE.md và làm theo để tích hợp CLAUDART vào project này. Hỏi tôi trước khi đụng tới bất kỳ thứ gì tôi đã custom.
 
+Installation hiện hữu dùng `INTEGRATE.md` để derive delta thực tế với upstream hiện tại, không giả định bản khởi đầu. Với knowledge contract đang được upstream khai báo, flow đối soát là `doctor → refactor-memory → doctor`; workflow này không có thêm command recall hay migration riêng.
+
 ## CLAUDART giải quyết gì
 
 | Nỗi đau                                      | Cách CLAUDART xử lý                                                                                     |
@@ -35,10 +37,10 @@ curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh 
 | Kế hoạch mất khi session đóng                | `/plan` ghi kế hoạch vào task file để session sau có thể tiếp tục đúng chỗ bạn dừng                     |
 | Mission quá lớn cho một session hay một plan | `/spec` đóng băng ý định thành POC + roadmap bạn approve một lần; `/spec-run` chạy lặp tới final review |
 | Session hiệu quả chạm trần context           | `/handoff` lưu suy luận của session - giả thuyết, evidence, dead ends - cho lần `/start` kế tiếp        |
-| Cùng quyết định bị tái khám phá hằng tuần    | `/learn` biến các chỉnh sửa lặp lại thành rule có scope theo path                                       |
-| Fact bền của dự án không có chỗ đúng để sống | `knowledge/` giữ chúng; index được hiển thị mỗi session, chi tiết được đọc khi cần                      |
+| Cùng quyết định bị tái khám phá hằng tuần    | `/learn` biến correction hành vi lặp lại thành rule có scope theo path                                  |
+| Fact bền của dự án không có chỗ đúng để sống | `knowledge/` lập map; agent nạp map phù hợp, outline topic rồi chỉ section liên quan                    |
 | `CLAUDE.md` phình thành bồn đốt token        | `/refactor-memory` gọt nó lại thành một index và đưa nội dung về đúng nơi                               |
-| Memory âm thầm mục ruỗng                     | `/doctor` là health check read-only để flag drift, link chết và nội dung đặt sai tầng                   |
+| Memory âm thầm mục ruỗng                     | `/doctor` chạy checker read-only được ship sẵn, rồi audit drift ngữ nghĩa và nội dung đặt sai tầng      |
 
 Ba review agent được ship kèm các command - `clean-code-reviewer`, `security-auditor` và `ui-visual-critic`, mỗi cái chỉ chạy khi được yêu cầu rõ ràng (không bao giờ tự động, kể cả bên trong một task hay spec loop) - cùng một delegation protocol để giữ việc subagent song song có biên rõ ràng thay vì lan rộng mất kiểm soát.
 
@@ -57,7 +59,9 @@ luôn được load   không được load     auto-load theo         INDEX trê
 vào context      (chỉ audit)         path phù hợp           chi tiết đọc khi cần
 ```
 
-`/checkpoint` rebuild `CONTEXT.md` ở cuối session và retire lịch sử sang `JOURNAL.md`, file không bao giờ được load vào context - nó tồn tại để audit, không phải để gợi nhớ. Fact nào hóa ra bền thì được thăng cấp vào `knowledge/`; hành vi nào cứ lặp lại thì được thăng cấp vào `rules/` qua `/learn`. Khi có gì đó trông stale, `/doctor` flag nó, và `/refactor-memory` kiểm lại từng fact với code thật trước khi giữ.
+`/checkpoint` rebuild `CONTEXT.md` cuối session, retire lịch sử sang `JOURNAL.md`, và bulk-promote các fact bền còn lại. Nó không phải write boundary duy nhất: giữa một lượt explore dài, nói “hãy cập nhật knowledge từ phần vừa xác minh rồi tiếp tục” sẽ kích hoạt distillation ngay. Fact dự án current và đã verify vào `knowledge/`; task/WIP/proposed state ở lại task, spec hoặc context; claim chưa chắc vẫn là candidate, trừ khi evidence làm mất hiệu lực owner hiện có thì topic đó chuyển thành `review-needed`; behavior lặp lại đi vào rule qua `/learn`.
+
+Retrieval đi từ map và có budget: root `INDEX.md`, tối đa các domain map phù hợp, rồi frontmatter/outline topic và section nhỏ nhất đủ dùng. Đọc toàn file hay search history/source chỉ là fallback. `/doctor` và `/refactor-memory` tự gọi Bash checker không dependency; user không phải kẹp thêm command vào prompt thường ngày.
 
 ## Bắt đầu nhanh
 
@@ -91,7 +95,7 @@ Bản tiếng Anh: **[README.md](README.md)** và **[docs/WORKFLOW.md](docs/WORK
 | **Memory review được bằng PR** |           ✅           |               ❌                |          ❌           |          ❌           |             ✅ JSON commit vào git             |            ❌ ChromaDB + SQLite binary             |
 | **Tool hỗ trợ**                | Claude Code, Codex CLI |             chỉ API             |        chỉ API        |     chỉ LangGraph     | Claude, Codex, Cursor, Copilot, Gemini + 6 nữa | Claude Code, Codex CLI, Gemini CLI, MCP-compatible |
 
-Markdown thuần trong repo đã thắng lập luận này: `AGENTS.md` giờ là một tiêu chuẩn của Linux Foundation, được dùng trong hơn 60.000 public repository. CLAUDART dựa trên convention đó và xây workflow còn thiếu ở phía trên - orientation, planning, learning, hygiene và review.
+Markdown thuần trong repo đã thắng lập luận này: `AGENTS.md` cung cấp một convention có version mà nhiều coding agent có thể dùng chung. CLAUDART xây workflow còn thiếu ở phía trên - orientation, planning, learning, hygiene và review.
 
 ## License
 

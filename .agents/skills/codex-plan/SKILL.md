@@ -30,12 +30,13 @@ Use `$codex-plan` when the work crosses sessions, touches multiple files, requir
 
 - Read `.codex/CONTEXT.md` (current state of work).
 - Read `.codex/tasks/index.md` if it exists. If an active task already covers this request, surface it and ask whether to continue that file instead of starting a new one.
+- Read `.codex/knowledge/INDEX.md`, then route only relevant maps/topics within `.codex/guidelines/knowledge-management.md`'s bounds.
 - Read any `docs/` directory the project provides for architectural context.
 - Run `git log -5 --oneline` for recent direction.
 
 ### Step 3: Explore the codebase (read-only)
 
-You are in planning lock from this point. Do not write or edit any file other than the task file itself and `index.md`.
+You are in planning lock from this point. Do not write implementation code. Normally write only the task file and `index.md`; the triggered knowledge-maintenance exception in `.codex/guidelines/task-management.md` still applies.
 
 Use read-only operations to:
 
@@ -56,7 +57,7 @@ If you need clarification before the plan is sensible, ask now. Do not invent an
 - Filename: `YYYY-MM-DD-NNN-<slug>.md` using today's UTC date and the computed sequence number.
 - Path: `.codex/tasks/<filename>`.
 
-No slug suffix (`-v2`, `-v3`) is needed — the sequence number already guarantees uniqueness per day.
+Do not add revision suffixes to slugs; the sequence number already guarantees uniqueness per day.
 
 ### Step 5: Write the task file
 
@@ -67,7 +68,7 @@ Use the exact skeleton in `.codex/guidelines/task-management.md`. Fill every sec
 - **Context & Orientation**: this is the handoff to future-self. Fill all three subsections:
   - _Related Code_: every file path the plan touches or reads, with one-line reason.
   - _Related Docs_: project docs (`docs/...`) AND external references (URLs, RFCs).
-  - _Memory Hints_: free-form notes — every non-obvious thing discovered during exploration that a fresh agent would otherwise re-discover. This section is the lifeline against memory loss across sessions. Be generous. If a hint is a project-wide durable fact (not specific to this task), flag it as a `.codex/knowledge/` graduation candidate — on completion, `$codex-checkpoint` or `$codex-learn` can promote it so it survives task archival.
+  - _Memory Hints_: free-form notes — non-obvious task/WIP context and uncertain discoveries that a fresh agent would otherwise re-discover. Keep these as candidates by default. A claim may move to knowledge immediately only under the task guideline's exception and the full capture gate in `knowledge-management.md`; patch the owner plus route atomically and run the checker. `$codex-checkpoint` bulk-evaluates remaining candidates; `$codex-learn` owns behavior, not fact promotion.
 - **Plan of Work**: 1-3 paragraphs of prose narrating the sequence and rationale.
 - **Concrete Steps**: ordered checklist. Each step is one self-contained action with target file, expected outcome, and a `(verify: <observable check>)`. Steps should be small enough that completing one is a meaningful save point, and written at plan altitude — decisions and verification, never code.
 - **Validation & Acceptance**: observable success criteria — tests to pass, commands to run, behaviors to verify.

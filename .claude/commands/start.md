@@ -10,7 +10,7 @@ Start this session with a lightweight CLAUDART orientation. This command is read
 2. Read `.claude/CONTEXT.md` if it exists. If missing, say the project has no Claude context yet and suggest `/checkpoint` after meaningful work.
 3. Read `.claude/tasks/index.md` if it exists. If missing, treat as "no active tasks". If present, extract entries under `## Active`.
 4. For each Active entry, verify the underlying file exists in `.claude/tasks/` (the index is a cache; the file is truth). Read its frontmatter (`status`, `updated`, `slug`) only — do not full-read task bodies in `/start`.
-5. Read `.claude/knowledge/INDEX.md` if it exists — the INDEX only. Count the entries under `## Knowledge`. Do NOT read individual knowledge detail files, and do NOT validate freshness or dead links (that is `/doctor`'s job). The index makes durable project facts discoverable; read a detail file only if a later task needs it.
+5. Read `.claude/knowledge/INDEX.md` if it exists — the root router only. Count visible route lines under `## Knowledge` that match the canonical Markdown route grammar; ignore HTML comments/templates and `- _(none)_`, so a seed index reports zero. Do not follow domain-map or topic links during startup. Later work follows the bounded map-first retrieval in `.claude/rules/knowledge-management.md`.
 6. Read `.claude/specs/INDEX.md` if it exists — the INDEX only. Extract entries under `## Active`. Do NOT read SPEC/ROADMAP/NOTES/LEDGER bodies in `/start`.
 7. Run `git log -3 --oneline`. If the directory is not a git repo or has fewer than three commits, report what is available.
 8. Extract only these sections from `.claude/CONTEXT.md` when present:
@@ -19,7 +19,7 @@ Start this session with a lightweight CLAUDART orientation. This command is read
    - `## Open Questions / Blockers`
 9. Do not read `.claude/JOURNAL.md`.
 10. Do not read task bodies in `.claude/tasks/done/`.
-11. Do not run `/doctor`; that is a heavier health check.
+11. Do not run `/doctor` or `bash .claude/scripts/knowledge-check.sh`; startup must stay lightweight.
 
 ## Output Format
 
@@ -31,7 +31,7 @@ Start this session with a lightweight CLAUDART orientation. This command is read
 **Last 3 commits:** [git log -3 --oneline output, compact]
 **Active tasks:** [list of "<slug> (<status>, updated <date>)" from tasks/index.md, or "None"]
 **Active specs:** [list of "<slug> (<status>, updated <date>)" from specs/INDEX.md, or "None"]
-**Project knowledge:** [N entries in knowledge/INDEX.md, or "none"]
+**Project knowledge:** [N root routes in knowledge/INDEX.md, or "none"]
 **Start by:** [Next Session Should Start By section, or see "Five Cases" below]
 **Open blockers:** [Open Questions / Blockers section, or "None recorded"]
 ```

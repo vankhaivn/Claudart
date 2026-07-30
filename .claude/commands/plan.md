@@ -29,12 +29,13 @@ In parallel:
 
 - Read `.claude/CONTEXT.md` (current state of work).
 - Read `.claude/tasks/index.md` if it exists. If an active task already covers this request, surface it and ask whether to continue that one instead of starting a new file.
+- Read `.claude/knowledge/INDEX.md`, then route only relevant maps/topics within `.claude/rules/knowledge-management.md`'s bounds.
 - Read any `docs/` directory the project provides for architectural context.
 - Run `git log -5 --oneline` to know recent direction.
 
 ### Step 3 — Explore the codebase (READ-ONLY)
 
-You are in planning lock from this point. **Do not write or edit any file other than the task file itself and `index.md`.**
+You are in planning lock from this point. **Do not write or edit code or project artifacts outside the task file and `index.md`.** The sole exception is an eligible mid-session knowledge mutation when both the capture gates and an immediate-promotion trigger in `knowledge-management.md` pass; update owner + route atomically and run the checker.
 
 Use `Read`, `Grep`, `Glob`, and read-only `Bash` (`ls`, `cat`, `git status/log/diff`, `find`) to:
 
@@ -55,7 +56,7 @@ If you need clarification from the user before the plan is sensible, ask now. Do
 - Filename: `YYYY-MM-DD-NNN-<slug>.md` using today's UTC date and the computed sequence number.
 - Path: `.claude/tasks/<filename>`.
 
-No slug suffix (`-v2`, `-v3`) is needed — the sequence number already guarantees uniqueness per day.
+No version suffix is needed — the sequence number already guarantees uniqueness per day.
 
 ### Step 5 — Write the task file
 
@@ -66,7 +67,7 @@ Use the exact skeleton in `.claude/rules/task-management.md`. Fill every section
 - **Context & Orientation**: this is your handoff to future-self. Fill all three subsections:
   - _Related Code_: every file path the plan touches or reads, with one-line reason.
   - _Related Docs_: project docs (`docs/...`) AND external references (URLs, RFCs).
-  - _Memory Hints_: free-form notes — every non-obvious thing you discovered during exploration that a fresh agent would otherwise re-discover. This section is the lifeline against "memory loss" across sessions. Be generous. If a hint is a **project-wide durable fact** (not specific to this task), flag it as a `.claude/knowledge/` graduation candidate — on completion, `/checkpoint` or `/learn` can promote it so it survives task archival.
+  - _Memory Hints_: free-form notes — every non-obvious thing a fresh agent would otherwise re-discover. Keep task state, proposals, and uncertain claims here. A fact may have local scope and still qualify for knowledge if it is descriptive, durable beyond this work, current, and evidenced; promote it mid-session only under a `knowledge-management.md` immediate-promotion trigger, otherwise label it as a candidate for `/checkpoint`.
 - **Plan of Work**: 1-3 paragraphs of prose narrating the sequence and rationale.
 - **Concrete Steps**: ordered checklist. Each step is one self-contained action with target file, expected outcome, and a `(verify: <observable check>)`. Steps should be small enough that completing one is a meaningful save point, and written at plan altitude — decisions and verification, never code.
 - **Validation & Acceptance**: observable success criteria — tests to pass, commands to run, behaviors to verify.

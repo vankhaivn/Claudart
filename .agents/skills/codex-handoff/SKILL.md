@@ -18,9 +18,9 @@ Distill. Never dump transcript.
    - the user's most recent request;
    - the quote anchoring where work stopped (see Hard Rule 7).
      Everything else gets distilled.
-4. **Route durable content out FIRST.** The baton holds conversational residue only — content with no durable home. Before writing it: durable project facts → `.codex/knowledge/` (+ register in `INDEX.md`); discoveries tied to an active task → that task file's `Memory Hints` / `Surprises & Discoveries`; a recurring behavioral lesson → name it in chat as a `$codex-learn` candidate. Whatever you routed out does NOT also go into the baton.
+4. **Route durable content out FIRST.** The baton holds conversational residue only. Before writing it, classify each claim: descriptive + durable beyond current work + current + evidenced → knowledge; task/spec state, WIP, and proposals → the active task/spec; recurring behavior → a `$codex-learn` candidate; uncertainty/conflict → the working artifact or the baton's Working Hypothesis, never active knowledge. A scoped fact is valid when its scope is recorded. Whatever you route out does NOT also go into the baton.
 5. **Active task wins.** If an active task file covers this session's work, most content belongs THERE. The baton then holds only a pointer to the task plus live reasoning not yet written into it. Never duplicate task content into the baton. An active spec mission (`.codex/specs/`) wins the same way — route into its NOTES/LEDGER; a routine spec pause needs no baton at all, `$codex-spec-run` re-orients from the folder.
-6. **No code edits.** This skill writes memory only — `HANDOFF.md`, and optionally a task file and knowledge entries. Never code, and never `CONTEXT.md` (that is `$codex-checkpoint`'s file).
+6. **No code edits.** This skill writes memory only — `HANDOFF.md`, and optionally a task/spec file and eligible knowledge entries. Never code, and never `CONTEXT.md` (that is `$codex-checkpoint`'s file).
 7. **Next Step is anchored, not invented.** It must trace directly to the user's most recent explicit request and the work in flight immediately before this handoff, with a verbatim quote proving it. Never list tangential ideas, speculative improvements, or already-completed work.
 
 ## Procedure
@@ -39,7 +39,7 @@ Do not skip this pass. Writing the baton from general impressions produces a vib
 
 ### Step 2 — Route durable content out
 
-Apply Hard Rule 4 now: write the knowledge entries and task-file updates first, so the baton can reference them instead of carrying them.
+Apply Hard Rule 4 now. For any eligible knowledge write, read `.codex/guidelines/knowledge-management.md` in full, patch the existing owner first, update the topic plus its reachable route atomically, and run `bash .codex/scripts/knowledge-check.sh --root .`. If evidence is insufficient or conflicting, preserve a candidate in the owning work artifact; when that evidence invalidates an existing active owner, mark the owner `review-needed` with a precise `status_note` instead of leaving known-wrong material authoritative. Write task/spec updates first so the baton can reference them instead of carrying them.
 
 ### Step 3 — Write `.codex/HANDOFF.md` (overwrite)
 

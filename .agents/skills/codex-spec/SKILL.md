@@ -20,11 +20,13 @@ Before doing anything, read `.codex/guidelines/spec-workflow.md`. That guideline
 
 Read: `.codex/CONTEXT.md`, `.codex/specs/INDEX.md` (if an active spec already covers this mission, surface it and ask whether to continue it instead), `.codex/knowledge/INDEX.md`, `docs/project/` if present, and `git log -5 --oneline`. If the user continues an existing `drafting` spec — including an approved final-review scope amendment returned by `$codex-spec-run` — reuse its dated folder; never create a duplicate mission folder.
 
+If planning needs a knowledge route beyond the root index, read `.codex/guidelines/knowledge-management.md` in full and stay within its map/topic/section budget. Do not treat a proposed product state in discovery docs or SPEC as current project knowledge.
+
 Ensure `.codex/specs/done/` exists. Before deciding whether an existing spec is active, check its `SPEC.md` frontmatter status; a top-level spec folder with `status: done` or `status: cancelled` is stale archive state, not an active collision, and should be moved to `.codex/specs/done/` when syncing INDEX.
 
 For a new mission, create `.codex/specs/YYYY-MM-DD-<slug>/` using today's date and the slug rules from the guideline file, write a minimal `SPEC.md` with `slug: <slug>` and `status: drafting`, and register it in `INDEX.md` with the dated folder link. For a resumed draft, keep its existing dated id and history. From here on, the folder is where everything lands — not chat.
 
-**Drafting lock**: while `status` is `drafting` or `poc-review`, write nothing outside the spec folder and `INDEX.md`. No implementation code, no scaffolding "to save time later".
+**Drafting lock**: while `status` is `drafting` or `poc-review`, write no implementation code and no scaffolding "to save time later". Normally write only the spec folder and `INDEX.md`; the spec guideline's narrow knowledge-maintenance exception remains available when the full capture gate and an immediate-promotion trigger in `knowledge-management.md` pass.
 
 ### Step 2 — Interview, capture-as-you-go
 
@@ -47,9 +49,9 @@ The skeleton is already half-full from Steps 2-3; finish it. The hard part is **
 
 ### Step 5 — Write ROADMAP.md (decision-complete)
 
-Explore the codebase read-only first (existing patterns, constraints, files each phase will touch) — de-risk decisions, don't pre-solve implementation. Spawn read-only `explorer` subagents for a broad survey only under `.codex/guidelines/agent-delegation.md`'s authorization gate; otherwise explore solo.
+Explore the codebase read-only first (existing patterns, constraints, files each phase will touch) — de-risk decisions, don't pre-solve implementation. Use read-only `explorer` subagents for a broad survey when the active harness policy and `.codex/guidelines/agent-delegation.md` make that decomposition useful.
 
-Then write phases per the guideline file. Hold the decision-complete bar: exact paths, chosen approaches with the _why_, per-task `verify:`, phase validation commands, parallelizable waves marked for fan-out. Mark a wave for subagent fan-out only where it genuinely helps — per `spec-workflow.md`, the user's standing approval of a roadmap carrying that marking is the recorded delegation authorization, so say the marking exists when you present for review. Phase 1 should reach something demoable early — the mission must produce visible progress every phase, not a big-bang integration at the end.
+Then write phases per the guideline file. Hold the decision-complete bar: exact paths, chosen approaches with the _why_, per-task `verify:`, phase validation commands, parallelizable waves marked for fan-out. Mark a wave only where the prepared decomposition genuinely helps; it records strategy for a later harness, not permission. Phase 1 should reach something demoable early — the mission must produce visible progress every phase, not a big-bang integration at the end.
 
 For a new mission, seed `LEDGER.md` with its header and no entries, and `NOTES.md` with what exploration surfaced: how to run, build, and verify the project (dev server, test commands), key files and helpers, non-obvious constraints, pitfalls, planning-time decisions with their rejected alternatives. Include `## Current Acceptance Delta` with `- None.`; it stays compact during execution and is never a second roadmap. For a resumed scope amendment, preserve LEDGER history and existing NOTES, then amend ROADMAP using its disposition rules rather than erasing completed or superseded work. NOTES is the executor's Memory Hints — a roadmap without it forces the executor to re-discover everything you just learned.
 

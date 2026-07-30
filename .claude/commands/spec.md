@@ -4,7 +4,7 @@ description: Create a dated mission-scale spec workspace in .claude/specs/ — i
 
 You are the expensive planning session. Everything you learn from the user in this conversation dies with it — the spec folder you produce is the only thing the executor will ever see. Spend the tokens here so `/spec-run` doesn't have to.
 
-Before doing anything, read `.claude/rules/spec-workflow.md`. That rule defines the folder schema, the SPEC/ROADMAP/NOTES/LEDGER formats, the decision-complete bar, the status state machine, and the standing-approval semantics. This command does not duplicate that contract; it orchestrates drafting.
+Before doing anything, read `.claude/rules/spec-workflow.md` and `.claude/rules/knowledge-management.md`. These rules define mission state and knowledge routing; this command does not duplicate them.
 
 ## Inputs
 
@@ -15,13 +15,13 @@ Before doing anything, read `.claude/rules/spec-workflow.md`. That rule defines 
 
 ### Step 1 — Read project context
 
-In parallel: `.claude/CONTEXT.md`, `.claude/specs/INDEX.md` (if an active spec already covers this mission, surface it and ask whether to continue it instead), `.claude/knowledge/INDEX.md`, `docs/project/` if present, and `git log -5 --oneline`. If the user continues an existing `drafting` spec — including an approved final-review scope amendment returned by `/spec-run` — reuse its dated folder; never create a duplicate mission folder.
+In parallel: `.claude/CONTEXT.md`, `.claude/specs/INDEX.md` (if an active spec already covers this mission, surface it and ask whether to continue it instead), the root knowledge router plus only relevant routed detail within the knowledge budget, `docs/project/` if present, and `git log -5 --oneline`. If the user continues an existing `drafting` spec — including an approved final-review scope amendment returned by `/spec-run` — reuse its dated folder; never create a duplicate mission folder.
 
 Ensure `.claude/specs/done/` exists. Before deciding whether an existing spec is active, check its `SPEC.md` frontmatter status; a top-level spec folder with `status: done` or `status: cancelled` is stale archive state, not an active collision, and should be moved to `.claude/specs/done/` when syncing INDEX.
 
 For a new mission, create `.claude/specs/YYYY-MM-DD-<slug>/` using today's date and the slug rules from the rule file, write a minimal `SPEC.md` with `slug: <slug>` and `status: drafting`, and register it in `INDEX.md` with the dated folder link. For a resumed draft, keep its existing dated id and history. From here on, the folder is where everything lands — not chat.
 
-**Drafting lock**: while `status` is `drafting` or `poc-review`, write nothing outside the spec folder and `INDEX.md`. No implementation code, no scaffolding "to save time later".
+**Drafting lock**: while `status` is `drafting` or `poc-review`, write no implementation code and normally write only the spec folder and its INDEX. The sole exception is an eligible knowledge mutation when the full capture gate and an immediate-promotion trigger in `knowledge-management.md` pass; update owner + reachable map atomically and run the checker.
 
 ### Step 2 — Interview, capture-as-you-go
 

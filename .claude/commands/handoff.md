@@ -15,9 +15,9 @@ Distill. Never dump transcript.
    - the user's most recent request;
    - the quote anchoring where work stopped (see Hard Rule 7).
      Everything else gets distilled.
-4. **Route durable content out FIRST.** The baton holds conversational residue only — content with no durable home. Before writing it: durable project facts → `.claude/knowledge/` (+ register in `INDEX.md`); discoveries tied to an active task → that task file's `Memory Hints` / `Surprises & Discoveries`; a recurring behavioral lesson → name it in chat as a `/learn` candidate. Whatever you routed out does NOT also go into the baton.
+4. **Route durable content out FIRST.** The baton holds conversational residue only — content with no durable home. Before writing it: task/spec state, WIP, proposals, and uncertain candidates → the owning task/spec artifact; recurring behavior → name it as a `/learn` candidate; descriptive facts → promote only when they pass `.claude/rules/knowledge-management.md`. Scope may be local. Whatever you routed out does NOT also go into the baton.
 5. **Active task wins.** If an active task file covers this session's work, most content belongs THERE. The baton then holds only a pointer to the task plus live reasoning not yet written into it. Never duplicate task content into the baton. An active spec mission (`.claude/specs/`) wins the same way — route into its NOTES/LEDGER; a routine spec pause needs no baton at all, `/spec-run` re-orients from the folder.
-6. **No code edits.** This command writes memory only — `HANDOFF.md`, and optionally a task file and knowledge entries. Never code, and never `CONTEXT.md` (that is `/checkpoint`'s file).
+6. **No code edits.** This command writes memory only — `HANDOFF.md`, and optionally a task/spec file and eligible knowledge entries. Never code, and never `CONTEXT.md` (that is `/checkpoint`'s file).
 7. **Next Step is anchored, not invented.** It must trace directly to the user's most recent explicit request and the work in flight immediately before this handoff, with a verbatim quote proving it. Never list tangential ideas, speculative improvements, or already-completed work.
 
 ## Procedure
@@ -36,7 +36,7 @@ Do not skip this pass. Writing the baton from general impressions produces a vib
 
 ### Step 2 — Route durable content out
 
-Apply Hard Rule 4 now: write the knowledge entries and task-file updates first, so the baton can reference them instead of carrying them.
+Apply Hard Rule 4 now. Patch an existing knowledge owner before creating a topic, update its reachable route atomically, and run `bash .claude/scripts/knowledge-check.sh` after any knowledge mutation. If evidence is insufficient or conflicting, keep a candidate in the owning work artifact or mark the existing owner `review-needed`; do not make the baton or a new topic pretend certainty.
 
 ### Step 3 — Write `.claude/HANDOFF.md` (overwrite)
 
@@ -102,7 +102,7 @@ Tell the user, briefly: the baton is written, what was routed to knowledge or th
 
 - ❌ Dumping transcript fragments or message lists into the baton.
 - ❌ Dated handoff files, multiple slots, or a handoff archive. One file; overwrite; delete on consumption.
-- ❌ Putting durable facts in the baton "to be safe" instead of routing them to `knowledge/` or the task file.
+- ❌ Putting eligible durable facts in the baton "to be safe" instead of routing them under the knowledge rule, or promoting uncertain/task-local material that belongs in the work artifact.
 - ❌ Copying any part of a task file's body into the baton.
 - ❌ A Next Step that doesn't trace to the user's latest explicit request.
 - ❌ Running `/handoff` as a routine session-end ritual. Session end is `/checkpoint`'s job; handoff is for when the **conversation itself** must survive a context boundary — the window is nearly full, or an investigation pauses mid-flight.

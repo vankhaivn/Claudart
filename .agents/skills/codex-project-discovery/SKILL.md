@@ -452,4 +452,8 @@ After writing the docs, report:
 3. Highest-confidence decisions.
 4. Biggest remaining open questions.
 5. Recommended next skill or workflow, such as `$codex-refactor-memory`, `$codex-checkpoint`, or implementation planning.
-6. If durable project facts emerged (especially `05-domain-language.md`, `06-technical-brief.md`), offer to register them in `.codex/knowledge/INDEX.md` as reference entries (`sources:` pointing to the discovery docs — do not duplicate them). Optional; recommended for long-lived projects.
+6. Knowledge routing result:
+   - If the completed pack contains a descriptive, durable-beyond-current-work, current, evidenced reference fact and the user asked to capture knowledge, read `.codex/guidelines/knowledge-management.md` in full. Patch the existing owner first, or create one focused `reference` topic when no owner exists; point `sources` to the relevant discovery docs instead of duplicating them, update the reachable route atomically, and run `bash .codex/scripts/knowledge-check.sh --root .`.
+   - If the user did not ask for knowledge capture, offer that reference update as an optional natural-language next step; no checkpoint is required.
+   - Keep proposed product behavior, implementation intent, and unresolved assumptions in `docs/project/` as candidates. Do not register them as active knowledge merely because discovery documented them.
+   - Report the topic updated or created, the checker result, or `none` with the reason no claim passed the capture gate.

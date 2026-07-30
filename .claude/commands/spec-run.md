@@ -4,7 +4,7 @@ description: Execute an approved dated spec mission from .claude/specs/ autonomo
 
 You are the executor. The spec folder was written by a session that interviewed the user; you were not there, and you don't need to have been — SPEC.md, ROADMAP.md, NOTES.md, and LEDGER.md carry everything. Assume total amnesia between iterations: the files, not your memory, are the truth.
 
-Before doing anything, read `.claude/rules/spec-workflow.md`. It defines the loop contract, standing approval, verification bar, circuit breakers, session rotation, and the final gate. This command does not duplicate that contract; it drives it. Also read `.claude/rules/agent-delegation.md` before any fan-out.
+Before doing anything, read `.claude/rules/spec-workflow.md` and `.claude/rules/knowledge-management.md`. They define the loop and the boundary between mission candidates and canonical knowledge. This command does not duplicate those contracts; it drives them. Also read `.claude/rules/agent-delegation.md` before any fan-out.
 
 In the designed loop a fresh session opens with `/start` (which surfaces active specs), then runs this command. If `/start` was skipped, Step 1 is still sufficient orientation — the spec folder is self-contained.
 
@@ -35,7 +35,7 @@ Execute **The Loop** from the rule file, iteration after iteration, without aski
 - Delegate per `agent-delegation.md` whenever work genuinely parallelizes; roadmap-marked waves are recorded strategy, not an authorization gate. Worker prompts carry the roadmap task text and relevant SPEC lines verbatim. Re-verify every worker result yourself before ticking.
 - Verify on a real surface; UI tasks compare against the frozen POC artifact (`SPEC.md → POC Artifacts`). Use an art-generation skill against that artifact when the roadmap calls for generated assets.
 - On failed verification, do not tick: append `validation-failed`, update Current Acceptance Delta, and retry only with a materially different hypothesis, implementation, or verifier. Stronger evidence that contradicts an earlier pass invalidates that pass per the rule.
-- On passed verification, tick, log evidence to LEDGER, bump `updated:`, clear any delta the evidence resolves, and route durable findings into NOTES.md (evidence → LEDGER, knowledge → NOTES). Then next runnable task.
+- On passed verification, tick, log evidence to LEDGER, bump `updated:`, clear any delta the evidence resolves, and route mission findings into NOTES.md. NOTES is the candidate surface; promote a grounded durable descriptive fact directly only when the full capture gate and an immediate-promotion trigger in `knowledge-management.md` pass. Patch owner + route atomically and run the checker, then continue.
 - Honor the SPEC's `commits:` policy: `user` → never run `git commit`; `per-task`/`per-phase` → commit at each tick / phase close with message `spec(<slug>): <summary>`. Push is never granted.
 - Honor the circuit breakers exactly as written. An out-of-scope question (anything Must-NOT-Have doesn't settle) blocks the affected task with its exact unlock condition; continue independent runnable work, and stop the whole loop only through the canonical no-runnable-work breaker. Never resolve scope by guessing or weaken a `verify:` to get past it.
 

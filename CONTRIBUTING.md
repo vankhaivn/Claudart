@@ -31,8 +31,8 @@ We welcome new AI commands and highly specialized agents. If you add a durable C
    ```bash
    git checkout -b feature/my-awesome-agent
    ```
-2. **Add or modify files** within the relevant AI layer: `.claude/` for Claude Code, `.codex/` plus `.agents/skills/` for Codex. Session state now lives inside each layer (`.claude/CONTEXT.md`, `.claude/JOURNAL.md`, `.codex/CONTEXT.md`, `.codex/JOURNAL.md`).
-3. If you've changed APIs or commands, **update the documentation** (e.g., `README.md`).
+2. **Add or modify files** within the relevant AI layer: `.claude/` for Claude Code, `.codex/` plus `.agents/skills/` for Codex. Session state lives inside each layer (`.claude/CONTEXT.md`, `.claude/JOURNAL.md`, `.codex/CONTEXT.md`, `.codex/JOURNAL.md`).
+3. If you've changed APIs, commands, or the knowledge contract, **update both English and Vietnamese documentation** where a mirrored page exists.
 4. **Commit your changes**. Write clear, concise commit messages.
    ```bash
    git commit -m "feat: Add brilliant-architect agent"
@@ -49,11 +49,15 @@ If you're contributing new logic, please adhere to our directory structure:
 
 - `.claude/commands/`: CLAUDART slash commands (`/learn`, `/checkpoint`, etc.). Your command files here should detail the steps the AI takes.
 - `.claude/agents/`: Highly specialized role-based instruction sets (`reviewer.md`, `architect.md`, etc.). Make sure agent prompts are self-contained and heavily instruct the AI on its specific persona and constraints.
-- `.claude/knowledge/` and `.codex/knowledge/`: Durable, **descriptive** project reference — domain, architecture, glossary, and pointers to canonical docs in other folders. Distinct from rules/guidelines (prescriptive). Only `INDEX.md` is surfaced (by `/start`); topic files are read on demand. Keep knowledge descriptive — behavior belongs in rules.
+- `.claude/knowledge/` and `.codex/knowledge/`: Durable, **descriptive** project reference — domain, architecture, glossary, and pointers to canonical docs in other folders. Distinct from rules/guidelines (prescriptive). Only the root `INDEX.md` is surfaced by `start`; optional `_maps/`, topic outlines, and the smallest useful sections are loaded on demand.
+- `.claude/rules/knowledge-management.md` and `.codex/guidelines/knowledge-management.md`: the mirrored semantic contract for capture, lifecycle, bounded retrieval, and project-fact classification. Keep their intent in parity.
+- `.claude/scripts/knowledge-check.sh` and `.codex/scripts/knowledge-check.sh`: byte-identical copies of the dependency-free, read-only mechanical checker. Change and test them as one unit.
 - `.codex/` and `.agents/skills/`: Codex-native source templates. They should preserve the same intent and quality as the Claude side, not act as lossy generated artifacts.
 - `.codex/guidelines/agent-delegation.md`: Codex subagent delegation protocol. If you add or change Codex agents, keep this protocol accurate about authorization, ownership boundaries, and parent review responsibilities.
 - `.codex/AGENTS.md`: The Codex root-loader source template. The installer copies it to `AGENTS.md` at the project root.
 - `INTEGRATE.md`: the AI-native install/upgrade protocol an agent follows to merge CLAUDART into an existing project (the alternative to `install.sh` for non-empty setups). Its "What CLAUDART contains" manifest is orientation only — the agent clones the repo as source of truth — but keep it roughly in sync when you add or remove a top-level piece.
+
+Before opening a pull request, run `npm run check`. Knowledge-check fixtures must be anonymous and synthetic: do not copy proprietary repository names, absolute home paths, source bodies, credentials, or other downstream project data into this repository.
 
 ## Pull Request Process
 

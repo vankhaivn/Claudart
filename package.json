@@ -2,6 +2,10 @@
   "private": true,
   "scripts": {
     "format:md": "prettier --write \"**/*.md\"",
+    "format:md:check": "prettier --check \"**/*.md\"",
+    "check:shell": "/bin/bash -n install.sh .claude/scripts/knowledge-check.sh .codex/scripts/knowledge-check.sh tests/knowledge-check/run.sh",
+    "test:knowledge": "/bin/bash tests/knowledge-check/run.sh",
+    "check": "npm run format:md:check && npm run check:shell && npm run test:knowledge",
     "hooks:install": "git config core.hooksPath .githooks"
   },
   "devDependencies": {

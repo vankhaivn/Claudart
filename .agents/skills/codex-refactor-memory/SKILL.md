@@ -1,312 +1,132 @@
 ---
 name: codex-refactor-memory
-description: Consolidate Codex project memory, guidelines, skills, and agents.
+description: Consolidate Codex project memory and perform controlled, in-place normalization of knowledge, guidelines, skills, and agent wiring.
 ---
 
 # Codex Refactor Memory
 
-Analyze the existing Codex memory layer in this repository and refactor it into a coherent Codex-native Modular Rules System.
+Refactor the repository-local Codex operating layer without losing project context or curated routing. Use the existing files as live state, make deterministic repairs before semantic ones, and preserve user-authored bodies unless evidence supports an explicit content change.
 
-The target shape is:
+For a knowledge contract upgrade, use this sequence:
 
-- a concise root `AGENTS.md` as the sole Codex memory index and instruction entrypoint;
-- durable domain knowledge in scoped files under `.codex/guidelines/`;
-- Codex subagent delegation policy in `.codex/guidelines/agent-delegation.md` when the repo uses or ships Codex agents;
-- current live state in `.codex/CONTEXT.md`;
-- append-only history in `.codex/JOURNAL.md`;
-- self-contained skills in `.agents/skills/`;
-- optional read-only reviewer/explorer agents in `.codex/agents/`.
-
-Codex CLI discovers `AGENTS.md` natively. If a base template keeps `.codex/AGENTS.md` as the source copied to root `AGENTS.md`, keep the two synchronized or ask the user which one is canonical. Otherwise, prefer root `AGENTS.md` as the canonical Codex memory index.
-
-> Pre-flight check: confirm `git status --short` is clean or that the user understands there is in-progress work before you begin. Refuse to proceed if unrelated uncommitted changes could be swallowed by the refactor.
-
-Execute the following steps systematically, without losing essential project context.
-
-## 1. Resolve The Memory Shape
-
-- Confirm whether the canonical memory file is root `AGENTS.md` or a template source such as `.codex/AGENTS.md`.
-- If both root `AGENTS.md` and `.codex/AGENTS.md` exist, compare them.
-  - If they are identical, remove or ignore the duplicate according to the repository convention.
-  - If they differ, ask which file should win before overwriting either one.
-- Search skills, agents, and guidelines for references to deleted or deprecated memory files and update them during the refactor.
-
-## 2. Analyze The Project
-
-- Determine the main framework, language, runtime, and architectural layers from `AGENTS.md`, project structure, package manifests, build files, and existing docs.
-- Identify the core logical layers, such as docs/contracts, database/repositories, API/controllers, UI/components, background jobs, runtime/deploy, or AI/model workflows.
-- Note linters, formatters, test runners, and validation commands detected. Delegate style rules to those tools instead of encoding them into `AGENTS.md`.
-- For docs-first repositories, identify document layers, source-of-truth boundaries, templates, workflows, and contract directories.
-
-## 3. Ensure The Guideline Directory Exists
-
-Create `.codex/guidelines/` if it does not already exist.
-
-Use `.codex/guidelines/*.md` for durable semantic guidance. Do not use `.codex/rules/` for semantic coding guidance. Reserve `.codex/rules/*.rules` for Codex permission or environment rules if the project uses them.
-
-## 4. Extract Domain-Specific Rules
-
-Group detailed coding rules, boundaries, and validation requirements from `AGENTS.md`, deprecated memory files, and repeated workflow decisions into a small set of logical guideline files under `.codex/guidelines/`.
-
-**Route by type first.** Split the candidate content: **prescriptive** material (an enforceable `MUST`/`NEVER`/should-avoid invariant — how to behave) becomes a guideline; **descriptive** material (how a subsystem works, an integration detail, a domain term, a pointer to a doc — a fact) goes to `.codex/knowledge/` instead (Step 10), never a guideline. Do not file a fact as a guideline and rely on Step 5 to re-route it later.
-
-Common examples:
-
-- `architecture.md`
-- `api.md`
-- `db.md`
-- `ui.md`
-- `runtime.md`
-- `testing.md`
-- `srs-integration.md`
-- `agent-delegation.md`
-
-Do not create guidelines just to create files. A small docs repo may only need one or two guidelines.
-
-Required for each guideline file:
-
-- YAML frontmatter with `paths:`, `description:`, `when_to_use:`, and `tags:`.
-- `paths:` must be a glob or list of globs scoped to the files the guideline governs.
-- `paths:` must use YAML flow sequence style, e.g. `paths: ["src/**/*.ts", "test/**/*.ts"]`. Never use block-list style (`paths:` followed by `- item`).
-- `description:` must say what domain the guideline controls.
-- `when_to_use:` must say when future agents should consult the guideline.
-- `tags:` must be an inline YAML array on one line, e.g. `tags: [architecture, nestjs, boundaries]`. Never use block-list style (`tags:` followed by `- item`) because tag indexing depends on single-line frontmatter.
-- `tags:` must contain 1-5 lowercase kebab-case values that describe the guideline domain or scope.
-- No long code snippets. Prefer `file:line` references and behavior-level rules so context does not go stale.
-- No secrets, tokens, private keys, production credentials, or real `.env` values.
-
-Rule Quality Checklist:
-
-1. Verifiable: a reader can check whether the rule was followed by reading the repo.
-2. Loophole-closed: if a rule has an obvious bypass, add `NEVER do X, even when Y seems like a good reason`.
-3. Critical-tagged: prefix high-priority constraints with `NEVER`, `YOU MUST`, `IMPORTANT`, or similar unambiguous language.
-4. Scoped: the rule belongs in the named guideline and does not duplicate unrelated guidance elsewhere.
-
-## 5. Audit Domain Guideline Semantics
-
-Do not stop at frontmatter, link, and glob hygiene. A successful memory refactor must also check whether the domain-specific guideline content still reflects the repository's current behavior.
-
-For every non-universal guideline under `.codex/guidelines/`:
-
-1. Read the guideline body and identify concrete claims.
-   - Claims include named files, modules, classes, functions, commands, config keys, environment variables, endpoints, schemas, database models, event names, message/queue topics, feature flags, UI routes, document contracts, or operational workflows.
-   - Ignore purely stylistic rules unless they contradict the codebase's current conventions.
-2. Verify each concrete claim against the actual repository.
-   - Use repository-native source files, package manifests, schemas, migrations, generated types, tests, docs/contracts, and config loaders as evidence.
-   - Prefer structured files and source-of-truth contracts over comments or stale prose.
-   - Use `rg` / `rg --files` first; use language/framework tooling only when it materially improves confidence.
-3. Classify each finding:
-   - **accurate**: guideline matches source and remains useful.
-   - **guideline-stale**: source/contract has intentionally moved on; update the guideline.
-   - **source-debt**: guideline is still the desired invariant, but source currently violates it; keep the guideline and report the code/doc debt instead of weakening the rule.
-   - **open-work**: a task, issue, TODO, or explicit user decision already tracks the gap; keep or update the guideline so future agents see the intended direction and the active gap.
-   - **needs-user-decision**: source and guideline disagree and neither clearly wins from local evidence; ask before rewriting either.
-4. Detect overbroad or kitchen-sink guidelines.
-   - If one guideline mixes unrelated domains, propose splitting it into focused files.
-   - Split only when the new files have clear `paths:` scopes and durable ownership. Do not create files just to satisfy symmetry.
-   - Preserve generic cross-cutting rules in broad files; move business/domain invariants into focused files.
-5. Detect near-duplicates and stale detail.
-   - If two guidelines repeat the same invariant, keep the rule in the most specific owner and replace the other copy with a pointer.
-   - Replace fragile line-number references and long source excerpts with stable symbol/file references where possible.
-   - Remove "future" or "temporary" wording once the feature is implemented, unless it still describes a real future state.
-6. Promote stable live-state decisions.
-   - Read `.codex/CONTEXT.md` for Recent Decisions. If a decision is now durable project behavior, move it into the relevant guideline and remove it from CONTEXT through the checkpoint workflow.
-   - If a decision is still temporary, keep it in CONTEXT and do not bury it in guidelines.
-7. Detect mis-tiered content (a guideline that belongs in knowledge).
-   - `.codex/guidelines/` is **prescriptive** — each guideline constrains behavior (an enforceable `MUST`/`NEVER`/should-avoid invariant). If a guideline body is purely **descriptive** — it only states how a subsystem works, an integration detail, a domain term, or a doc pointer, with no constraint a reader could "follow" — it is misfiled.
-   - Propose moving it to `.codex/knowledge/`: create or update the topic file + its `INDEX.md` entry, then remove the guideline and its reference from `AGENTS.md`. Confirm with the user before removing a guideline.
-   - This is the exact reverse of the Step 10 boundary (which pushes prescriptive content out of knowledge into guidelines). The descriptive/prescriptive boundary runs **both ways**.
-
-Semantic audit output must list:
-
-- guidelines updated automatically;
-- stale rules fixed;
-- source-debt items intentionally left as code/doc follow-up;
-- split/merge actions performed;
-- split/merge actions that still need user confirmation;
-- guidelines proposed for migration to `.codex/knowledge/` (descriptive content misfiled as behavior).
-
-## 6. Refactor AGENTS.md
-
-Trim root `AGENTS.md` so it stays a concise memory index, not a knowledge dump.
-
-It should contain only:
-
-- project identity;
-- context loading order;
-- core Codex workflows and skill selection;
-- a project map or pointers to primary docs;
-- security and repository-wide constraints;
-- a `## Guidelines` section linking `.codex/CONTEXT.md` and `.codex/guidelines/*.md`;
-- a clear rule that `.codex/JOURNAL.md` is not auto-loaded;
-- a clear rule that Codex subagents require explicit user authorization before delegation or parallel agent work;
-- the `## Agent Self-Evolution & Context Maintenance` section.
-
-Target: keep `AGENTS.md` under 100 lines where practical. If it exceeds 100 lines, extract more into `.codex/guidelines/`, workflows, or project docs. If it exceeds 150 lines, flag it in the final summary.
-
-## 7. Cross-Link Guidelines
-
-Under a `## Guidelines` heading in `AGENTS.md`, add references for every guideline file plus the live-state context file.
-
-Example:
-
-```markdown
-See `.codex/CONTEXT.md` for current session state, updated by `$codex-checkpoint`.
-See `.codex/guidelines/ai-behavior.md` for universal AI behavior guidelines.
-See `.codex/guidelines/architecture.md` for architecture boundaries.
-See `.codex/guidelines/agent-delegation.md` for Codex subagent and parallel delegation protocol.
+```text
+$codex-doctor
+$codex-refactor-memory
+$codex-doctor
 ```
 
-NEVER add `.codex/JOURNAL.md` as a loaded context reference. JOURNAL is intentionally excluded from session context to save tokens. If you find such an import or auto-load instruction in `AGENTS.md` or `.codex/guidelines/`, remove it and warn the user in the final summary.
+The first doctor run establishes a read-only baseline; refactor performs one controlled in-place normalization; the final doctor run verifies the result.
 
-For the knowledge tier, add a plain pointer line under `## Guidelines`, e.g. `Project knowledge: see .codex/knowledge/INDEX.md (surfaced by $codex-start; read entries on demand).` Only `$codex-start` surfaces the index; knowledge detail files are never auto-loaded.
+## 1. Preflight
 
-## 8. Wire Up AI Behavior Guidelines
+1. Run `git status --short`. Preserve unrelated user changes and stop for direction only when overlapping edits make the refactor unsafe.
+2. Resolve the active memory index: installed projects normally use root `AGENTS.md`; the CLAUDART source template may use `.codex/AGENTS.md` as the installer source. If both differ and local evidence does not identify the owner, ask before overwriting either.
+3. Inventory `.codex/CONTEXT.md`, `.codex/JOURNAL.md`, guidelines, knowledge, tasks, specs, skills, agents, and recent Git history. Never read `.env` or expose secrets.
+4. Read `.codex/guidelines/knowledge-management.md` in full before inspecting or changing knowledge.
+5. Require `.codex/scripts/knowledge-check.sh`. If it is missing, report a High-severity installation problem and stop before knowledge writes.
+6. Run `bash .codex/scripts/knowledge-check.sh --root .` and retain its pre-change findings. Exit `1` is a finding baseline; exit `2` is a checker usage/runtime failure, so stop before knowledge writes.
 
-`ai-behavior.md` is the universal behavior guideline for Codex work.
+## 2. Keep The Memory Tiers Distinct
 
-- If `.codex/guidelines/ai-behavior.md` does not exist, create a concise version with complete frontmatter and durable behavior rules.
-- If the user has customized `ai-behavior.md`, leave their content alone and only ensure the reference exists.
-- Do not inline `ai-behavior.md` into `AGENTS.md`.
-- Add a single reference under `## Guidelines`.
+- `AGENTS.md`: concise entrypoint and routing pointers, preferably under 100 lines.
+- `.codex/guidelines/`: durable prescriptive behavior.
+- `.codex/knowledge/`: durable descriptive project facts and reference pointers.
+- `.codex/CONTEXT.md`: small declarative state true now.
+- `.codex/JOURNAL.md`: append-only history, never auto-loaded.
+- `.codex/tasks/` and `.codex/specs/`: working plans, proposals, acceptance state, and mission-local discoveries.
+- `.codex/HANDOFF.md`: optional single-use conversational baton.
+- `.agents/skills/` and `.codex/agents/`: executable workflows and bounded specialist roles.
 
-## 8b. Wire Up Agent Delegation Guidelines
+Route content by meaning before reorganizing files. Do not move WIP or a proposed future state into knowledge. Do not turn a descriptive fact into a guideline merely to keep it always loaded.
 
-`agent-delegation.md` is the Codex subagent and parallel-work guideline.
+## 3. Analyze The Project And Extract Owners
 
-- If `.codex/guidelines/agent-delegation.md` does not exist and the repository ships `.codex/agents/`, create a concise version with complete frontmatter. It must require explicit user authorization to spawn (depth, thoroughness, or investigation do not count) and define critical-path versus sidecar work, disjoint worker ownership, parent review responsibility, and durable handoff recording.
-- Keep the delegation behavior in the guideline, not `.codex/config.toml`; config only caps agent fan-out.
-- Add a single reference under `## Guidelines`.
+1. Determine the main frameworks, languages, runtime, architectural layers, and repository shape from the active memory index, manifests, build files, source tree, and existing docs.
+2. Identify logical ownership boundaries such as contracts/docs, data/repositories, API/controllers, UI/components, jobs, runtime/deploy, and AI/model workflows. For docs-first repositories, identify document layers, templates, workflows, and source-of-truth contracts.
+3. Discover linters, formatters, test runners, and validation commands. Delegate style enforcement to those tools instead of copying their rules into `AGENTS.md`.
+4. Inspect the active `AGENTS.md`, deprecated memory files, current guidelines, and stable decisions in CONTEXT. Split candidates by type before moving them: behavior → guideline; fact → knowledge; WIP/proposal → task/spec/CONTEXT.
+5. Ensure `.codex/guidelines/` exists, then extract detailed behavior into the smallest set of domain guidelines with clear ownership and useful `paths:`. Do not create files for symmetry or force a weak concept into an unrelated owner. Use `.codex/guidelines/*.md` for semantic guidance; never place it in `.codex/rules/`, whose optional `*.rules` files are reserved for Codex permission or environment rules.
+6. Keep each rule verifiable, scoped, loophole-closed, and unambiguous about critical constraints. Use stable file/symbol references rather than long code snippets or fragile line excerpts.
+7. Never write secrets, tokens, keys, production credentials, or real `.env` values into any memory tier.
 
-## 9. Audit Guidelines, Skills, And Agents
+## 4. Refactor AGENTS And Guidelines
 
-Report proposed audit changes in a clear list before applying risky changes. Apply safe fixes such as missing references, stale deleted-file references, frontmatter corrections, missing `.codex/CONTEXT.md` references, and JOURNAL auto-load removal. Ask before merging or deleting agents, guidelines, or skills.
+1. Trim the active `AGENTS.md` to project identity, selective context loading, core workflows, security/repository-wide constraints, and pointers. Never require reading every guideline blindly. Keep it under 100 lines where practical; if it still exceeds 150 lines, flag that explicitly in the final report.
+2. Reconcile stale references to deprecated or duplicate memory files. Follow the repository convention for byte-identical duplicates; ask before removing a divergent file or choosing a winner.
+3. Keep the four compact knowledge invariants in `AGENTS.md` and the full contract in `knowledge-management.md`.
+4. Ensure every relevant guideline has `paths:`, `description:`, `when_to_use:`, and `tags:` frontmatter and a clear owner. Keep flow-style `paths`/`tags`.
+5. Verify concrete guideline claims against repository sources. Classify mismatches as guideline-stale, source-debt, open-work, or needs-user-decision; do not weaken a desired invariant merely because source currently violates it.
+6. Detect kitchen-sink files, near-duplicates, stale temporary wording, and repeated facts. Keep a rule in its most specific owner and replace copies with pointers; merge, split, or remove semantic owners only with clear evidence and user confirmation.
+7. Promote stable behavioral decisions from CONTEXT to the correct guideline through checkpoint semantics. Leave temporary decisions in CONTEXT. Route purely descriptive guideline content to the knowledge workflow only after the capture gate passes and ask before removing the original guideline.
+8. Cross-link `.codex/CONTEXT.md`, the universal behavior guideline, every globally relevant workflow guideline, and the knowledge root router from `AGENTS.md`. Never auto-load JOURNAL, HANDOFF, task bodies, or knowledge details.
+9. Ensure `ai-behavior.md` exists without overwriting user customizations. Follow the active harness policy for delegation; keep decomposition, disjoint ownership, non-overlap, parent validation, and durable result recording in `agent-delegation.md` instead of inventing a conflicting permission rule.
+10. Ensure `## Agent Self-Evolution & Context Maintenance` remains in `AGENTS.md`: project-wide behavior updates its owner guideline, new guideline owners get indexed, eligible descriptive facts use the knowledge contract, global Codex behavior updates `AGENTS.md`, and live state uses checkpoint.
 
-For every file in `.codex/guidelines/`:
+Semantic audit results must identify guidelines changed, stale rules fixed, source debt left in code/docs, split/merge actions, and decisions still requiring the user.
 
-- Verify YAML frontmatter exists with valid `paths:`, `description:`, `when_to_use:`, and `tags:`.
-- Flag block-list `paths:`; guidelines must use flow-style `paths: ["glob-a", "glob-b"]`.
-- Flag block-list `tags:`; guidelines must use inline `tags: [tag-a, tag-b]` style.
-- Run a glob check on each `paths:` entry. `paths: ["**/*"]` is valid for universal guidelines.
-- If a glob matches zero files, flag the guideline as potentially dead and ask whether to remove or rescope it.
-- Replace long inlined code with `file:line` references.
-- Apply the Rule Quality Checklist.
-- Apply the semantic audit from Step 5 before declaring a guideline healthy.
-- Use tag overlap as an initial signal for near-duplicates; read bodies only when tags or paths suggest overlap. Merge near-duplicates only after user confirmation.
+## 5. Normalize Knowledge In Place
 
-For every file in `.agents/skills/*/SKILL.md`:
+Read every topic frontmatter, the root router, domain maps, and route targets. Use the canonical grammar and mutation rules from `knowledge-management.md`; do not restate or improvise a second schema.
 
-- Verify the file starts with YAML frontmatter.
-- Confirm `name:` and `description:` are present.
-- Confirm the skill contains sufficient procedure detail to execute the workflow without referencing external files.
-- Keep skills complete and actionable. A future Codex session should know exactly what to do and which files it may update.
-- Remove stale generated-marker comments or references to deleted memory files.
+For each topic:
 
-For every file in `.codex/agents/`:
+1. Identify its existing canonical owner and evidence. Preserve the body, title, curated hook, grouping, ordering, and deliberate external routes.
+2. Normalize frontmatter once using only supported fields and formats. Do not invent aliases, triggers, scope, sources, relations, verification dates, or lifecycle claims.
+3. Set `status: active` only when current evidence was actually checked. Record `last_verified` as the evidence-check date and ensure active topics have `sources` or `verify`.
+4. If evidence is insufficient or conflicting, use `status: review-needed` with a precise `status_note`; do not present uncertainty as active truth.
+5. Use `superseded` or `retired` only with clear repository evidence or user confirmation. Never infer lifecycle from age or absence from the map.
+6. Update the topic and its reachable root/domain-map route atomically. Route lines have no dates.
 
-- Verify TOML includes `name`, `description`, `model`, `sandbox_mode`, and `developer_instructions`.
-- Keep review/explorer agents read-only unless the agent is explicitly a worker.
-- Confirm worker-style agents define ownership expectations and say they must not revert changes made by others in parallel.
-- Replace hardcoded grep pattern lists with guidance to scan the codebase and use project tooling when present.
-- Confirm the agent's responsibilities do not overlap more than 50% with another agent. If they do, propose a merge.
+Store-wide rules:
 
-## 10. Maintain CONTEXT And JOURNAL
+- A small store may remain root → topic. When active topics exceed 24 or the root exceeds 1,200 visible words, introduce `_maps/<domain>.md` from existing scope/grouping evidence while preserving curated and external routes; if ownership cannot be grouped safely, report the decision instead of guessing.
+- Domain maps route only to topics and never nest.
+- A topic over 10 KiB is a split candidate. Preserve it and report a reviewed split proposal; do not rewrite or split its body automatically.
+- Report an ambiguous unindexed file with evidence. Never auto-promote, auto-delete, retire, or supersede it.
+- Do not regenerate the root or maps from frontmatter alone; hooks, grouping, ordering, and external routes carry human routing intent.
+- Do not add a recall command, write-on-read behavior, telemetry, database, or daemon.
 
-For `.codex/CONTEXT.md`:
+After the normalization batch, run `bash .codex/scripts/knowledge-check.sh --root . --fail-on warning`. Fix only supported mechanical failures; exit `2` blocks completion. Then repeat the normalization scan without changing inputs: it must produce no further diff. If a second pass would churn formatting or metadata, the refactor is not idempotent; stop and report the cause.
 
-- Confirm it exists. If not, create a concise template.
-- Verify line count is at most 150. If exceeded, flag for user review and propose trimming or graduating long-lived items into `.codex/guidelines/`.
-- Confirm `AGENTS.md` references `.codex/CONTEXT.md`.
-- Ensure it describes current state only.
+## 6. Preserve Live Workflow State
 
-For `.codex/JOURNAL.md`:
+- Create concise CONTEXT and JOURNAL scaffolds when missing. Rewrite `.codex/CONTEXT.md` only through checkpoint semantics, keep it under 150 lines, and ensure `AGENTS.md` references it.
+- Never rewrite or prune JOURNAL; use tail and targeted `rg`, and remove any instruction that auto-loads it.
+- If task/spec directories are missing while their skills exist, create only their canonical seed indexes and archive placeholders. Do not rewrite, move, close, or change task/spec bodies; their owning workflows manage state and archives.
+- Remove an archive `.gitkeep` only when a real archived Markdown file already makes it redundant, and report the removal.
+- Do not store subagent ids or transient thread state in durable memory.
+- Treat an empty knowledge tier as valid. Do not populate it merely to make refactor appear productive.
 
-- Confirm it exists. If not, create a concise append-only template.
-- Search `AGENTS.md` and `.codex/guidelines/` for instructions that auto-load `.codex/JOURNAL.md`. If found, remove them and warn the user.
-- Do not full-read JOURNAL by default. Use `tail` and targeted `rg` searches for pattern analysis.
-- Do not prune or rewrite JOURNAL entries. The file is append-only by contract.
+## 7. Audit Skills And Agents
 
-For `.codex/tasks/`:
+- Validate every `SKILL.md` frontmatter and confirm the workflow remains executable with its referenced guidelines and one-hop resources. Repair stale references and generated markers without making skills duplicate canonical guideline contracts.
+- Keep skills concise and load detailed contracts from their canonical guideline instead of copying them.
+- For every `.codex/agents/*.toml`, require `name`, `description`, `model`, `model_reasoning_effort`, `sandbox_mode`, and `developer_instructions`. Keep reviewers/explorers read-only unless the agent is explicitly a worker.
+- Confirm worker agents define ownership boundaries and say they must not revert edits made by others in parallel. Replace hardcoded grep lists with repository discovery and project tooling. If two agents' responsibilities overlap by more than 50%, propose a merge but do not perform it without user confirmation.
+- Parent review remains required for delegated results.
+- Apply safe wiring and frontmatter fixes. Ask before merges, deletions, or meaning-changing rewrites.
 
-- If the folder does not exist but `codex-plan` is present in `.agents/skills/`, create it with a seed `index.md` and a `done/.gitkeep`.
-- If `.codex/tasks/done/.gitkeep` exists AND `.codex/tasks/done/` contains at least one real `.md` file, delete the `.gitkeep` — once real archives live there, the placeholder is redundant. Report what was removed.
-- Do not modify or move any task `.md` file content. Task files are working documents owned by `$codex-plan` and `$codex-checkpoint`; refactor-memory only touches the `.gitkeep` placeholder and (if missing) the seed `index.md`.
+## 8. Base Template Handling
 
-For `.codex/specs/`:
+When the repository is a distributable template:
 
-- If the folder does not exist but `codex-spec` is present in `.agents/skills/`, create it with a seed `INDEX.md` (canonical header plus empty `## Active` and `## Done` sections) and a `done/.gitkeep`.
-- If `.codex/specs/` exists but `.codex/specs/done/` is missing, create `.codex/specs/done/.gitkeep`.
-- Do not modify or move any spec folder content. Spec folders are mission documents owned by `$codex-spec`, `$codex-spec-run`, and `$codex-checkpoint`; refactor-memory only touches the archive placeholder and (if missing) the seed `INDEX.md`.
+- Treat `.codex/` and `.agents/` as generic payload, not live maintainer state.
+- Preserve the documented relationship between `.codex/AGENTS.md` and the downstream root `AGENTS.md`.
+- Do not add generated-marker comments, project-specific frameworks, private paths, or downstream names to the payload.
+- Do not assume adopters share this repository's languages, tooling, docs, tasks, specs, or knowledge.
 
-For Codex delegation state:
+## 9. Verify And Report
 
-- Do not store subagent ids or transient thread names in `.codex/CONTEXT.md`.
-- Keep durable subagent outcomes in task files first; use CONTEXT only for still-active blockers, decisions, or next-session handoff notes.
-- If recurring delegation mistakes appear in JOURNAL or task retrospectives, propose `$codex-learn` to harden `.codex/guidelines/agent-delegation.md`.
+Before completion:
 
-For `.codex/knowledge/`:
+1. Run the knowledge checker after the final knowledge mutation and report its result.
+2. Confirm every active topic is reachable exactly once; every review-needed topic is either unindexed or reachable at most once; every map is one hop; and curated/external routes remain.
+3. Confirm a repeated normalization pass creates no changes.
+4. Confirm `AGENTS.md` line count and links; verify live state and guideline targets exist and that JOURNAL, HANDOFF, task bodies, and knowledge details are not auto-loaded.
+5. Confirm guideline globs match intended files, frontmatter is valid, semantic findings use the required classifications, and `agent-delegation.md` is wired when agents exist.
+6. Confirm task/spec seed shape and archive placeholders without altering their live documents.
+7. Run the available skill validator for every skill changed by this refactor.
+8. Confirm `.codex/config.toml` retains a conservative positive concurrency cap unless a higher value is explicitly documented.
+9. Run `git diff --stat`, `git diff --check`, `git status --short`, line/token estimates for the active memory index and CONTEXT, and relevant repository formatters.
 
-- If the folder does not exist, create it with a seed `INDEX.md` (header comment + empty `## Knowledge` section).
-- Bootstrap an empty tier — discover and write grounded drafts. If `.codex/knowledge/` is empty (the common case right after adopting the tier), do NOT skip it: running `$codex-refactor-memory` IS the trigger to seed it. Proactively (a) discover durable facts you can ground from the project `README`, `docs/`, architecture/contract files, `Makefile`/`package.json`, and descriptive content pulled out of `AGENTS.md` in Steps 4/6 (build on your Step 2 analysis); (b) write a small set of draft entries (domain, architecture, key integrations, glossary — a handful, not an exhaustive dump) into `.codex/knowledge/` and register them in `INDEX.md`. Every entry MUST carry a `sources:` anchor to the real file it summarizes — no source, no entry. This is an auto-write like the CONTEXT/JOURNAL writes: the git diff is the review gate — report exactly what you created so the user can revert anything they dislike. NEVER invent facts by reading raw source code (summarize existing docs/contracts only); if there is genuinely nothing groundable, say so and skip.
-- Reconcile the index: every `.md` file (excluding `INDEX.md`) must have an `INDEX.md` entry, and every entry must point to a real file. Add missing entries; flag dead entries.
-- Audit each knowledge file: frontmatter present (`name`/`description`/`type`/`updated`); `sources:` relative paths still exist (dead -> report); `updated:` older than 90 days -> flag for review.
-- Enforce the boundary: knowledge is descriptive. If a file carries prescriptive rules (`MUST`/`NEVER`), propose moving that content to `.codex/guidelines/`. The boundary is bidirectional — Step 5 handles the reverse (a purely descriptive guideline that belongs here).
-- Verify concrete claims against the repo — apply the same rigor as Step 5, on knowledge bodies: extract concrete claims (named files, modules, symbols, endpoints, config keys, paths) and confirm they still exist. Classify accurate / stale / needs-user-decision. Knowledge is descriptive fact about the codebase, so it rots faster than guidelines — flag stale facts for user review, never auto-delete. Recommend a `sources:` or `verify:` anchor for any entry that has neither (unanchored facts can't be checked deterministically by `$codex-doctor`).
-- Overlap detection (`knowledge` ↔ `knowledge` and `knowledge` ↔ `guidelines`): use `description`/`type` keywords as a cheap overlap signal (as Step 9 uses tag overlap for guidelines); read bodies only when keywords collide. Two knowledge entries on the same topic -> propose merging into the most specific owner + a `[[link]]`. A fact restated inside a guideline's prose -> propose keeping the behavior in the guideline and the fact in knowledge, cross-linked — never duplicated. Propose only; merge after user confirmation.
-- Reconcile `related:` links: confirm each `[[slug]]` in a knowledge file's `related:` resolves to an existing knowledge topic or guideline; repair or report dead links.
-- Do not auto-delete or rewrite knowledge bodies — flag staleness and dead pointers for user review. Keep `INDEX.md` a one-line-per-entry map.
-
-## 11. Base Template Notes
-
-If this repository is a base template whose `.codex/` and `.agents/` directories are installed into other projects:
-
-- Do not add generated-marker comments to base template files.
-- Keep template language generic and avoid project-specific names unless the template is intentionally branded.
-- If an installer copies `.codex/AGENTS.md` to root `AGENTS.md`, document that relationship clearly and keep both files synchronized.
-- Do not assume a downstream project has the same languages, frameworks, docs, or tests as the template repository.
-
-## 12. Append Agent Self-Evolution Section
-
-At the end of root `AGENTS.md`, ensure `## Agent Self-Evolution & Context Maintenance` exists.
-
-Include these rules, adapted to Codex paths:
-
-- "Do not assume a human will document your code patterns. If you build it, document it."
-- Existing guidelines change -> update the relevant file in `.codex/guidelines/`.
-- New domains/layers -> create a new guideline file in `.codex/guidelines/` with flow-style `paths: [...]`, `description:`, `when_to_use:`, and inline `tags: [...]` frontmatter and append its reference to `AGENTS.md`.
-- Durable project facts (domain, architecture, integration, glossary, external-doc pointers) -> create or update a topic file in `.codex/knowledge/` and register it in `.codex/knowledge/INDEX.md`. Knowledge is descriptive; guidelines are prescriptive.
-- Global Codex changes -> update `AGENTS.md` directly.
-- Shared live state -> update `.codex/CONTEXT.md` through `$codex-checkpoint`, not through refactor-memory.
-
-## 13. Verification
-
-Before the final summary, run or perform:
-
-- `git diff --stat`
-- `git status --short`
-- `wc -l AGENTS.md .codex/CONTEXT.md`
-- Search for stale references to deleted memory files, such as `.codex/AGENTS.md`, if those files were removed.
-- Search `AGENTS.md` and `.codex/guidelines/` for JOURNAL auto-load instructions.
-- Confirm every guideline listed in `AGENTS.md` exists.
-- Confirm `.codex/knowledge/INDEX.md` exists, lists every topic file, and is referenced by a plain pointer in `AGENTS.md`.
-- Confirm every knowledge entry you created this run (bootstrap or migration) carries a `sources:` anchor; drop or flag any that does not.
-- Confirm `.codex/guidelines/agent-delegation.md` is referenced when `.codex/agents/` exists.
-- Confirm `.codex/config.toml` keeps the subagent concurrency cap (`[agents] max_concurrent_threads_per_session`) at 6 or below unless a higher fan-out is explicitly documented.
-- Confirm semantic guideline findings were classified as accurate, guideline-stale, source-debt, open-work, or needs-user-decision.
-
-Do not run `git commit`, `git push`, `git merge`, `git rebase`, or similar history/remote-writing commands yourself.
-
-## 14. Final Summary
-
-Output a concise summary covering:
-
-1. Guideline files and `.codex/knowledge/` entries created, updated, or migrated between tiers (including any bootstrap of an empty tier).
-2. `AGENTS.md` changes and final line count.
-3. Audit findings from Step 9, separated into auto-fixed and needs user decision.
-4. Semantic drift findings from Step 5, including source-debt items not fixed in memory.
-5. Deprecated memory files removed or retained.
-6. Verification commands/checks run.
-7. Remaining risks or user decisions.
-8. Suggest the user run `git diff` to review every change before committing.
-
-Confirm completion only after every relevant step has been completed or explicitly marked not applicable.
+Summarize files created/changed, cross-tier moves, final `AGENTS.md` size, checker results before/after, semantic findings and source debt, skills/agents audited, candidates left `review-needed`, ambiguous unindexed files preserved, removed placeholders/deprecated files, validation run, and decisions still needed. Suggest reviewing the full diff. Do not commit, push, merge, rebase, tag, or trigger CI/CD without explicit user permission.

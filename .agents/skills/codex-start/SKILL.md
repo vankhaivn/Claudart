@@ -1,6 +1,6 @@
 ---
 name: codex-start
-description: Orient a new Codex session from current context, recent git history, and active task documents.
+description: Orient a new Codex session from current state, active task/spec indexes, the root knowledge router, and recent Git history without running heavy validation.
 ---
 
 # Codex Start
@@ -13,7 +13,7 @@ Start a Codex session with a lightweight CLAUDART orientation. This skill is rea
 2. Read `.codex/CONTEXT.md` if it exists. If missing, say the project has no Codex context yet and suggest `$codex-checkpoint` after meaningful work.
 3. Read `.codex/tasks/index.md` if it exists. If missing, treat as "no active tasks". If present, extract entries under `## Active`.
 4. For each Active entry, verify the underlying file exists in `.codex/tasks/` (the index is a cache; the file is truth). Read its frontmatter (`status`, `updated`, `slug`) only — do not full-read task bodies in `$codex-start`.
-5. Read `.codex/knowledge/INDEX.md` if it exists — the INDEX only. Count the entries under `## Knowledge`. Do NOT read individual knowledge detail files, and do NOT validate freshness or dead links (that is `$codex-doctor`'s job). The index makes durable project facts discoverable; read a detail file only if a later task needs it.
+5. Read `.codex/knowledge/INDEX.md` if it exists — the root router only. Count visible route lines under `## Knowledge` that match the canonical Markdown route grammar; ignore HTML comments/templates and `- _(none)_`, so a seed index reports zero. Do NOT read domain maps, topic files, or `.codex/guidelines/knowledge-management.md`, and do NOT validate freshness or dead links. A later task that needs knowledge loads the guideline and follows its bounded routing contract.
 6. Read `.codex/specs/INDEX.md` if it exists — the INDEX only. Extract entries under `## Active`. Do NOT read SPEC/ROADMAP/NOTES/LEDGER bodies in `$codex-start`.
 7. Run `git log -3 --oneline`. If the directory is not a git repo or has fewer than three commits, report what is available.
 8. Extract only these sections from `.codex/CONTEXT.md` when present:
@@ -22,7 +22,7 @@ Start a Codex session with a lightweight CLAUDART orientation. This skill is rea
    - `## Open Questions / Blockers`
 9. Do not read `.codex/JOURNAL.md`.
 10. Do not read task bodies in `.codex/tasks/done/`.
-11. Do not run `$codex-doctor`; that is a heavier health check.
+11. Do not run `$codex-doctor` or `bash .codex/scripts/knowledge-check.sh`; those are heavier health checks.
 
 ## Output Format
 
@@ -34,7 +34,7 @@ Start a Codex session with a lightweight CLAUDART orientation. This skill is rea
 **Last 3 commits:** [git log -3 --oneline output, compact]
 **Active tasks:** [list of "<slug> (<status>, updated <date>)" from tasks/index.md, or "None"]
 **Active specs:** [list of "<slug> (<status>, updated <date>)" from specs/INDEX.md, or "None"]
-**Project knowledge:** [N entries in knowledge/INDEX.md, or "none"]
+**Project knowledge:** [N root routes in knowledge/INDEX.md, or "none"]
 **Start by:** [Next Session Should Start By section, or see "Five Cases" below]
 **Open blockers:** [Open Questions / Blockers section, or "None recorded"]
 ```

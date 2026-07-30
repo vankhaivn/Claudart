@@ -11,6 +11,8 @@ Plans live as markdown documents in `.claude/tasks/`, not in session memory. One
 
 This rule supersedes the native plan mode workflow. Do not rely on `ExitPlanMode` for persistence; the task file is the persistence layer.
 
+Task files remain the owner for task state, WIP, proposed behavior, acceptance state, and uncertain discoveries. A descriptive fact may be promoted mid-task only through `.claude/rules/knowledge-management.md` when both its capture gates and an immediate-promotion trigger pass; local scope is valid, but task state never becomes knowledge.
+
 For work that may parallelize, also follow `agent-delegation.md`. The `delegation:` frontmatter field records a delegation strategy at planning time and carries it into execution at the approval signal; its values and whether they gate delegation are defined there, not in this file.
 
 Mission-scale work runs one layer up, in `.claude/specs/` (see `spec-workflow.md`), and **supersedes this rule within its scope**: an approved spec's standing approval replaces the per-task approval and review gates below, and a spec executor never creates task files. Never run both layers over the same work.
@@ -74,6 +76,7 @@ tags: [1-5 lowercase kebab-case tags]
 - Libraries/tools the project uses (e.g., "uses Zod, not Joi")
 - Pitfalls already encountered
 - Delegation strategy when relevant: subagent roles, ownership boundaries, validation responsibilities (mirror the `delegation:` field)
+- Knowledge candidates not yet eligible for promotion, labeled with their evidence gap or conflict
 - Anything that would save the next session from re-discovering the same thing>
 
 ## Plan of Work
@@ -135,7 +138,7 @@ blocked ──(blocker cleared)──▶ in-progress
 
 ## Read-only Locks (Critical)
 
-Two task states forbid code edits — the agent may only touch the task file (and `index.md`):
+Two task states forbid code edits. The normal write scope is the task file and `index.md`; the only additional memory write is the narrow knowledge exception below.
 
 ### Planning Lock — `status: planning`
 
@@ -143,6 +146,7 @@ The agent is drafting / awaiting approval to start.
 
 - **Do NOT modify any code file.** No `Write`, `Edit`, or `NotebookEdit` outside `.claude/tasks/` (or `.codex/tasks/` for the Codex mirror).
 - **Allowed**: read-only exploration (`Read`, `Grep`, `Glob`, `git log/diff/status`), and creating/editing the task file itself.
+- **Knowledge exception**: an eligible descriptive fact may update `.claude/knowledge/` mid-session only when the capture gates and an immediate-promotion trigger in `knowledge-management.md` pass. Patch owner + route atomically and run the checker. This never permits code edits or promotion of task/proposed state.
 - If the user requests a code change while a planning-locked task is open, ask whether to flip status to `in-progress` first.
 
 ### Awaiting-Review Lock — `status: awaiting-review`
@@ -151,6 +155,7 @@ The agent has reported completion; the user has not yet verified.
 
 - **Do NOT modify any code file.** The work is under user review; if changes are needed, the user will tell you, and you flip status back to `in-progress` first.
 - **Allowed**: refining the draft Outcomes & Retrospective in the task file based on user comments before they give the final signal.
+- The same narrow knowledge exception applies; awaiting-review state and unresolved acceptance findings remain in the task.
 - If the user reports a problem or requests a code change, follow the "User reports a problem" flow in the Completion section — do not patch silently while still in awaiting-review.
 
 Both locks are enforced by convention, not tool restriction. Honor them strictly. They are the safety net replacing native plan mode and replacing blind agent self-completion.
@@ -185,6 +190,7 @@ When `status: in-progress`, the agent maintains the task file as it works:
 3. Append to **Surprises & Discoveries** when reality diverges from the plan (e.g., file moved, dependency missing, existing helper found). Prefix each entry with a `(YYYY-MM-DD HH:MMZ)` UTC timestamp.
 4. Append to **Decision Log** when changing approach mid-flight, prefixed with `(YYYY-MM-DD HH:MMZ, <agent>)`. Include rationale.
 5. **Do not delete or rewrite steps that were skipped or abandoned** — strike them through with `~~text~~` and add a Surprises entry explaining why.
+6. Route findings by `.claude/rules/knowledge-management.md`: keep task/WIP/proposal/uncertainty here; promote an eligible descriptive fact directly only under one of the rule's immediate-promotion triggers. Run the checker after a knowledge mutation.
 
 The plan is a living document. Edits to it are part of the work, not an afterthought. Every in-task log entry — a completed step, a Decision Log line, a Surprises line — carries the full `YYYY-MM-DD HH:MMZ` UTC time, never date-only: one task often logs several entries in a single day, and the time is the only thing that keeps them ordered for audit.
 
@@ -216,6 +222,7 @@ When the user gives a completion signal — "approved", "confirmed", "looks good
    ```
 5. Update `.claude/tasks/index.md`: remove from Active, add to Recently Done.
 6. If a recurring pattern emerged, propose `/learn` to graduate it into a rule.
+7. Leave task-local outcomes in the archived task. Promote only eligible descriptive facts under `knowledge-management.md`; `/checkpoint` can bulk-maintain remaining candidates.
 
 ### Phase 2b — User reports a problem (`awaiting-review → in-progress`)
 
@@ -251,7 +258,7 @@ A new session resuming a task must:
 3. If reality drifted from what the file expects, append a Surprises entry and ask the user whether to adapt the plan or revisit prior steps.
 4. Only then proceed with the next unchecked step.
 
-Never assume the file is still accurate without verification. The Memory Hints section is the future-session's lifeline — treat it as authoritative recall.
+Never assume the file is still accurate without verification. Memory Hints are the future session's orientation and candidate surface, not automatic authority; verify claims against current evidence before acting or promoting them.
 
 ## `index.md` Format
 
