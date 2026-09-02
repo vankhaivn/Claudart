@@ -1,102 +1,133 @@
-<div align="center">
-  <h1>CLAUDART</h1>
-  <p><strong>Lớp vận hành bằng markdown cho Claude Code &amp; Codex CLI - memory, kế hoạch và review, tất cả nằm trong git.</strong></p>
+# CLAUDART
 
-  <p>
-    <a href="https://github.com/vankhaivn/Claudart/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/github/license/vankhaivn/Claudart?style=for-the-badge&color=orange"></a>
-    <img alt="Pure Markdown" src="https://img.shields.io/badge/memory-pure_markdown-blue?style=for-the-badge">
-    <img alt="Offline-friendly" src="https://img.shields.io/badge/works-offline-green?style=for-the-badge">
-    <a href="https://github.com/vankhaivn/Claudart/issues"><img alt="Issues" src="https://img.shields.io/github/issues/vankhaivn/Claudart?style=for-the-badge&color=blue"></a>
-  </p>
-</div>
+[English](README.md) · [Hướng dẫn quy trình](docs/WORKFLOW_VI.md)
 
----
+CLAUDART là một bộ quy trình đặt ngay trong repository dành cho Claude Code và Codex CLI. Trạng thái phiên làm việc, kế hoạch triển khai, kiến thức dự án và chỉ dẫn cho agent đều được lưu bằng Markdown và quản lý cùng mã nguồn.
 
-Coding agent hay quên. Đóng terminal là kế hoạch biến mất. Session kế tiếp bắt đầu trong mù mờ, đọc lại nửa repo, rồi tranh luận lại một quyết định bạn đã chốt từ thứ Ba tuần trước. Trong lúc đó `CLAUDE.md` cứ phình to, vì chẳng ai đủ tin nó để xóa bất kỳ thứ gì.
+Hai lớp Claude và Codex hoạt động độc lập. Bạn có thể cài một lớp hoặc cả hai. CLAUDART không cần cơ sở dữ liệu, daemon hay dịch vụ chạy nền.
 
-CLAUDART xử lý chuyện này bằng file. Một nhóm slash command nhỏ duy trì một bộ tài liệu markdown dưới `.claude/` và `.codex/`: điều đang đúng ngay lúc này, kế hoạch cho từng task, các fact và rule đáng giữ lại. Tất cả đều được commit vào git, review được trong PR, và đọc được mà không cần tooling nào. Không có vector database, không daemon. Không cần host, không cần trông coi.
+## CLAUDART bổ sung những gì
+
+- **Định hướng phiên làm việc:** bắt đầu phiên mới từ trạng thái hiện tại, công việc đang mở, kiến thức dự án và lịch sử Git gần nhất.
+- **Kế hoạch bền vững:** lưu công việc nhiều bước trong file thay vì để kế hoạch biến mất cùng cuộc trò chuyện.
+- **Đặc tả cho công việc lớn:** mô tả và thực thi công việc kéo dài qua nhiều tác vụ hoặc nhiều phiên dưới một đặc tả đã được phê duyệt.
+- **Kiến thức dự án:** tách các sự thật bền vững khỏi quy tắc hành vi và trạng thái tạm thời.
+- **Bàn giao phiên:** giữ lại phần điều tra đang dở khi cửa sổ ngữ cảnh gần đầy.
+- **Công cụ bảo trì:** kiểm tra và chuẩn hóa cấu trúc bộ nhớ mà không cần thêm dịch vụ riêng.
+- **Agent chuyên biệt theo yêu cầu:** dùng agent cho chất lượng mã, bảo mật và đánh giá giao diện chỉ khi bạn gọi rõ ràng.
 
 ## Cài đặt
 
+### Dự án mới
+
+Mặc định, lệnh sau cài lớp Claude Code:
+
 ```bash
-# Flag sau `bash -s --`:  --claude (mặc định) · --codex · --both · --force (ghi đè)
+curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash
+```
+
+Chọn lớp cần cài khi cần thiết:
+
+```bash
+# Claude Code
 curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --claude
+
+# Codex CLI
+curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --codex
+
+# Cả hai
+curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --both
 ```
 
-`install.sh` copy mới toàn bộ, và đó không phải cách đúng cho một project đã có setup riêng. Trong trường hợp đó, hãy dán đoạn này vào agent của bạn. Nó sẽ đọc repo, diff với project, và chỉ merge những gì bạn phê duyệt:
+Trình cài đặt sao chép các file còn thiếu và bỏ qua file đã tồn tại. Tùy chọn `--force` sẽ ghi đè file hiện có, vì vậy chỉ dùng khi bạn thực sự muốn thay thế chúng.
 
-> Đọc https://raw.githubusercontent.com/vankhaivn/Claudart/main/INTEGRATE.md và làm theo để tích hợp CLAUDART vào project này. Hỏi tôi trước khi đụng tới bất kỳ thứ gì tôi đã custom.
+Với một bản cài Codex mới, trình cài đặt thêm `.codex/`, `.agents/skills/` và `AGENTS.md` ở thư mục gốc. Trong repository CLAUDART, file mẫu nguồn nằm tại `.codex/AGENTS.md`.
 
-Installation hiện hữu dùng `INTEGRATE.md` để derive delta thực tế với upstream hiện tại, không giả định bản khởi đầu. Với knowledge contract đang được upstream khai báo, flow đối soát là `doctor → refactor-memory → doctor`; workflow này không có thêm command recall hay migration riêng.
+### Dự án đã có cấu hình hoặc đã cài CLAUDART
 
-## CLAUDART giải quyết gì
+Không dùng trình cài đặt như một công cụ hợp nhất. Nó có thể sao chép hoặc ghi đè file, nhưng không đối soát được chỉ dẫn tùy chỉnh, trạng thái đang dùng, tác vụ, đặc tả hay kiến thức riêng của dự án.
 
-| Nỗi đau                                      | Cách CLAUDART xử lý                                                                                     |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| Session nào cũng bắt đầu mù mờ               | `/start` đọc trạng thái hiện tại, task đang mở và các commit gần đây trước khi đụng vào bất kỳ thứ gì   |
-| Kế hoạch mất khi session đóng                | `/plan` ghi kế hoạch vào task file để session sau có thể tiếp tục đúng chỗ bạn dừng                     |
-| Mission quá lớn cho một session hay một plan | `/spec` đóng băng ý định thành POC + roadmap bạn approve một lần; `/spec-run` chạy lặp tới final review |
-| Session hiệu quả chạm trần context           | `/handoff` lưu suy luận của session - giả thuyết, evidence, dead ends - cho lần `/start` kế tiếp        |
-| Cùng quyết định bị tái khám phá hằng tuần    | `/learn` biến correction hành vi lặp lại thành rule có scope theo path                                  |
-| Fact bền của dự án không có chỗ đúng để sống | `knowledge/` lập map; agent nạp map phù hợp, outline topic rồi chỉ section liên quan                    |
-| `CLAUDE.md` phình thành bồn đốt token        | `/refactor-memory` gọt nó lại thành một index và đưa nội dung về đúng nơi                               |
-| Memory âm thầm mục ruỗng                     | `/doctor` chạy checker read-only được ship sẵn, rồi audit drift ngữ nghĩa và nội dung đặt sai tầng      |
+Hãy yêu cầu coding agent làm theo quy trình tích hợp:
 
-Ba agent chuyên biệt được ship kèm các command và chỉ chạy khi có yêu cầu rõ ràng. `clean-code-reviewer` là agent cải thiện chất lượng code theo hướng implementation, có thể chỉnh sửa và kiểm tra code trong đúng phạm vi được giao; `security-auditor` và `ui-visual-critic` vẫn là agent audit/review read-only. Không agent nào tự động chạy, kể cả bên trong task hay spec loop. Delegation protocol giữ phần việc subagent song song có biên rõ ràng thay vì lan rộng mất kiểm soát.
+> Đọc https://raw.githubusercontent.com/vankhaivn/Claudart/main/INTEGRATE.md và làm theo để tích hợp hoặc cập nhật CLAUDART trong dự án này. Giữ nguyên nội dung riêng của dự án và trình bày các thay đổi dự kiến trước khi ghi file.
 
-## Mô hình memory
+Quy trình này so sánh dự án hiện tại với nhánh `main` mới nhất, đồng thời phân biệt file CLAUDART đã cũ với nội dung do dự án tự viết.
 
-Bốn loại memory, bốn vòng đời khác nhau:
+### Lần chạy đầu tiên
 
-```text
-SESSION STATE (dễ bay hơi)           DURABLE REFERENCE (sống qua session)
+Sau khi cài hoặc đối soát, chạy một lần chuỗi kiểm tra và chuẩn hóa:
 
-CONTEXT.md       JOURNAL.md          rules/ · guidelines/   knowledge/
-điều đang đúng   điều đã xảy ra      cách hành xử           dự án là gì
-(declarative)    (history log)       (prescriptive)         (descriptive facts)
+| Claude Code        | Codex CLI                |
+| ------------------ | ------------------------ |
+| `/doctor`          | `$codex-doctor`          |
+| `/refactor-memory` | `$codex-refactor-memory` |
+| `/doctor`          | `$codex-doctor`          |
 
-luôn được load   không được load     auto-load theo         INDEX trên /start,
-vào context      (chỉ audit)         path phù hợp           chi tiết đọc khi cần
-```
+Sau đó bắt đầu phiên làm việc bình thường bằng `/start` hoặc `$codex-start`.
 
-`/checkpoint` rebuild `CONTEXT.md` cuối session, retire lịch sử sang `JOURNAL.md`, và bulk-promote các fact bền còn lại. Nó không phải write boundary duy nhất: giữa một lượt explore dài, nói “hãy cập nhật knowledge từ phần vừa xác minh rồi tiếp tục” sẽ kích hoạt distillation ngay. Fact dự án current và đã verify vào `knowledge/`; task/WIP/proposed state ở lại task, spec hoặc context; claim chưa chắc vẫn là candidate, trừ khi evidence làm mất hiệu lực owner hiện có thì topic đó chuyển thành `review-needed`; behavior lặp lại đi vào rule qua `/learn`.
+## Quy trình hằng ngày
 
-Retrieval đi từ map và có budget: root `INDEX.md`, tối đa các domain map phù hợp, rồi frontmatter/outline topic và section nhỏ nhất đủ dùng. Đọc toàn file hay search history/source chỉ là fallback. `/doctor` và `/refactor-memory` tự gọi Bash checker không dependency; user không phải kẹp thêm command vào prompt thường ngày.
+| Mục đích                                               | Claude Code        | Codex CLI                |
+| ------------------------------------------------------ | ------------------ | ------------------------ |
+| Định hướng phiên                                       | `/start`           | `$codex-start`           |
+| Tạo kế hoạch triển khai bền vững                       | `/plan <task>`     | `$codex-plan <task>`     |
+| Mô tả công việc lớn, kéo dài nhiều phiên               | `/spec <mission>`  | `$codex-spec <mission>`  |
+| Thực thi đặc tả đã được phê duyệt                      | `/spec-run <slug>` | `$codex-spec-run <slug>` |
+| Lưu phần điều tra đang dở                              | `/handoff`         | `$codex-handoff`         |
+| Xây dựng lại trạng thái hiện tại tại điểm dừng phù hợp | `/checkpoint`      | `$codex-checkpoint`      |
+| Biến cách làm lặp lại thành quy tắc                    | `/learn`           | `$codex-learn`           |
+| Kiểm tra bản cài đặt                                   | `/doctor`          | `$codex-doctor`          |
 
-## Bắt đầu nhanh
+Dùng kế hoạch tác vụ cho phần triển khai có nhiều bước hoặc nhiều file. Dùng đặc tả khi công việc có nhiều giai đoạn, cần bản thử nghiệm hoặc tiêu chí nghiệm thu, hay phải tiếp tục qua nhiều phiên.
+
+## Cách tổ chức trạng thái
+
+| Vị trí                      | Mục đích                                         | Cách nạp                                            |
+| --------------------------- | ------------------------------------------------ | --------------------------------------------------- |
+| `CONTEXT.md`                | Trạng thái hiện tại của dự án và công việc       | Đọc khi bắt đầu phiên; được checkpoint viết lại     |
+| `JOURNAL.md`                | Lịch sử đã kết thúc                              | Chỉ nối thêm; không tự động nạp                     |
+| `rules/` hoặc `guidelines/` | Chỉ dẫn mang tính quy định cho hành vi của agent | Nạp khi phù hợp                                     |
+| `knowledge/`                | Các sự thật bền vững mô tả dự án                 | Định tuyến qua `INDEX.md`; chỉ đọc chi tiết khi cần |
+| `tasks/`                    | Kế hoạch triển khai bền vững                     | Đọc khi tác vụ đang hoạt động hoặc được tiếp tục    |
+| `specs/`                    | Đặc tả công việc lớn và lịch sử thực thi         | Đọc khi đặc tả đang hoạt động                       |
+| `HANDOFF.md`                | Bàn giao suy luận cho một phiên kế tiếp          | Phiên `/start` kế tiếp tiếp nhận rồi xóa            |
+
+Ranh giới quan trọng nhất: **quy tắc nói agent nên làm việc như thế nào; knowledge ghi điều gì đang đúng về dự án; task và spec ghi công việc đang được thực hiện.**
+
+## Agent chuyên biệt
+
+Các agent này không bao giờ tự chạy.
+
+| Agent               | Vai trò                                                                                                                                       |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Clean-code reviewer | Cải thiện chất lượng mã trong phạm vi rõ ràng, giữ nguyên hành vi dự kiến và chạy kiểm tra. Yêu cầu chỉ review sẽ giữ agent ở chế độ chỉ đọc. |
+| Security auditor    | Thực hiện audit bảo mật chỉ đọc dựa trên bằng chứng và ghi báo cáo.                                                                           |
+| UI visual critic    | Đánh giá giao diện hoặc đầu ra trực quan đã render khi được yêu cầu rõ ràng.                                                                  |
+
+Agent cha vẫn chịu trách nhiệm về phạm vi, tích hợp và kiểm tra kết quả của công việc được giao cho subagent.
+
+## Phát triển CLAUDART
+
+Repository này dùng Prettier cho Markdown và các kiểm tra Bash cho trình cài đặt, hợp đồng knowledge và quy trình spec.
 
 ```bash
-# Trong project đã cài CLAUDART
-/start                          # định hướng session
-/plan add JWT middleware        # ghi task file; agent chờ bạn approve trước khi code
-/spec build the demo game       # mission quá lớn cho một plan? phỏng vấn → POC → roadmap, approve một lần
-/spec-run demo-game             # session mới thực thi mission đã approve tự chủ tới cổng final review
-/handoff                        # context gần đầy? lưu suy luận, resume fresh bằng /start
-/checkpoint                     # rebuild CONTEXT.md cuối session
-/learn                          # thăng cấp quyết định lặp lại thành rule
-/doctor                         # health check khi setup có vẻ lệch
+npm ci
+npm run check
 ```
 
-Codex CLI chạy cùng flow với `$codex-` thay cho `/` (ví dụ `$codex-start`).
+Để dùng pre-commit hook của repository:
+
+```bash
+npm run hooks:install
+```
 
 ## Tài liệu
 
-**[docs/WORKFLOW_VI.md](docs/WORKFLOW_VI.md)** là manual - kiến trúc, lifecycle đầy đủ của task, toàn bộ command và layout thư mục. README này chỉ là phần giới thiệu.
+- [Hướng dẫn quy trình](docs/WORKFLOW_VI.md)
+- [Workflow guide bằng tiếng Anh](docs/WORKFLOW.md)
+- [Quy trình tích hợp và nâng cấp](INTEGRATE.md)
+- [Hướng dẫn đóng góp](CONTRIBUTING.md)
 
-Bản tiếng Anh: **[README.md](README.md)** và **[docs/WORKFLOW.md](docs/WORKFLOW.md)**.
+## Giấy phép
 
-## So sánh
-
-|                                |        CLAUDART        |              Mem0               |          Zep          |        LangMem        |              Understand-Anything               |                     MemPalace                      |
-| ------------------------------ | :--------------------: | :-----------------------------: | :-------------------: | :-------------------: | :--------------------------------------------: | :------------------------------------------------: |
-| **Setup**                      |     `curl \| bash`     | vector DB + Docker + OpenAI key | Neo4j + managed cloud | PostgreSQL + pgvector |           `curl \| bash` hoặc plugin           |            `pip install` + model 300 MB            |
-| **Con người đọc được**         |           ✅           |               ❌                |          ❌           |          ❌           |              ⚠️ JSON + dashboard               |           ⚠️ text nguyên văn, binary DB            |
-| **Chạy offline / air-gapped**  |           ✅           |               ❌                |          ❌           |          ❌           |                   ❌ cần LLM                   |                         ✅                         |
-| **Memory review được bằng PR** |           ✅           |               ❌                |          ❌           |          ❌           |             ✅ JSON commit vào git             |            ❌ ChromaDB + SQLite binary             |
-| **Tool hỗ trợ**                | Claude Code, Codex CLI |             chỉ API             |        chỉ API        |     chỉ LangGraph     | Claude, Codex, Cursor, Copilot, Gemini + 6 nữa | Claude Code, Codex CLI, Gemini CLI, MCP-compatible |
-
-Markdown thuần trong repo đã thắng lập luận này: `AGENTS.md` cung cấp một convention có version mà nhiều coding agent có thể dùng chung. CLAUDART xây workflow còn thiếu ở phía trên - orientation, planning, learning, hygiene và review.
-
-## License
-
-MIT, xem [`LICENSE`](LICENSE). Hoan nghênh đóng góp; [`CONTRIBUTING.md`](CONTRIBUTING.md) có các nguyên tắc cơ bản.
+CLAUDART được phát hành theo [giấy phép MIT](LICENSE).
