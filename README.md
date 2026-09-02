@@ -42,7 +42,7 @@ Existing installations use `INTEGRATE.md` to derive their actual delta against c
 | `CLAUDE.md` bloats into a token sink          | `/refactor-memory` trims it back to an index and files the content where it belongs                  |
 | Memory rots silently                          | `/doctor` runs a shipped read-only checker, then audits semantic drift and misfiled content          |
 
-Three review agents ship alongside the commands — `clean-code-reviewer`, `security-auditor`, and `ui-visual-critic`, each invoked on explicit request only (never automatically, not even inside a task or spec loop) — plus a delegation protocol that keeps parallel subagent work bounded instead of letting it sprawl.
+Three explicit-request-only specialized agents ship alongside the commands. `clean-code-reviewer` is an implementation-focused refiner that may edit and validate code inside the requested scope; `security-auditor` and `ui-visual-critic` remain read-only audit/review agents. None runs automatically, including inside a task or spec loop. A delegation protocol keeps parallel subagent work bounded instead of letting it sprawl.
 
 ## The memory model
 

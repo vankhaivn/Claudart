@@ -1,6 +1,6 @@
 # Integrate CLAUDART with your agent (AI-native install)
 
-**You are an AI coding agent** (Claude Code, Codex CLI, or similar) and your user pasted a link to this file because they want to **adopt or upgrade CLAUDART** in the current project. CLAUDART is a plain-markdown operating layer — slash commands / skills, a layered memory model, and review agents — for Claude Code and Codex CLI.
+**You are an AI coding agent** (Claude Code, Codex CLI, or similar) and your user pasted a link to this file because they want to **adopt or upgrade CLAUDART** in the current project. CLAUDART is a plain-markdown operating layer — slash commands / skills, a layered memory model, and specialized agents — for Claude Code and Codex CLI.
 
 Source of truth: <https://github.com/vankhaivn/Claudart> (branch `main`).
 
@@ -32,7 +32,7 @@ This is a category map, not an exhaustive or versioned allowlist. Enumerate the 
 **Claude layer** (`.claude/`):
 
 - `commands/` — slash commands: `start`, `plan`, `spec`, `spec-run`, `checkpoint`, `handoff`, `learn`, `refactor-memory`, `doctor`, `project-discovery`
-- `agents/` — review agents: `clean-code-reviewer`, `security-auditor`, `ui-visual-critic` (read-only on user code; invoked on explicit request only, never automatically)
+- `agents/` — specialized agents: write-capable `clean-code-reviewer` for scoped code-health implementation, plus read-only `security-auditor` and `ui-visual-critic`; all are explicit-request-only and never run automatically
 - `rules/` — **prescriptive**, path-scoped behavior (`ai-behavior`, `agent-delegation`, `knowledge-management`, `task-management`, `spec-workflow`)
 - `knowledge/INDEX.md` — root router for **descriptive** durable project facts; optional `_maps/` and detail files are read on demand
 - `scripts/knowledge-check.sh` — dependency-free, read-only mechanical validation for the knowledge contract

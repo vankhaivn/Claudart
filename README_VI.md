@@ -42,7 +42,7 @@ Installation hiện hữu dùng `INTEGRATE.md` để derive delta thực tế v�
 | `CLAUDE.md` phình thành bồn đốt token        | `/refactor-memory` gọt nó lại thành một index và đưa nội dung về đúng nơi                               |
 | Memory âm thầm mục ruỗng                     | `/doctor` chạy checker read-only được ship sẵn, rồi audit drift ngữ nghĩa và nội dung đặt sai tầng      |
 
-Ba review agent được ship kèm các command - `clean-code-reviewer`, `security-auditor` và `ui-visual-critic`, mỗi cái chỉ chạy khi được yêu cầu rõ ràng (không bao giờ tự động, kể cả bên trong một task hay spec loop) - cùng một delegation protocol để giữ việc subagent song song có biên rõ ràng thay vì lan rộng mất kiểm soát.
+Ba agent chuyên biệt được ship kèm các command và chỉ chạy khi có yêu cầu rõ ràng. `clean-code-reviewer` là agent cải thiện chất lượng code theo hướng implementation, có thể chỉnh sửa và kiểm tra code trong đúng phạm vi được giao; `security-auditor` và `ui-visual-critic` vẫn là agent audit/review read-only. Không agent nào tự động chạy, kể cả bên trong task hay spec loop. Delegation protocol giữ phần việc subagent song song có biên rõ ràng thay vì lan rộng mất kiểm soát.
 
 ## Mô hình memory
 
