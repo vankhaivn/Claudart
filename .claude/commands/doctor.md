@@ -38,7 +38,7 @@ For each missing path, report which command would create it (e.g., "missing → 
 For every `.md` file under `.claude/commands/`, `.claude/agents/`, `.claude/rules/`:
 
 - Verify the file starts with a YAML frontmatter block delimited by `---`.
-- For agents: confirm `name`, `description`, `tools`, and `model` keys are present. If `description` should auto-trigger the agent, confirm it contains `PROACTIVELY` (note when missing — may be intentional).
+- For agents: confirm `name`, `description`, `tools`, and `model` keys are present. If `description` should auto-trigger the agent, confirm it contains `PROACTIVELY` (note when missing — may be intentional). Keep explorers and review-only/audit-only agents without `Edit`; allow `Edit` only when the declared purpose explicitly requires implementation. Every write-capable agent must define scope, protect unrelated user work, require validation, and account for parallel edits.
 - For rules: confirm `paths:` (a list of glob patterns), `description:`, `when_to_use:`, and `tags:` keys are present.
 - For rule `paths:`, confirm paths use YAML flow sequence style, e.g. `paths: ["src/**/*.ts", "test/**/*.ts"]`. Flag block-list style (`paths:` followed by `- item`) because frontmatter conventions should stay compact and grep-friendly.
 - For rule `tags:`, confirm tags use inline YAML array style on one line, e.g. `tags: [architecture, nestjs, boundaries]`. Flag block-list style (`tags:` followed by `- item`) because tag indexing depends on single-line frontmatter.

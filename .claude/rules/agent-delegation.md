@@ -11,7 +11,7 @@ tags: [subagents, delegation, parallelism, orchestration]
 
 **What this rule adds is the _how_, not the _whether_.** Claude's Agent tool already encodes the mechanics — launching parallel agents in one message, `SendMessage` to continue a thread, `run_in_background`, `isolation: worktree`, and _"once you've delegated a search, don't also run it yourself — wait for the result."_ On top of that, this rule supplies the project-specific layer: how to decompose work, how to avoid shadow-running, how to write a self-contained worker prompt, and how delegated findings persist into CLAUDART memory.
 
-This protocol governs general-purpose delegation (`subagent_type: general-purpose`, `Explore`, `Plan`). Project review agents (`clean-code-reviewer`, `security-auditor` under `.claude/agents/`) carry their own instructions and are invoked by name; they are out of scope here.
+This protocol governs general-purpose delegation (`subagent_type: general-purpose`, `Explore`, `Plan`). Project-specific specialized agents under `.claude/agents/` carry their own instructions and are invoked directly by name; they are out of scope here. Their capabilities differ: `clean-code-reviewer` is a write-capable implementation refiner by default, while `security-auditor` remains review-only.
 
 ## Decompose before you fan out
 

@@ -12,7 +12,7 @@ The target shape is:
 - current live state in `.claude/CONTEXT.md`;
 - append-only history in `.claude/JOURNAL.md`;
 - self-contained skills in `.agents/skills/` or `.claude/commands/`;
-- optional read-only reviewer/explorer agents in `.claude/agents/`.
+- optional specialized agents in `.claude/agents/`, with write access only for roles whose declared purpose explicitly requires implementation.
 
 > **Pre-flight checks**: confirm `git status --short` is clean or that the user understands there is in-progress work before you begin. Refuse to proceed if unrelated uncommitted changes could be swallowed by the refactor. Confirm `.claude/scripts/knowledge-check.sh` exists, then run `bash .claude/scripts/knowledge-check.sh` and retain its complete output as the mechanical baseline. Exit `1` is the finding baseline. Exit `2` is a checker usage/runtime failure and blocks all knowledge mutation. A missing checker is also a blocker.
 
@@ -189,7 +189,8 @@ For every file in `.agents/skills/*/SKILL.md` and `.claude/commands/*.md`:
 For every file in `.claude/agents/`:
 
 - Verify YAML frontmatter has `name`, `description` (with `PROACTIVELY` if it should auto-trigger), `tools`, and `model`.
-- Keep review/explorer agents read-only unless the agent is explicitly a worker.
+- Keep explorers and review-only/audit-only agents read-only. Allow `Edit` only when the declared purpose explicitly requires implementation, as with a refiner or worker.
+- Confirm every write-capable agent defines ownership boundaries, protects unrelated user work, validates its changes, and says it must not revert edits made by others in parallel.
 - Replace hardcoded grep pattern lists with guidance to scan the codebase and use project tooling when present.
 - Confirm the agent's responsibilities do not overlap more than 50% with another agent. If they do, propose a merge.
 

@@ -101,8 +101,8 @@ After the normalization batch, run `bash .codex/scripts/knowledge-check.sh --roo
 
 - Validate every `SKILL.md` frontmatter and confirm the workflow remains executable with its referenced guidelines and one-hop resources. Repair stale references and generated markers without making skills duplicate canonical guideline contracts.
 - Keep skills concise and load detailed contracts from their canonical guideline instead of copying them.
-- For every `.codex/agents/*.toml`, require `name`, `description`, `model`, `model_reasoning_effort`, `sandbox_mode`, and `developer_instructions`. Keep reviewers/explorers read-only unless the agent is explicitly a worker.
-- Confirm worker agents define ownership boundaries and say they must not revert edits made by others in parallel. Replace hardcoded grep lists with repository discovery and project tooling. If two agents' responsibilities overlap by more than 50%, propose a merge but do not perform it without user confirmation.
+- For every `.codex/agents/*.toml`, require `name`, `description`, `model`, `model_reasoning_effort`, `sandbox_mode`, and `developer_instructions`. Keep explorers and review-only/audit-only agents read-only. Allow workspace writes only when the declared purpose explicitly requires implementation, as with a refiner or worker.
+- Confirm every write-capable agent defines ownership boundaries, protects unrelated user work, validates its changes, and says it must not revert edits made by others in parallel. Replace hardcoded grep lists with repository discovery and project tooling. If two agents' responsibilities overlap by more than 50%, propose a merge but do not perform it without user confirmation.
 - Parent review remains required for delegated results.
 - Apply safe wiring and frontmatter fixes. Ask before merges, deletions, or meaning-changing rewrites.
 

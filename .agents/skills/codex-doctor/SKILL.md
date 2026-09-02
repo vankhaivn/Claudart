@@ -45,8 +45,8 @@ For every `.agents/skills/*/SKILL.md` file:
 For every `.codex/agents/*.toml` file:
 
 - Confirm `name`, `description`, `model`, `model_reasoning_effort`, `sandbox_mode`, and `developer_instructions` keys are present.
-- Confirm review/explorer agents use `sandbox_mode = "read-only"` unless their purpose clearly requires writes.
-- Confirm any worker-style agent clearly describes its write scope expectations and warns that other agents may be editing in parallel.
+- Confirm explorers and review-only/audit-only agents use `sandbox_mode = "read-only"`. A write-capable refiner or worker is valid only when its declared purpose explicitly requires implementation.
+- Confirm every write-capable agent clearly defines scope expectations, protects unrelated user work, requires validation, and warns that other agents may be editing in parallel.
 
 ### 3. Guideline Path Coverage
 
