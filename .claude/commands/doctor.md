@@ -22,6 +22,7 @@ Record its exit status and every finding. The checker is read-only and owns mech
 - `.claude/commands/` exists and contains at least: `start.md`, `learn.md`, `refactor-memory.md`, `doctor.md`, `checkpoint.md`, `plan.md`, `handoff.md`, `project-discovery.md`, `spec.md`, `spec-run.md`
 - `.claude/agents/` exists (may be empty if user removed shipped agents)
 - `.claude/rules/` exists (may be empty before the user runs `/refactor-memory`)
+- `.claude/rules/code-health.md` exists and is referenced from `.claude/CLAUDE.md`
 - `.claude/rules/knowledge-management.md` exists and is referenced from `.claude/CLAUDE.md`
 - `.claude/knowledge/` exists with `INDEX.md` (warn if missing — `/refactor-memory` will recreate it)
 - `.claude/scripts/knowledge-check.sh` exists (missing is **High**, not a routine warning)
@@ -71,6 +72,11 @@ For every rule file in `.claude/rules/*.md`:
 
 - Confirm `.claude/rules/ai-behavior.md` exists.
 - Confirm `.claude/CLAUDE.md` has `@.claude/rules/ai-behavior.md` (or equivalent reference) under Domain Rules. If missing, the universal behavior guidelines are not loaded — flag as **High** severity.
+
+### 5a. Code Health Wiring
+
+- Confirm `.claude/rules/code-health.md` exists.
+- Confirm `.claude/CLAUDE.md` has `@.claude/rules/code-health.md` (or equivalent reference) under Domain Rules. If missing, ordinary implementation bypasses the shared correctness, scope, behavior-preservation, testing, and validation contract — flag as **High** severity.
 
 ### 5b. CONTEXT/JOURNAL Wiring (token hygiene)
 

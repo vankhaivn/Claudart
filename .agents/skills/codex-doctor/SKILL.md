@@ -14,7 +14,7 @@ Run a read-only health check on this repository's CLAUDART installation from the
 - A Codex memory index exists: root `AGENTS.md` for an installed downstream project, or `.codex/AGENTS.md` for the CLAUDART source template copied by the installer. If both exist, compare them and flag drift.
 - `.codex/CONTEXT.md` exists. Warn if missing because the user may not have run checkpoint yet.
 - `.codex/JOURNAL.md` exists. Warn if missing.
-- `.codex/guidelines/` exists and contains at least `ai-behavior.md`, `task-management.md`, `agent-delegation.md`, `spec-workflow.md`, and `knowledge-management.md`.
+- `.codex/guidelines/` exists and contains at least `ai-behavior.md`, `code-health.md`, `task-management.md`, `agent-delegation.md`, `spec-workflow.md`, and `knowledge-management.md`.
 - `.codex/knowledge/` exists with `INDEX.md` (warn if missing — `$codex-refactor-memory` will recreate it).
 - `.codex/scripts/knowledge-check.sh` exists and is readable. Missing checker is **High** because doctor cannot mechanically validate the canonical knowledge contract; do not emulate it with ad hoc parsing.
 - `.codex/agents/` exists, even if the user removed shipped agents.
@@ -75,6 +75,12 @@ For every guideline file in `.codex/guidelines/*.md`:
 - Confirm `.codex/guidelines/ai-behavior.md` exists.
 - Confirm the active memory index references `.codex/guidelines/ai-behavior.md`.
 - If missing, flag as High severity because universal behavior guidelines are not loaded.
+
+### 5a. Code Health Wiring
+
+- Confirm `.codex/guidelines/code-health.md` exists.
+- Confirm the active memory index references `.codex/guidelines/code-health.md` as the continuous implementation baseline for code and code-adjacent work.
+- If missing or unwired, flag as High because ordinary implementation would bypass the shared correctness, scope, behavior-preservation, testing, and validation contract.
 
 ### 5b. Agent Delegation Wiring
 
