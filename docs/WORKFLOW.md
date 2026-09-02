@@ -45,6 +45,8 @@ CONTEXT.md       JOURNAL.md          rules/ · guidelines/      knowledge/
 
 `rules/` (Claude) and `guidelines/` (Codex) hold behavior: the prescriptive "always do X" patterns that earned a permanent place by recurring. `/learn` is how they get there.
 
+The mirrored [Claude rule](../.claude/rules/code-health.md) and [Codex guideline](../.codex/guidelines/code-health.md) define the globally scoped code-health implementation baseline. It applies continuously when ordinary agent work inspects or changes code: preserve behavior and contracts, make the smallest coherent change, prefer evidence over generic clean-code dogma, test the risk, and validate proportionally. It does not auto-invoke the explicit-request-only `clean-code-reviewer` refiner.
+
 `knowledge/` holds facts: what the project is, how it is wired, and what its terms mean. Rules prescribe; knowledge describes. One topic owns each fact cluster, while the root `INDEX.md` and optional `_maps/<domain>.md` files route the agent without loading every topic. A reference topic points to an existing canonical document instead of copying it.
 
 Checkpoint is the bulk maintenance boundary, not the only knowledge write boundary. The user can say “update knowledge from what we just verified, then continue” at any point. The agent distils the exploration before writing: current, evidenced facts that outlive the current work go to knowledge; task/WIP/proposed state stays in the task, spec, or `CONTEXT.md`; recurring behavior goes through `/learn`; uncertainty becomes a candidate or an existing topic is lowered to `review-needed`.
@@ -296,6 +298,7 @@ your-project/
 │   ├── guidelines/                 # Codex-native semantic guidance
 │   │   ├── ai-behavior.md
 │   │   ├── agent-delegation.md
+│   │   ├── code-health.md
 │   │   ├── knowledge-management.md
 │   │   ├── spec-workflow.md
 │   │   └── task-management.md
@@ -325,6 +328,7 @@ your-project/
     ├── rules/
     │   ├── agent-delegation.md
     │   ├── ai-behavior.md
+    │   ├── code-health.md
     │   ├── knowledge-management.md
     │   ├── spec-workflow.md
     │   └── task-management.md

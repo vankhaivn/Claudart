@@ -45,6 +45,8 @@ CONTEXT.md       JOURNAL.md          rules/ · guidelines/      knowledge/
 
 `rules/` (Claude) và `guidelines/` (Codex) giữ hành vi: những pattern prescriptive kiểu "luôn làm X" đã lặp lại đủ nhiều để xứng đáng có chỗ vĩnh viễn. `/learn` là cách chúng đi vào đó.
 
+[Rule Claude](../.claude/rules/code-health.md) và [guideline Codex](../.codex/guidelines/code-health.md) được mirror để định nghĩa baseline code-health implementation có scope toàn cục. Baseline này áp dụng liên tục khi công việc thông thường của agent đọc hoặc chỉnh sửa code: bảo toàn behavior và contract, thực hiện thay đổi coherent nhỏ nhất, ưu tiên evidence hơn clean-code dogma chung chung, test đúng risk và validate tương xứng. Nó không tự động gọi `clean-code-reviewer`, vì refiner chuyên biệt đó vẫn chỉ chạy khi được yêu cầu rõ ràng.
+
 `knowledge/` giữ fact: dự án là gì, được nối dây ra sao, và thuật ngữ có nghĩa gì. Rule quy định; knowledge mô tả. Mỗi cụm fact có một topic owner, còn root `INDEX.md` và các `_maps/<domain>.md` tùy chọn route agent mà không load mọi topic. Reference topic trỏ tới canonical document đã tồn tại thay vì copy nó.
 
 Checkpoint là boundary bảo trì hàng loạt, không phải cách duy nhất để ghi knowledge. User có thể nói “hãy cập nhật knowledge từ phần vừa xác minh rồi tiếp tục” bất kỳ lúc nào. Agent distill trước khi ghi: fact current, có evidence và sống lâu hơn phần việc hiện tại vào knowledge; task/WIP/proposed state ở task, spec hoặc `CONTEXT.md`; behavior lặp lại đi qua `/learn`; phần chưa chắc thành candidate hoặc hạ topic hiện hữu xuống `review-needed`.
@@ -296,6 +298,7 @@ your-project/
 │   ├── guidelines/                 # Codex-native semantic guidance
 │   │   ├── ai-behavior.md
 │   │   ├── agent-delegation.md
+│   │   ├── code-health.md
 │   │   ├── knowledge-management.md
 │   │   ├── spec-workflow.md
 │   │   └── task-management.md
@@ -325,6 +328,7 @@ your-project/
     ├── rules/
     │   ├── agent-delegation.md
     │   ├── ai-behavior.md
+    │   ├── code-health.md
     │   ├── knowledge-management.md
     │   ├── spec-workflow.md
     │   └── task-management.md

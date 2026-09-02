@@ -33,7 +33,7 @@ This is a category map, not an exhaustive or versioned allowlist. Enumerate the 
 
 - `commands/` — slash commands: `start`, `plan`, `spec`, `spec-run`, `checkpoint`, `handoff`, `learn`, `refactor-memory`, `doctor`, `project-discovery`
 - `agents/` — specialized agents: write-capable `clean-code-reviewer` for scoped code-health implementation, plus read-only `security-auditor` and `ui-visual-critic`; all are explicit-request-only and never run automatically
-- `rules/` — **prescriptive**, path-scoped behavior (`ai-behavior`, `agent-delegation`, `knowledge-management`, `task-management`, `spec-workflow`)
+- `rules/` — **prescriptive**, path-scoped behavior (`ai-behavior`, `code-health`, `agent-delegation`, `knowledge-management`, `task-management`, `spec-workflow`)
 - `knowledge/INDEX.md` — root router for **descriptive** durable project facts; optional `_maps/` and detail files are read on demand
 - `scripts/knowledge-check.sh` — dependency-free, read-only mechanical validation for the knowledge contract
 - `CONTEXT.md` (state now), `JOURNAL.md` (history, append-only), `CLAUDE.md` (memory index)
