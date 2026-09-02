@@ -21,6 +21,7 @@ CLAUDART keeps the Claude-specific operating layer inside `.claude/`, including 
 
 See @.claude/CONTEXT.md for the current state of work (updated by /checkpoint).
 See @.claude/rules/ai-behavior.md for universal AI behavior guidelines.
+See @.claude/rules/code-health.md for the continuous, behavior-preserving implementation baseline applied whenever code or code-adjacent artifacts are inspected or changed.
 See @.claude/rules/task-management.md for the persistent task-document workflow that replaces native plan mode.
 See @.claude/rules/agent-delegation.md for how to delegate well to subagents (decomposition, worker prompts, anti-shadow-run, persistence) — the harness decides _whether_ to delegate; the rule adds the project's _how_.
 See @.claude/rules/spec-workflow.md for dated mission-scale spec workspaces in `.claude/specs/` with `done/` archives — the loop-engineering layer above tasks, executed autonomously by /spec-run under a standing approval.
