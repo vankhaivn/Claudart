@@ -1,114 +1,236 @@
 # Integrate CLAUDART with your agent (AI-native install)
 
-**You are an AI coding agent** (Claude Code, Codex CLI, or similar) and your user pasted a link to this file because they want to **adopt or upgrade CLAUDART** in the current project. CLAUDART is a plain-markdown operating layer — slash commands / skills, a layered memory model, and specialized agents — for Claude Code and Codex CLI.
+**You are an AI coding agent** (Claude Code, Codex CLI, or similar) and your user linked this file because they want to **adopt or upgrade CLAUDART** in the current project. CLAUDART is a plain-Markdown operating layer for commands or skills, layered memory, persistent work, project knowledge, and specialized agents.
 
 Source of truth: <https://github.com/vankhaivn/Claudart> (branch `main`).
 
-This file is a **protocol, not a script** — follow it top to bottom. It exists because the one-line `install.sh` does a _fresh copy_ and will clobber an existing setup. You are smarter than that: you can read the repo, compare it to this project, and merge surgically.
+This file is a **protocol, not an installer**. Follow it top to bottom. It exists because a fresh-copy installer cannot safely reconcile custom instructions, live state, tasks, specifications, or project knowledge.
 
-> **Version-agnostic delta rule.** Never assume which CLAUDART release, feature set, or file layout the downstream project started from. Derive the delta during this run from the current upstream clone, the current downstream tree, and upstream history. Do not reuse a canned release narrative such as “we just added X”; the same protocol must work for any future upstream state.
+> **Version-agnostic delta rule.** Never assume which CLAUDART release, feature set, or file layout the downstream project started from. Derive the delta during this run from current upstream, the current downstream tree, and upstream history only where history is actually needed.
 >
-> **Golden rule — read freely, write only what is approved.** NEVER overwrite or delete anything the user authored or customized. When CLAUDART and the project disagree, show a diff and ASK. Default to preserving the user's work, even when taking CLAUDART's version "seems obviously better."
+> **Golden rule — read freely, write only what is approved.** NEVER overwrite, delete, or relocate user-authored content without showing the proposed change and receiving explicit approval. Default to preserving the user's work.
 >
-> **"Customized" means content the user wrote — not any local file that happens to differ from upstream.** A CLAUDART-shipped file whose local copy merely lags the current template is **stale, not custom** — upgrading it is the point of this protocol. When the user says "don't touch what I customized," that protects their authored content, and is never a reason to skip upgrading stale template files. Apply the stale-vs-custom test in Scenario C before calling anything custom.
+> **"Customized" means user-authored content, not every local difference.** A CLAUDART-shipped file whose local copy merely matches an older upstream state is stale, not custom. Upgrade stale template content; preserve and deliberately re-apply real project-specific additions.
+>
+> **Mechanical verification first; semantic maintenance only when justified.** Every integration gets a bounded, read-only verification pass. Do not run `doctor → refactor-memory → doctor` merely because files were installed or upgraded. Doctor is conditional and diagnostic; refactor-memory is write-capable and requires a concrete finding plus explicit approval.
+>
+> **Integration validation precedence.** Step 4 governs this integration run. Generic first-run suggestions elsewhere do not make doctor or refactor-memory mandatory here.
 
 ---
 
-## Step 0 — Fetch the source and understand the intent
+## Step 0 — Diagnose first, then fetch proportionally
 
-1. Get a clean copy of CLAUDART so you can diff against it precisely. Clone with full history — the repo is small, and you will need `git log` to tell stale template copies apart from real user customizations:
+1. Work from the project root. Run `git status --short` when Git is available, record unrelated work, and do not disturb it.
+2. Inventory only relevant AI paths: `.claude/`, `.codex/`, `.agents/skills/`, root or nested `CLAUDE.md`, root `AGENTS.md`, and any overlapping custom commands, agents, rules, memory, tasks, specs, or knowledge.
+3. Resolve the target layer:
+   - explicit user choice wins;
+   - otherwise default to the runtime already present;
+   - if neither exists and the active agent runtime makes the choice obvious, state that assumption in the plan instead of asking unnecessarily;
+   - if both are selected, classify each layer independently.
+4. Classify each selected layer:
+   - **A — Clean adopt:** no meaningful AI operating layer exists yet; a bare loader file is allowed.
+   - **B — Merge into an existing workflow:** the project already has its own agents, commands, rules, memory, or work conventions.
+   - **C — Upgrade an existing CLAUDART install:** recognizable CLAUDART files are already present.
+5. Get current upstream into `/tmp/claudart-src`:
+
    ```bash
-   rm -rf /tmp/claudart-src && git clone https://github.com/vankhaivn/Claudart /tmp/claudart-src
+   rm -rf /tmp/claudart-src
    ```
-   If you cannot clone (no git, or no network for clone), fetch files on demand from
-   `https://raw.githubusercontent.com/vankhaivn/Claudart/main/<path>` instead.
-2. Before touching anything, read these in the source to integrate the _model_, not just files: `README.md`, `docs/WORKFLOW.md`, `CONTRIBUTING.md`.
-3. Do **not** run `install.sh` in a project that already has its own AI setup — that is exactly the situation this protocol replaces.
 
-## What CLAUDART contains (orientation — the clone is the source of truth)
+   For Scenario A, or the initial pass for Scenario B:
 
-This is a category map, not an exhaustive or versioned allowlist. Enumerate the actual current clone on every run; a path omitted from this overview must still be included when the live dependency analysis finds it.
+   ```bash
+   git clone --depth 1 --branch main https://github.com/vankhaivn/Claudart /tmp/claudart-src
+   ```
+
+   For Scenario C, clone full history. For Scenario B, deepen only when a real collision needs stale-vs-custom evidence:
+
+   ```bash
+   git clone --branch main https://github.com/vankhaivn/Claudart /tmp/claudart-src
+   # Or, after a shallow clone:
+   git -C /tmp/claudart-src fetch --unshallow
+   ```
+
+   If cloning is unavailable, fetch current raw files on demand from `https://raw.githubusercontent.com/vankhaivn/Claudart/main/<path>`. Without history, preserve ambiguous differences and show the exact uncertainty instead of guessing.
+
+6. Enumerate the actual selected-layer payload from current upstream. Read `install.sh` as a payload and relocation reference, plus the loaders and every file in the proposed dependency closure. README, workflow, and contributing docs are orientation only; read them only when a real ambiguity requires them.
+7. Treat `install.sh` as a payload reference, not a merge tool. Do not execute it during Scenario B or C, do not use `--force`, and do not run any write-capable maintenance workflow before approval.
+
+## What CLAUDART contains
+
+This map is orientation only; the current source tree and its references are authoritative.
 
 **Claude layer** (`.claude/`):
 
-- `commands/` — slash commands: `start`, `plan`, `spec`, `spec-run`, `checkpoint`, `handoff`, `learn`, `refactor-memory`, `doctor`, `project-discovery`
-- `agents/` — specialized agents: write-capable `clean-code-reviewer` for scoped code-health implementation, plus read-only `security-auditor` and `ui-visual-critic`; all are explicit-request-only and never run automatically
-- `rules/` — **prescriptive**, path-scoped behavior (`ai-behavior`, `code-health`, `agent-delegation`, `knowledge-management`, `task-management`, `spec-workflow`)
-- `knowledge/INDEX.md` — root router for **descriptive** durable project facts; optional `_maps/` and detail files are read on demand
-- `scripts/knowledge-check.sh` — dependency-free, read-only mechanical validation for the knowledge contract
-- `CONTEXT.md` (state now), `JOURNAL.md` (history, append-only), `CLAUDE.md` (memory index)
-- `tasks/` — persistent plan documents (`index.md` + `done/`)
-- `specs/` — mission-scale spec workspaces (only `INDEX.md` ships; mission folders are created by `/spec`)
+- `commands/`, `agents/`, and path-scoped `rules/`;
+- `knowledge/INDEX.md` plus optional maps and topics;
+- read-only scripts under `scripts/`;
+- `CLAUDE.md`, `CONTEXT.md`, and append-only `JOURNAL.md`;
+- persistent `tasks/` and mission-scale `specs/`.
 
-**Codex layer** (`.codex/` + `.agents/`):
+**Codex layer** (`.codex/` + `.agents/skills/`):
 
-- `.agents/skills/codex-*` — the same commands as Codex skills
-- `.codex/guidelines/` (= rules, including `knowledge-management`), `.codex/knowledge/`, `.codex/scripts/knowledge-check.sh`, `.codex/agents/*.toml`, `.codex/config.toml`, `.codex/CONTEXT.md`, `.codex/JOURNAL.md`, `.codex/tasks/`, `.codex/specs/`
-- `AGENTS.md` at repo root (Codex memory index; the installer copies it from `.codex/AGENTS.md`)
+- Codex-native skills under `.agents/skills/codex-*`;
+- `.codex/guidelines/`, `.codex/knowledge/`, `.codex/scripts/`, `.codex/agents/`, and `.codex/config.toml`;
+- `.codex/CONTEXT.md`, `.codex/JOURNAL.md`, `.codex/tasks/`, and `.codex/specs/`;
+- `.codex/AGENTS.md` as the source template for the canonical downstream root `AGENTS.md`.
 
-Every Claude command has a mirrored Codex skill. If you integrate both layers, keep them consistent.
+When integrating both layers, preserve intent parity between mirrored Claude and Codex contracts without forcing byte identity where tool mechanics differ.
 
-## Step 1 — Diagnose the situation
+## Step 1 — Derive the current delta
 
-Inventory the **current project** (not the clone). Does `.claude/` / `.codex/` / `AGENTS.md` / `CLAUDE.md` exist? Are there custom agents, commands, rules, or a home-grown memory/workflow convention? Classify into one scenario:
+Before proposing writes, distinguish:
 
-- **A — Clean adopt:** no AI operating layer yet (at most a bare `CLAUDE.md`).
-- **B — Merge into an existing workflow:** the user already has their own agents / commands / memory and must NOT have them clobbered.
-- **C — Upgrade an existing CLAUDART install:** CLAUDART files are already present; the user wants the delta between that installation and current upstream.
-
-Then ask which **layer(s)** to target — Claude (`.claude/`), Codex (`.codex/` + `.agents/`), or both. Default to whatever the project already uses.
-
-## Step 2 — Plan, then ask
-
-State a short plan for the detected scenario and chosen layer(s): list **exactly** which files you would add, replace, merge, relocate, retire, or skip. **Wait for explicit approval before writing anything.**
+- **template-owned protocol:** commands, skills, rules, guidelines, agents, scripts, config, and other files intended to track current upstream;
+- **merge-owned indexes:** loaders and indexes whose project routes and ordering must be preserved;
+- **live state:** `CONTEXT.md`, `JOURNAL.md`, handoffs, task/spec bodies, mission folders, knowledge topics/maps, and equivalent project-owned state;
+- **project-owned custom content:** instructions or workflows authored specifically for this project.
 
 ### Scenario A — Clean adopt
 
-Copy the chosen layer(s) from the clone. The only merge is into index files that may already exist: if a root `CLAUDE.md` / `AGENTS.md` is present, **splice** CLAUDART's Core Commands and Domain Rules / Guidelines pointers into it — do not replace it. Then go to Step 3 → Step 4.
+Copy the current selected-layer payload. Splice CLAUDART routes into any existing canonical or overlapping loader, including `.claude/CLAUDE.md`, root `CLAUDE.md`, or root `AGENTS.md` as applicable; never replace project-authored loader content. For missing live-state files, create only the current empty seed/header. For Codex, place the source loader at the current canonical downstream location, normally root `AGENTS.md`, and avoid two competing loaders.
 
-### Scenario B — Merge into an existing workflow (do not clobber)
+Scenario A is the fast path: do not inspect full history and do not schedule doctor or refactor-memory when Step 4 verification can prove the installation mechanically.
 
-For each CLAUDART piece, find its counterpart in the project and act by type:
+### Scenario B — Merge into an existing workflow
 
-- **Upstream-only path** (present in the current clone with no downstream counterpart) → propose adding it and explain its current role. Still list it in the plan.
-- **Same concept, different file** (e.g. they have their own reviewer agent) → do NOT overwrite. Show both and ask: keep theirs, take CLAUDART's, or run both under a renamed file.
-- **Same filename** (`CLAUDE.md`, `AGENTS.md`, a rule of the same name) → **merge sections**, never replace. Add CLAUDART's command list / rule pointers / self-evolution section while preserving everything the user wrote.
-- **Concept overlap** (they already have a "memory" or "plan" convention) → explain how CLAUDART's `CONTEXT`/`JOURNAL`/`tasks` map onto theirs and let the user choose which wins. Never silently run two competing systems.
+For each current CLAUDART concept:
 
-Present the full add / replace / merge / relocate / retire / skip plan and ask before writing.
+- **Upstream-only path** → propose adding it and explain its role.
+- **Same concept, different file** → do not overwrite; propose keeping one, merging responsibilities, or keeping both under distinct names and triggers.
+- **Same filename** → merge sections, preserving project-authored content and ordering.
+- **Competing memory or work system** → map responsibilities and let the user choose one authority; never silently leave two systems owning the same job.
+- **Project-only path** → preserve it unless retirement or relocation is explicitly approved.
 
-### Scenario C — Reconcile an existing CLAUDART install with current upstream
+Derive the complete dependency closure for each accepted concept from current upstream. Include every selected-layer file that defines, routes, invokes, validates, installs, or mirrors it.
 
-1. Diff the project's actual installed state against the current clone; do not assume all local files came from one revision. Classify every relevant path:
-   - **Equivalent** (identical or demonstrably equivalent after an allowed root relocation) → keep it and record `unchanged`.
-   - **Upstream-only path** (present in current upstream and absent downstream) → inspect history and downstream counterparts to distinguish an addition from a rename, move, split, consolidation, or replacement before proposing the action.
-   - **Stale template copy** (the local content matches an earlier upstream state and contains no user-authored additions) → propose replacing it with current upstream **verbatim**. This is the default recommendation for recognizable CLAUDART protocol files: their purpose is to track the template, not freeze an earlier snapshot.
-   - **Genuinely diverged** (the local file contains user-authored content that never shipped in any CLAUDART version — e.g. a section "Additional rules for project X") → take upstream as the **base** and **re-apply the user's additions on top**: show exactly which local sections you would carry over, and ASK before writing. Never discard their edits — and never let their edits become a reason to skip the upstream upgrade of the rest of the file.
-   - **Downstream-only path** → use upstream history to decide whether it is project-authored or a CLAUDART path that current upstream removed, renamed, or consolidated. Preserve project-authored paths. For former template paths, show the replacement/owner and propose an explicit relocate or retirement; never silently leave competing protocols, and never delete before approval.
-   - **Live state** (`CONTEXT.md`, `JOURNAL.md`, handoffs, task/spec bodies, knowledge topics/maps, and equivalent project-owned state) → preserve its content. Reconcile only its current contract, routing, or structure through the owning workflow; never compare it to seed content as though it were a stale template.
-2. **Stale-vs-custom test — never classify by "differs from upstream" alone.** A difference is _custom_ only if you can point at the specific local lines the user authored. Use the clone's history to check: if the local content matches (or nearly matches) some past upstream version (`git -C /tmp/claudart-src log --oneline --all -- <path>`, or `git -C /tmp/claudart-src log -S"<distinctive local phrase>" -- <path>` to see whether a phrase ever existed upstream), the file is stale — take upstream. Content that names this project, its domain, or rules found in no upstream version is custom — preserve it per the diverged bucket above. When in doubt, show the specific lines and ask about **those lines**, not the whole file.
-3. For _why_ things changed, recent commit messages (`git -C /tmp/claudart-src log --oneline -20`) are orientation only, never a history boundary. Trace any specific path or structural transition through full relevant history, using commands such as `git -C /tmp/claudart-src log --all --follow -- <path>` and targeted `git log -S`.
-4. Produce a **current upstream reconciliation report** covering unchanged, upstream-only, changed upstream-derived, renamed/moved/split/consolidated, retired, preserved downstream-only, live-state, and genuinely customized paths. Then apply only what the user approves. Never identify the downstream as a named or assumed release unless repository evidence proves it, and never substitute a canned release narrative for that evidence.
+### Scenario C — Reconcile an existing CLAUDART install
 
-For any added, changed, renamed, or retired cross-file contract, derive its complete dependency closure from **current upstream**. Include every selected-layer file that defines, routes, invokes, validates, installs, documents, or mirrors that contract. Derive the set from actual references and the current installer payload; do not rely on a component list copied from a previous release. Integrate the approved closure atomically. When the delta touches the knowledge contract, preserve every live downstream topic, map, and project-specific route; the shipped `knowledge/INDEX.md` is a merge template, not a replacement for project knowledge.
+Diff the actual installed state against current upstream; do not assume all local files came from one revision. Classify every relevant path:
 
-## Step 3 — Conflict protocol (every scenario)
+- **Equivalent** → keep and record `unchanged`.
+- **Upstream-only** → inspect references and, when needed, history to distinguish an addition from a rename, move, split, consolidation, or replacement.
+- **Stale template copy** → local content matches an earlier upstream state and has no user-authored additions; propose replacing it with current upstream verbatim.
+- **Genuinely diverged** → use current upstream as the base and deliberately re-apply or relocate the exact project-authored additions.
+- **Downstream-only** → preserve project-authored paths; for former template paths, propose an explicit relocation or retirement and identify the current owner.
+- **Live state** → preserve its body; reconcile only its current contract or routing through the workflow that owns it.
 
-- **Never** overwrite a file the user created or modified without showing a diff and getting an explicit "yes." (A stale template copy is not "modified by the user" — see the stale-vs-custom test in Scenario C.)
-- For CLAUDART-shipped core files, prefer **verbatim upstream + relocated customizations**: project-specific behavior belongs in its own rule/guideline file, `knowledge/`, or the project's `CLAUDE.md`/`AGENTS.md` — not inline edits to core protocol files. When you find genuinely custom lines inside a core file, offer to move them to the right home so the core file can track upstream cleanly.
-- Index / memory files (`CLAUDE.md`, `AGENTS.md`, `knowledge/INDEX.md`, `tasks/index.md`, `specs/INDEX.md`) are **spliced**, never wholesale-replaced — preserve the user's content and ordering. Preserve live `knowledge/_maps/` and topic files too; they are project state, not template payload.
-- `CONTEXT.md` and `JOURNAL.md` are live user state — **never** import them from the template; only create them empty (from the template header) if missing. `HANDOFF.md` (when present) is a live one-shot session baton — never import, overwrite, or create it. Spec mission folders (`specs/<slug>/`) are likewise live state — only the `specs/INDEX.md` registry ships from the template.
-- Do not touch `.env`, secrets, or anything matched by `.gitignore`.
-- If integrating both layers, keep the Claude command and its Codex skill mirror consistent.
+Apply the stale-vs-custom test narrowly:
+
+1. Never call a file custom merely because it differs from current upstream.
+2. Point to the exact local lines believed to be user-authored.
+3. Use history only for the relevant path or phrase, for example:
+
+   ```bash
+   git -C /tmp/claudart-src log --all --follow -- <path>
+   git -C /tmp/claudart-src log -S'<distinctive local phrase>' --all -- <path>
+   ```
+
+4. If local content matches a past upstream state and contains no project-specific addition, it is stale.
+5. If evidence remains ambiguous, show the specific lines and ask about those lines, not the entire file.
+
+Produce a reconciliation report covering unchanged, upstream-only, stale replacements, genuine custom merges, moves or consolidations, retirement candidates, preserved downstream-only paths, untouched live state, and review-needed ambiguities. Preserve every live knowledge topic, map, and project-specific route; shipped indexes are merge templates, not replacements for project knowledge.
+
+## Step 2 — Present the plan and wait
+
+Before writing, classify the planned result under these actions:
+
+- `add`;
+- `replace verbatim`;
+- `merge`;
+- `relocate`;
+- `retire`;
+- `preserve unchanged`;
+- `skip`;
+- `review-needed`.
+
+List exact paths for every write, merge, relocation, retirement, or ambiguity. Unchanged paths may be grouped by tree and count. For a collision-free Scenario A tree copied verbatim, you may report it as one grouped add with a generated file count instead of explaining every file; still list loader placement and live-state seeds separately. Any collision or non-verbatim action must be path-specific.
+
+For each merge, identify what current upstream content will be introduced and what downstream content will be preserved or relocated. For each retirement, identify the replacement or current owner. Mark live-state files explicitly as preserved.
+
+Also state the validation profile: mandatory fast verification, any already-justified targeted semantic review, whether a full doctor trigger exists, and that refactor-memory will not run without a later concrete finding and separate approval.
+
+Wait for explicit approval before writing. Approval for this plan does not pre-approve additional normalization discovered later.
+
+## Step 3 — Apply only the approved change
+
+- Re-check `git status --short` and protect unrelated or parallel work.
+- Apply the approved dependency closure atomically per concept where practical.
+- Keep template-owned files verbatim unless an explicit merge was approved.
+- Prefer relocating project-specific additions to project-owned rules, guidelines, knowledge, or loader sections so core protocol files can track upstream cleanly.
+- Splice loaders and indexes; never wholesale-replace project routing or ordering.
+- Never overwrite existing `CONTEXT.md` or `JOURNAL.md`; never import, overwrite, or create `HANDOFF.md`; never replace task bodies, spec mission folders, knowledge topics, or maps with template content.
+- Create only missing seeds, indexes, or placeholders that were listed and approved.
+- Do not touch `.env`, secrets, ignored private files, or unrelated project files.
+- If an unplanned conflict or required write appears, stop before that write and present an amended path-level plan.
+- Do not commit, push, or merge.
 
 ## Step 4 — Validate and hand off
 
-1. Read the current upstream workflow documentation and the selected layer's current validation/normalization definitions, then run the reconciliation flow they declare. In the current source, that flow is `doctor → refactor-memory → doctor` (Codex: `$codex-doctor → $codex-refactor-memory → $codex-doctor`): inventory the actual on-disk state read-only, reconcile it idempotently, then verify it. Current upstream is authoritative if this sequence changes later. Do not infer a version-specific path or invent migration, recall, or other commands absent from current upstream.
-2. Fix any wiring or mechanical contract failure. Park claims that cannot be safely resolved as `review-needed`; never invent evidence just to make the checker green.
-3. Summarize what was **added / replaced / merged / relocated / retired / normalized / skipped**, and list any conflicts you parked for the user to decide.
-4. Remind the user to review `git diff` before committing. **Do not commit, push, or merge yourself.**
-5. This protocol is **idempotent** — safe to re-run later to pull the next CLAUDART update (that is Scenario C).
+### 4.1 Mandatory fast verification — read-only
+
+Run bounded mechanical checks against the selected layers and changed dependency closure. Validation may use `/tmp`, but it must not mutate the project tree.
+
+1. Check scope and patch integrity:
+
+   ```bash
+   git status --short
+   git diff --name-status
+   git diff --check
+   ```
+
+   Skip Git-specific checks only outside a Git repository. Confirm every changed path was approved and unrelated changes remain untouched.
+
+2. Confirm every approved add, replacement, merge, relocation, and retirement reached its intended final path.
+3. Compare every supposedly verbatim template-owned file with current upstream using `cmp`, checksums, or `git diff --no-index`, accounting only for approved relocation. Any unexplained drift fails verification.
+4. For merged loaders and indexes, confirm both the required current CLAUDART routes and the project-authored sections identified in the plan remain present.
+5. Confirm referenced commands, skills, rules, guidelines, agents, scripts, indexes, and config paths exist; no loader, rule, or guideline auto-loads `JOURNAL.md` or `HANDOFF.md`; existing live-state bodies were not replaced; changed shell scripts pass `bash -n`; changed command/skill/agent/rule/guideline frontmatter still satisfies the current upstream contract; and mirrored contracts remain consistent when both layers changed.
+6. Inspect current upstream `scripts/`. If it ships a documented read-only installation verifier that can target another root, run it exactly as documented. If none exists, that absence is not a failure; run the current upstream knowledge checker for each selected layer instead. With the current interface:
+
+   ```bash
+   bash /tmp/claudart-src/.claude/scripts/knowledge-check.sh \
+     --root "$PWD" --layer claude
+
+   bash /tmp/claudart-src/.codex/scripts/knowledge-check.sh \
+     --root "$PWD" --layer codex
+   ```
+
+   Run only selected layers. If current upstream `--help` differs, follow it instead. Prefer the trusted source script over an unreviewed downstream copy.
+
+A mechanical failure may be fixed immediately only when its fix is already inside the approved plan. Any additional write requires a new proposed diff and explicit approval.
+
+### 4.2 Semantic review and doctor are conditional
+
+Do **not** run doctor solely because integration occurred. If fast verification passes and none of the triggers below exists, stop after the fast verification. Scenario A defaults to this fast path; Scenario B and C also use it for purely mechanical additions, verbatim stale-template replacements, and approved relocations that do not change semantic ownership.
+
+When semantic judgment is needed, first review only the changed files and their dependency closure. Run the selected layer's full read-only doctor once only when at least one trigger exists:
+
+- competing instructions, routing, memory, or work systems were merged;
+- project-authored content moved between rules/guidelines, knowledge, state, tasks, specs, or loaders;
+- rule scope, agent responsibility, task/spec lifecycle, or knowledge ownership changed semantically;
+- history left a material `review-needed` ambiguity;
+- deterministic verification found a problem that cannot be decided mechanically;
+- the affected contract is repository-wide;
+- the user explicitly requested a full health audit.
+
+When triggered, run `/doctor` for Claude or `$codex-doctor` for Codex. Doctor is diagnostic only. Report findings; do not turn them into automatic writes.
+
+### 4.3 Refactor-memory is opt-in
+
+Never run `/refactor-memory` or `$codex-refactor-memory` automatically after integration. Run it only when a concrete finding is owned by that workflow, the exact additional files and intended changes are presented, and the user explicitly approves those writes.
+
+After an approved refactor-memory run, repeat mandatory fast verification. Repeat doctor only when the original finding requires semantic confirmation or the user explicitly requests it. There is no default `doctor → refactor-memory → doctor` chain.
+
+### 4.4 Report the result
+
+Summarize the scenario and selected layer, paths added/replaced/merged/relocated/retired/preserved/skipped/review-needed, verification commands and results, why doctor was or was not run, and any normalization still awaiting approval. Remind the user to review `git diff` before committing.
+
+This protocol is idempotent: a later run derives a fresh delta from the then-current upstream and downstream state.
 
 ## Cleanup
 
-Remove the temp clone when done: `rm -rf /tmp/claudart-src`.
+Remove the temporary source after all comparisons and validation are complete:
+
+```bash
+rm -rf /tmp/claudart-src
+```
