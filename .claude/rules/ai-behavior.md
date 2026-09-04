@@ -61,7 +61,3 @@ Apply these rules with judgment. The user's outcome, applicable repository instr
 - Report the outcome, material changes, exact validation performed, and any concrete residual risk or assumption.
 - Keep communication proportional to the task. Do not dump hidden reasoning, repeat the prompt, narrate routine tool use, or produce a generic principles essay.
 - A no-op is a valid result when the requested outcome is already satisfied or a proposed change would make the system worse.
-
----
-
-These guidelines are working when Claude Code asks fewer unnecessary questions, makes smaller coherent diffs, avoids speculative architecture, completes more tasks without supervision, and provides concrete evidence instead of unsupported confidence.
