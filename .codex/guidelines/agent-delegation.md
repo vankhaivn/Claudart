@@ -13,6 +13,33 @@ tags: [subagents, delegation, parallelism, orchestration]
 
 This protocol governs the built-in `explorer`/`worker`/`default` delegation pattern. Project-specific custom agents (defined under `.codex/agents/`) carry their own instructions and are invoked directly by name when the user asks for them; they are out of scope here.
 
+## Route general-purpose delegates by difficulty
+
+Role selection and execution-profile selection are separate decisions. `explorer`, `worker`, and `default` describe **what** the delegate does; the delegated unit's difficulty determines **which model and reasoning effort** should do it. This section applies only to ordinary built-in delegation. Named project specialists under `.codex/agents/` keep their existing model/reasoning policy and must not be silently down-routed by this guideline.
+
+Before each ordinary spawn, classify the delegated unit by its ambiguity, breadth, consequence of a wrong answer, and difficulty of verification. Choose the lowest class that is likely to complete the unit reliably:
+
+| Class | Typical delegated unit | Ideal Codex profile |
+| --- | --- | --- |
+| `routine` | focused search, call-site inventory, docs lookup, extraction, mechanical or highly constrained edit | `gpt-5.6-luna` / `low` |
+| `standard` | bounded implementation or debugging with clear contracts and local verification | `gpt-5.6-terra` / `medium` |
+| `complex` | ambiguous cross-file debugging, architecture-sensitive reasoning, difficult review or integration | `gpt-5.6-sol` / `high` |
+| `maximum` | genuinely frontier-level, long-horizon, highly ambiguous work, or a unit whose cheaper attempt exposed a capability limit | `gpt-6-astra` / parent-selected effort |
+
+The **parent session's selected model and reasoning effort are hard ceilings for implicit delegation**. Treat the child execution profile as two independent dimensions: choose the cheapest suitable model and the lowest sufficient reasoning effort for the class, then cap each at the parent session's selected setting. A difficult task is not permission to spend above the user's session choice on either dimension.
+
+- Conceptually: `effective model = min(ideal model for task, parent-model ceiling)` and `effective effort = min(ideal effort for task, parent-effort ceiling)`.
+- An Astra/high parent may route a `routine` unit to Luna/low, a `standard` unit to Terra/medium, a `complex` unit to Sol/high, and reserve Astra/high for `maximum` work.
+- A Sol/medium parent caps both `complex` and `maximum` units at Sol/medium. A Terra/low parent caps the same way. The rule continues downward on both dimensions.
+- **Never launch a model family or reasoning effort above the parent ceiling unless the user explicitly requests or authorizes that stronger execution profile for the delegated unit.** A project instruction, perceived urgency, retry, or "be thorough" request is not such authorization.
+- Codex's spawn interface resolves `model` and `reasoning_effort` independently. When selecting a different child model, set **both** fields explicitly so the selected model's default reasoning effort cannot silently raise or otherwise change the intended compute budget. If both effective values equal the parent's values, omit the overrides and inherit normally.
+- If the ideal effort is unsupported by the selected child model, choose the nearest supported effort that does not exceed the parent-effort ceiling. Never compensate for an unsupported effort by silently raising the model or effort above either ceiling.
+- Use the exact model slug exposed by the current `spawn_agent` model catalog. The intended current routing order is `gpt-5.6-luna` → `gpt-5.6-terra` → `gpt-5.6-sol` → `gpt-6-astra`; availability can change, so respect account/workspace allowlists and never substitute a model above the parent ceiling.
+- If the parent model/effort cannot be identified, the desired child profile is unavailable or disallowed, or the override cannot be trusted, do not guess upward: inherit the parent or choose a known available model/effort pair that is no more capable or compute-intensive than the parent.
+- Do not rewrite the project's intentional custom-agent model definitions to implement this policy.
+
+A retry may use a stronger class **within the same model and reasoning ceilings** when the returned evidence shows a capability failure rather than a bad prompt. Keep the existing one-retry limit: sharpen the prompt and, when justified, move the retry up one class; if that retry still fails, pull the unit back to the parent. Do not climb through multiple paid retries, and never cross either parent ceiling implicitly.
+
 ## Decompose before you fan out
 
 When a task is a candidate for delegation, sketch a short decomposition first — this is strategy guidance, not a permission gate:
@@ -43,7 +70,7 @@ The deciding signal is **task structure, not the user's exact words.** Before sp
 
 Infer this from what the request _decomposes into_, never from a magic phrase. "Spawn an explorer to check X and tell me what it finds", "giao cho 1 agent điều tra repo Y", "delegate this audit and read its output" all describe **one delegated unit with no separate parent work** — the same shape, regardless of wording. The reliable tell is **overlap of the same sub-question**: if your own next step (or another subagent) would answer the _same_ sub-question this subagent owns, that is redundancy, not parallelism — collapse it.
 
-Redundancy is acceptable only when **deliberate and disclosed**: independent review (intentionally asking N agents the same question to cross-check), or a hedge the user authorized on a flaky path. The anti-pattern is _silent, unrequested_ duplication. In particular, if you are unsure the subagent will honor a constraint — e.g. a per-agent `model` override — **surface that constraint and choose one path** (delegate or do it locally), or ask. Never hedge by silently running both.
+Redundancy is acceptable only when **deliberate and disclosed**: independent review (intentionally asking N agents the same question to cross-check), or a hedge the user authorized on a flaky path. The anti-pattern is _silent, unrequested_ duplication. In particular, if you are unsure the subagent will honor a constraint — e.g. a per-agent `model` or `reasoning_effort` override — **surface that constraint and choose one path** (delegate or do it locally), or ask. Never hedge by silently running both.
 
 ## Good Uses
 
@@ -64,6 +91,7 @@ Codex spawns subagents from natural-language requests and applicable project/ski
 
 - **Built-in agents** (always available): `default` (general-purpose fallback), `worker` (execution-focused, for implementation and fixes), `explorer` (read-heavy codebase exploration). Custom agents are invoked by their `name`.
 - **Single delegation**: name the agent and hand it a self-contained task, e.g. "Spawn an explorer to find every call site of `parseConfig` and return each as `file:line`."
+- **Routed delegation**: when the effective child profile differs from the parent, pass both the selected exact `model` slug and `reasoning_effort` on the spawn. Do not set only `model` and rely on that model's default effort.
 - **Parallel fan-out**: ask for one agent per independent unit, then wait-and-summarize, e.g. "Spawn one explorer per point above, wait for all of them, and summarize the result for each point." Codex waits until every requested result is available, then returns a single consolidated response.
 - **Steering threads**: use `/agent` in the CLI to switch between and inspect active agent threads; ask Codex directly to steer a running subagent, stop it, or close completed threads.
 
@@ -88,7 +116,7 @@ Prefer read-only explorers before workers when ownership is unclear.
 
 - Integrate returned patches **one at a time, in dependency order**, running the relevant validation after each merge — batch-merging N patches and testing once makes a failure unattributable.
 - Conflicts between two returned patches are resolved by the parent directly. Never spawn another agent to mediate a conflict.
-- When a worker returns a wrong or partial result: retry **once**, with a sharpened prompt that names exactly what the first attempt got wrong; if the retry also fails, pull the unit back and do it locally. Never respawn the identical prompt hoping for a different outcome.
+- When a worker returns a wrong or partial result: retry **once**, with a sharpened prompt that names exactly what the first attempt got wrong; if the evidence points to insufficient model capability, that retry may move up one routing class without exceeding either parent ceiling. If the retry also fails, pull the unit back and do it locally. Never respawn the identical prompt hoping for a different outcome.
 
 ## Parent Responsibilities
 
@@ -99,7 +127,7 @@ The parent Codex session remains responsible for the final result. **Codex's doc
 - **A silent subagent is not a stalled one.** A healthy explorer/worker on a long task often emits no intermediate signal; treat silence as in-progress, not failure. Misreading liveness and duplicating the work is a known Codex pitfall ([openai/codex#16900](https://github.com/openai/codex/issues/16900)). If you genuinely suspect it is stuck, steer or stop it explicitly via `/agent` — never quietly redo its work.
 - Review subagent outputs quickly and integrate only the useful parts.
 - Run the relevant validation yourself or verify that the validation evidence is trustworthy.
-- Record each delegation **at spawn time** in the active task file (the CONTEXT micro-handoff for un-planned work; the spec LEDGER as a `delegated` entry for mission work): the unit, the agent, the expected output, and where it will be integrated; mark it consumed when integrated. A compaction or handoff must never orphan a running subagent — the file, not session memory, is what remembers outstanding delegations.
+- Record each delegation **at spawn time** in the active task file (the CONTEXT micro-handoff for un-planned work; the spec LEDGER as a `delegated` entry for mission work): the unit, the agent, the routing class plus model/reasoning profile when explicitly selected, the expected output, and where it will be integrated; mark it consumed when integrated. A compaction or handoff must never orphan a running subagent — the file, not session memory, is what remembers outstanding delegations.
 - Classify returned findings before persistence. WIP, proposals, task state, and uncertainty stay in the task/spec/CONTEXT candidate surface; reusable behavior goes through `$codex-learn`. Immediate fact promotion requires the full capture gate plus a user request, a verified correction needed to avoid continued reliance on known-wrong canonical knowledge, confirmed source drift, or a lifecycle promotion boundary. Otherwise persist the finding as a candidate. For a promotion, read `knowledge-management.md`, patch the existing owner plus reachable route atomically, and run the checker.
 - Treat a subagent's knowledge claim as evidence to verify, not canonical truth. If a worker is explicitly assigned a knowledge mutation, its ownership must include both the topic and reachable map so no other agent splits the atomic write; the parent re-runs `bash .codex/scripts/knowledge-check.sh --root .` after integration.
 - Do not rely on subagent thread history for persistence.
@@ -112,13 +140,15 @@ For planned work, capture delegation under `## Plan of Work` or `### Memory Hint
 - intended subagent roles;
 - read/write ownership boundaries;
 - validation and review responsibilities;
-- any concurrency or cost limits.
+- the parent model/reasoning ceilings and intended routing profiles when delegation cost materially matters;
+- any concurrency or other cost limits.
 
 When a task is likely to parallelize, record the strategy; otherwise note "Delegation opportunity: <short idea>" when it would materially help a later session.
 
 ## Safety And Cost
 
 - Keep delegation one level deep unless the user explicitly asks for recursive delegation.
+- Never exceed the parent session's model family or reasoning effort through ordinary delegation without explicit user authorization.
 - Keep concurrency conservative — the shipped config caps `[agents] max_concurrent_threads_per_session` at **6**. Raising it, in OpenAI's own words, _"can turn broad delegation instructions into repeated fan-out, which increases token usage, latency, and local resource consumption."_
-- Ultra coordinates multiple agents in parallel by default and Codex itself warns that high multi-agent concurrency can increase usage quickly — match fan-out to the size of the request so a trivial ask doesn't spin up expensive parallel work; judgment, not a brake on genuinely parallel work.
+- Ultra coordinates multiple agents in parallel by default and Codex itself warns that high multi-agent concurrency can increase usage quickly — match model tier, reasoning effort, and fan-out to the size of the request so a trivial ask doesn't spin up expensive parallel work; judgment, not a brake on genuinely parallel work.
 - Use read-only sandboxing for explorers and any read-only delegation whenever possible.
