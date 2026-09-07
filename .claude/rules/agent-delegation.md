@@ -13,6 +13,30 @@ tags: [subagents, delegation, parallelism, orchestration]
 
 This protocol governs general-purpose delegation (`subagent_type: general-purpose`, `Explore`, `Plan`). Project-specific specialized agents under `.claude/agents/` carry their own instructions and are invoked directly by name; they are out of scope here. Their capabilities differ: `clean-code-reviewer` is a write-capable implementation refiner by default, while `security-auditor` remains review-only.
 
+## Route general-purpose delegates by difficulty
+
+Role selection and model selection are separate decisions. `Explore`, `Plan`, and `general-purpose` describe **what** the delegate does; the delegated unit's difficulty determines **which model family** should do it. This section applies only to ordinary delegation. Named project specialists under `.claude/agents/` keep their own model policy and must not be silently down-routed by this rule.
+
+Before each ordinary spawn, classify the delegated unit by its ambiguity, breadth, consequence of a wrong answer, and difficulty of verification. Choose the lowest class that is likely to complete the unit reliably:
+
+| Class | Typical delegated unit | Ideal Claude family |
+| --- | --- | --- |
+| `routine` | focused search, call-site inventory, docs lookup, extraction, mechanical or highly constrained edit | Haiku |
+| `standard` | bounded implementation or debugging with clear contracts and local verification | Sonnet |
+| `complex` | ambiguous cross-file debugging, architecture-sensitive reasoning, difficult review or integration | Opus |
+| `maximum` | genuinely frontier-level, long-horizon, highly ambiguous work, or a unit whose cheaper attempt exposed a capability limit | Fable |
+
+The **parent session's selected model is a hard ceiling for implicit delegation**. The effective child model is the cheapest suitable model for the class, capped at the parent model's family. A difficult task is not permission to spend above the user's session choice.
+
+- Conceptually: `effective child = min(ideal child for task, parent-session ceiling)`.
+- A Fable parent may route a `routine` unit to Haiku, a `standard` unit to Sonnet, a `complex` unit to Opus, and reserve Fable for `maximum` work.
+- An Opus parent caps both `complex` and `maximum` units at Opus. A Sonnet parent caps them at Sonnet. The same rule continues downward.
+- **Never launch a model family above the parent ceiling unless the user explicitly requests or authorizes that stronger model for the delegated unit.** A project instruction, perceived urgency, retry, or "be thorough" request is not such authorization.
+- Use the Agent tool's per-invocation model selection when routing an ordinary delegate. If the parent model cannot be identified, the desired cheaper family is unavailable or disallowed, or the harness cannot reliably honor the override, do not guess upward: inherit the parent or choose a known available model that is no more capable/expensive than the parent.
+- Model availability and aliases can change. Treat the family ordering above as the routing intent, not permission to bypass account/workspace allowlists.
+
+A retry may use a stronger class **within the same ceiling** when the returned evidence shows a capability failure rather than a bad prompt. Keep the existing one-retry limit: sharpen the prompt and, when justified, move the retry up one class; if that retry still fails, pull the unit back to the parent. Do not climb through multiple paid retries, and never cross the parent ceiling implicitly.
+
 ## Decompose before you fan out
 
 When a task is a candidate for delegation, sketch a short decomposition first — this is strategy guidance, not a permission gate:
@@ -57,7 +81,7 @@ Every worker prompt must include: **Goal** (the exact user-visible outcome), **S
 
 - Integrate returned patches **one at a time, in dependency order**, running the relevant validation after each merge — batch-merging N patches and testing once makes a failure unattributable.
 - Conflicts between two returned patches are resolved by the parent directly. Never spawn another agent to mediate a conflict.
-- When a worker returns a wrong or partial result: retry **once**, with a sharpened prompt that names exactly what the first attempt got wrong; if the retry also fails, pull the unit back and do it locally. Never respawn the identical prompt hoping for a different outcome.
+- When a worker returns a wrong or partial result: retry **once**, with a sharpened prompt that names exactly what the first attempt got wrong; if the evidence points to insufficient model capability, that retry may move up one routing class without exceeding the parent ceiling. If the retry also fails, pull the unit back and do it locally. Never respawn the identical prompt hoping for a different outcome.
 
 ## Parent Responsibilities
 
@@ -66,17 +90,18 @@ The parent session remains responsible for the final result. Beyond the harness 
 - The subagent's final message returns to you as the tool result and is NOT shown to the user — relay what matters.
 - Review subagent outputs and integrate only the useful parts; do not treat a subagent patch as final without parent review and validation.
 - Run the relevant validation yourself, or verify the validation evidence is trustworthy.
-- Record each delegation **at spawn time** in the active task file (the CONTEXT micro-handoff for un-planned work; the spec LEDGER as a `delegated` entry for mission work): the unit, the agent, the expected output, and where it will be integrated; mark it consumed when integrated. A compaction or handoff must never orphan a running subagent — the file, not session memory, is what remembers outstanding delegations.
+- Record each delegation **at spawn time** in the active task file (the CONTEXT micro-handoff for un-planned work; the spec LEDGER as a `delegated` entry for mission work): the unit, the agent, the routing class/model when explicitly selected, the expected output, and where it will be integrated; mark it consumed when integrated. A compaction or handoff must never orphan a running subagent — the file, not session memory, is what remembers outstanding delegations.
 - Persist task/spec state, WIP, proposals, and uncertain subagent findings in the owning task/spec/CONTEXT surface; do not rely on subagent thread history.
 - Route a verified descriptive finding through `.claude/rules/knowledge-management.md` when it is durable beyond the current work. Mid-session promotion requires both the capture gates and one of that rule's immediate-promotion triggers; patch owner + reachable map atomically and run the checker. `/checkpoint` bulk-maintains remaining candidates, while recurring behavior goes to `/learn`.
 
 ## Task Documents
 
-For planned work, capture delegation under `## Plan of Work` or `### Memory Hints`, not a separate schema section. Include: the intended decomposition; intended roles; read/write ownership boundaries; validation and review responsibilities; any concurrency or cost limits. When a task is likely to parallelize, record the strategy; otherwise note "Delegation opportunity: <short idea>" when it would materially help a later session.
+For planned work, capture delegation under `## Plan of Work` or `### Memory Hints`, not a separate schema section. Include: the intended decomposition; intended roles; read/write ownership boundaries; validation and review responsibilities; the parent model ceiling and intended routing classes when delegation cost materially matters; any concurrency or other cost limits. When a task is likely to parallelize, record the strategy; otherwise note "Delegation opportunity: <short idea>" when it would materially help a later session.
 
 ## Safety And Cost
 
 - Keep delegation one level deep unless the user explicitly asks for recursive delegation.
+- Never exceed the parent session's model family through ordinary delegation without explicit user authorization.
 - Use read-only subagents (`Explore`) for any read-only delegation whenever possible.
 - Give parallel writers `isolation: worktree` so concurrent edits cannot conflict.
-- Be cost-aware on template/downstream projects: match fan-out to the size of the request so a trivial ask doesn't spin up expensive parallel work — judgment, not a brake on genuinely parallel work.
+- Be cost-aware on template/downstream projects: match both model tier and fan-out to the size of the request so a trivial ask doesn't spin up expensive parallel work — judgment, not a brake on genuinely parallel work.

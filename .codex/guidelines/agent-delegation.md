@@ -13,6 +13,30 @@ tags: [subagents, delegation, parallelism, orchestration]
 
 This protocol governs the built-in `explorer`/`worker`/`default` delegation pattern. Project-specific custom agents (defined under `.codex/agents/`) carry their own instructions and are invoked directly by name when the user asks for them; they are out of scope here.
 
+## Route general-purpose delegates by difficulty
+
+Role selection and model selection are separate decisions. `explorer`, `worker`, and `default` describe **what** the delegate does; the delegated unit's difficulty determines **which model tier** should do it. This section applies only to ordinary built-in delegation. Named project specialists under `.codex/agents/` keep their existing model policy and must not be silently down-routed by this guideline.
+
+Before each ordinary spawn, classify the delegated unit by its ambiguity, breadth, consequence of a wrong answer, and difficulty of verification. Choose the lowest class that is likely to complete the unit reliably:
+
+| Class | Typical delegated unit | Routing intent |
+| --- | --- | --- |
+| `routine` | focused search, call-site inventory, docs lookup, extraction, mechanical or highly constrained edit | cheapest suitable Codex model |
+| `standard` | bounded implementation or debugging with clear contracts and local verification | mid-tier Codex model |
+| `complex` | ambiguous cross-file debugging, architecture-sensitive reasoning, difficult review or integration | strong Codex model |
+| `maximum` | genuinely frontier-level, long-horizon, highly ambiguous work, or a unit whose cheaper attempt exposed a capability limit | strongest model allowed by the parent ceiling |
+
+The **parent session's selected model is a hard ceiling for implicit delegation**. The effective child model is the cheapest suitable model for the class, capped at the parent model's tier. A difficult task is not permission to spend above the user's session choice.
+
+- Conceptually: `effective child = min(ideal child for task, parent-session ceiling)`.
+- A frontier parent may route routine and standard units downward and reserve its own tier for `maximum` work.
+- A Sol-class parent caps both `complex` and `maximum` units at Sol-class capability. Lower parents cap the same way.
+- **Never launch a model tier above the parent ceiling unless the user explicitly requests or authorizes that stronger model for the delegated unit.** A project instruction, perceived urgency, retry, or "be thorough" request is not such authorization.
+- Use Codex's child-model override when the harness exposes one for the spawn. If the parent model cannot be identified, the desired cheaper model is unavailable or disallowed, or the override cannot be trusted, do not guess upward: inherit the parent or choose a known available model that is no more capable/expensive than the parent.
+- Concrete model names and availability can change. Treat the classes above as routing intent rather than a permanently pinned product matrix; do not rewrite the project's intentional custom-agent model definitions to implement this policy.
+
+A retry may use a stronger class **within the same ceiling** when the returned evidence shows a capability failure rather than a bad prompt. Keep the existing one-retry limit: sharpen the prompt and, when justified, move the retry up one class; if that retry still fails, pull the unit back to the parent. Do not climb through multiple paid retries, and never cross the parent ceiling implicitly.
+
 ## Decompose before you fan out
 
 When a task is a candidate for delegation, sketch a short decomposition first — this is strategy guidance, not a permission gate:
@@ -88,7 +112,7 @@ Prefer read-only explorers before workers when ownership is unclear.
 
 - Integrate returned patches **one at a time, in dependency order**, running the relevant validation after each merge — batch-merging N patches and testing once makes a failure unattributable.
 - Conflicts between two returned patches are resolved by the parent directly. Never spawn another agent to mediate a conflict.
-- When a worker returns a wrong or partial result: retry **once**, with a sharpened prompt that names exactly what the first attempt got wrong; if the retry also fails, pull the unit back and do it locally. Never respawn the identical prompt hoping for a different outcome.
+- When a worker returns a wrong or partial result: retry **once**, with a sharpened prompt that names exactly what the first attempt got wrong; if the evidence points to insufficient model capability, that retry may move up one routing class without exceeding the parent ceiling. If the retry also fails, pull the unit back and do it locally. Never respawn the identical prompt hoping for a different outcome.
 
 ## Parent Responsibilities
 
@@ -99,7 +123,7 @@ The parent Codex session remains responsible for the final result. **Codex's doc
 - **A silent subagent is not a stalled one.** A healthy explorer/worker on a long task often emits no intermediate signal; treat silence as in-progress, not failure. Misreading liveness and duplicating the work is a known Codex pitfall ([openai/codex#16900](https://github.com/openai/codex/issues/16900)). If you genuinely suspect it is stuck, steer or stop it explicitly via `/agent` — never quietly redo its work.
 - Review subagent outputs quickly and integrate only the useful parts.
 - Run the relevant validation yourself or verify that the validation evidence is trustworthy.
-- Record each delegation **at spawn time** in the active task file (the CONTEXT micro-handoff for un-planned work; the spec LEDGER as a `delegated` entry for mission work): the unit, the agent, the expected output, and where it will be integrated; mark it consumed when integrated. A compaction or handoff must never orphan a running subagent — the file, not session memory, is what remembers outstanding delegations.
+- Record each delegation **at spawn time** in the active task file (the CONTEXT micro-handoff for un-planned work; the spec LEDGER as a `delegated` entry for mission work): the unit, the agent, the routing class/model when explicitly selected, the expected output, and where it will be integrated; mark it consumed when integrated. A compaction or handoff must never orphan a running subagent — the file, not session memory, is what remembers outstanding delegations.
 - Classify returned findings before persistence. WIP, proposals, task state, and uncertainty stay in the task/spec/CONTEXT candidate surface; reusable behavior goes through `$codex-learn`. Immediate fact promotion requires the full capture gate plus a user request, a verified correction needed to avoid continued reliance on known-wrong canonical knowledge, confirmed source drift, or a lifecycle promotion boundary. Otherwise persist the finding as a candidate. For a promotion, read `knowledge-management.md`, patch the existing owner plus reachable route atomically, and run the checker.
 - Treat a subagent's knowledge claim as evidence to verify, not canonical truth. If a worker is explicitly assigned a knowledge mutation, its ownership must include both the topic and reachable map so no other agent splits the atomic write; the parent re-runs `bash .codex/scripts/knowledge-check.sh --root .` after integration.
 - Do not rely on subagent thread history for persistence.
@@ -112,13 +136,15 @@ For planned work, capture delegation under `## Plan of Work` or `### Memory Hint
 - intended subagent roles;
 - read/write ownership boundaries;
 - validation and review responsibilities;
-- any concurrency or cost limits.
+- the parent model ceiling and intended routing classes when delegation cost materially matters;
+- any concurrency or other cost limits.
 
 When a task is likely to parallelize, record the strategy; otherwise note "Delegation opportunity: <short idea>" when it would materially help a later session.
 
 ## Safety And Cost
 
 - Keep delegation one level deep unless the user explicitly asks for recursive delegation.
+- Never exceed the parent session's model tier through ordinary delegation without explicit user authorization.
 - Keep concurrency conservative — the shipped config caps `[agents] max_concurrent_threads_per_session` at **6**. Raising it, in OpenAI's own words, _"can turn broad delegation instructions into repeated fan-out, which increases token usage, latency, and local resource consumption."_
-- Ultra coordinates multiple agents in parallel by default and Codex itself warns that high multi-agent concurrency can increase usage quickly — match fan-out to the size of the request so a trivial ask doesn't spin up expensive parallel work; judgment, not a brake on genuinely parallel work.
+- Ultra coordinates multiple agents in parallel by default and Codex itself warns that high multi-agent concurrency can increase usage quickly — match both model tier and fan-out to the size of the request so a trivial ask doesn't spin up expensive parallel work; judgment, not a brake on genuinely parallel work.
 - Use read-only sandboxing for explorers and any read-only delegation whenever possible.
