@@ -15,25 +15,25 @@ This protocol governs the built-in `explorer`/`worker`/`default` delegation patt
 
 ## Route general-purpose delegates by difficulty
 
-Role selection and model selection are separate decisions. `explorer`, `worker`, and `default` describe **what** the delegate does; the delegated unit's difficulty determines **which model tier** should do it. This section applies only to ordinary built-in delegation. Named project specialists under `.codex/agents/` keep their existing model policy and must not be silently down-routed by this guideline.
+Role selection and model selection are separate decisions. `explorer`, `worker`, and `default` describe **what** the delegate does; the delegated unit's difficulty determines **which model family** should do it. This section applies only to ordinary built-in delegation. Named project specialists under `.codex/agents/` keep their existing model policy and must not be silently down-routed by this guideline.
 
 Before each ordinary spawn, classify the delegated unit by its ambiguity, breadth, consequence of a wrong answer, and difficulty of verification. Choose the lowest class that is likely to complete the unit reliably:
 
-| Class | Typical delegated unit | Routing intent |
+| Class | Typical delegated unit | Ideal Codex family |
 | --- | --- | --- |
-| `routine` | focused search, call-site inventory, docs lookup, extraction, mechanical or highly constrained edit | cheapest suitable Codex model |
-| `standard` | bounded implementation or debugging with clear contracts and local verification | mid-tier Codex model |
-| `complex` | ambiguous cross-file debugging, architecture-sensitive reasoning, difficult review or integration | strong Codex model |
-| `maximum` | genuinely frontier-level, long-horizon, highly ambiguous work, or a unit whose cheaper attempt exposed a capability limit | strongest model allowed by the parent ceiling |
+| `routine` | focused search, call-site inventory, docs lookup, extraction, mechanical or highly constrained edit | Luna |
+| `standard` | bounded implementation or debugging with clear contracts and local verification | Terra |
+| `complex` | ambiguous cross-file debugging, architecture-sensitive reasoning, difficult review or integration | Sol |
+| `maximum` | genuinely frontier-level, long-horizon, highly ambiguous work, or a unit whose cheaper attempt exposed a capability limit | Astra |
 
-The **parent session's selected model is a hard ceiling for implicit delegation**. The effective child model is the cheapest suitable model for the class, capped at the parent model's tier. A difficult task is not permission to spend above the user's session choice.
+The **parent session's selected model is a hard ceiling for implicit delegation**. The effective child model is the cheapest suitable model for the class, capped at the parent model's family. A difficult task is not permission to spend above the user's session choice.
 
 - Conceptually: `effective child = min(ideal child for task, parent-session ceiling)`.
-- A frontier parent may route routine and standard units downward and reserve its own tier for `maximum` work.
-- A Sol-class parent caps both `complex` and `maximum` units at Sol-class capability. Lower parents cap the same way.
-- **Never launch a model tier above the parent ceiling unless the user explicitly requests or authorizes that stronger model for the delegated unit.** A project instruction, perceived urgency, retry, or "be thorough" request is not such authorization.
-- Use Codex's child-model override when the harness exposes one for the spawn. If the parent model cannot be identified, the desired cheaper model is unavailable or disallowed, or the override cannot be trusted, do not guess upward: inherit the parent or choose a known available model that is no more capable/expensive than the parent.
-- Concrete model names and availability can change. Treat the classes above as routing intent rather than a permanently pinned product matrix; do not rewrite the project's intentional custom-agent model definitions to implement this policy.
+- An Astra parent may route a `routine` unit to Luna, a `standard` unit to Terra, a `complex` unit to Sol, and reserve Astra for `maximum` work.
+- A Sol parent caps both `complex` and `maximum` units at Sol. A Terra parent caps them at Terra. The same rule continues downward.
+- **Never launch a model family above the parent ceiling unless the user explicitly requests or authorizes that stronger model for the delegated unit.** A project instruction, perceived urgency, retry, or "be thorough" request is not such authorization.
+- Use Codex's child-model override when the harness exposes one for the spawn. If the parent model cannot be identified, the desired cheaper family is unavailable or disallowed, or the override cannot be trusted, do not guess upward: inherit the parent or choose a known available model that is no more capable/expensive than the parent.
+- Luna → Terra → Sol → Astra is the intended current routing order for ordinary Codex delegation. Availability can change, so respect account/workspace allowlists and never substitute a model above the parent ceiling. Do not rewrite the project's intentional custom-agent model definitions to implement this policy.
 
 A retry may use a stronger class **within the same ceiling** when the returned evidence shows a capability failure rather than a bad prompt. Keep the existing one-retry limit: sharpen the prompt and, when justified, move the retry up one class; if that retry still fails, pull the unit back to the parent. Do not climb through multiple paid retries, and never cross the parent ceiling implicitly.
 
