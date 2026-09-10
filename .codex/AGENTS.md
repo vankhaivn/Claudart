@@ -10,12 +10,12 @@ This repository contains CLAUDART, a markdown-based operating layer for AI codin
 - Read `.codex/guidelines/knowledge-management.md` in full only when the task retrieves, writes, audits, or refactors project knowledge, or when the user asks for a knowledge update or prior-project evidence.
 - Do not auto-load `.codex/JOURNAL.md`; use it only for explicit history or learning tasks.
 - Do not auto-load `.codex/HANDOFF.md`; it is a one-shot session baton consumed by `$codex-start`.
-- Do not auto-load task bodies in `.codex/tasks/*.md` — read individual task files only when resuming or working on them.
+- Do not auto-load `.codex/tasks/*/TASK.md` bodies or task artifacts. Read the selected `TASK.md` when resuming or working on it, then only supporting files needed for the next action.
 
 ## Core Commands
 
 - `$codex-start` — orients a new session from current state, task/spec indexes, the root knowledge map only, and recent Git history; it never runs the knowledge checker.
-- `$codex-plan <description>` — creates a persistent implementation plan in `.codex/tasks/`. Use instead of session-only `/plan` for any multi-session or multi-file work.
+- `$codex-plan <description>` — creates a lightweight workspace at `.codex/tasks/YYYY-MM-DD-NNN-<slug>/TASK.md` when work needs a persistent plan or the user explicitly requests one. Small, clear edits do not require a workspace; file count alone is not a trigger. Artifacts are created only for a concrete need.
 - `$codex-spec <mission>` — creates a mission-scale spec workspace in `.codex/specs/` — interview → POC artifact → decision-complete SPEC + ROADMAP, approved once as a standing approval.
 - `$codex-spec-run <slug>` — executes an approved spec autonomously until final review — verifies acceptance, records ROADMAP task dispositions and evidence, blocks unchanged failure loops, and offers session rotation at phase boundaries.
 - `$codex-project-discovery` — interviews the user about a rough project idea and creates a raw synthesis plus structured project docs.
@@ -35,7 +35,7 @@ This repository contains CLAUDART, a markdown-based operating layer for AI codin
 
 See `.codex/guidelines/ai-behavior.md` for universal AI behavior guidelines.
 See `.codex/guidelines/code-health.md` for the continuous, behavior-preserving implementation baseline applied whenever code or code-adjacent artifacts are inspected or changed.
-See `.codex/guidelines/task-management.md` for the persistent task-document workflow that replaces session-only plan mode.
+See `.codex/guidelines/task-management.md` for the lightweight task-workspace workflow that replaces session-only plan mode.
 See `.codex/guidelines/agent-delegation.md` for Codex subagent and parallel delegation protocol. Trust the harness on whether to delegate; the guideline supplies the how — decomposition, self-contained worker prompts, anti-shadow-run discipline, and persisting delegated findings.
 See `.codex/guidelines/spec-workflow.md` for mission-scale spec workspaces in `.codex/specs/` — the loop-engineering layer above tasks, executed autonomously by `$codex-spec-run` under a standing approval.
 See `.codex/guidelines/knowledge-management.md` for the full knowledge routing, capture, schema, lifecycle, and validation contract. Load it only under the trigger in Context Loading.

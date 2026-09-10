@@ -77,13 +77,17 @@ This map is orientation only; the current source tree and its references are aut
 
 When integrating both layers, preserve intent parity between mirrored Claude and Codex contracts without forcing byte identity where tool mechanics differ.
 
+Task workspaces use `tasks/YYYY-MM-DD-NNN-<slug>/TASK.md` and `tasks/done/<task-id>/TASK.md` in either layer. `TASK.md` is the only required file; `artifacts/` is created only for a concrete task need. Install only empty task seeds, never live upstream tasks or test fixtures. Preserve downstream workspace contents and storage/Git policies; do not bulk-read, extract, or normalize attachments during integration.
+
+The current upstream format is the standard: no flat-task compatibility layer or migration framework is installed. Downstream projects must adapt existing work deliberately before using the new task workflow. Report format mismatches and preserve the original files; any requested relocation still requires the explicit, path-specific approval below. Merely upgrading commands does not authorize moving or deleting task history.
+
 ## Step 1 — Derive the current delta
 
 Before proposing writes, distinguish:
 
 - **template-owned protocol:** commands, skills, rules, guidelines, agents, scripts, config, and other files intended to track current upstream;
 - **merge-owned indexes:** loaders and indexes whose project routes and ordering must be preserved;
-- **live state:** `CONTEXT.md`, `JOURNAL.md`, handoffs, task/spec bodies, mission folders, knowledge topics/maps, and equivalent project-owned state;
+- **live state:** `CONTEXT.md`, `JOURNAL.md`, handoffs, task workspaces and attachments, spec bodies and mission folders, knowledge topics/maps, and equivalent project-owned state;
 - **project-owned custom content:** instructions or workflows authored specifically for this project.
 
 ### Scenario A — Clean adopt
@@ -159,7 +163,7 @@ Wait for explicit approval before writing. Approval for this plan does not pre-a
 - Keep template-owned files verbatim unless an explicit merge was approved.
 - Prefer relocating project-specific additions to project-owned rules, guidelines, knowledge, or loader sections so core protocol files can track upstream cleanly.
 - Splice loaders and indexes; never wholesale-replace project routing or ordering.
-- Never overwrite existing `CONTEXT.md` or `JOURNAL.md`; never import, overwrite, or create `HANDOFF.md`; never replace task bodies, spec mission folders, knowledge topics, or maps with template content.
+- Never overwrite existing `CONTEXT.md` or `JOURNAL.md`; never import, overwrite, or create `HANDOFF.md`; never replace task workspaces or attachments, spec mission folders, knowledge topics, or maps with template content.
 - Create only missing seeds, indexes, or placeholders that were listed and approved.
 - Do not touch `.env`, secrets, ignored private files, or unrelated project files.
 - If an unplanned conflict or required write appears, stop before that write and present an amended path-level plan.
