@@ -1,5 +1,5 @@
-<!-- .codex/tasks/index.md — dashboard of task documents. Maintained by $codex-plan and $codex-checkpoint.
-     Task files are source of truth; this index is a convenience cache. Hard ceiling: 100 lines. -->
+<!-- .codex/tasks/index.md — dashboard of task workspaces. Maintained by $codex-plan and $codex-checkpoint.
+     Each <task-id>/TASK.md is source of truth; this index is a convenience cache. Hard ceiling: 100 lines. -->
 
 ## Active
 

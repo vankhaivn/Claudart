@@ -9,7 +9,7 @@ The two runtime layers are independent. Install Claude Code support, Codex suppo
 ## What it adds
 
 - **Session orientation:** start a new session from current state, active work, project knowledge, and recent Git history.
-- **Persistent plans:** keep multi-step work in task files instead of leaving the plan in chat.
+- **Persistent plans:** keep a resumable `TASK.md` in a lightweight task workspace, with supporting files only when needed.
 - **Large-work specifications:** define and execute work that spans several tasks or sessions under one approved specification.
 - **Project knowledge:** store durable facts separately from behavioral rules and temporary work state.
 - **Session handoff:** preserve an unfinished investigation when the context window is nearly full.
@@ -78,7 +78,9 @@ Then begin a normal session with `/start` or `$codex-start`.
 | Turn recurring behavior into a rule               | `/learn`           | `$codex-learn`           |
 | Check the installation                            | `/doctor`          | `$codex-doctor`          |
 
-Use a task plan for multi-step or multi-file implementation. Use a specification when the work contains several phases, needs a proof-of-concept or acceptance scenarios, or must continue across many sessions.
+Use a task plan when meaningful decisions, coordination, interruption, or review need persistence, or when explicitly requested. Small, clear edits do not require a workspace; file count alone is not a trigger. Use a specification for mission-scale scope with shared approved intent and a multi-phase roadmap—not merely because a task needs an image, JSON, or an archive.
+
+A task starts as `tasks/YYYY-MM-DD-NNN-<slug>/TASK.md` under the selected runtime. `TASK.md` is the only required file. Create `artifacts/` only for a concrete native-format input/output, necessary retained evidence, or substantial task-local research; short findings stay inline. There is no mandatory POC, ledger, repeated review loop, or session rotation. On user-confirmed closure, archive the whole directory. The current contract has no flat-task compatibility path; downstream upgrades adapt existing work deliberately.
 
 ## How state is organized
 
@@ -88,7 +90,7 @@ Use a task plan for multi-step or multi-file implementation. Use a specification
 | `JOURNAL.md`              | Retired history                                 | Append-only; not loaded automatically               |
 | `rules/` or `guidelines/` | Prescriptive instructions for agent behavior    | Loaded when applicable                              |
 | `knowledge/`              | Durable descriptive facts about the project     | Routed through `INDEX.md`; details loaded on demand |
-| `tasks/`                  | Persistent implementation plans                 | Read when a task is active or resumed               |
+| `tasks/`                  | Persistent implementation plans                 | Metadata at start; selected `TASK.md` and needed files on resume               |
 | `specs/`                  | Large-work specifications and execution records | Read when a specification is active                 |
 | `HANDOFF.md`              | One-session reasoning handoff                   | Consumed by the next start, then removed            |
 
@@ -108,7 +110,7 @@ The parent agent remains responsible for scope, integration, and validation of d
 
 ## Developing CLAUDART
 
-This repository uses Prettier for Markdown and Bash-based checks for the installer, knowledge contract, and specification workflow.
+This repository uses Prettier for Markdown and Bash-based checks for the installer, knowledge contract, task workspaces, and specification workflow.
 
 ```bash
 npm ci

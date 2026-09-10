@@ -7,7 +7,7 @@ CLAUDART keeps the Claude-specific operating layer inside `.claude/`, including 
 ## Core Commands
 
 - `/start` orients a new session from `.claude/CONTEXT.md`, task/spec indexes, the root knowledge router, and recent git history.
-- `/plan <description>` creates a persistent implementation plan in `.claude/tasks/` — use instead of native plan mode for any multi-session or multi-file work.
+- `/plan <description>` creates a lightweight workspace at `.claude/tasks/YYYY-MM-DD-NNN-<slug>/TASK.md` when work needs a persistent plan or the user explicitly requests one. Small, clear edits do not require a workspace; file count alone is not a trigger. Artifacts are created only for a concrete need.
 - `/spec <mission>` creates a dated mission-scale spec workspace in `.claude/specs/` — interview → POC artifact → decision-complete SPEC + ROADMAP, approved once as a standing approval.
 - `/spec-run <slug>` executes an approved spec autonomously until final review — verifies acceptance, records ROADMAP task dispositions and evidence, blocks unchanged failure loops, and offers session rotation at phase boundaries.
 - `/refactor-memory` consolidates the memory system and normalizes knowledge in place.
@@ -17,12 +17,14 @@ CLAUDART keeps the Claude-specific operating layer inside `.claude/`, including 
 - `/learn` promotes validated recurring behavior into `.claude/rules/` and routes descriptive facts to knowledge.
 - `/doctor` runs the mechanical knowledge checker followed by a read-only semantic health audit.
 
+Task bodies (`.claude/tasks/*/TASK.md`) and artifacts are not auto-imported. Read the selected `TASK.md` on resume, then only supporting files needed for the next action.
+
 ## Domain Rules
 
 See @.claude/CONTEXT.md for the current state of work (updated by /checkpoint).
 See @.claude/rules/ai-behavior.md for universal AI behavior guidelines.
 See @.claude/rules/code-health.md for the continuous, behavior-preserving implementation baseline applied whenever code or code-adjacent artifacts are inspected or changed.
-See @.claude/rules/task-management.md for the persistent task-document workflow that replaces native plan mode.
+See @.claude/rules/task-management.md for the lightweight task-workspace workflow that replaces native plan mode.
 See @.claude/rules/agent-delegation.md for how to delegate well to subagents (decomposition, worker prompts, anti-shadow-run, persistence) — the harness decides _whether_ to delegate; the rule adds the project's _how_.
 See @.claude/rules/spec-workflow.md for dated mission-scale spec workspaces in `.claude/specs/` with `done/` archives — the loop-engineering layer above tasks, executed autonomously by /spec-run under a standing approval.
 See @.claude/rules/knowledge-management.md for the always-available knowledge routing, capture, schema, and validation contract.
