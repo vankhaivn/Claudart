@@ -1,5 +1,5 @@
-<!-- .claude/tasks/index.md — dashboard of task documents. Maintained by /plan and /checkpoint.
-     Task files are source of truth; this index is a convenience cache. Hard ceiling: 100 lines. -->
+<!-- .claude/tasks/index.md — dashboard of task workspaces. Maintained by /plan and /checkpoint.
+     Each <task-id>/TASK.md is source of truth; this index is a convenience cache. Hard ceiling: 100 lines. -->
 
 ## Active
 

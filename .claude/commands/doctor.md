@@ -90,23 +90,21 @@ For every rule file in `.claude/rules/*.md`:
   - `tail -n 5 .claude/JOURNAL.md` — sample-check the most recent lines match the `YYYY-MM-DD | <type> | <summary>` format.
   - Skip deeper validation. If a malformed line is suspected, ask the user; do not slurp the whole file just to verify format.
 
-### 5c. Task Document Health (`.claude/tasks/`)
+### 5c. Task Workspace Health (`.claude/tasks/`)
 
-Skip this section if `.claude/tasks/` does not exist.
+Skip this section if `.claude/tasks/` does not exist. Follow `.claude/rules/task-management.md`; this audit does not create or repair task content.
 
-- Confirm `.claude/tasks/index.md` exists. If missing, flag as **Medium** — `/checkpoint` or `/plan` should regenerate it.
-- Count `.claude/tasks/index.md` lines via `wc -l`. Hard ceiling 100. If exceeded, flag as **High** — trim Recently Done.
-- For every `.claude/tasks/*.md` file (excluding `index.md` and `done/`), check the YAML frontmatter:
-  - Required keys: `slug`, `status`, `created`, `updated`, `agent`, `tags`.
-  - `status` must be one of: `planning`, `in-progress`, `awaiting-review`, `blocked`, `done`, `cancelled`.
-  - `slug` must match the filename (excluding the `YYYY-MM-DD-NNN-` prefix and `.md` suffix).
-  - `tags` must be inline YAML array style with 1-5 lowercase kebab-case tags.
-- Flag any task in the top-level folder with `status: done` or `status: cancelled` — these should have been moved to `done/` by `/checkpoint`. Suggest running `/checkpoint`.
-- Apply the **Staleness Thresholds** table in `.claude/rules/task-management.md` (the canonical numbers — do not redefine them here): flag stalled `in-progress` and stuck `awaiting-review` tasks as Medium severity (for the latter, surface prominently and suggest the user verify and give the close-out signal, or reject), and flag abandoned `planning` tasks as cancellation candidates.
-- Cross-check `index.md` Active entries against actual task files: every Active entry must correspond to a real file; every real file with `status` ∈ {planning, in-progress, awaiting-review, blocked} must appear in Active. Mismatches → suggest `/checkpoint` to resync.
-- Required sections in every task file body: `## Purpose`, `## Context & Orientation`, `## Plan of Work`, `## Concrete Steps`, `## Validation & Acceptance`, `## Decision Log`, `## Surprises & Discoveries`, `## Outcomes & Retrospective`. Flag missing sections.
-- Within `## Context & Orientation`, flag if `### Memory Hints` is missing or empty — that section is the cross-session lifeline.
-- **Redundant `.gitkeep`**: if `.claude/tasks/done/.gitkeep` exists AND `.claude/tasks/done/` contains at least one real `.md` file, flag as **Low** severity. The `.gitkeep` exists only to track an empty folder; once real archived tasks live there, it is redundant. Mention that `/refactor-memory` will clean it up, or the user can `rm` it manually.
+- Confirm `.claude/tasks/index.md` exists. Missing -> Medium; suggest `/checkpoint` to regenerate it. Count lines with `wc -l`: the 100-line ceiling and trim ladder remain unchanged.
+- Inspect only `.claude/tasks/*/TASK.md` and `.claude/tasks/done/*/TASK.md` in directly contained `YYYY-MM-DD-NNN-<slug>` directories. Exclude `done/` itself; never follow workspace or `TASK.md` symlinks or recursively parse attachments as tasks. Flat task files are outside the current contract, not a second discovery format.
+- Flag a dated directory missing `TASK.md`, or an invalid directory name, as Medium; preserve it for explicit repair. Do not invent metadata, migrate flat files, or remove unknown content.
+- Check `TASK.md` frontmatter: required `slug`, `status`, `created`, `updated`, `agent`, `delegation`, `tags`; `status` in {planning, in-progress, awaiting-review, blocked, done, cancelled}; `agent` in {claude, codex, both}; `delegation` in {none, strategy-only, authorized}. The directory must equal `<created>-<NNN>-<slug>`, with UTC date, sequence 001–999, and a 2–5-word lowercase kebab-case slug. Tags remain an inline array of 1–5 lowercase kebab-case values.
+- Flag top-level `done`/`cancelled` workspaces for whole-directory archival by `/checkpoint`. Flag an archive destination collision or an archived non-terminal task as Medium; never overwrite, relocate, or change status during this audit. `awaiting-review` must remain active until the user confirms.
+- Cross-check index links against the actual `TASK.md` paths and status: every active workspace appears under Active, every listed entry exists, and Recently Done links use `done/<task-id>/TASK.md`. Suggest `/checkpoint` for mismatches.
+- Required body sections remain `## Purpose`, `## Context & Orientation`, `## Plan of Work`, `## Concrete Steps`, `## Validation & Acceptance`, `## Decision Log`, `## Surprises & Discoveries`, and `## Outcomes & Retrospective`. Require `### Memory Hints`; `None.` is valid when no non-obvious context exists. Do not demand filler for simple tasks.
+- A `TASK.md`-only workspace is complete. Missing `artifacts/` or `### Workspace Files` is normal and must never produce a warning. Do not require NOTES, ROADMAP, LEDGER, manifests, or placeholder reports.
+- When `### Workspace Files` exists, check only its explicit local references for existence and a concrete purpose. Flag missing required input/evidence or unexplained local-only dependencies; a documented external/reproducible reference is not a broken local link. Do not read artifact bodies, fetch external inputs, extract archives, execute files, generate replacements, or create directories as part of doctor.
+- Apply the canonical **Staleness Thresholds** in `.claude/rules/task-management.md`; surface stalled work and review gates without automatically changing status.
+- A `tasks/done/.gitkeep` beside a real archived `<task-id>/TASK.md` is redundant (Low); `/refactor-memory` may remove that placeholder only. Task evidence is not a cleanup target.
 
 ### 5d. Knowledge Tier Wiring (`.claude/knowledge/`)
 

@@ -9,7 +9,7 @@ Hai lớp Claude và Codex hoạt động độc lập. Bạn có thể cài m�
 ## CLAUDART bổ sung những gì
 
 - **Định hướng phiên làm việc:** bắt đầu phiên mới từ trạng thái hiện tại, công việc đang mở, kiến thức dự án và lịch sử Git gần nhất.
-- **Kế hoạch bền vững:** lưu công việc nhiều bước trong file thay vì để kế hoạch biến mất cùng cuộc trò chuyện.
+- **Kế hoạch bền vững:** lưu `TASK.md` có thể tiếp tục trong workspace gọn nhẹ, chỉ thêm file hỗ trợ khi thực sự cần.
 - **Đặc tả cho công việc lớn:** mô tả và thực thi công việc kéo dài qua nhiều tác vụ hoặc nhiều phiên dưới một đặc tả đã được phê duyệt.
 - **Kiến thức dự án:** tách các sự thật bền vững khỏi quy tắc hành vi và trạng thái tạm thời.
 - **Bàn giao phiên:** giữ lại phần điều tra đang dở khi cửa sổ ngữ cảnh gần đầy.
@@ -78,7 +78,9 @@ Sau đó bắt đầu phiên làm việc bình thường bằng `/start` hoặc 
 | Biến cách làm lặp lại thành quy tắc                    | `/learn`           | `$codex-learn`           |
 | Kiểm tra bản cài đặt                                   | `/doctor`          | `$codex-doctor`          |
 
-Dùng kế hoạch tác vụ cho phần triển khai có nhiều bước hoặc nhiều file. Dùng đặc tả khi công việc có nhiều giai đoạn, cần bản thử nghiệm hoặc tiêu chí nghiệm thu, hay phải tiếp tục qua nhiều phiên.
+Dùng task plan khi quyết định quan trọng, phối hợp, gián đoạn hoặc review cần được lưu bền vững, hay khi user yêu cầu rõ ràng. Thay đổi nhỏ, rõ ràng không cần workspace; số lượng file không phải điều kiện tự động. Dùng spec cho phạm vi cấp mission cần ý định được duyệt chung và roadmap nhiều phase—không phải chỉ vì task cần ảnh, JSON hay archive.
+
+Task bắt đầu bằng `tasks/YYYY-MM-DD-NNN-<slug>/TASK.md` trong runtime đã chọn. `TASK.md` là file bắt buộc duy nhất. Chỉ tạo `artifacts/` cho input/output ở định dạng riêng, bằng chứng cần giữ hoặc nghiên cứu chi tiết của task; phát hiện ngắn nằm ngay trong plan. Không bắt buộc POC, ledger, vòng review lặp lại hay đổi phiên. Khi user xác nhận đóng, archive toàn bộ thư mục. Hợp đồng hiện hành không hỗ trợ task file phẳng; downstream chủ động điều chỉnh công việc đã có khi nâng cấp.
 
 ## Cách tổ chức trạng thái
 
@@ -88,7 +90,7 @@ Dùng kế hoạch tác vụ cho phần triển khai có nhiều bước hoặc 
 | `JOURNAL.md`                | Lịch sử đã kết thúc                              | Chỉ nối thêm; không tự động nạp                     |
 | `rules/` hoặc `guidelines/` | Chỉ dẫn mang tính quy định cho hành vi của agent | Nạp khi phù hợp                                     |
 | `knowledge/`                | Các sự thật bền vững mô tả dự án                 | Định tuyến qua `INDEX.md`; chỉ đọc chi tiết khi cần |
-| `tasks/`                    | Kế hoạch triển khai bền vững                     | Đọc khi tác vụ đang hoạt động hoặc được tiếp tục    |
+| `tasks/`                    | Kế hoạch triển khai bền vững                     | Metadata lúc start; `TASK.md` đã chọn và file cần thiết khi tiếp tục    |
 | `specs/`                    | Đặc tả công việc lớn và lịch sử thực thi         | Đọc khi đặc tả đang hoạt động                       |
 | `HANDOFF.md`                | Bàn giao suy luận cho một phiên kế tiếp          | Phiên `/start` kế tiếp tiếp nhận rồi xóa            |
 
@@ -108,7 +110,7 @@ Agent cha vẫn chịu trách nhiệm về phạm vi, tích hợp và kiểm tra
 
 ## Phát triển CLAUDART
 
-Repository này dùng Prettier cho Markdown và các kiểm tra Bash cho trình cài đặt, hợp đồng knowledge và quy trình spec.
+Repository này dùng Prettier cho Markdown và các kiểm tra Bash cho trình cài đặt, hợp đồng knowledge, workspace task và quy trình spec.
 
 ```bash
 npm ci

@@ -5,7 +5,7 @@ description: Bulk-maintain Codex current state, task/spec indexes, JOURNAL histo
 
 # CodexCheckpoint
 
-Update `.codex/CONTEXT.md` to reflect the current state of work from a Codex session. Sync `.codex/tasks/index.md` with current task file states. Append meaningful retired items to `.codex/JOURNAL.md`. Run this at the end of meaningful sessions.
+Update `.codex/CONTEXT.md` to reflect the current state of work from a Codex session. Sync `.codex/tasks/index.md` with current TASK.md states. Append meaningful retired items to `.codex/JOURNAL.md`. Run this at the end of meaningful sessions.
 
 The output is not a log of what happened. It is a declarative snapshot of what is true right now. Lifelong append is the failure mode this command exists to prevent.
 
@@ -18,8 +18,8 @@ Checkpoint is a bulk-maintenance boundary, not the only way to write knowledge. 
 3. `.codex/JOURNAL.md` is append-only. Never edit or delete prior entries. Each new entry is a single line.
 4. Never add `.codex/JOURNAL.md` as auto-loaded context in `AGENTS.md` or `.codex/guidelines/`. If such an auto-load already exists, remove that wiring and warn the user; JOURNAL remains append-only and outside session context.
 5. Skip JOURNAL entirely when there is nothing meaningful to record. Empty entries pollute the file.
-6. Task files keep their own bodies; CONTEXT.md never absorbs a task body. But CONTEXT.md should still reference the currently-focused task by slug + path in `## In Progress` so `$codex-start` sees both task and non-task work in one place. Two valid CONTEXT entries:
-   - Task reference: `- Working task \`add-jwt-auth\` (see .codex/tasks/2026-05-13-001-add-jwt-auth.md) <!-- since: YYYY-MM-DD -->`
+6. Task workspaces keep their own bodies and supporting files; CONTEXT.md never absorbs a task body. But CONTEXT.md should still reference the currently-focused task by slug + path in `## In Progress` so `$codex-start` sees both task and non-task work in one place. Two valid CONTEXT entries:
+   - Task reference: `- Working task \`add-jwt-auth\` (see .codex/tasks/2026-05-13-001-add-jwt-auth/TASK.md) <!-- since: YYYY-MM-DD -->`
    - Ad-hoc non-task change the user requested without creating a `$codex-plan` (a quick tweak, a transient pivot): CONTEXT is its **only** home, so it gets a **micro-handoff** — intent in the user's words + files of interest + next step (see Step 4) — not just a one-line pointer.
      Checkpoint _syncs_ `tasks/index.md` AND ensures CONTEXT references the focus task, but never copies a task's Steps/Decisions/Surprises into CONTEXT.
 7. Subagent threads are not durable project memory. Do not store subagent ids, nicknames, or transient thread state in CONTEXT. Store only durable outcomes: decisions, unresolved blockers, validated findings, changed ownership boundaries, and next steps.
@@ -51,7 +51,7 @@ Pure tactical noise is dropped silently.
 
 Add to `.codex/CONTEXT.md` only what is true now:
 
-- Work that is mid-stream, with `file:line` where useful. If the work is being tracked in a task file, reference it by slug + path (e.g., `Working task \`add-jwt-auth\` (see .codex/tasks/2026-05-13-001-add-jwt-auth.md)`). Do not duplicate the task body here.
+- Work that is mid-stream, with `file:line` where useful. If the work is being tracked in a task file, reference it by slug + path (e.g., `Working task \`add-jwt-auth\` (see .codex/tasks/2026-05-13-001-add-jwt-auth/TASK.md)`). Do not duplicate the task body here.
 - Ad-hoc changes the user requested _without_ creating a `$codex-plan` (quick fixes, transient tweaks, mid-flight pivots). These have no task file, so CONTEXT **is** their handoff summary, not just a note. Give each _active_ one a **micro-handoff** (see Step 4 skeleton): the user's intent in their own words, the files of interest with `file:line`, and the next concrete step. Mark them `(no task)`.
 - Decisions just made that are not yet codified in guidelines.
 - Durable subagent outcomes that still matter after this session, such as a validated finding, unresolved worker/reviewer blocker, or changed ownership boundary. Do not mention subagent thread ids.
@@ -73,9 +73,9 @@ Use this skeleton. Omit any section that has nothing to say.
 
 ## In Progress
 
-<!-- planned work → one-line pointer; the task file holds the depth -->
+<!-- planned work → one-line pointer; TASK.md routes the task details -->
 
-- Working task `<slug>` (see .codex/tasks/<file>) <!-- since: YYYY-MM-DD -->
+- Working task `<slug>` (see .codex/tasks/<task-id>/TASK.md) <!-- since: YYYY-MM-DD -->
 <!-- mission work → one-line pointer; the spec folder holds the depth -->
 
 - Running spec `<slug>` (see .codex/specs/YYYY-MM-DD-<slug>/SPEC.md) <!-- since: YYYY-MM-DD -->
@@ -137,17 +137,18 @@ Now, and only now, write the new `.codex/CONTEXT.md` from Step 4.
 
 This step is independent of CONTEXT.md. Skip entirely if `.codex/tasks/` does not exist.
 
-1. List `.codex/tasks/*.md` (exclude `index.md` and the `done/` subfolder). For each, read only frontmatter (`status`, `slug`, `updated`).
-2. List `.codex/tasks/done/*.md`. For each, read frontmatter (`status`, `slug`, `updated`).
-3. Detect any task in the top-level `tasks/` folder whose `status` is `done` or `cancelled`. These have been user-confirmed (or cancelled) and not yet archived. For each:
-   - Ensure `Outcomes & Retrospective` is filled (read the body to confirm). If empty, flag in the report — do not auto-fill; the user or implementing agent should write it.
-   - Move the file to `.codex/tasks/done/`.
-   - Append the completion line to `.codex/JOURNAL.md` in the Phase 2a format from `.codex/guidelines/task-management.md` (use type `cancelled` instead of `completed` for cancelled tasks).
-   - Before archiving, scan the task's `### Memory Hints` and `### Related Docs`. Route only claims that pass the knowledge guideline's full capture gate into **Step 6c**; leave uncertain or task-specific material in the archived task.
-   - DO NOT archive `awaiting-review` tasks. Those are explicitly waiting for user confirmation; archiving them defeats the gate. They stay in the top-level `tasks/` folder and appear in the Active list.
-4. Rewrite `.codex/tasks/index.md` from scratch per the canonical **"`index.md` Format"** in `.codex/guidelines/task-management.md` — Active includes `awaiting-review` (with its ⏳ marker); Recently Done covers the last 14 days.
-5. Enforce that section's 100-line ceiling and trim ladder.
-6. Flag stalled tasks: apply the **Staleness Thresholds** table in `.codex/guidelines/task-management.md` (stalled `in-progress`, stuck `awaiting-review`, abandoned `planning`) and list each flagged task in the report.
+1. List `.codex/tasks/*/TASK.md` from valid top-level workspace ids only, excluding `done/` itself and symlinked workspaces or `TASK.md` files. Read only frontmatter (`status`, `slug`, `created`, `updated`). Never recursively enumerate task bodies or parse attachments as tasks.
+2. List `.codex/tasks/done/*/TASK.md` at that exact depth. Read the same metadata. Flag an archived nonterminal task or a validly named workspace missing `TASK.md`; do not move, repair, or infer status automatically.
+3. Detect top-level workspaces whose `TASK.md` status is `done` or `cancelled`. These have been user-confirmed (or cancelled) and not yet archived. For each:
+   - Confirm `Outcomes & Retrospective` is filled in `TASK.md`. If empty, report it; do not invent the outcome.
+   - Before archiving, inspect only `TASK.md` Memory Hints and Related Docs for eligible knowledge candidates; use the full knowledge capture gate in Step 6c. Do not bulk-read supporting files or promote task/WIP/proposal state.
+   - Move the entire workspace to `.codex/tasks/done/<task-id>/`, preserving its id and all contents. Follow the task contract's archive safeguards: if the destination exists (including a symlink), stop that archive and report the collision; never overwrite, merge, or nest it. Confirm a successful move before updating references or journaling. Do not create, rewrite, extract, or delete artifacts.
+   - Append a completion/cancellation line linking `tasks/done/<task-id>/TASK.md` to `.codex/JOURNAL.md` only if the recent journal tail does not already contain that closure. Use the Phase 2a format from `.codex/guidelines/task-management.md`, with type `cancelled` for cancellation. Never rewrite journal history.
+   - Update any live CONTEXT/HANDOFF pointer to the archived `TASK.md` without copying its body.
+   - **DO NOT archive `awaiting-review` tasks.** They remain active until the user confirms; checkpoint never changes task status or ticks acceptance boxes.
+4. Rewrite `.codex/tasks/index.md` per the canonical **"`index.md` Format"** in `.codex/guidelines/task-management.md`, with links to `<task-id>/TASK.md` and `done/<task-id>/TASK.md`. Active includes `awaiting-review` with its ⏳ marker; Recently Done covers the last 14 days. Report any still-unarchived terminal workspace rather than linking it to a nonexistent archive.
+5. Enforce the 100-line ceiling and trim ladder. Missing `artifacts/` is normal; checkpoint never creates supporting files.
+6. Flag stalled tasks using the **Staleness Thresholds** in `.codex/guidelines/task-management.md`; surface the needed user decision rather than cancelling or reopening work automatically.
 
 ### Step 6b2: Sync .codex/specs/INDEX.md
 

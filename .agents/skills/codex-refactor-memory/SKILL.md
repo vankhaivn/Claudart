@@ -93,7 +93,8 @@ After the normalization batch, run `bash .codex/scripts/knowledge-check.sh --roo
 - Create concise CONTEXT and JOURNAL scaffolds when missing. Rewrite `.codex/CONTEXT.md` only through checkpoint semantics, keep it under 150 lines, and ensure `AGENTS.md` references it.
 - Never rewrite or prune JOURNAL; use tail and targeted `rg`, and remove any instruction that auto-loads it.
 - If task/spec directories are missing while their skills exist, create only their canonical seed indexes and archive placeholders. Do not rewrite, move, close, or change task/spec bodies; their owning workflows manage state and archives.
-- Remove an archive `.gitkeep` only when a real archived Markdown file already makes it redundant, and report the removal.
+- Remove an archive `.gitkeep` only when a real archived workspace (`tasks/done/<task-id>/TASK.md` or `specs/done/<folder-id>/SPEC.md`) already makes it redundant, and report the removal.
+- Task inventory uses only `.codex/tasks/*/TASK.md` and `.codex/tasks/done/*/TASK.md` at the depths defined by `task-management.md`; never recursively read attachments or follow workspace/`TASK.md` symlinks. Preserve every task workspace and its supporting files. Do not create `artifacts/`, extract archives, rewrite evidence, migrate flat tasks, or treat missing optional files as repair targets.
 - Do not store subagent ids or transient thread state in durable memory.
 - Treat an empty knowledge tier as valid. Do not populate it merely to make refactor appear productive.
 

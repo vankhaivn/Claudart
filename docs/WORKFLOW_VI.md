@@ -51,7 +51,7 @@ Dùng [INTEGRATE.md](../INTEGRATE.md). Quy trình tích hợp yêu cầu agent:
 2. phân biệt file không đổi, template CLAUDART đã cũ và nội dung riêng do dự án viết;
 3. trình bày rõ file nào sẽ được thêm, thay thế, hợp nhất, di chuyển hoặc loại bỏ;
 4. chờ phê duyệt trước khi ghi;
-5. giữ nguyên trạng thái đang dùng, task, spec và knowledge của dự án;
+5. giữ nguyên trạng thái đang dùng, workspace task và file đính kèm, spec và knowledge của dự án;
 6. chạy chuỗi đối soát hiện hành sau khi áp dụng thay đổi đã được duyệt.
 
 Prompt gợi ý:
@@ -106,8 +106,10 @@ Start không chạy knowledge checker. Mục tiêu của nó là khởi động 
 | Chế độ        | Dùng khi                                                                             | Nơi lưu                               |
 | ------------- | ------------------------------------------------------------------------------------ | ------------------------------------- |
 | Làm trực tiếp | Thay đổi nhỏ, rõ ràng, ít rủi ro và không cần kế hoạch bền vững                      | Cuộc trò chuyện và lịch sử repository |
-| Task plan     | Triển khai nhiều bước, nhiều file, có thể bị gián đoạn hoặc cần cổng review          | Một file trong `tasks/`               |
-| Spec          | Công việc có nhiều giai đoạn, acceptance scenario, artifact hoặc kéo dài nhiều phiên | Một thư mục trong `specs/`            |
+| Task plan     | Triển khai cần kế hoạch bền vững, quyết định đáng lưu hoặc user yêu cầu plan rõ ràng          | `tasks/<task-id>/TASK.md`               |
+| Spec          | Công việc cấp mission cần ý định được duyệt chung và roadmap thực thi nhiều phase | Một thư mục trong `specs/`            |
+
+Số lượng file không tự tạo ra nhu cầu lập plan. Cần JSON, ảnh hay archive không đồng nghĩa với cần spec. Khi user yêu cầu plan cho việc nhỏ, giữ plan ngắn và chỉ có `TASK.md` trừ khi thực sự cần file hỗ trợ.
 
 Trong phạm vi đã được phê duyệt, spec thay thế task plan. Không tạo task file cho công việc đã thuộc một spec đang hoạt động.
 
@@ -209,7 +211,7 @@ Trong quy trình bình thường, `/doctor` và `/refactor-memory` tự gọi ch
 
 Dùng `/plan <task>` hoặc `$codex-plan <task>` khi công việc cần tồn tại lâu hơn cuộc trò chuyện hiện tại.
 
-Command tạo một task file có ngày tháng dưới `.claude/tasks/` hoặc `.codex/tasks/`. Một task file hữu ích cần ghi:
+Command tạo `YYYY-MM-DD-NNN-<slug>/TASK.md` dưới `.claude/tasks/` hoặc `.codex/tasks/`, dùng ngày tạo UTC và số thứ tự trong ngày. `TASK.md` là file bắt buộc duy nhất và nguồn chuẩn cho scope, trạng thái, các bước, quyết định và nghiệm thu. Một task hữu ích cần ghi:
 
 - yêu cầu của user và mục tiêu có thể quan sát;
 - code, tài liệu và knowledge liên quan;
@@ -219,7 +221,26 @@ Command tạo một task file có ngày tháng dưới `.claude/tasks/` hoặc `
 - phát hiện làm thay đổi kế hoạch;
 - kết quả và phần nhìn lại sau khi hoàn tất.
 
-Task file phải đủ để một phiên sau tiếp tục mà không cần dựa vào cuộc chat ban đầu.
+Đọc `TASK.md` phải đủ để hiểu trạng thái, quyết định và hành động tiếp theo mà không cần cuộc chat ban đầu. Giữ nội dung tương xứng với công việc: phát hiện ngắn ở ngay trong file; section không có gì liên quan có thể ghi `None.`.
+
+### Chỉ tạo file hỗ trợ khi cần
+
+Workspace mặc định đã đầy đủ với:
+
+```text
+tasks/YYYY-MM-DD-NNN-<slug>/
+└── TASK.md
+```
+
+Chỉ tạo `artifacts/` khi cần input/output ở định dạng riêng, bằng chứng phục vụ kiểm tra hoặc tiếp tục công việc mà tóm tắt ngắn không giữ được, hoặc nghiên cứu chi tiết của task sẽ làm khó đọc kế hoạch hành động. Liên kết các file có ý nghĩa trong section tùy chọn `### Workspace Files`, ghi mục đích và đường dẫn tương đối trong workspace. Quyết định và kết luận vẫn nằm trong `TASK.md`.
+
+Sửa vài nút không mặc định cần bộ mockup. Chỉnh API không cần báo cáo JSON chỉ vì API trả về JSON. ZIP do user cung cấp để tái hiện lỗi import, hoặc số liệu cần so sánh hiệu năng, có thể là lý do hợp lệ để giữ file. Liên kết file chuẩn đã có thay vì sao chép; source, tài liệu, asset và regression fixture lâu dài vẫn ở vị trí thông thường trong dự án.
+
+Workspace thay đổi cách lưu, không thay đổi mô hình thực thi của task: không bắt buộc POC, vòng phỏng vấn, roadmap hay ledger riêng, review lặp lại hoặc đổi phiên. Chạy tập kiểm tra nhỏ nhất đủ chứng minh kết quả cùng các check bắt buộc của repository; làm thêm phải có lỗi quan sát được, thay đổi liên quan, tiêu chí chưa đạt hoặc feedback của user.
+
+Artifact tuân theo chính sách riêng tư, lưu trữ và Git của dự án downstream; lưu file không đồng nghĩa với được phép commit. Ghi rõ dependency chỉ có ở máy hiện tại và cách lấy lại hoặc tái tạo input cần thiết. Không tự giải nén hay thực thi archive, nạp hàng loạt file đính kèm hoặc xóa bằng chứng khi hoàn tất.
+
+Định dạng thư mục là hợp đồng task hiện hành duy nhất. Khi nâng cấp, downstream phải chủ động điều chỉnh công việc đã có; không có nhánh tương thích task file phẳng hay migration tự động.
 
 ### State machine
 
@@ -235,8 +256,8 @@ bất kỳ trạng thái nào ── user hủy ──▶ cancelled
 
 `planning` và `awaiting-review` là hai trạng thái khóa việc sửa source:
 
-- Ở `planning`, agent có thể chỉnh task file nhưng chưa triển khai.
-- Ở `awaiting-review`, agent đã hoàn tất các check của mình và chờ user review.
+- Ở `planning`, agent có thể chỉnh `TASK.md` và giữ ghi chú, input được cung cấp hoặc bằng chứng chỉ đọc cần thiết. Không được triển khai, kể cả bên trong `artifacts/`.
+- Ở `awaiting-review`, agent giữ nguyên implementation và bằng chứng đang được review trong lúc chờ user.
 - Khi user báo vấn đề, task được mở lại và quay về `in-progress`.
 
 ### Phê duyệt và hoàn tất
@@ -248,17 +269,17 @@ Lời khen, câu hỏi hoặc việc user tự sửa task file không được c
 Completion có hai bước riêng:
 
 1. **Agent hoàn tất:** triển khai và validation xong; trạng thái chuyển thành `awaiting-review`.
-2. **User xác nhận:** user review kết quả; task chuyển sang `done`, file được archive và journal nhận một dòng lịch sử ngắn.
+2. **User xác nhận:** user review kết quả; task chuyển sang `done`, toàn bộ thư mục chuyển vào `tasks/done/<task-id>/`, và journal nhận một dòng lịch sử ngắn. Hủy task cũng giữ nguyên cả workspace. Không ghi đè đích archive; các liên kết tương đối tới artifact vẫn hoạt động sau khi di chuyển.
 
 ### Tiếp tục ở phiên sau
 
-Phiên mới phải đọc toàn bộ task file, kiểm tra các bước đã hoàn tất vẫn đúng với repository hiện tại, ghi lại drift nếu có, rồi mới tiếp tục từ bước chưa hoàn thành tiếp theo.
+Startup chỉ đọc metadata của task. Khi tiếp tục, đọc `TASK.md`, rồi chỉ đọc code và file hỗ trợ cần cho hành động tiếp theo. Đối chiếu bằng chứng với code hiện tại, kiểm tra claim bị ảnh hưởng khi cần và ghi drift; không chạy lại mọi check đã hoàn tất chỉ vì đổi phiên. Báo thiếu input bắt buộc thay vì bịa kết quả tái hiện thành công.
 
 Task file là kế hoạch có thể tiếp tục, không phải bằng chứng rằng repository vẫn giữ nguyên.
 
 ## 6. Quy trình spec
 
-Dùng `/spec <mission>` hoặc `$codex-spec <mission>` khi một task file không đủ.
+Dùng `/spec <mission>` hoặc `$codex-spec <mission>` cho phạm vi cấp mission cần ý định được duyệt chung và roadmap thực thi nhiều phase—không phải chỉ vì task cần thêm file.
 
 Workspace của spec nằm tại:
 
@@ -373,7 +394,7 @@ Một bản cài Claude tập trung trong:
     └── INDEX.md
 ```
 
-`HANDOFF.md` chỉ xuất hiện trong khoảng từ lúc handoff đến lần start kế tiếp. Task file, workspace spec, knowledge topic và map được tạo thêm khi dự án phát triển.
+`HANDOFF.md` chỉ xuất hiện trong khoảng từ lúc handoff đến lần start kế tiếp. Workspace task, workspace spec, knowledge topic và map được tạo thêm khi dự án phát triển. Seed task trong bộ cài không chứa task đang làm hay artifact ví dụ.
 
 Một bản cài Codex tập trung trong:
 

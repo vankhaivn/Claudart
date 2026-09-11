@@ -11,8 +11,8 @@ Start a Codex session with a lightweight CLAUDART orientation. This skill is rea
 
 1. Check `.codex/HANDOFF.md`. If present, read it in full — it is a one-shot reasoning baton written by a previous session's `$codex-handoff`. Note its `created:` date. Consumption flow: see Case H below. If absent (the normal state), continue silently.
 2. Read `.codex/CONTEXT.md` if it exists. If missing, say the project has no Codex context yet and suggest `$codex-checkpoint` after meaningful work.
-3. Read `.codex/tasks/index.md` if it exists. If missing, treat as "no active tasks". If present, extract entries under `## Active`.
-4. For each Active entry, verify the underlying file exists in `.codex/tasks/` (the index is a cache; the file is truth). Read its frontmatter (`status`, `updated`, `slug`) only — do not full-read task bodies in `$codex-start`.
+3. Read `.codex/tasks/index.md` if it exists and extract `## Active`. If missing, use shallow `.codex/tasks/*/TASK.md` discovery and report that `$codex-checkpoint` should regenerate the index; a missing cache does not prove there are no tasks.
+4. Resolve Active entries only to `.codex/tasks/<YYYY-MM-DD-NNN-slug>/TASK.md` and verify existence. Use valid top-level workspace ids during fallback discovery; exclude `done/` itself and symlinked workspaces or `TASK.md` files. Read `TASK.md` frontmatter (`status`, `updated`, `created`, `slug`) only; flag missing/broken references for `$codex-checkpoint`. Do not read task bodies or artifact contents, recurse into workspaces, or create supporting files during startup.
 5. Read `.codex/knowledge/INDEX.md` if it exists — the root router only. Count visible route lines under `## Knowledge` that match the canonical Markdown route grammar; ignore HTML comments/templates and `- _(none)_`, so a seed index reports zero. Do NOT read domain maps, topic files, or `.codex/guidelines/knowledge-management.md`, and do NOT validate freshness or dead links. A later task that needs knowledge loads the guideline and follows its bounded routing contract.
 6. Read `.codex/specs/INDEX.md` if it exists — the INDEX only. Extract entries under `## Active`. Do NOT read SPEC/ROADMAP/NOTES/LEDGER bodies in `$codex-start`.
 7. Run `git log -3 --oneline`. If the directory is not a git repo or has fewer than three commits, report what is available.
@@ -78,13 +78,13 @@ Do NOT auto-start the loop; `$codex-spec-run` is the user's call.
 Pick the most recently updated one. The exact prompt depends on its status:
 
 - `awaiting-review`: a previous session reported the task complete and is waiting for the user's verification. Say:
-  > "Task `<slug>` is `awaiting-review` — a previous session finished it and is waiting for your verification. Open `.codex/tasks/<file>` to review draft Outcomes. Confirm to close, or tell me what didn't work and I'll flip it back to `in-progress`."
+  > "Task `<slug>` is `awaiting-review` — a previous session finished it and is waiting for your verification. Open `.codex/tasks/<task-id>/TASK.md` to review draft Outcomes. Confirm to close, or tell me what didn't work and I'll flip it back to `in-progress`."
 - `in-progress`: say:
-  > "There's an active task `<slug>` (in-progress, updated <date>). Want to resume? I'll read the full file and verify the completed steps still hold against current code. Or tell me to start something else."
+  > "There's an active task `<slug>` (in-progress, updated <date>). Want to resume? I'll read TASK.md and check whether recorded evidence still applies to the next step. Or tell me to start something else."
 - `blocked`: say:
   > "Task `<slug>` is blocked (updated <date>). Has the blocker cleared? If yes, I'll flip to in-progress and resume. If no, tell me what to work on instead."
 
-Do not auto-read the task body, auto-resume, or auto-confirm completion. Wait for explicit user direction. When the user confirms a resume, **warm the session**: read the full task file, then read the files in its `Related Code` section (cap ~5 most relevant) so you resume against real code, not the plan's description of it. Then follow the Resumption protocol in `.codex/guidelines/task-management.md` (verify completed steps still hold against current code, surface drift in Surprises section).
+Do not auto-read the task body, auto-resume, or auto-confirm completion. Wait for explicit user direction. When the user confirms a resume, **warm the session**: read `TASK.md`, then only the next action's relevant code and linked supporting files (cap ~5 most relevant references) so you resume against real code, not the plan's description of it. Then follow the Resumption protocol in `.codex/guidelines/task-management.md` (reuse applicable evidence, verify relevant drift or gaps, and surface drift in Surprises; never replay all completed checks just because this is a new session).
 
 ### Case B: No active task, but CONTEXT.md carries a handoff: `## Next Session Should Start By` is set, or an active `(no task)` micro-handoff sits under `## In Progress`
 
@@ -96,7 +96,7 @@ Surface the Next-Session line (or the micro-handoff's label and its `Next:` step
 
 Ask plainly:
 
-> "No active task or session handoff found. What would you like to tackle? If it's non-trivial or multi-session, I can run `$codex-plan <description>` to create a persistent task document."
+> "No active task or session handoff found. What would you like to tackle? If it's non-trivial or multi-session, I can run `$codex-plan <description>` to create a lightweight task workspace with TASK.md only unless supporting material is actually needed."
 
 ## Notes
 

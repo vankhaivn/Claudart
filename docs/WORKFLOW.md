@@ -51,7 +51,7 @@ Use [INTEGRATE.md](../INTEGRATE.md). The integration protocol asks an agent to:
 2. identify unchanged files, stale CLAUDART templates, and project-authored customizations;
 3. present a concrete add, replace, merge, move, or retire plan;
 4. wait for approval before writing;
-5. preserve live state, task files, specification folders, and project knowledge;
+5. preserve live state, task workspaces and attachments, specification folders, and project knowledge;
 6. run the current reconciliation checks after the approved changes.
 
 A useful prompt is:
@@ -106,8 +106,10 @@ It does not run the knowledge checker. Start is intended to be lightweight.
 | Mode          | Use it for                                                                  | Persistence                                |
 | ------------- | --------------------------------------------------------------------------- | ------------------------------------------ |
 | Direct work   | Small, clear, low-risk changes that do not need a durable plan              | Conversation and normal repository history |
-| Task plan     | Multi-step, multi-file, interruptible, or review-gated implementation       | One file in `tasks/`                       |
-| Specification | Work with several phases, acceptance scenarios, artifacts, or many sessions | One folder in `specs/`                     |
+| Task plan     | Implementation needing a durable plan, meaningful decisions, or an explicit plan request       | `tasks/<task-id>/TASK.md`                       |
+| Specification | Mission-scale work needing shared approved intent and a multi-phase execution roadmap | One folder in `specs/`                     |
+
+File count alone does not require a plan. Needing JSON, an image, or an archive does not require a specification. A small explicit plan stays brief, with `TASK.md` only unless supporting files are actually needed.
 
 A specification replaces task plans within its approved scope. Do not create task files for work already owned by an active specification.
 
@@ -209,7 +211,7 @@ The normal `/doctor` and `/refactor-memory` commands call the relevant checker a
 
 Use `/plan <task>` or `$codex-plan <task>` when the work should survive the current conversation.
 
-The command creates a dated task file under `.claude/tasks/` or `.codex/tasks/`. A useful task file records:
+The command creates `YYYY-MM-DD-NNN-<slug>/TASK.md` under `.claude/tasks/` or `.codex/tasks/`, using the UTC creation date and a daily sequence. `TASK.md` is the sole required file and authority for scope, status, steps, decisions, and acceptance. A useful task records:
 
 - the user's request and observable purpose;
 - relevant code, documents, and knowledge pointers;
@@ -219,7 +221,26 @@ The command creates a dated task file under `.claude/tasks/` or `.codex/tasks/`.
 - discoveries that changed the plan;
 - the final outcome and retrospective.
 
-The task file should be sufficient for a later session to continue without relying on the original chat.
+Reading `TASK.md` should explain the current state, decisions, and next action without the original chat. Keep it proportional: short findings stay inline, and sections with nothing relevant can say `None.`.
+
+### Supporting files only when needed
+
+A complete default workspace is:
+
+```text
+tasks/YYYY-MM-DD-NNN-<slug>/
+└── TASK.md
+```
+
+Create `artifacts/` only for a concrete native-format input/output, evidence needed for verification or resumption that a short summary cannot preserve, or substantial task-local research that would obscure the actionable plan. Link meaningful files under the optional `### Workspace Files` section, with their purpose and workspace-relative path. Keep decisions and conclusions in `TASK.md`.
+
+For a button adjustment, do not create a mockup package by default. For an API tweak, do not save a JSON report merely because the API returns JSON. A supplied ZIP needed to reproduce an import bug, or measurements needed to compare performance, may justify retained files. Link existing canonical project files instead of copying them; permanent source, docs, assets, and regression fixtures stay in normal project locations.
+
+This changes storage, not the task's execution model: no mandatory POC, interview loop, separate roadmap or ledger, repeated review, or session rotation. Run the smallest sufficient verification set plus mandatory repository checks; further work needs an observed failure, relevant change, acceptance gap, or user feedback.
+
+Artifacts follow the downstream project's privacy, storage, and Git policies; saving one does not authorize committing it. Mark local-only dependencies and how to retrieve or reproduce required inputs. Do not auto-extract or execute archives, bulk-load attachments, or remove evidence on completion.
+
+The directory format is the only current task contract. Downstream upgrades must adapt existing work deliberately; there is no flat-task compatibility path or automatic migration.
 
 ### State machine
 
@@ -235,8 +256,8 @@ any state ── user cancels ──▶ cancelled
 
 `planning` and `awaiting-review` are write locks for source code:
 
-- In `planning`, the agent may refine the task file but does not implement yet.
-- In `awaiting-review`, the agent has finished its checks and waits for the user's review.
+- In `planning`, the agent may refine `TASK.md` and retain necessary notes, supplied inputs, or read-only evidence. Implementation is forbidden even inside `artifacts/`.
+- In `awaiting-review`, the agent preserves the reviewed implementation and evidence while waiting for the user's review.
 - A reported problem reopens the task and returns it to `in-progress`.
 
 ### Approval and completion
@@ -248,17 +269,17 @@ Praise, questions, or manual edits to the task file are not treated as approval.
 Completion has two distinct steps:
 
 1. **Agent completion:** implementation and validation finish; status becomes `awaiting-review`.
-2. **User confirmation:** the user reviews the result; the task moves to `done`, its file is archived, and the journal receives a compact record.
+2. **User confirmation:** the user reviews the result; the task moves to `done`, the entire directory moves to `tasks/done/<task-id>/`, and the journal receives a compact record. Cancellation also preserves the whole workspace. Never overwrite an archive destination; workspace-relative attachment links survive the move.
 
 ### Resuming later
 
-A new session should read the whole task file, verify that completed steps still hold against the current repository, record any drift, and continue from the next valid unchecked step.
+Startup reads only task metadata. On resume, read `TASK.md`, then only the code and supporting files required for the next action. Check recorded evidence against current code, verify affected claims when needed, and record drift; do not replay every completed check just because the session changed. Report a missing required input rather than inventing a successful reproduction.
 
 A task file is a resumable plan, not proof that the repository has remained unchanged.
 
 ## 6. Specification workflow
 
-Use `/spec <mission>` or `$codex-spec <mission>` when one task file is not enough.
+Use `/spec <mission>` or `$codex-spec <mission>` for mission-scale scope that needs shared approved intent and a multi-phase execution roadmap—not merely because a task needs additional files.
 
 A specification workspace lives under:
 
@@ -373,7 +394,7 @@ A Claude installation centers on:
     └── INDEX.md
 ```
 
-`HANDOFF.md` appears only between a handoff and the next start. Task files, specification workspaces, knowledge topics, and maps are created as the project evolves.
+`HANDOFF.md` appears only between a handoff and the next start. Task workspaces, specification workspaces, knowledge topics, and maps are created as the project evolves. Installable task seeds contain no live tasks or example artifacts.
 
 A Codex installation centers on:
 

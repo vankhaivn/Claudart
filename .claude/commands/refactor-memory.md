@@ -31,7 +31,7 @@ Execute the following steps systematically, without losing essential project con
 - Determine the main framework, language, runtime, and architectural layers from `.claude/CLAUDE.md`, project structure, package manifests, build files, and existing docs.
 - Identify the core logical layers, such as docs/contracts, database/repositories, API/controllers, UI/components, background jobs, runtime/deploy, or AI/model workflows.
 - Note linters, formatters, test runners, and validation commands detected. Delegate style rules to those tools instead of encoding them into `.claude/CLAUDE.md`.
-- For docs-first repositories, identify document layers, source-of-truth boundaries, templates, workflows, and contract directories.
+- For docs-first repositories, identify document layers, templates, workflows, and source-of-truth contracts.
 
 ## 3. Ensure The Rules Directory Exists
 
@@ -212,9 +212,10 @@ For `.claude/JOURNAL.md`:
 
 For `.claude/tasks/`:
 
-- If the folder does not exist but `/plan` is documented in `.claude/commands/`, create it with a seed `index.md` and a `done/.gitkeep`.
-- If `.claude/tasks/done/.gitkeep` exists AND `.claude/tasks/done/` contains at least one real `.md` file, delete the `.gitkeep` — once real archives live there, the placeholder is redundant. Report what was removed.
-- Do not modify or move any task `.md` file content. Task files are working documents owned by `/plan` and `/checkpoint`; refactor-memory only touches the `.gitkeep` placeholder and (if missing) the seed `index.md`.
+- If the folder does not exist but `/plan` is documented in `.claude/commands/`, create only the canonical seed `index.md` and `done/.gitkeep`.
+- Inventory only `.claude/tasks/*/TASK.md` and `.claude/tasks/done/*/TASK.md` at the depths defined in `.claude/rules/task-management.md`. Do not recursively read attachments or follow workspace/`TASK.md` symlinks.
+- If `.claude/tasks/done/.gitkeep` exists beside a real archived `<task-id>/TASK.md`, remove only that redundant placeholder and report the removal.
+- Preserve task workspaces and their supporting files. Do not modify, move, close, or normalize `TASK.md` or attachments; `/plan` and `/checkpoint` own task state and archival. Do not create `artifacts/`, extract archives, rewrite evidence, migrate flat tasks, or treat missing optional files as repair targets.
 
 For `.claude/specs/`:
 
