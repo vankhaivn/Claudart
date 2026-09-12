@@ -1,36 +1,45 @@
 <!--
-Author notes: Adapt this for operators, maintainers, and support readers who run or recover the service. Update it after release, support, rollback, or troubleshooting procedures change; replace or retire it when an existing operational runbook is the maintained owner. Remove this comment after adaptation and omit irrelevant sections.
+Author notes: Use a separate page only when running, updating, or recovering the software needs an owner beyond existing development/README guidance. Adapt to actual local use, deployment, or formal release; retain the team's applicable approval, verification, recovery, and support requirements. Update when those procedures change; replace or retire this page if an existing runbook owns them. Remove this comment and inapplicable sections after adaptation; do not invent a production process.
 -->
 
 # Operating {{project_name}}
 
-## Service and support scope
+## Use and delivery scope
 
-{{State_which_service_environment_or_deployment_this_guidance_covers.}}
+{{State_how_the_software_is_used_and_which_checkout_environment_or_release_this_guidance_covers.}}
 
-**Supported versions or environments:** {{supported_versions_environments_and_evidence_owner}}.
+**Procedure owner:** {{maintainer_team_or_existing_operating_reference}}.
 
-**Service owner and escalation path:** {{team_role_or_existing_incident_destination}}.
+## Update or delivery procedure
 
-## Release procedure
+**Authoritative procedure:** {{existing_local_update_deployment_or_release_owner_or_short_procedure_below}}.
 
-1. {{confirm_approved_scope_version_and_release_evidence_requirements}}.
-2. {{run_preflight_checks_and_record_their_results}}.
-3. {{deploy_or_release_using_the_authoritative_delivery_procedure}}.
-4. {{record_the_release_where_support_and_users_can_find_it}}.
+1. {{check_the_prerequisites_and_any_actual_project_required_approvals}}.
+2. {{update_run_or_deliver_using_the_project_procedure}}.
+3. {{verify_the_result_in_the_scope_being_described_and_record_required_evidence}}.
 
-## Preflight and post-release verification
+## Verification for this use
 
-| Stage        | Check                                               | Success signal | If it fails                     |
-| ------------ | --------------------------------------------------- | -------------- | ------------------------------- |
-| Preflight    | {{migration_dependency_capacity_or_approval_check}} | {{signal}}     | {{stop_or_escalation_action}}   |
-| Post-release | {{health_user_journey_or_monitoring_check}}         | {{signal}}     | {{rollback_or_incident_action}} |
+| When            | Relevant check                                      | Success signal | If it fails                     |
+| --------------- | --------------------------------------------------- | -------------- | ------------------------------- |
+| Before updating | {{applicable_dependency_data_or_delivery_check}}    | {{signal}}     | {{stop_or_recovery_action}}     |
+| After updating  | {{applicable_run_behavior_or_service_health_check}} | {{signal}}     | {{recovery_or_incident_action}} |
 
-## Rollback
+## Recovery or rollback
 
-{{State_when_rollback_is_appropriate_and_the_safe_authoritative_procedure_or_destination.}}
+{{State_when_and_how_to_recover_or_rollback_with_the_actual_constraints_or_procedure_owner.}}
 
 **Data or compatibility considerations:** {{migration_state_backward_compatibility_or_recovery_constraint}}.
+
+<!-- Keep this section only where distinct release/support commitments exist. -->
+
+## Release and support commitments
+
+**Supported scopes and evidence:** {{versions_environments_or_cohorts_and_actual_support_owner}}.
+
+**Required release controls:** {{existing_approval_readiness_verification_and_rollback_requirements_or_their_owner}}.
+
+**Escalation:** {{actual_support_or_incident_destination}}.
 
 ## Troubleshooting
 

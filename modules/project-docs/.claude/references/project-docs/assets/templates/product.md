@@ -45,4 +45,4 @@ Author notes: Adapt this for product, domain, or business readers who need the a
 
 ## Relationship to the running product
 
-This page records approved intent. {{State_the_implemented_and_released_evidence_source_or_the_material_gap}}. Do not infer that current code, a test, or a reported bug changes the approved requirement.
+This page records approved intent. {{Link_current_behavior_for_the_relevant_commit_or_use_scope_and_any_material_gap}}. Do not infer that current code, a test, or a reported bug changes the approved requirement.

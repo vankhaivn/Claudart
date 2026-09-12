@@ -39,4 +39,4 @@ Author notes: Use this optional record only for a significant rationale that mus
 
 - **Approved intent:** {{decision_approval_source}}.
 - **Implemented state:** {{code_schema_test_or_reference_source}}.
-- **Released or supported state:** {{release_or_support_evidence_source}}.
+- **Use or delivery evidence, if relevant:** {{running_deployed_or_supported_scope_owner_or_omit}}.

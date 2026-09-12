@@ -15,7 +15,7 @@ Infer the operation from the request; a mode name is optional:
 - **Audit:** assess ownership, routes, evidence, and drift; report without edits unless the user also asks to fix them. Read [maintenance](references/maintenance.md).
 - **Compact:** make an authorized, focused cleanup of superseded or duplicated docs. Read [maintenance](references/maintenance.md).
 
-For any operation that selects or changes a source of authority, read [ownership](references/ownership.md). Read only the mode reference needed. Release is a context for update or audit, not a release operation.
+For any operation that selects or changes a source of authority, read [ownership](references/ownership.md). Read only the mode reference needed. Delivery and release are contexts for update or audit, not required stages or permission to release; follow the project's actual use and commitments.
 
 When authoring a missing page or reshaping an unsuitable one, use the [output templates and filled examples](references/templates.md), selecting only the relevant template. Existing suitable owners need no template conversion.
 

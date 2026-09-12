@@ -1,5 +1,5 @@
 <!--
-Author notes: Adapt one copy per meaningful capability, for readers implementing, testing, supporting, or reviewing its agreed behavior. Update it when approved rules or evidenced behavior change; replace or retire it when a maintained contract, API reference, or domain source is the better owner. Remove this comment after adaptation and omit irrelevant sections.
+Author notes: Adapt one copy per meaningful capability, for readers implementing, testing, using, or reviewing its agreed behavior. Update when approved rules or evidenced behavior change; replace or retire it when a maintained contract, API reference, or domain source is the better owner. Current behavior may describe a checked main commit or actual local use. Add distinct delivery/support scopes only where useful; keep real team commitments. Remove author comments and irrelevant sections after adaptation.
 -->
 
 # {{capability_name}}
@@ -41,17 +41,19 @@ Author notes: Adapt one copy per meaningful capability, for readers implementing
 - {{verifiable_reliability_security_privacy_accessibility_or_performance_expectation}}.
 - {{observable_acceptance_condition_or_testable_invariant}}.
 
-## Current implementation
+## Current behavior
 
-{{Describe_what_the_code_actually_does_and_any_gap_against_the_agreed_behavior.}}
+{{Describe_actual_behavior_in_this_scope_and_any_gap_against_the_agreed_behavior.}}
 
-**Evidence and scope:** {{revision_source_tests_or_observation_and_what_they_establish}}.
+**Evidence and scope:** {{branch_commit_checkout_or_environment_with_source_checks_or_observation_and_what_they_establish}}.
 
-## Released and supported behavior
+<!-- Omit this section when current behavior already covers the only relevant scope. -->
 
-| Supported scope                   | Actual behavior and limits           | Release or support evidence                     |
-| --------------------------------- | ------------------------------------ | ----------------------------------------------- |
-| {{version_environment_or_cohort}} | {{evidenced_behavior_in_this_scope}} | {{release_record_and_verification_destination}} |
+## Other delivery or support scopes
+
+| Scope                             | Actual behavior and limits           | Delivery or support evidence                           |
+| --------------------------------- | ------------------------------------ | ------------------------------------------------------ |
+| {{version_environment_or_cohort}} | {{evidenced_behavior_in_this_scope}} | {{deployment_release_or_support_evidence_destination}} |
 
 ## Approved change not yet delivered
 

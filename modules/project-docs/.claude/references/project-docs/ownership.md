@@ -19,9 +19,15 @@ The project's existing docs router is the entry point. If a router is useful and
 
 Changing owners requires a concrete reason such as overlap, scope mismatch, or changed maintenance responsibility, within the user's existing authorization. Do not request per-file reconfirmation for an already authorized move. When evidence cannot resolve competing owners, leave their content intact and report the decision needed. Knowledge changes still follow the selected runtime's capture and checker contract.
 
+## Match the project's actual use and delivery
+
+Infer how the affected software is developed, used, and delivered from the request and existing sources: local use, a current branch/commit, a deployed environment, or versioned releases may all be valid scopes. These can coexist in one project. Neither company ownership, personal ownership, project age, nor feature count determines the required process. Preserve the team's actual release, approval, support, and operational commitments; do not create or relax them merely to fit a template.
+
+A project used directly from `main` can document evidenced behavior at a commit without inventing a separate release stage. Record a running checkout or deployment only when making claims about that instance; a merge changes the branch, not necessarily the running software. Keep a separate release/support section only when it conveys a real distinction. The absence of tags, release notes, a support matrix, or a production-readiness checklist is not itself a documentation defect.
+
 ## Keep intent and reality distinct
 
-An approved product direction describes what the project intends to build. Code, tests, release artifacts, and operating evidence describe what currently works or has shipped. A proposed but unapproved direction is neither. For example, if E is approved while the application still implements C, state E as the approved direction and C as current behavior, with the gap visible. Do not present E as implemented, or treat current C as proof that C remains the desired product behavior. Supported older versions may retain their own documented behavior.
+An approved product direction describes what the project intends to build. Code, tests, and relevant usage or delivery evidence describe actual behavior in a stated scope. A proposed but unapproved direction is neither. For example, if E is approved while the application still implements C, state E as the approved direction and C as current behavior, with the gap visible. Do not present E as implemented, or treat current C as proof that C remains the desired product behavior. Where releases or supported older versions exist, retain their distinct evidenced behavior.
 
 When a formerly approved A, B, or C is truly superseded by E for the same scope, keep E in the current intent owner once its approval is established. Replace claims about implemented or released behavior only when implementation or release evidence supports them. Retain only rationale that still helps current decisions. Preserve older supported behavior and any genuinely distinct scope. Use existing history for chronology; do not append every transition to current guidance or create an archive copy on every edit.
 
