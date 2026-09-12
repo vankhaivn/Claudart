@@ -8,7 +8,7 @@ The target shape is:
 
 - a concise `.claude/CLAUDE.md` as the Claude instruction index and entrypoint;
 - durable prescriptive behavior in scoped files under `.claude/rules/`;
-- durable descriptive facts under `.claude/knowledge/`;
+- eligible durable descriptive facts without another owner under `.claude/knowledge/`, with compact routes or minimal unique agent context for externally owned facts;
 - current live state in `.claude/CONTEXT.md`;
 - append-only history in `.claude/JOURNAL.md`;
 - self-contained skills in `.agents/skills/` or `.claude/commands/`;
@@ -43,7 +43,7 @@ Use `.claude/rules/*.md` for durable semantic guidance with YAML frontmatter.
 
 Group detailed coding rules, boundaries, and validation requirements from `.claude/CLAUDE.md`, deprecated memory files, and repeated workflow decisions into a small set of logical rule files under `.claude/rules/`.
 
-**Route by type first.** Split the candidate content: **prescriptive** material (an enforceable `MUST`/`NEVER`/should-avoid invariant — how to behave) becomes a rule; **descriptive** material (how a subsystem works, an integration detail, a domain term, a pointer to a doc — a fact) goes to `.claude/knowledge/` instead (Step 10), never a rule. Do not file a fact as a rule and rely on Step 5 to re-route it later.
+**Route by type and owner first.** Split the candidate content: **prescriptive** material (an enforceable `MUST`/`NEVER`/should-avoid invariant — how to behave) becomes a rule; an eligible **descriptive** fact goes to its current authoritative source, or to `.claude/knowledge/` when no other source owns it (Step 10). Knowledge may hold a compact route or minimal unique agent context for another owner. Do not file a fact as a rule and rely on Step 5 to re-route it later.
 
 Common examples:
 
@@ -135,7 +135,7 @@ It should contain only:
 
 Target: keep `.claude/CLAUDE.md` under 100 lines where practical. If it exceeds 100 lines, extract more into `.claude/rules/`, workflows, or project docs. If it exceeds 150 lines, flag it in the final summary.
 
-**CRITICAL**: PURGE all domain-specific logic AND style/formatting rules — delegate styling to standard tools (Prettier, ESLint, Ruff, gofmt). Do not duplicate info already in `package.json` or `README.md`. Less is more. Descriptive project facts you pull out of `.claude/CLAUDE.md` belong in `.claude/knowledge/` (Step 10), not `.claude/rules/`.
+**CRITICAL**: PURGE all domain-specific logic AND style/formatting rules — delegate styling to standard tools (Prettier, ESLint, Ruff, gofmt). Do not duplicate info already in `package.json` or `README.md`. Less is more. Route descriptive project facts pulled from `.claude/CLAUDE.md` to their current authoritative owner; use `.claude/knowledge/` (Step 10) only when no other source owns them, or for a compact route. They do not belong in `.claude/rules/`.
 
 ## 7. Cross-Link Rules
 
@@ -235,7 +235,7 @@ For `.claude/knowledge/`:
 - Patch an existing owner before creating a topic. On an empty tier, create only a small grounded set whose claims pass every capture gate; otherwise leave the tier empty. Never convert WIP, proposals, task/spec state, or unsupported inference into knowledge.
 - Reconcile each already-reachable topic with its root or domain-map route atomically. Preserve ambiguous unindexed files as unindexed: normalize the file itself where safe, report it for review, and neither promote nor remove it.
 - When active topics exceed 24 or the root exceeds 1,200 visible words, create `_maps/<domain>.md` routes with root → map → topic only, using existing scope/grouping evidence while preserving curated and external routes. If ownership cannot be grouped safely, preserve the direct routes and report the decision instead of guessing. Never nest maps. A topic over 10 KiB is a reported split candidate; do not split it automatically.
-- Detect overlap and lifecycle tension, but never auto-merge, auto-retire, auto-supersede, delete, or rewrite bodies without unambiguous evidence and the required user decision.
+- Detect overlap and lifecycle tension, including facts already maintained in current project docs, source, schemas, or generated references. Preserve bodies during this normalization pass; route substantive deduplication through an authorized semantic cleanup. Never auto-merge, auto-retire, auto-supersede, or delete based on age or an ambiguous route.
 - Do not add a recall command, write-on-read behavior, telemetry, database, or daemon.
 - Make the result idempotent: running `/refactor-memory` again against unchanged sources must produce no knowledge diff.
 - After all mutations, run `bash .claude/scripts/knowledge-check.sh --fail-on warning`. Exit `1` means findings remain and normalization cannot be claimed complete; exit `2` is a checker failure and blocks completion.
@@ -258,7 +258,7 @@ Include these rules:
 - "Do not assume a human will document your code patterns. If you build it, document it."
 - Existing rules change → update the relevant file in `.claude/rules/`.
 - New domains/layers → CREATE a new rule file in `.claude/rules/` (with flow-style `paths: [...]`, `description:`, `when_to_use:`, and inline `tags: [...]` frontmatter) and add a conditional Domain Rules route. Reserve automatic imports for universal guidance, using paths relative to the importing file.
-- Durable descriptive facts that pass `.claude/rules/knowledge-management.md` → patch the canonical owner and reachable map atomically, then run the checker. Scope may be local; task/spec state stays local.
+- Durable descriptive facts that pass `.claude/rules/knowledge-management.md` → find the authoritative owner; knowledge owns only facts without another owner and otherwise keeps compact routes or minimal unique context. For a knowledge mutation, patch the topic and reachable map atomically, then run the checker. Scope may be local; task/spec state stays local.
 - Global changes → update `.claude/CLAUDE.md` directly.
 - Shared live state → update `.claude/CONTEXT.md` through `/checkpoint`, not through refactor-memory.
 

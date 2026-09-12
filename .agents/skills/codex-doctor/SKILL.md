@@ -21,7 +21,7 @@ Run a read-only health check on this repository's CLAUDART installation from the
 - `.codex/config.toml` exists and contains an `[agents]` table with conservative delegation limits.
 - `.codex/tasks/` exists with `index.md` and `done/` subdirectory (warn if missing — `$codex-plan` will create on first use).
 - `.codex/specs/` exists with `INDEX.md` and `done/` archive folder (informational if missing — `$codex-spec` creates it on first use).
-- `.agents/skills/` exists and contains `codex-start`, `codex-checkpoint`, `codex-learn`, `codex-doctor`, `codex-refactor-memory`, `codex-plan`, `codex-handoff`, `codex-project-discovery`, `codex-spec`, and `codex-spec-run`.
+- `.agents/skills/` exists and contains `codex-start`, `codex-checkpoint`, `codex-learn`, `codex-doctor`, `codex-refactor-memory`, `codex-plan`, `codex-handoff`, `codex-spec`, and `codex-spec-run`. `codex-project-docs` is optional; if present, check its skill and referenced files, but do not flag its absence.
 
 For each missing path, report which workflow would create or repair it.
 
@@ -109,8 +109,8 @@ The checker cannot decide whether prose is true or correctly tiered. Audit:
 
 - **Capture quality**: active claims are descriptive, durable beyond current work, current, and evidenced; narrowly scoped claims carry an accurate typed `scope`.
 - **Tier separation**: roadmap, backlog, acceptance state, WIP, proposals, and behavioral `MUST`/`NEVER` content do not masquerade as descriptive knowledge.
+- **Ownership**: overlapping facts have one focused canonical owner; related topics link rather than copy. Flag a sampled topic that repeats a claim already maintained by source, schema, generated reference, or project docs; a compact pointer or distinct useful synthesis is valid. Preserve deliberate external routes and curated hooks. Do not run a repository-wide documentation audit as part of doctor.
 - **Authority**: `review-needed`, conflicting, superseded, or retired topics are not presented as current authority; `status_note` and evidence explain the state.
-- **Ownership**: overlapping facts have one focused canonical owner; related topics link rather than copy. Preserve deliberate external routes and curated hooks.
 - **Verification meaning**: `updated` means content edit and `last_verified` means evidence check. Source drift takes priority over age; age alone is only a review nudge.
 - **Retrieval shape**: root → topic is acceptable for a small store; root → `_maps/<domain>.md` → topic is the only mapped shape. Maps never nest. A topic over 10 KiB is a reviewed split candidate, not an automatic rewrite.
 - **Loading behavior**: `$codex-start` reads only the root router and never runs this checker. Detail topics are not globally auto-loaded.
@@ -181,7 +181,7 @@ Skip this section if `.codex/specs/` does not exist.
 - Vague Codex skills that do not contain sufficient detail to execute the workflow.
 - Agent delegation instructions that override the active harness policy or omit bounded decomposition, ownership, and parent validation.
 - Worker agent instructions that allow overlapping writes or omit ownership boundaries.
-- Mis-tiered guideline (descriptive, not prescriptive): a `.codex/guidelines/` file whose body states only facts (how a subsystem works, an integration detail, a domain term, a doc pointer) with no behavioral constraint (`MUST`/`NEVER`/`should`/`avoid`/`always`/`never`) -> flag as Low: it likely belongs in `.codex/knowledge/`. Mirror of §5c's descriptive-only check; the boundary runs both ways. Universal guidance like `ai-behavior.md` is exempt.
+- Mis-tiered guideline (descriptive, not prescriptive): a `.codex/guidelines/` file whose body states only facts (how a subsystem works, an integration detail, a domain term, a doc pointer) with no behavioral constraint (`MUST`/`NEVER`/`should`/`avoid`/`always`/`never`) -> flag as Low: it belongs with the fact's authoritative owner, or in `.codex/knowledge/` when no other owner exists. Universal guidance like `ai-behavior.md` is exempt.
 
 ### 8. Size Sanity
 

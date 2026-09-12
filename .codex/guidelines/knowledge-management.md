@@ -7,7 +7,7 @@ tags: [knowledge, retrieval, evidence, memory]
 
 # Knowledge Management
 
-`.codex/knowledge/` stores durable **descriptive** project facts. Topic Markdown is the source of truth; `INDEX.md` and `_maps/*.md` are compact routers.
+`.codex/knowledge/` stores durable **descriptive** project facts and compact routes to other current owners. A topic owns a fact when no source code, schema, generated reference, project document, or other authoritative source already states that same claim as its maintained contract. Source code can be evidence for a distinct, useful synthesis in knowledge without owning that synthesis. `INDEX.md` and `_maps/*.md` are compact routers. Choose ownership by the subject and evidence, not by which agent or reader needs the information; keep one owner per fact and link from other surfaces.
 
 This guideline is the root contract for retrieval and classification. Routine `$codex-start` reads only `.codex/knowledge/INDEX.md`; it does not load this guideline, detail topics, domain maps, the maintenance reference, or the checker.
 
@@ -38,6 +38,8 @@ A claim qualifies for knowledge only when all four tests pass:
 - **Durable**: it remains useful beyond the current work. A narrowly scoped fact is valid when its scope says where it applies.
 - **Current**: it describes implemented reality rather than a proposal, acceptance target, roadmap, backlog, or intended future state.
 - **Evidenced**: repository evidence or an authoritative source supports it now.
+
+Passing these tests makes a claim eligible for knowledge routing, not necessarily a new canonical topic body. If another current source owns it, keep only the pointer or minimal agent-specific context needed to find and use that source. A knowledge topic may remain the owner when no other source owns the fact. If the optional Project Docs module is installed, its ownership and maintenance procedure applies to current project documents; the knowledge gate and checker still apply to knowledge mutations.
 
 Route everything else by kind:
 

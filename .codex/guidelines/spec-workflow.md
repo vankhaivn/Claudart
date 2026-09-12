@@ -9,7 +9,7 @@ tags: [specs, loop-engineering, autonomy, cross-session, missions]
 
 A **spec** is a mission: work too large for one task file — a whole game, a feature system, a client-demo POC. While active, it lives as a dated folder in `.codex/specs/YYYY-MM-DD-<slug>/` written by `$codex-spec`, then executed to the final-review gate by `$codex-spec-run` **without per-task human approval**. Completed and cancelled missions are archived under `.codex/specs/done/YYYY-MM-DD-<slug>/`. The folder, not chat memory, is the source of truth across sessions and recovery.
 
-Missions sit **above** the task layer (`task-management.md`): a spec supersedes `$codex-plan` for its scope, and its executor never creates `.codex/tasks/` files. Use `$codex-plan` for a bounded feature or fix whose decisions fit one task workspace. Use `$codex-spec` for a defined mission that needs a POC-frozen intent, phased roadmap, standing approval, and multi-session convergence. Use `$codex-project-discovery` when the user is still defining the project or product itself and needs synthesized project documentation before choosing an implementation mission. Unanswered spec-level details do not by themselves turn a defined mission into project discovery.
+Missions sit **above** the task layer (`task-management.md`): a spec supersedes `$codex-plan` for its scope, and its executor never creates `.codex/tasks/` files. Use `$codex-plan` for a bounded feature or fix whose decisions fit one task workspace. Use `$codex-spec` for a defined mission that needs a POC-frozen intent, phased roadmap, standing approval, and multi-session convergence. For a still-undefined project or product needing current documentation, use `$codex-project-docs` if installed; otherwise clarify intent within the current work. Unanswered spec-level details do not by themselves turn a defined mission into project-document work.
 
 ## File Layout
 
@@ -28,7 +28,7 @@ Missions sit **above** the task layer (`task-management.md`): a spec supersedes 
 
 - **Naming**: folder id is `YYYY-MM-DD-<slug>`, using the spec creation date and a slug of 2-5 lowercase kebab-case words. `SPEC.md` frontmatter keeps the short `slug: <slug>`; the folder name must equal `<created>-<slug>`. One folder per mission; never nest specs except the single archive folder `done/`.
 - **Resolving a spec**: `$codex-spec-run <arg>` accepts either a full folder id (`YYYY-MM-DD-<slug>`) or the short slug. Match active top-level folders first; if a short slug matches more than one active folder, ask the user to choose the dated folder. If the match exists only under `done/`, report its archived status and do not run it.
-- **`SPEC.md` holds intent, `ROADMAP.md` holds the plan, `NOTES.md` holds mission working knowledge/candidates, `LEDGER.md` holds the proof.** Canonical durable descriptive facts live under `.codex/knowledge/` only after the capture gate passes.
+- **`SPEC.md` holds mission intent, `ROADMAP.md` holds the plan, `NOTES.md` holds mission working knowledge/candidates, `LEDGER.md` holds the proof.** Current project facts live with their authoritative owner; `.codex/knowledge/` owns only eligible facts without another owner and otherwise routes to that source.
 
 ## SPEC.md
 

@@ -1,6 +1,6 @@
 # Integrate CLAUDART with your agent (AI-native install)
 
-**You are an AI coding agent** (Claude Code, Codex CLI, or similar) and your user linked this file because they want to **adopt or upgrade CLAUDART** in the current project. CLAUDART is a plain-Markdown operating layer for commands or skills, layered memory, persistent work, project knowledge, and specialized agents.
+**You are an AI coding agent** (Claude Code, Codex, or similar) and your user linked this file because they want to **adopt or upgrade CLAUDART** in the current project. CLAUDART is a plain-Markdown operating layer for commands or skills, layered memory, persistent work, project knowledge, and specialized agents.
 
 Source of truth: <https://github.com/vankhaivn/Claudart> (branch `main`).
 
@@ -21,12 +21,13 @@ This file is a **protocol, not an installer**. Follow it top to bottom. It exist
 ## Step 0 — Diagnose first, then fetch proportionally
 
 1. Work from the project root. Run `git status --short` when Git is available, record unrelated work, and do not disturb it.
-2. Inventory only relevant AI paths: `.claude/`, `.codex/`, `.agents/skills/`, root or nested `CLAUDE.md`, root `AGENTS.md`, and any overlapping custom commands, agents, rules, memory, tasks, specs, or knowledge.
-3. Resolve the target layer:
+2. Inventory only relevant AI paths: `.claude/`, `.codex/`, `.agents/skills/`, root or nested `CLAUDE.md`, root `AGENTS.md`, and any overlapping custom commands, agents, rules, memory, tasks, specs, knowledge, or documentation routes in the requested scope.
+3. Resolve the target layers and optional modules:
    - explicit user choice wins;
    - otherwise default to the runtime already present;
    - if neither exists and the active agent runtime makes the choice obvious, state that assumption in the plan instead of asking unnecessarily;
-   - if both are selected, classify each layer independently.
+   - if both are selected, classify each layer independently;
+   - record explicit module choices or exclusions. A general integration or update request permits recommending relevant modules in Step 2; it does not silently select them for installation, update, or removal.
 4. Classify each selected layer:
    - **A — Clean adopt:** no meaningful AI operating layer exists yet; a bare loader file is allowed.
    - **B — Merge into an existing workflow:** the project already has its own agents, commands, rules, memory, or work conventions.
@@ -53,8 +54,9 @@ This file is a **protocol, not an installer**. Follow it top to bottom. It exist
 
    If cloning is unavailable, fetch current raw files on demand from `https://raw.githubusercontent.com/vankhaivn/Claudart/main/<path>`. Without history, preserve ambiguous differences and show the exact uncertainty instead of guessing.
 
-6. Enumerate the actual selected-layer payload from current upstream. Read `install.sh` as a payload and relocation reference, plus the loaders and every file in the proposed dependency closure. README, workflow, and contributing docs are orientation only; read them only when a real ambiguity requires them.
-7. Treat `install.sh` as a payload reference, not a merge tool. Do not execute it during Scenario B or C, do not use `--force`, and do not run any write-capable maintenance workflow before approval.
+6. Inspect the current `modules/` inventory and brief module descriptions. Recommend a module when the request or observed project gives it a concrete purpose; for example, existing discovery material or competing documentation owners can make Project Docs relevant. Respect an explicit core-only scope or module exclusion. This does not require a full docs audit or loading every module's detailed references.
+7. Enumerate the actual selected core-layer and proposed optional-module payload from current upstream. Read `install.sh` as a payload and relocation reference, plus the loaders and every file in the proposed dependency closure. README, workflow, and contributing docs are orientation only; read them only when a real ambiguity requires them.
+8. Treat `install.sh` as a payload reference, not a merge tool. Do not execute it during Scenario B or C, do not use `--force`, and do not run any write-capable maintenance workflow before approval.
 
 ## What CLAUDART contains
 
@@ -75,6 +77,10 @@ This map is orientation only; the current source tree and its references are aut
 - `.codex/CONTEXT.md`, `.codex/JOURNAL.md`, `.codex/tasks/`, and `.codex/specs/`;
 - `.codex/AGENTS.md` as the source template for the canonical downstream root `AGENTS.md`.
 
+**Optional modules:** install only when selected. Project Docs lives under `modules/project-docs/` in upstream; overlay its `.claude/` and/or `.agents/` payload at the downstream root for the selected runtimes. This adds `.claude/commands/project-docs.md` or `.agents/skills/codex-project-docs/` and their referenced files. Do not copy the module's source wrapper or packaging README into the project. It supplies documentation-lifecycle guidance; it does not install a documentation tree or own a project's existing documentation by default.
+
+Include the selected module's output templates and filled examples in its resource closure, retaining their module-relative paths. They are reusable authoring resources, not live project docs: do not instantiate templates or apply the example snippets during integration. Preserve custom resource edits under the same reconciliation rules as other instructions.
+
 When integrating both layers, preserve intent parity between mirrored Claude and Codex contracts without forcing byte identity where tool mechanics differ. Preserve the loader's one-state-layer rule: use the native layer by default or the user's explicit alternate choice, with host-native tools; never infer permission to synchronize state stores.
 
 Task workspaces use `tasks/YYYY-MM-DD-NNN-<slug>/TASK.md` and `tasks/done/<task-id>/TASK.md` in either layer. `TASK.md` is the only required file; `artifacts/` is created only for a concrete task need. Install only empty task seeds, never live upstream tasks or test fixtures. Preserve downstream workspace contents and storage/Git policies; do not bulk-read, extract, or normalize attachments during integration.
@@ -90,9 +96,11 @@ Before proposing writes, distinguish:
 - **live state:** `CONTEXT.md`, `JOURNAL.md`, handoffs, task workspaces and attachments, spec bodies and mission folders, knowledge topics/maps, and equivalent project-owned state;
 - **project-owned custom content:** instructions or workflows authored specifically for this project.
 
+Treat an optional module as a selected dependency closure, separate from the core layer. Classify existing discovery commands and references using the stale-vs-custom test below. List any proposed retirement in the reconciliation plan, identifying its replacement or the chosen core-only outcome. Generated discovery output, `docs/project/`, and other project documentation are live project-owned content; retiring a template command does not authorize deleting its output.
+
 ### Scenario A — Clean adopt
 
-Copy the current selected-layer payload. Splice CLAUDART routes into any existing canonical or overlapping loader, including `.claude/CLAUDE.md`, root `CLAUDE.md`, or root `AGENTS.md` as applicable; never replace project-authored loader content. For missing live-state files, create only the current empty seed/header. For Codex, place the source loader at the current canonical downstream location, normally root `AGENTS.md`, and avoid two competing loaders.
+Copy the current selected core-layer and optional-module payload. Splice CLAUDART routes into any existing canonical or overlapping loader, including `.claude/CLAUDE.md`, root `CLAUDE.md`, or root `AGENTS.md` as applicable; never replace project-authored loader content. For missing live-state files, create only the current empty seed/header. For Codex, place the source loader at the current canonical downstream location, normally root `AGENTS.md`, and avoid two competing loaders.
 
 Scenario A is the fast path: do not inspect full history and do not schedule doctor or refactor-memory when Step 4 verification can prove the installation mechanically.
 
@@ -106,11 +114,11 @@ For each current CLAUDART concept:
 - **Competing memory or work system** → map responsibilities and let the user choose one authority; never silently leave two systems owning the same job.
 - **Project-only path** → preserve it unless retirement or relocation is explicitly approved.
 
-Derive the complete dependency closure for each accepted concept from current upstream. Include every selected-layer file that defines, routes, invokes, validates, installs, or mirrors it.
+Derive the complete dependency closure for each accepted core concept and selected module from current upstream. Include every selected-layer file that defines, routes, invokes, validates, installs, or mirrors it. Preserve unselected module paths and unrelated legacy discovery or documentation content.
 
 ### Scenario C — Reconcile an existing CLAUDART install
 
-Diff the actual installed state against current upstream; do not assume all local files came from one revision. Classify every relevant path:
+Diff the actual installed state against current upstream; do not assume all local files came from one revision. Classify every relevant core path and selected module path:
 
 - **Equivalent** → keep and record `unchanged`.
 - **Upstream-only** → inspect references and, when needed, history to distinguish an addition from a rename, move, split, consolidation, or replacement.
@@ -133,7 +141,7 @@ Apply the stale-vs-custom test narrowly:
 4. If local content matches a past upstream state and contains no project-specific addition, it is stale.
 5. If evidence remains ambiguous, show the specific lines and ask about those lines, not the entire file.
 
-Produce a reconciliation report covering unchanged, upstream-only, stale replacements, genuine custom merges, moves or consolidations, retirement candidates, preserved downstream-only paths, untouched live state, and review-needed ambiguities. Preserve every live knowledge topic, map, and project-specific route; shipped indexes are merge templates, not replacements for project knowledge.
+Produce a reconciliation report covering unchanged, upstream-only, stale replacements, genuine custom merges, moves or consolidations, retirement candidates, preserved downstream-only paths, untouched live state, and review-needed ambiguities. Preserve every live knowledge topic, map, project-specific route, and unselected module. Do not retire customized legacy discovery or `docs/project/` content merely because current upstream no longer ships it; inspect it only when that retirement is in scope and identify its replacement owner.
 
 ## Step 2 — Present the plan and wait
 
@@ -148,7 +156,9 @@ Before writing, classify the planned result under these actions:
 - `skip`;
 - `review-needed`.
 
-List exact paths for every write, merge, relocation, retirement, or ambiguity. Unchanged paths may be grouped by tree and count. For a collision-free Scenario A tree copied verbatim, you may report it as one grouped add with a generated file count instead of explaining every file; still list loader placement and live-state seeds separately. Any collision or non-verbatim action must be path-specific.
+List the selected layers and optional modules, then exact paths for every write, merge, relocation, retirement, or ambiguity. Unchanged paths may be grouped by tree and count. For a collision-free Scenario A tree copied verbatim, you may report it as one grouped add with a generated file count instead of explaining every file; still list loader placement and live-state seeds separately. Any collision or non-verbatim action must be path-specific.
+
+Separate requested module changes from optional recommendations. For each recommendation, state the project-specific reason, runtime files it would add or change, and whether later `adopt` work would be useful. Ask the user to include or exclude it when approving the plan; an already explicit choice needs no repeat confirmation. Only modules included in the approved plan may change. Installing Project Docs does not itself authorize generating, moving, or compacting live docs or knowledge.
 
 For each merge, identify what current upstream content will be introduced and what downstream content will be preserved or relocated. For each retirement, identify the replacement or current owner. Mark live-state files explicitly as preserved.
 
@@ -160,6 +170,7 @@ Wait for explicit approval before writing. Approval for this plan does not pre-a
 
 - Re-check `git status --short` and protect unrelated or parallel work.
 - Apply the approved dependency closure atomically per concept where practical.
+- Do not add, remove, or update an optional module unless that module was explicitly selected in the approved plan.
 - Keep template-owned files verbatim unless an explicit merge was approved.
 - Prefer relocating project-specific additions to project-owned rules, guidelines, knowledge, or loader sections so core protocol files can track upstream cleanly.
 - Splice loaders and indexes; never wholesale-replace project routing or ordering.
@@ -187,7 +198,7 @@ Run bounded mechanical checks against the selected layers and changed dependency
 
 2. Confirm every approved add, replacement, merge, relocation, and retirement reached its intended final path.
 3. Compare every supposedly verbatim template-owned file with current upstream using `cmp`, checksums, or `git diff --no-index`, accounting only for approved relocation. Any unexplained drift fails verification.
-4. For merged loaders and indexes, confirm both the required current CLAUDART routes and the project-authored sections identified in the plan remain present. Resolve actual Claude `@` imports relative to each importing file, including nested targets: `@rules/ai-behavior.md` is relative to the installed `.claude/CLAUDE.md`. Preserve conditional plain routes and narrow rule scopes; do not make every workflow global or require an automatic import for every rule. An intentionally empty task/spec seed may have no glob matches. Verify referenced `references/` files are included in the dependency closure and installed at the paths used by their entrypoints.
+4. For merged loaders and indexes, confirm both the required current CLAUDART routes and the project-authored sections identified in the plan remain present. Resolve actual Claude `@` imports relative to each importing file, including nested targets: `@rules/ai-behavior.md` is relative to the installed `.claude/CLAUDE.md`. Preserve conditional plain routes and narrow rule scopes; do not make every workflow global or require an automatic import for every rule. An intentionally empty task/spec seed may have no glob matches. Verify core and selected module references are included in the dependency closure and installed at the paths used by their entrypoints.
 5. Confirm referenced commands, skills, rules, guidelines, agents, scripts, indexes, and config paths exist; no loader, rule, or guideline auto-loads `JOURNAL.md` or `HANDOFF.md`; existing live-state bodies were not replaced; changed shell scripts pass `bash -n`; changed command/skill/agent/rule/guideline frontmatter still satisfies the current upstream contract; and mirrored contracts remain consistent when both layers changed.
 6. Inspect current upstream `scripts/`. If it ships a documented read-only installation verifier that can target another root, run it exactly as documented. If none exists, that absence is not a failure; run the current upstream knowledge checker for each selected layer instead. With the current interface:
 
@@ -227,7 +238,7 @@ After an approved refactor-memory run, repeat mandatory fast verification. Repea
 
 ### 4.4 Report the result
 
-Summarize the scenario and selected layer, paths added/replaced/merged/relocated/retired/preserved/skipped/review-needed, verification commands and results, why doctor was or was not run, and any normalization still awaiting approval. Remind the user to review `git diff` before committing.
+Summarize the scenario, selected layers and modules, paths added/replaced/merged/relocated/retired/preserved/skipped/review-needed, verification commands and results, why doctor was or was not run, and any normalization still awaiting approval. Remind the user to review `git diff` before committing.
 
 This protocol is idempotent: a later run derives a fresh delta from the then-current upstream and downstream state.
 

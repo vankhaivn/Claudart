@@ -83,7 +83,7 @@ Use this skeleton; **omit any section that has nothing to say**:
 
 ## Recent Decisions (not yet promoted to rules)
 
-- [Decision + brief why; behavior → .claude/rules/ via /learn; eligible descriptive fact → knowledge under its rule] <!-- since: YYYY-MM-DD -->
+- [Decision + brief why; behavior → .claude/rules/ via /learn; eligible descriptive fact → its owner under the knowledge rule] <!-- since: YYYY-MM-DD -->
 
 ## Next Session Should Start By
 
@@ -159,15 +159,15 @@ Skip entirely if `.claude/specs/` does not exist.
 7. Scan each Active spec's `NOTES.md` for `→ graduate:` flags: route `knowledge/` flags into Step 6c and surface `/learn` flags as proposals. Clear only successfully promoted or deliberately reclassified claims; retain unresolved candidates.
 8. Do NOT tick roadmap boxes, write LEDGER entries, or change any spec `status` — those transitions belong to `/spec`, `/spec-run`, and the user.
 
-### Step 6c — Bulk-maintain eligible knowledge
+### Step 6c — Route durable facts to their owners
 
 Read `.claude/rules/knowledge-management.md` and skip if no candidate from this session, task closeout, or spec NOTES passes its capture gates.
 
-Distill rather than copy work history. Keep task/spec state and proposals in their owning artifacts, route behavioral lessons to `/learn`, and leave uncertain/conflicting claims as candidates or mark an existing owner `review-needed`. Never write secrets.
+Distill rather than copy work history. Keep task/spec state and proposals in their owning artifacts, route behavioral lessons to `/learn`, and leave uncertain/conflicting claims as candidates or mark an existing owner `review-needed`. Identify each fact's existing owner; when another current source owns it, leave only a knowledge route or minimal unique context. Checkpoint does not take over full project-document maintenance or require a docs audit. Never write secrets.
 
 For each eligible claim:
 
-1. Route map-first and patch the existing canonical owner before creating a focused topic.
+1. Route map-first and patch the existing canonical owner before creating a focused topic. Create a knowledge owner only when no other authoritative source owns that fact.
 2. Apply the canonical frontmatter, trust, scope, relation, and route grammar from the knowledge rule. Update `updated` only for a content edit and `last_verified` only for an evidence check.
 3. Update the topic and its reachable root/domain map atomically. Preserve curated titles, hooks, grouping, ordering, and external routes; never auto-promote an ambiguous unindexed file or auto-delete a topic.
 4. Run `bash .claude/scripts/knowledge-check.sh` after the final knowledge mutation. If it fails, report the exact findings and do not claim the knowledge update healthy.

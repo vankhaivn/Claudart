@@ -40,6 +40,7 @@ Apply these rules with judgment. The user's outcome, applicable repository instr
 
 - Every changed hunk MUST trace to the requested outcome or to necessary supporting work.
 - Necessary support may include directly affected tests, callers, types, documentation, schemas, migrations, fixtures, snapshots, lockfiles, and generated artifacts.
+- When a change alters actual behavior, contracts, setup, operations, or a canonical owner, check the affected documentation and update its owner and dependent routes in the same authorized change. Use the repository's existing documentation convention; if the optional Project Docs module is installed, follow its maintenance procedure. A routine task or checkpoint does not require a full documentation audit.
 - Do not perform drive-by cleanup, broad renaming, unrelated reformatting, dependency upgrades, speculative refactoring, or deletion of unrelated pre-existing dead code.
 - Remove imports, variables, functions, files, or branches made obsolete by YOUR change.
 - Preserve unrelated user-owned work. Inspect the working tree and final diff when available.

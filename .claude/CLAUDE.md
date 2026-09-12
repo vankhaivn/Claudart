@@ -11,10 +11,10 @@ CLAUDART keeps the Claude-specific operating layer inside `.claude/`, including 
 - `/spec <mission>` creates a dated mission-scale spec workspace in `.claude/specs/` — interview → POC artifact → decision-complete SPEC + ROADMAP, approved once as a standing approval.
 - `/spec-run <slug>` executes an approved spec autonomously until final review — verifies acceptance, records ROADMAP task dispositions and evidence, blocks unchanged failure loops, and offers session rotation at phase boundaries.
 - `/refactor-memory` consolidates the memory system and normalizes knowledge in place.
-- `/project-discovery` interviews the user about a rough project idea and creates a raw synthesis plus structured project docs.
+- `/project-docs` initializes, adopts, updates, audits, or retires current project documentation when `.claude/commands/project-docs.md` is installed. Discovery is a focused step when project intent remains unclear.
 - `/checkpoint` rewrites current state, syncs task/spec indexes, appends meaningful history, and bulk-maintains eligible knowledge candidates.
 - `/handoff` writes a single-slot session baton (`.claude/HANDOFF.md`) distilling this session's reasoning state — run when the context window is nearly full or when pausing mid-investigation; the next `/start` consumes and deletes it. Never auto-load `HANDOFF.md`.
-- `/learn` promotes validated recurring behavior into `.claude/rules/` and routes descriptive facts to knowledge.
+- `/learn` promotes validated recurring behavior into `.claude/rules/` and routes descriptive facts to their owners.
 - `/doctor` runs the mechanical knowledge checker followed by a read-only semantic health audit.
 
 Task bodies (`.claude/tasks/*/TASK.md`) and artifacts are not auto-imported. Read the selected `TASK.md` on resume, then only supporting files needed for the next action.
@@ -36,11 +36,12 @@ Read these project-root paths only when their trigger applies. Conditional rules
 - `.claude/rules/knowledge-management.md` when retrieving project knowledge; also read `.claude/references/knowledge-maintenance.md` before knowledge writes, audits, or refactors.
 
 Project knowledge: `.claude/knowledge/INDEX.md` is the root router surfaced by `/start`; it and topic bodies are not auto-imported. Route entries on demand under the knowledge rule.
+When the optional Project Docs command is present, use it for project-document ownership and lifecycle work. Core tasks still follow the repository's existing documentation convention when it is absent.
 
 ## Agent Self-Evolution & Context Maintenance
 
 - "Do not assume a human will document your code patterns. If you build it, document it."
 - Existing rules change -> update the relevant file in `.claude/rules/`.
 - New domains/layers -> CREATE a new rule file in `.claude/rules/` (with flow-style `paths: [...]`, `description:`, `when_to_use:`, and inline `tags: [...]` frontmatter) and add a conditional route in this file's Domain Rules section. Use narrow paths for conditional rules; reserve `@` imports for universal guidance, with paths relative to this file.
-- Durable descriptive facts that pass the knowledge rule -> patch the canonical topic and reachable map atomically, then run the knowledge checker. Mid-session natural-language updates are valid; `/checkpoint` is bulk maintenance, not the sole write gate.
+- Durable descriptive facts that pass the knowledge rule -> find their owner first. Knowledge owns a fact only when no other authoritative source does; otherwise keep a pointer or minimal unique context. For a knowledge mutation, patch the topic and reachable map atomically, then run the checker. Mid-session natural-language updates are valid; `/checkpoint` is bulk maintenance, not the sole write gate.
 - Global changes -> update `.claude/CLAUDE.md` directly.

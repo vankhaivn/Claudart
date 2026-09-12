@@ -19,7 +19,7 @@ Record its exit status and every finding. The checker is read-only and owns mech
 ### 1. Required Structure
 
 - `.claude/` exists at the repository root
-- `.claude/commands/` exists and contains at least: `start.md`, `learn.md`, `refactor-memory.md`, `doctor.md`, `checkpoint.md`, `plan.md`, `handoff.md`, `project-discovery.md`, `spec.md`, `spec-run.md`
+- `.claude/commands/` exists and contains at least: `start.md`, `learn.md`, `refactor-memory.md`, `doctor.md`, `checkpoint.md`, `plan.md`, `handoff.md`, `spec.md`, `spec-run.md`. `project-docs.md` is optional; if present, check its command and referenced files, but do not flag its absence.
 - `.claude/agents/` exists (may be empty if user removed shipped agents)
 - `.claude/rules/` exists (may be empty before the user runs `/refactor-memory`)
 - `.claude/rules/code-health.md` exists and is referenced from `.claude/CLAUDE.md`
@@ -118,6 +118,7 @@ Read `.claude/rules/knowledge-management.md` and `.claude/references/knowledge-m
 - Treat an empty tier as informational. An unindexed file with ambiguous intent is a review candidate, not automatically active, retired, or orphaned.
 - Verify sampled concrete claims against their stated sources/current repository evidence. If evidence is insufficient, stale, or conflicting while status is `active`, flag **Medium** and recommend `review-needed` plus a `status_note`; do not change the file.
 - Flag prescriptive behavior, WIP, proposals, roadmap/acceptance state, or task chronology in knowledge as **Medium** tier leakage. A locally scoped durable fact is valid and must not be rejected merely because it is not project-wide.
+- Flag a sampled knowledge topic that repeats a fact already owned by current source, schema, generated reference, or project docs; a compact pointer or minimal unique agent context is valid. Do not run a repository-wide documentation audit as part of doctor.
 - Flag likely duplicate owners or unsupported supersession/retirement as **Low** for controlled curation. Never recommend automatic deletion.
 - Treat a topic over 10 KiB as an outline/section-first split candidate, not an automatic split.
 - Confirm no knowledge topic or INDEX is `@`-imported into `.claude/CLAUDE.md`; the plain root-router pointer is valid.
@@ -152,7 +153,7 @@ Skip this section if `.claude/specs/` does not exist.
 - **Inlined code blocks**: any triple-backtick code block longer than ~5 lines inside a rule or agent file is a likely violation of the "NO CODE SNIPPETS" principle. Report file + line.
 - **Stale metadata**: lines like `Last Updated: <date>` rot quickly. Flag for removal.
 - **Hardcoded shell patterns** (e.g., long `grep -r` lists) inside agent files. Flag — these belong in the project's tooling, not the agent prompt.
-- **Mis-tiered rule (descriptive, not prescriptive)**: a `.claude/rules/` file whose body states only facts (how a subsystem works, an integration detail, a domain term, a doc pointer) with no behavioral constraint (`MUST`/`NEVER`/`should`/`avoid`/`always`/`never`) → flag as **Low**: it likely belongs in `.claude/knowledge/`. This is the mirror of §5d's descriptive-only check — the boundary runs both ways. Universal guidance like `ai-behavior.md` is exempt.
+- **Mis-tiered rule (descriptive, not prescriptive)**: a `.claude/rules/` file whose body states only facts (how a subsystem works, an integration detail, a domain term, a doc pointer) with no behavioral constraint (`MUST`/`NEVER`/`should`/`avoid`/`always`/`never`) → flag as **Low**: it belongs with the fact's authoritative owner, or in `.claude/knowledge/` when no other owner exists. Universal guidance like `ai-behavior.md` is exempt.
 
 ### 7. .claude/CLAUDE.md Size Sanity
 

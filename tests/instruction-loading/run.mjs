@@ -48,10 +48,44 @@ function importGraph(file, seen = new Set()) {
   for (const target of imports(file)) importGraph(target, seen);
   return seen;
 }
+// Output examples contain downstream-relative links inside fenced Markdown.
+// Only prose links declare module resources; keep checking those recursively.
+function resourceLinks(file) {
+  let fence;
+  const prose = [];
+  for (const line of read(file).split("\n")) {
+    const marker = /^ {0,3}(`{3,}|~{3,})(.*)$/.exec(line);
+    if (fence) {
+      if (
+        marker &&
+        marker[1][0] === fence[0] &&
+        marker[1].length >= fence.length &&
+        !marker[2].trim()
+      )
+        fence = undefined;
+      continue;
+    }
+    if (marker) fence = marker[1];
+    else prose.push(line);
+  }
+  return [...prose.join("\n").matchAll(/\]\(([^)#]+)(?:#[^)]*)?\)/g)]
+    .map((match) => match[1])
+    .filter((target) => !/^https?:/.test(target))
+    .map((target) => resolve(dirname(file), target));
+}
+function resourceGraph(file, seen = new Set()) {
+  assert(existsSync(file), `Missing resource: ${file}`);
+  if (seen.has(file)) return seen;
+  seen.add(file);
+  if (file.endsWith(".md")) {
+    for (const target of resourceLinks(file)) resourceGraph(target, seen);
+  }
+  return seen;
+}
 try {
   const source = join(scratch, "archive/claudart");
   mkdirSync(source, { recursive: true });
-  for (const layer of [".claude", ".codex", ".agents"])
+  for (const layer of [".claude", ".codex", ".agents", "modules/project-docs"])
     cpSync(join(root, layer), join(source, layer), { recursive: true });
   const archive = join(scratch, "source.tar.gz");
   execFileSync("tar", ["-czf", archive, "-C", dirname(source), "claudart"]);
@@ -63,23 +97,44 @@ try {
     { mode: 0o755 },
   );
 
-  for (const mode of ["claude", "codex", "both"]) {
-    const dest = join(scratch, `install ${mode}`);
-    mkdirSync(dest);
-    execFileSync("/bin/bash", [join(root, "install.sh"), `--${mode}`], {
+  function install(dest, args = [], sourceArchive = archive) {
+    mkdirSync(dest, { recursive: true });
+    return execFileSync("/bin/bash", [join(root, "install.sh"), ...args], {
       cwd: dest,
       env: {
         ...process.env,
         PATH: `${bin}:${process.env.PATH}`,
-        CLAUDART_TEST_ARCHIVE: archive,
+        CLAUDART_TEST_ARCHIVE: sourceArchive,
       },
       stdio: "pipe",
     });
+  }
+
+  for (const mode of ["claude", "codex", "both"]) {
+    const dest = join(scratch, `install ${mode}`);
+    install(dest, [`--${mode}`]);
     check(`${mode}: only selected runtime layers installed`, () => {
       assert.equal(existsSync(join(dest, ".claude")), mode !== "codex");
       assert.equal(existsSync(join(dest, ".codex")), mode !== "claude");
       assert.equal(existsSync(join(dest, ".agents")), mode !== "claude");
     });
+    check(`${mode}: core install leaves optional Project Docs absent`, () => {
+      assert(!existsSync(join(dest, ".claude/commands/project-docs.md")));
+      assert(!existsSync(join(dest, ".agents/skills/codex-project-docs")));
+      assert(!existsSync(join(dest, "docs")));
+    });
+    check(
+      `${mode}: fresh installs exclude the retired discovery payload`,
+      () => {
+        assert(
+          !existsSync(join(dest, ".claude/commands/project-discovery.md")),
+        );
+        assert(!existsSync(join(dest, ".claude/references/project-discovery")));
+        assert(
+          !existsSync(join(dest, ".agents/skills/codex-project-discovery")),
+        );
+      },
+    );
     if (mode !== "codex") {
       check(`${mode}: Claude imports resolve from the installed loader`, () => {
         const graph = importGraph(join(dest, ".claude/CLAUDE.md"));
@@ -108,12 +163,7 @@ try {
       () => {
         const support = [
           ...(mode !== "codex" ? [".claude/references"] : []),
-          ...(mode !== "claude"
-            ? [
-                ".codex/references",
-                ".agents/skills/codex-project-discovery/references",
-              ]
-            : []),
+          ...(mode !== "claude" ? [".codex/references", ".agents/skills"] : []),
         ];
         for (const folder of support) {
           assert(
@@ -136,18 +186,22 @@ try {
       () => {
         const entrypoints = [
           ...(mode !== "codex"
-            ? [
-                ".claude/commands/project-discovery.md",
-                ".claude/rules/knowledge-management.md",
-              ]
+            ? [".claude/rules/knowledge-management.md"]
             : []),
           ...(mode !== "claude"
-            ? [
-                ".agents/skills/codex-project-discovery/SKILL.md",
-                ".codex/guidelines/knowledge-management.md",
-              ]
+            ? [".codex/guidelines/knowledge-management.md"]
             : []),
         ];
+        for (const folder of [
+          ...(mode !== "codex" ? [".claude/commands"] : []),
+          ...(mode !== "claude" ? [".agents/skills"] : []),
+        ]) {
+          entrypoints.push(
+            ...files(join(dest, folder))
+              .filter((file) => file.endsWith(".md"))
+              .map((file) => file.slice(dest.length + 1)),
+          );
+        }
         for (const entry of entrypoints) {
           const file = join(dest, entry);
           for (const [, target] of read(file).matchAll(
@@ -163,6 +217,262 @@ try {
       },
     );
   }
+  const moduleSource = join(root, "modules/project-docs");
+  const moduleEntries = [
+    ".claude/commands/project-docs.md",
+    ".agents/skills/codex-project-docs/SKILL.md",
+  ];
+  check("output examples do not hide missing prose resource links", () => {
+    const fixture = join(scratch, "example links");
+    mkdirSync(fixture);
+    const entry = join(fixture, "entry.md");
+    const reference = join(fixture, "reference.md");
+    const asset = join(fixture, "template.md");
+    writeFileSync(
+      entry,
+      [
+        "````md",
+        "```md",
+        "[Output link](not-a-module-file.md)",
+        "```",
+        "````",
+        "~~~md",
+        "[Another output link](also-not-a-module-file.md)",
+        "~~~",
+        "[Reference](reference.md)",
+      ].join("\n"),
+    );
+    assert.throws(() => resourceGraph(entry), /Missing resource/);
+    writeFileSync(reference, "[Template](template.md)\n");
+    assert.throws(() => resourceGraph(entry), /Missing resource/);
+    writeFileSync(asset, "# Output template\n");
+    assert.deepEqual(resourceGraph(entry), new Set([entry, reference, asset]));
+  });
+  check(
+    "Project Docs output templates and example content match across runtimes",
+    () => {
+      const codex = join(moduleSource, ".agents/skills/codex-project-docs");
+      const claude = join(moduleSource, ".claude/references/project-docs");
+      for (const [from, to] of [
+        ["assets/templates", "assets/templates"],
+        ["references/examples", "examples"],
+      ]) {
+        const originals = files(join(codex, from));
+        assert.deepEqual(
+          originals.map((file) => file.slice(join(codex, from).length + 1)),
+          files(join(claude, to)).map((file) =>
+            file.slice(join(claude, to).length + 1),
+          ),
+        );
+        for (const file of originals) {
+          const relative = file.slice(join(codex, from).length + 1);
+          assert.equal(read(file), read(join(claude, to, relative)), relative);
+        }
+      }
+      const guides = [
+        join(codex, "references/templates.md"),
+        join(claude, "templates.md"),
+      ].map((file) =>
+        read(file)
+          .replaceAll("../assets/templates/", "assets/templates/")
+          .split("\n")
+          // Different link lengths change only the formatter's table padding.
+          .map((line) =>
+            line.startsWith("|")
+              ? line
+                  .split("|")
+                  .map((cell) => cell.trim().replace(/^-+$/, "---"))
+                  .join("|")
+              : line,
+          )
+          .join("\n"),
+      );
+      assert.equal(guides[0], guides[1]);
+    },
+  );
+  for (const mode of ["claude", "codex", "both"]) {
+    for (const moduleFirst of [false, true]) {
+      const dest = join(scratch, `module ${mode} ${moduleFirst}`);
+      const args = [`--${mode}`, "--project-docs"];
+      if (moduleFirst) args.reverse();
+      install(dest, args);
+      const label = `${mode}, module ${moduleFirst ? "first" : "last"}`;
+      check(`${label}: module overlays only selected runtime layers`, () => {
+        assert.equal(
+          existsSync(join(dest, moduleEntries[0])),
+          mode !== "codex",
+        );
+        assert.equal(
+          existsSync(join(dest, moduleEntries[1])),
+          mode !== "claude",
+        );
+        assert.equal(existsSync(join(dest, ".claude")), mode !== "codex");
+        assert.equal(existsSync(join(dest, ".codex")), mode !== "claude");
+        assert.equal(existsSync(join(dest, ".agents")), mode !== "claude");
+        assert(
+          !existsSync(join(dest, "modules")),
+          "Source wrapper is not runtime state",
+        );
+        assert(
+          !existsSync(join(dest, "docs")),
+          "Installing does not author project docs",
+        );
+        assert(
+          !existsSync(join(dest, "README.md")),
+          "Module packaging docs stay upstream",
+        );
+      });
+      check(
+        `${label}: module resources are copied intact and links resolve`,
+        () => {
+          for (const folder of [
+            ...(mode !== "codex" ? [".claude"] : []),
+            ...(mode !== "claude" ? [".agents"] : []),
+          ]) {
+            for (const file of files(join(moduleSource, folder))) {
+              const relative = file.slice(moduleSource.length + 1);
+              const installed = join(dest, relative);
+              assert.equal(
+                read(installed),
+                read(file),
+                `Module differs: ${relative}`,
+              );
+              for (const target of resourceLinks(installed)) {
+                assert(
+                  existsSync(target),
+                  `Broken module link: ${relative} -> ${target}`,
+                );
+              }
+            }
+          }
+          if (mode !== "codex") {
+            assert.equal(
+              importGraph(join(dest, ".claude/CLAUDE.md")).size,
+              2,
+              "The optional module must not expand unconditional imports",
+            );
+          }
+        },
+      );
+      check(
+        `${label}: all module resources are reachable from their entrypoint`,
+        () => {
+          for (const [folder, entry] of [
+            ...(mode !== "codex" ? [[".claude", moduleEntries[0]]] : []),
+            ...(mode !== "claude" ? [[".agents", moduleEntries[1]]] : []),
+          ]) {
+            const graph = resourceGraph(join(dest, entry));
+            for (const file of files(join(moduleSource, folder))) {
+              const relative = file.slice(moduleSource.length + 1);
+              assert(
+                graph.has(join(dest, relative)),
+                `Unreachable module resource: ${relative}`,
+              );
+            }
+          }
+        },
+      );
+    }
+  }
+  check("module flag alone keeps the default Claude runtime", () => {
+    const dest = join(scratch, "module default");
+    install(dest, ["--project-docs"]);
+    assert(existsSync(join(dest, moduleEntries[0])));
+    assert(!existsSync(join(dest, ".codex")));
+    assert(!existsSync(join(dest, ".agents")));
+  });
+  check(
+    "existing docs, custom discovery, and module edits survive additive installs",
+    () => {
+      const dest = join(scratch, "existing project");
+      install(dest, ["--both"]);
+      const custom = {
+        "docs/README.md":
+          "# Team documentation\n\n[Product](project/product.md)\n",
+        "docs/project/product.md":
+          "# Approved intent\n\nE is approved; C is implemented.\n",
+        "docs/releases/v1.md":
+          "# Supported release\n\nVersion 1 remains supported.\n",
+        ".claude/commands/project-discovery.md":
+          "Custom team interview; preserve this file.\n",
+        ".agents/skills/codex-project-discovery/SKILL.md":
+          "Custom team discovery skill.\n",
+        [moduleEntries[0]]: "Custom project documentation command.\n",
+        [moduleEntries[1]]: "Custom project documentation skill.\n",
+        ".codex/knowledge/team-route.md":
+          "Existing team-owned knowledge route.\n",
+      };
+      for (const [relative, body] of Object.entries(custom)) {
+        mkdirSync(dirname(join(dest, relative)), { recursive: true });
+        writeFileSync(join(dest, relative), body);
+      }
+      install(dest, ["--both", "--project-docs"]);
+      for (const [relative, body] of Object.entries(custom))
+        assert.equal(
+          read(join(dest, relative)),
+          body,
+          `Additive install overwrote ${relative}`,
+        );
+      assert(
+        existsSync(join(dest, ".claude/references/project-docs/ownership.md")),
+      );
+      assert(
+        existsSync(
+          join(
+            dest,
+            ".agents/skills/codex-project-docs/references/ownership.md",
+          ),
+        ),
+      );
+      install(dest, ["--both", "--force"]);
+      for (const [relative, body] of Object.entries(custom))
+        assert.equal(
+          read(join(dest, relative)),
+          body,
+          `Core-only refresh touched ${relative}`,
+        );
+      install(dest, ["--codex", "--force", "--project-docs"]);
+      assert.equal(
+        read(join(dest, moduleEntries[1])),
+        read(join(moduleSource, moduleEntries[1])),
+      );
+      assert.equal(
+        read(join(dest, moduleEntries[0])),
+        custom[moduleEntries[0]],
+        "Forcing the Codex module does not overwrite the Claude module",
+      );
+      for (const [relative, body] of Object.entries(custom)) {
+        if (relative === moduleEntries[1]) continue;
+        assert.equal(
+          read(join(dest, relative)),
+          body,
+          `Module refresh touched ${relative}`,
+        );
+      }
+    },
+  );
+  check(
+    "missing selected module fails before writing a partial install",
+    () => {
+      rmSync(join(source, "modules"), { recursive: true });
+      const coreArchive = join(scratch, "core-only.tar.gz");
+      execFileSync("tar", [
+        "-czf",
+        coreArchive,
+        "-C",
+        dirname(source),
+        "claudart",
+      ]);
+      const dest = join(scratch, "missing module");
+      assert.throws(
+        () => install(dest, ["--both", "--project-docs"], coreArchive),
+        /Project Docs payload is missing/,
+      );
+      assert.deepEqual(readdirSync(dest), []);
+      install(dest, ["--both"], coreArchive);
+      assert(existsSync(join(dest, "AGENTS.md")));
+    },
+  );
   check("regression fixture rejects a repeated .claude prefix", () => {
     const fixture = join(scratch, "bad/.claude");
     mkdirSync(join(fixture, "rules"), { recursive: true });

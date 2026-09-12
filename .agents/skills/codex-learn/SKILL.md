@@ -44,7 +44,7 @@ Guideline frontmatter uses `paths:`, `description:`, `when_to_use:`, and `tags:`
 
 ## 4. Route Non-Behavioral Material
 
-- Descriptive, durable-beyond-current-work, current, evidenced fact → follow the full knowledge guideline now. Patch the existing topic owner first, update its reachable route atomically, and run `bash .codex/scripts/knowledge-check.sh --root .` after the mutation.
+- Descriptive, durable-beyond-current-work, current, evidenced fact → follow the full knowledge guideline now. Find the fact's authoritative owner first; knowledge owns it only if no other current source does. Keep any knowledge copy to a route or minimal unique context, update its reachable route atomically, and run `bash .codex/scripts/knowledge-check.sh --root .` after a knowledge mutation.
 - WIP, proposal, acceptance state, or task-local discovery → keep it in the active task, spec, or `CONTEXT.md`.
 - Uncertain or conflicting observation → keep it as a candidate, or mark a contradicted canonical owner `review-needed` with evidence and `status_note`.
 - Retired chronology → leave it in JOURNAL; do not rewrite JOURNAL.

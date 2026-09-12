@@ -2,7 +2,7 @@
 
 [Tiếng Việt](README_VI.md) · [Workflow guide](docs/WORKFLOW.md)
 
-CLAUDART is a repository-local workflow for Claude Code and Codex CLI. It keeps session state, implementation plans, project knowledge, and agent instructions in versioned Markdown files alongside the code.
+CLAUDART is a repository-local workflow for Claude Code and Codex. It keeps session state, implementation plans, project knowledge, and agent instructions in versioned Markdown files alongside the code.
 
 The two runtime layers are independent. Install Claude Code support, Codex support, or both. CLAUDART does not require a database, daemon, or hosted service.
 
@@ -32,14 +32,19 @@ Choose a layer explicitly when needed:
 # Claude Code
 curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --claude
 
-# Codex CLI
+# Codex
 curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --codex
 
 # Both
 curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --both
+
+# Add the optional Project Docs module to the selected layer or layers
+curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --claude --project-docs
 ```
 
-The installer copies missing files and skips files that already exist. `--force` overwrites existing files and should be used only when that is intentional.
+The installer copies missing files and skips files that already exist. The default installation contains only the core layer; `--project-docs` adds the optional documentation-lifecycle command or skill and its references. It never creates or migrates your project documentation. `--force` overwrites existing files and should be used only when that is intentional.
+
+Project Docs includes [output templates and filled examples](modules/project-docs/README.md#output-templates-and-examples) for product scope, behavior, architecture, development, and operations, linked by a small documentation router. Use only the responsibilities that need an owner; existing docs and knowledge can retain theirs. Templates adapt to local use, `main` latest, continuous deployment, or formal team releases; they preserve actual requirements without imposing a production-readiness process.
 
 A clean Codex installation adds `.codex/`, `.agents/skills/`, and a root `AGENTS.md`. The source template is stored at `.codex/AGENTS.md` in this repository.
 
@@ -51,7 +56,7 @@ Ask your coding agent to follow the integration protocol instead:
 
 > Read https://raw.githubusercontent.com/vankhaivn/Claudart/main/INTEGRATE.md and follow it to integrate or update CLAUDART in this project. Preserve project-specific content and show me the proposed changes before writing them.
 
-The protocol compares the current project with the current `main` branch and separates stale CLAUDART files from project-authored customizations.
+The protocol compares the current project with the current `main` branch and separates stale CLAUDART files from project-authored customizations. It also identifies relevant optional modules and explains recommendations in the proposed plan. You do not need to know their names in advance; a module is installed only if you include it in the approved plan. Installing Project Docs does not automatically reorganize existing docs or knowledge.
 
 ### First run
 
@@ -67,7 +72,7 @@ Then begin a normal session with `/start` or `$codex-start`.
 
 ## Daily workflow
 
-| Purpose                                           | Claude Code        | Codex CLI                |
+| Purpose                                           | Claude Code        | Codex                    |
 | ------------------------------------------------- | ------------------ | ------------------------ |
 | Orient a session                                  | `/start`           | `$codex-start`           |
 | Create a persistent implementation plan           | `/plan <task>`     | `$codex-plan <task>`     |
@@ -77,6 +82,7 @@ Then begin a normal session with `/start` or `$codex-start`.
 | Rebuild current state at a natural stopping point | `/checkpoint`      | `$codex-checkpoint`      |
 | Turn recurring behavior into a rule               | `/learn`           | `$codex-learn`           |
 | Check the installation                            | `/doctor`          | `$codex-doctor`          |
+| Maintain current project documentation (optional) | `/project-docs`    | `$codex-project-docs`    |
 
 Use a task plan when meaningful decisions, coordination, interruption, or review need persistence, or when explicitly requested. Small, clear edits do not require a workspace; file count alone is not a trigger. Use a specification for mission-scale scope with shared approved intent and a multi-phase roadmap—not merely because a task needs an image, JSON, or an archive.
 
@@ -96,11 +102,11 @@ An explicit instruction to implement or resume carries through planning without 
 | `specs/`                  | Large-work specifications and execution records | Read when a specification is active                              |
 | `HANDOFF.md`              | One-session reasoning handoff                   | Consumed by the next start, then removed                         |
 
-The important boundary is simple: **rules say how the agent should work; knowledge records what is true about the project; tasks and specifications record work in progress.**
+The important boundary is simple: **rules say how the agent should work; knowledge records facts with no better current owner; tasks and specifications record work in progress.** When source, schema, generated reference, or a project document already owns a fact, knowledge keeps a concise route instead of a competing copy.
 
 Each workstream uses one state layer: `.claude/` for Claude or `.codex/` for Codex by default. If you explicitly ask another host to follow a Codex skill, its `.codex/` state stays authoritative while tool use follows that host's actual capabilities. The two stores are not synchronized automatically.
 
-Workflow rules load when needed. Claude's installed loader resolves imports from `.claude/CLAUDE.md`; conditional discovery and knowledge-maintenance detail lives in `references/`. Retrieval does not load mutation schemas, and uninterrupted spec iterations read relevant state instead of repeatedly reloading all mission files.
+Workflow rules load when needed. Claude's installed loader resolves imports from `.claude/CLAUDE.md`; knowledge-maintenance detail lives in `references/`. The optional Project Docs module is used for lifecycle requests or when a change affects current documentation it owns; it does not run a full audit at start, checkpoint, or after an ordinary minor edit. Retrieval does not load mutation schemas, and uninterrupted spec iterations read relevant state instead of repeatedly reloading all mission files.
 
 ## Specialized agents
 
@@ -133,6 +139,7 @@ npm run hooks:install
 
 - [Workflow guide](docs/WORKFLOW.md)
 - [Vietnamese workflow guide](docs/WORKFLOW_VI.md)
+- [Project Docs module](modules/project-docs/README.md)
 - [Integration and upgrade protocol](INTEGRATE.md)
 - [Contributing](CONTRIBUTING.md)
 

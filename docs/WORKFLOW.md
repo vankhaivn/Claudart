@@ -7,7 +7,7 @@ This guide explains how to use CLAUDART after it has been installed. It focuses 
 The exact machine-facing contracts remain in the runtime files themselves:
 
 - Claude Code: `.claude/commands/` and `.claude/rules/`
-- Codex CLI: `.agents/skills/` and `.codex/guidelines/`
+- Codex: `.agents/skills/` and `.codex/guidelines/`
 
 Those files are authoritative when a command schema or lifecycle detail changes.
 
@@ -18,11 +18,13 @@ CLAUDART provides two independent layers.
 | Runtime     | Installed files                                | Command form                             | Main loader         |
 | ----------- | ---------------------------------------------- | ---------------------------------------- | ------------------- |
 | Claude Code | `.claude/`                                     | `/start`, `/plan`, and so on             | `.claude/CLAUDE.md` |
-| Codex CLI   | `.codex/`, `.agents/skills/`, root `AGENTS.md` | `$codex-start`, `$codex-plan`, and so on | `AGENTS.md`         |
+| Codex       | `.codex/`, `.agents/skills/`, root `AGENTS.md` | `$codex-start`, `$codex-plan`, and so on | `AGENTS.md`         |
 
 Install either layer or both. The workflows have the same intent, but their command and delegation files are written for the mechanics of each tool.
 
 Both layers include the same dependency-free Bash knowledge checker. No database or background process is required.
+
+Project Docs is an optional module. It adds a documentation-lifecycle command or skill only when selected during installation; the core workflow neither creates a documentation pack nor runs a full documentation audit automatically. Use it for a lifecycle request or when a change affects current documentation it owns.
 
 ## 2. Install or integrate
 
@@ -32,14 +34,17 @@ Both layers include the same dependency-free Bash knowledge checker. No database
 # Claude Code, the default
 curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash
 
-# Codex CLI
+# Codex
 curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --codex
 
 # Both runtimes
 curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --both
+
+# Add the optional Project Docs module to the selected layer or layers
+curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --claude --project-docs
 ```
 
-The installer copies files that are missing and skips existing files unless `--force` is supplied. It is suitable for a clean installation, not for merging a customized setup.
+The installer copies files that are missing and skips existing files unless `--force` is supplied. The default installation is core only; `--project-docs` adds the optional documentation-lifecycle module and never generates or migrates actual project docs. It is suitable for a clean installation, not for merging a customized setup.
 
 On a clean Codex installation, the installer copies the source template `.codex/AGENTS.md` to `AGENTS.md` at the project root and removes the duplicate template copy.
 
@@ -49,7 +54,7 @@ Use [INTEGRATE.md](../INTEGRATE.md). The integration protocol asks an agent to:
 
 1. compare the current project with the current upstream repository;
 2. identify unchanged files, stale CLAUDART templates, and project-authored customizations;
-3. present a concrete add, replace, merge, move, or retire plan;
+3. present a concrete add, replace, merge, move, or retire plan, including relevant optional-module recommendations for the user to select;
 4. wait for approval before writing;
 5. preserve live state, task workspaces and attachments, specification folders, and project knowledge;
 6. run the current reconciliation checks after the approved changes.
@@ -105,16 +110,16 @@ The current request remains authoritative during startup. If it already names a 
 
 ### Choose the right work mode
 
-| Mode              | Use it for                                                                                    | Persistence                                |
-| ----------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------ |
-| Direct work       | Small, clear, low-risk changes that do not need a durable plan                                | Conversation and normal repository history |
-| Task plan         | A bounded implementation needing durable decisions, interruption support, or a requested plan | `tasks/<task-id>/TASK.md`                  |
-| Specification     | A defined mission needing POC-frozen intent, phases, and standing approval                    | One folder in `specs/`                     |
-| Project discovery | A rough project or product idea that first needs structured project documentation             | `docs/project/`                            |
+| Mode                           | Use it for                                                                                    | Persistence                                |
+| ------------------------------ | --------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| Direct work                    | Small, clear, low-risk changes that do not need a durable plan                                | Conversation and normal repository history |
+| Task plan                      | A bounded implementation needing durable decisions, interruption support, or a requested plan | `tasks/<task-id>/TASK.md`                  |
+| Specification                  | A defined mission needing POC-frozen intent, phases, and standing approval                    | One folder in `specs/`                     |
+| Project Docs module (optional) | Establish, adopt, update, audit, or compact current documentation                             | Existing documentation owners and router   |
 
 File count alone does not require a plan. Needing JSON, an image, or an archive does not require a specification. A small explicit plan stays brief, with `TASK.md` only unless supporting files are actually needed.
 
-A specification replaces task plans within its approved scope. Do not create task files for work already owned by an active specification.
+A specification replaces task plans within its approved scope. Do not create task files for work already owned by an active specification. When product intent is still unclear, use Project Docs if installed to gather bootstrap input and establish only the current owners that are needed; it does not require a discovery pack or a `docs/project/` directory.
 
 ### End or pause cleanly
 
@@ -144,20 +149,30 @@ CLAUDART separates information by purpose and lifetime.
 
 ### Durable knowledge
 
-The knowledge store is descriptive. Typical topics include architecture, terminology, domain rules, external system contracts, and pointers to canonical documents.
+The knowledge store is descriptive. Typical topics include architecture, terminology, domain rules, external system contracts, and pointers to canonical documents. Keep one owner per claim: when source, schema, generated reference, project docs, or a team source already maintains it, knowledge links there instead of keeping a competing account. Evidence in source can still support a distinct, useful synthesis owned by knowledge.
 
-A claim belongs in knowledge when it is:
+A claim qualifies for knowledge capture or routing when it is:
 
 1. supported by repository or user-provided evidence;
 2. true now;
 3. likely to remain useful after the current task ends;
-4. placed under the topic that already owns that fact, when one exists.
+4. routed to its existing owner, with a knowledge owner only when no other maintained source owns that claim.
 
 Work in progress, proposed designs, and task-specific discoveries remain in the task, specification, or `CONTEXT.md` until they become durable.
 
 A useful capture test is:
 
 > Would this still be true and useful if the current task were cancelled tomorrow?
+
+Shared project docs describe approved product intent, architecture, operating guidance, and supported capabilities under the repository’s own convention. Keep approved intent distinct from implemented or released behavior. The optional [Project Docs module](../modules/project-docs/README.md) supports their init/adopt, targeted update, read-only audit, and authorized compaction; task/spec records retain execution history.
+
+For an established project, `adopt` retains valid current owners, including knowledge topics. A docs router can link to an existing architecture synthesis in knowledge; the subject or intended reader alone does not justify moving it. Reconcile only demonstrated gaps or overlap within the requested scope. A healthy setup may need no changes.
+
+The module ships [actual output templates and filled examples](../modules/project-docs/README.md#output-templates-and-examples): router, product scope, capability behavior, architecture, development/testing, operations/release/support, and an optional significant-decision record. When creating or reshaping a page, select the relevant body and adapt it to existing owners and paths. A new idea may need only a product brief and router; do not generate empty technical or operational pages.
+
+Behavior docs distinguish approved rules and quality expectations from actual behavior in the relevant commit or use scope. Link the pending delta to its task/spec and update affected owners as evidence becomes available. Compaction replaces superseded current claims and removes resolved pending summaries, preserving useful rationale and any still-supported versions without appending an edit diary.
+
+Release is an optional delivery context, not a required project stage. An app used from `main` can document the evidenced revision and local run/check guidance without separate release notes, support tables, or an operations page. Continuous deployments use environment-specific evidence; teams with formal releases retain their actual approval, readiness, verification, recovery, and support requirements. Infer these needs from existing use and commitments, not personal/company labels. Audit does not treat missing formal release machinery as a defect by itself; real behavior or data problems still matter.
 
 ### Retrieval
 
@@ -284,7 +299,7 @@ A task file is a resumable plan, not proof that the repository has remained unch
 
 ## 6. Specification workflow
 
-Use `/spec <mission>` or `$codex-spec <mission>` for a defined mission that needs shared approved intent, POC references, and a multi-phase execution roadmap—not merely because a task needs additional files. Use project discovery when the user is still defining the project or product itself; ordinary open details inside an already-defined mission stay in the spec interview.
+Use `/spec <mission>` or `$codex-spec <mission>` for a defined mission that needs shared approved intent, POC references, and a multi-phase execution roadmap—not merely because a task needs additional files. When a project or product is still undefined, the optional Project Docs module can gather bootstrap input before a mission is planned; ordinary open details inside an already-defined mission stay in the spec interview.
 
 A specification workspace lives under:
 
@@ -371,18 +386,18 @@ The shipped Codex configuration limits concurrent subagent threads to six per se
 
 ## 8. Command reference
 
-| Claude Code          | Codex CLI                  | Purpose                                                                                 |
-| -------------------- | -------------------------- | --------------------------------------------------------------------------------------- |
-| `/start`             | `$codex-start`             | Orient a session from current state, indexes, knowledge routing, and recent Git history |
-| `/plan <task>`       | `$codex-plan <task>`       | Create a persistent implementation task                                                 |
-| `/spec <mission>`    | `$codex-spec <mission>`    | Create and approve a multi-phase specification                                          |
-| `/spec-run <slug>`   | `$codex-spec-run <slug>`   | Execute an approved specification to final review                                       |
-| `/project-discovery` | `$codex-project-discovery` | Turn a rough project idea into structured project documents                             |
-| `/checkpoint`        | `$codex-checkpoint`        | Rebuild current state, synchronize indexes, and distill durable information             |
-| `/handoff`           | `$codex-handoff`           | Preserve an unfinished investigation for the next session                               |
-| `/learn`             | `$codex-learn`             | Promote recurring behavior into rules or guidelines                                     |
-| `/doctor`            | `$codex-doctor`            | Run structural and semantic health checks                                               |
-| `/refactor-memory`   | `$codex-refactor-memory`   | Normalize and reorganize the memory structure in place                                  |
+| Claude Code                | Codex                            | Purpose                                                                                 |
+| -------------------------- | -------------------------------- | --------------------------------------------------------------------------------------- |
+| `/start`                   | `$codex-start`                   | Orient a session from current state, indexes, knowledge routing, and recent Git history |
+| `/plan <task>`             | `$codex-plan <task>`             | Create a persistent implementation task                                                 |
+| `/spec <mission>`          | `$codex-spec <mission>`          | Create and approve a multi-phase specification                                          |
+| `/spec-run <slug>`         | `$codex-spec-run <slug>`         | Execute an approved specification to final review                                       |
+| `/project-docs` (optional) | `$codex-project-docs` (optional) | Establish, adopt, update, audit, or compact current project documentation               |
+| `/checkpoint`              | `$codex-checkpoint`              | Rebuild current state, synchronize indexes, and distill durable information             |
+| `/handoff`                 | `$codex-handoff`                 | Preserve an unfinished investigation for the next session                               |
+| `/learn`                   | `$codex-learn`                   | Promote recurring behavior into rules or guidelines                                     |
+| `/doctor`                  | `$codex-doctor`                  | Run structural and semantic health checks                                               |
+| `/refactor-memory`         | `$codex-refactor-memory`         | Normalize and reorganize the memory structure in place                                  |
 
 ## 9. Installed layout
 
@@ -431,6 +446,8 @@ AGENTS.md
 ```
 
 In the CLAUDART source repository, `.codex/AGENTS.md` is the template used to create the root `AGENTS.md` during a clean installation.
+
+When selected, Project Docs adds `.claude/commands/project-docs.md` with resources under `.claude/references/project-docs/` for Claude, and `.agents/skills/codex-project-docs/` for Codex. Output templates live under each resource root's `assets/templates/`; the template guide links filled examples. These resources guide documentation work but create no project docs by themselves.
 
 ## 10. Maintaining CLAUDART itself
 

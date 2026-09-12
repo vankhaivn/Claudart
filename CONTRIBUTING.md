@@ -165,6 +165,7 @@ If you're contributing new logic, please adhere to our directory structure:
 - `.claude/rules/knowledge-management.md` and `.codex/guidelines/knowledge-management.md`: the mirrored semantic contract for capture, lifecycle, bounded retrieval, and project-fact classification. Keep their intent in parity.
 - `.claude/scripts/knowledge-check.sh` and `.codex/scripts/knowledge-check.sh`: byte-identical copies of the dependency-free, read-only mechanical checker. Change and test them as one unit.
 - `.codex/` and `.agents/skills/`: Codex-native source templates. They should preserve the same intent and quality as the Claude side, not act as lossy generated artifacts.
+- `modules/project-docs/`: optional Project Docs source, with `.claude/` and `.agents/` payloads overlaid at the downstream root only when selected. Keep packaging documentation outside the runtime payload and verify core-only and module-enabled installations.
 - `.codex/guidelines/agent-delegation.md`: Codex subagent delegation protocol. If you add or change Codex agents, keep this protocol accurate about authorization, ownership boundaries, and parent review responsibilities.
 - `.codex/AGENTS.md`: the **installable Codex root-loader source template**. The installer copies it to `AGENTS.md` at a downstream project root; it is distinct from this repository's root `AGENTS.md`.
 - `.claude/CLAUDE.md`: the installable Claude project-memory template; it is distinct from this repository's root `CLAUDE.md`.

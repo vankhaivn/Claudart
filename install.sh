@@ -8,6 +8,7 @@
 #   --claude     Install the Claude Code layer (explicit, same as default)
 #   --codex      Install the Codex layer (.codex/ + .agents/ + AGENTS.md at root)
 #   --both       Install both Claude and Codex layers
+#   --project-docs  Add the optional Project Docs module to selected layers
 #   --force      Overwrite existing files
 #   --help       Show this help text
 
@@ -19,6 +20,7 @@ TARBALL_URL="https://github.com/${REPO}/archive/refs/heads/${BRANCH}.tar.gz"
 
 INSTALL_CLAUDE=true
 INSTALL_CODEX=false
+INSTALL_PROJECT_DOCS=false
 FORCE=false
 
 # ── helpers ──────────────────────────────────────────────────────────────────
@@ -42,6 +44,7 @@ OPTIONS
   --claude     Install the Claude Code layer (explicit)
   --codex      Install the Codex layer instead
   --both       Install both Claude Code and Codex layers
+  --project-docs  Add the optional Project Docs module to selected layers
   --force      Overwrite files that already exist
   --help       Show this help text
 
@@ -49,6 +52,10 @@ LAYERS
   Claude Code (default)   .claude/
   Codex                   .codex/  +  .agents/  +  AGENTS.md at project root
   Both                    all of the above
+
+OPTIONAL MODULES
+  --project-docs           Project documentation lifecycle commands and references
+                          Does not generate or migrate your project documentation
 EOF2
 }
 
@@ -59,6 +66,7 @@ for arg in "$@"; do
     --claude) INSTALL_CLAUDE=true;  INSTALL_CODEX=false ;;
     --codex)  INSTALL_CLAUDE=false; INSTALL_CODEX=true ;;
     --both)   INSTALL_CLAUDE=true;  INSTALL_CODEX=true ;;
+    --project-docs) INSTALL_PROJECT_DOCS=true ;;
     --force)  FORCE=true ;;
     --help|-h) show_help; exit 0 ;;
     *) printf '%s Unknown option: %s\n' "$(red "error")" "$arg" >&2; exit 1 ;;
@@ -82,28 +90,20 @@ else
   exit 1
 fi
 
+# Check the selected module before copying any files.
+if [[ "$INSTALL_PROJECT_DOCS" == true ]]; then
+  MODULE_ROOT="$TMPDIR/modules/project-docs"
+  if { [[ "$INSTALL_CLAUDE" == true ]] && [[ ! -f "$MODULE_ROOT/.claude/commands/project-docs.md" ]]; } ||
+     { [[ "$INSTALL_CODEX" == true ]] && [[ ! -f "$MODULE_ROOT/.agents/skills/codex-project-docs/SKILL.md" ]]; }; then
+    printf '%s Project Docs payload is missing from the downloaded source.\n' "$(red "error")" >&2
+    exit 1
+  fi
+fi
+
 # ── copy helpers ──────────────────────────────────────────────────────────────
 
 SKIPPED=0
 COPIED=0
-
-# Copy a single file, skipping if it already exists (unless --force).
-copy_file() {
-  local rel="$1"          # path relative to repo root, e.g. ".claude/CLAUDE.md"
-  local src="$TMPDIR/$rel"
-  local dst="$DEST/$rel"
-
-  if [[ -f "$dst" && "$FORCE" == false ]]; then
-    printf '  %s  %s\n' "$(yellow "skip")" "$rel"
-    (( SKIPPED++ )) || true
-    return
-  fi
-
-  mkdir -p "$(dirname "$dst")"
-  cp "$src" "$dst"
-  printf '  %s  %s\n' "$(green "copy")" "$rel"
-  (( COPIED++ )) || true
-}
 
 # Copy a file from an arbitrary src path to an arbitrary dst path (different rel names).
 copy_file_from_src() {
@@ -124,18 +124,19 @@ copy_file_from_src() {
   (( COPIED++ )) || true
 }
 
-# Walk every file inside a source tree and call copy_file for each one.
+# Copy a runtime tree, optionally from a module's source directory.
 copy_tree() {
   local root="$1"         # e.g. ".claude"
-  local src_root="$TMPDIR/$root"
+  local prefix="${2:-}"   # e.g. "modules/project-docs/"
+  local src_root="$TMPDIR/$prefix$root"
 
   if [[ ! -d "$src_root" ]]; then
     return
   fi
 
   while IFS= read -r src_file; do
-    local rel="${src_file#"$TMPDIR/"}"
-    copy_file "$rel"
+    local rel="${src_file#"$TMPDIR/$prefix"}"
+    copy_file_from_src "$prefix$rel" "$rel"
   done < <(find "$src_root" -type f | sort)
 }
 
@@ -184,6 +185,16 @@ if [[ "$INSTALL_CODEX" == true ]]; then
   fi
 fi
 
+if [[ "$INSTALL_PROJECT_DOCS" == true ]]; then
+  printf '\n%s\n' "$(bold "Project Docs module (selected layers)")"
+  if [[ "$INSTALL_CLAUDE" == true ]]; then
+    copy_tree ".claude" "modules/project-docs/"
+  fi
+  if [[ "$INSTALL_CODEX" == true ]]; then
+    copy_tree ".agents" "modules/project-docs/"
+  fi
+fi
+
 # ── summary ───────────────────────────────────────────────────────────────────
 
 printf '\n%s  Done. %d copied, %d skipped.\n\n' "$(bold "✓")" "$COPIED" "$SKIPPED"
@@ -200,5 +211,8 @@ if [[ "$INSTALL_CODEX" == true ]]; then
   # The dollar-prefixed skill names are intentional literals.
   # shellcheck disable=SC2016
   printf '  Codex        →  open project, run $codex-doctor → $codex-refactor-memory → $codex-doctor once\n'
+fi
+if [[ "$INSTALL_PROJECT_DOCS" == true ]]; then
+  printf '  Project Docs →  use init for a new idea, adopt for an existing project\n'
 fi
 printf '\n'

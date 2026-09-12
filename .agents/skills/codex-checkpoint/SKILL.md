@@ -36,14 +36,14 @@ Checkpoint is a bulk-maintenance boundary, not the only way to write knowledge. 
 
 For each item currently in `.codex/CONTEXT.md`, decide one of:
 
-| Status                                                                                              | Action                                                                                                   |
-| --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| Still true right now                                                                                | Keep it, refreshing wording if needed. Preserve any existing `<!-- since: YYYY-MM-DD -->` comment.       |
-| Done / resolved / merged                                                                            | Drop it from `.codex/CONTEXT.md`. Candidate for JOURNAL if it was a real decision, completion, or pivot. |
-| Superseded by newer state                                                                           | Drop the old item and write the new current state.                                                       |
-| Broad recurring behavior relevant to future work                                                    | Propose moving it into `.codex/guidelines/` via `$codex-learn`, then drop it from CONTEXT.               |
-| Descriptive, durable-beyond-current-work, current, and evidenced project fact (scope may be narrow) | Flag for **Step 6c**, then drop it from CONTEXT after the knowledge write validates.                     |
-| WIP, proposed future state, task/acceptance state, or an uncertain/conflicting observation          | Keep it in the task/spec/CONTEXT candidate surface; never promote it as an active fact.                  |
+| Status                                                                                              | Action                                                                                                                            |
+| --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Still true right now                                                                                | Keep it, refreshing wording if needed. Preserve any existing `<!-- since: YYYY-MM-DD -->` comment.                                |
+| Done / resolved / merged                                                                            | Drop it from `.codex/CONTEXT.md`. Candidate for JOURNAL if it was a real decision, completion, or pivot.                          |
+| Superseded by newer state                                                                           | Drop the old item and write the new current state.                                                                                |
+| Broad recurring behavior relevant to future work                                                    | Propose moving it into `.codex/guidelines/` via `$codex-learn`, then drop it from CONTEXT.                                        |
+| Descriptive, durable-beyond-current-work, current, and evidenced project fact (scope may be narrow) | Flag for **Step 6c**, then drop it from CONTEXT after its owner or knowledge route is updated and the relevant validation passes. |
+| WIP, proposed future state, task/acceptance state, or an uncertain/conflicting observation          | Keep it in the task/spec/CONTEXT candidate surface; never promote it as an active fact.                                           |
 
 Pure tactical noise is dropped silently.
 
@@ -91,7 +91,7 @@ Use this skeleton. Omit any section that has nothing to say.
 
 ## Recent Decisions (not yet promoted to guidelines)
 
-- [Decision + brief why; promote when it stabilizes — behavior → .codex/guidelines/ via $codex-learn, eligible descriptive fact → knowledge under its guideline] <!-- since: YYYY-MM-DD -->
+- [Decision + brief why; promote when it stabilizes — behavior → .codex/guidelines/ via $codex-learn, eligible descriptive fact → its owner under the knowledge guideline] <!-- since: YYYY-MM-DD -->
 
 ## Next Session Should Start By
 
@@ -167,11 +167,11 @@ Skip entirely if `.codex/specs/` does not exist.
 7. Scan each Active spec's `NOTES.md` for `→ graduate:` flags: evaluate `knowledge/` flags in Step 6c, surface `$codex-learn` flags as proposals in the report, and clear only flags successfully routed or explicitly retained as candidates.
 8. Do NOT tick roadmap boxes, write LEDGER entries, or change any spec `status` — those transitions belong to `$codex-spec`, `$codex-spec-run`, and the user.
 
-### Step 6c: Graduate Durable Facts to .codex/knowledge/
+### Step 6c: Route Durable Facts to Their Owners
 
 Skip if no candidate fact surfaced; do not run the knowledge checker for a checkpoint that makes no knowledge mutation.
 
-Before evaluating or writing any candidate, read `.codex/guidelines/knowledge-management.md` in full. It is the source of truth for capture, frontmatter, routing, lifecycle, and validation; do not recreate a second schema here.
+Before evaluating or writing any candidate, read `.codex/guidelines/knowledge-management.md` in full. It owns the knowledge capture, routing, lifecycle, and validation contract; do not recreate a second schema here. Identify the fact's existing owner first. When another current source owns it, leave only a knowledge route or minimal unique context; checkpoint does not take over full project-document maintenance or require a docs audit.
 
 For candidates from Step 2, Step 3, task close, or spec NOTES:
 
