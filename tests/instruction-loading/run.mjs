@@ -108,12 +108,7 @@ try {
       () => {
         const support = [
           ...(mode !== "codex" ? [".claude/references"] : []),
-          ...(mode !== "claude"
-            ? [
-                ".codex/references",
-                ".agents/skills/codex-project-discovery/references",
-              ]
-            : []),
+          ...(mode !== "claude" ? [".codex/references", ".agents/skills"] : []),
         ];
         for (const folder of support) {
           assert(
@@ -136,18 +131,22 @@ try {
       () => {
         const entrypoints = [
           ...(mode !== "codex"
-            ? [
-                ".claude/commands/project-discovery.md",
-                ".claude/rules/knowledge-management.md",
-              ]
+            ? [".claude/rules/knowledge-management.md"]
             : []),
           ...(mode !== "claude"
-            ? [
-                ".agents/skills/codex-project-discovery/SKILL.md",
-                ".codex/guidelines/knowledge-management.md",
-              ]
+            ? [".codex/guidelines/knowledge-management.md"]
             : []),
         ];
+        for (const folder of [
+          ...(mode !== "codex" ? [".claude/commands"] : []),
+          ...(mode !== "claude" ? [".agents/skills"] : []),
+        ]) {
+          entrypoints.push(
+            ...files(join(dest, folder))
+              .filter((file) => file.endsWith(".md"))
+              .map((file) => file.slice(dest.length + 1)),
+          );
+        }
         for (const entry of entrypoints) {
           const file = join(dest, entry);
           for (const [, target] of read(file).matchAll(

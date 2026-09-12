@@ -18,7 +18,7 @@ Never auto-write after every exploration. Never copy a transcript, chronology, o
 ## Mutation Contract
 
 1. Confirm `.claude/scripts/knowledge-check.sh` exists before writing. A missing checker is a High-severity installation problem and blocks the mutation.
-2. Find the canonical owner. Patch an existing focused topic before creating another.
+2. Find the canonical owner for each fact. If a source, schema, generated reference, or project document owns it, update that owner within the authorized work and keep knowledge to a pointer or minimal unique context. Otherwise patch an existing focused knowledge topic before creating another.
 3. Verify the claim and record scope/source information without inventing metadata.
 4. Change the topic and its reachable route atomically in the same diff. Preserve curated hooks, grouping, order, and external routes.
 5. Do not auto-delete topics. Do not auto-promote, retire, or supersede an ambiguous unindexed file.

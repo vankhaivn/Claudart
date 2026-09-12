@@ -12,16 +12,16 @@ Before doing anything, read `.codex/guidelines/spec-workflow.md`. That guideline
 ## Inputs
 
 - The user's request after `$codex-spec` is the mission description. If empty, ask: "What's the mission?"
-- Route a bounded feature or fix to `$codex-plan`. Route an undefined project/product idea that first needs durable project documentation to `$codex-project-discovery`. Keep a defined, demoable mission in `$codex-spec` even when the interview still needs to settle mission-level details.
+- Route a bounded feature or fix to `$codex-plan`. Route an undefined project/product idea needing current project documentation to `$codex-project-docs` when installed; otherwise clarify intent within the current work. Keep a defined, demoable mission in `$codex-spec` even when the interview still needs to settle mission-level details.
 - Track execution intent separately from approval. An explicit request to implement, execute, start, continue, or resume after approval remains applicable unless the user withdraws it; a request to author or approve the spec alone does not imply immediate execution.
 
 ## Procedure
 
 ### Step 1 — Read project context
 
-Read: `.codex/CONTEXT.md`, `.codex/specs/INDEX.md`, `.codex/knowledge/INDEX.md`, `docs/project/` if present, and `git log -5 --oneline`. If an active spec already covers the mission, honor an explicit current selection or continue/resume instruction without asking again; ask only when multiple plausible matches remain ambiguous. Reuse an existing `drafting` spec — including an approved final-review scope amendment returned by `$codex-spec-run` — and route other statuses under the canonical state machine; never create a duplicate mission folder.
+Read: `.codex/CONTEXT.md`, `.codex/specs/INDEX.md`, `.codex/knowledge/INDEX.md`, relevant current project documents under the repository's convention, and `git log -5 --oneline`. If an active spec already covers the mission, honor an explicit current selection or continue/resume instruction without asking again; ask only when multiple plausible matches remain ambiguous. Reuse an existing `drafting` spec — including an approved final-review scope amendment returned by `$codex-spec-run` — and route other statuses under the canonical state machine; never create a duplicate mission folder.
 
-If planning needs a knowledge route beyond the root index, read `.codex/guidelines/knowledge-management.md` in full and follow its bounded routing contract. Do not treat a proposed product state in discovery docs or SPEC as current project knowledge.
+If planning needs a knowledge route beyond the root index, read `.codex/guidelines/knowledge-management.md` in full and follow its bounded routing contract. Do not treat a proposed product state in a draft document or SPEC as implemented project reality.
 
 Ensure `.codex/specs/done/` exists. Before deciding whether an existing spec is active, check its `SPEC.md` frontmatter status; a top-level spec folder with `status: done` or `status: cancelled` is stale archive state, not an active collision, and should be moved to `.codex/specs/done/` when syncing INDEX.
 
@@ -31,7 +31,7 @@ For a new mission, create `.codex/specs/YYYY-MM-DD-<slug>/` using today's date a
 
 ### Step 2 — Interview, capture-as-you-go
 
-Interview like `$codex-project-discovery` (plain questions in chat, one highest-leverage question at a time, options with trade-offs) — but aim every question at one target: **what must a POC prove for the user to say "yes, that's it"?**
+Interview with plain questions in chat, one highest-leverage question at a time and options with trade-offs. Aim every question at one target: **what must a POC prove for the user to say "yes, that's it"?**
 
 **Write every confirmed decision into `SPEC.md` as it lands** — after every few answers, not at the end. The chat does not survive compaction; the spec folder does. Keep the draft's working split visible: confirmed / rejected (→ Must-NOT-Have) / open. By the time you start the POC, the core intent is already on disk.
 

@@ -30,7 +30,7 @@ The first doctor run establishes a read-only baseline; refactor performs one con
 
 - `AGENTS.md`: concise entrypoint and routing pointers, preferably under 100 lines.
 - `.codex/guidelines/`: durable prescriptive behavior.
-- `.codex/knowledge/`: durable descriptive project facts and reference pointers.
+- `.codex/knowledge/`: eligible durable descriptive facts without another owner, plus compact routes or minimal unique agent context for externally owned facts.
 - `.codex/CONTEXT.md`: small declarative state true now.
 - `.codex/JOURNAL.md`: append-only history, never auto-loaded.
 - `.codex/tasks/` and `.codex/specs/`: working plans, proposals, acceptance state, and mission-local discoveries.
@@ -44,7 +44,7 @@ Route content by meaning before reorganizing files. Do not move WIP or a propose
 1. Determine the main frameworks, languages, runtime, architectural layers, and repository shape from the active memory index, manifests, build files, source tree, and existing docs.
 2. Identify logical ownership boundaries such as contracts/docs, data/repositories, API/controllers, UI/components, jobs, runtime/deploy, and AI/model workflows. For docs-first repositories, identify document layers, templates, workflows, and source-of-truth contracts.
 3. Discover linters, formatters, test runners, and validation commands. Delegate style enforcement to those tools instead of copying their rules into `AGENTS.md`.
-4. Inspect the active `AGENTS.md`, deprecated memory files, current guidelines, and stable decisions in CONTEXT. Split candidates by type before moving them: behavior → guideline; fact → knowledge; WIP/proposal → task/spec/CONTEXT.
+4. Inspect the active `AGENTS.md`, deprecated memory files, current guidelines, and stable decisions in CONTEXT. Split candidates by type and owner before moving them: behavior → guideline; eligible fact → its current authoritative source or knowledge when no other owner exists; WIP/proposal → task/spec/CONTEXT.
 5. Ensure `.codex/guidelines/` exists, then extract detailed behavior into the smallest set of domain guidelines with clear ownership and useful `paths:`. Do not create files for symmetry or force a weak concept into an unrelated owner. Use `.codex/guidelines/*.md` for semantic guidance; never place it in `.codex/rules/`, whose optional `*.rules` files are reserved for Codex permission or environment rules.
 6. Keep each rule verifiable, scoped, loophole-closed, and unambiguous about critical constraints. Use stable file/symbol references rather than long code snippets or fragile line excerpts.
 7. Never write secrets, tokens, keys, production credentials, or real `.env` values into any memory tier.
@@ -57,7 +57,7 @@ Route content by meaning before reorganizing files. Do not move WIP or a propose
 4. Ensure every relevant guideline has `paths:`, `description:`, `when_to_use:`, and `tags:` frontmatter and a clear owner. Keep flow-style `paths`/`tags`.
 5. Verify concrete guideline claims against repository sources. Classify mismatches as guideline-stale, source-debt, open-work, or needs-user-decision; do not weaken a desired invariant merely because source currently violates it.
 6. Detect kitchen-sink files, near-duplicates, stale temporary wording, and repeated facts. Keep a rule in its most specific owner and replace copies with pointers; merge, split, or remove semantic owners only with clear evidence and user confirmation.
-7. Promote stable behavioral decisions from CONTEXT to the correct guideline through checkpoint semantics. Leave temporary decisions in CONTEXT. Route purely descriptive guideline content to the knowledge workflow only after the capture gate passes and ask before removing the original guideline.
+7. Promote stable behavioral decisions from CONTEXT to the correct guideline through checkpoint semantics. Leave temporary decisions in CONTEXT. Route purely descriptive guideline content to its fact owner only after the capture gate passes and ask before removing the original guideline.
 8. Cross-link `.codex/CONTEXT.md`, the universal behavior guideline, every globally relevant workflow guideline, and the knowledge root router from `AGENTS.md`. Never auto-load JOURNAL, HANDOFF, task bodies, or knowledge details.
 9. Ensure `ai-behavior.md` exists without overwriting user customizations. Follow the active harness policy for delegation; keep decomposition, disjoint ownership, non-overlap, parent validation, and durable result recording in `agent-delegation.md` instead of inventing a conflicting permission rule.
 10. Ensure `## Agent Self-Evolution & Context Maintenance` remains in `AGENTS.md`: project-wide behavior updates its owner guideline, new guideline owners get indexed, eligible descriptive facts use the knowledge contract, global Codex behavior updates `AGENTS.md`, and live state uses checkpoint.
@@ -70,7 +70,7 @@ Read every topic frontmatter, the root router, domain maps, and route targets. U
 
 For each topic:
 
-1. Identify its existing canonical owner and evidence. Preserve the body, title, curated hook, grouping, ordering, and deliberate external routes.
+1. Identify the owner of each fact and its evidence. Preserve the topic body, title, curated hook, grouping, ordering, and deliberate external routes during in-place normalization. Address duplicate ownership when the current request already includes semantic cleanup; otherwise report it for a scoped follow-up. Do not turn this normalization pass into a full project-document audit.
 2. Normalize frontmatter once using only supported fields and formats. Do not invent aliases, triggers, scope, sources, relations, verification dates, or lifecycle claims.
 3. Set `status: active` only when current evidence was actually checked. Record `last_verified` as the evidence-check date and ensure active topics have `sources` or `verify`.
 4. If evidence is insufficient or conflicting, use `status: review-needed` with a precise `status_note`; do not present uncertainty as active truth.

@@ -19,10 +19,10 @@ This repository contains CLAUDART, a markdown-based operating layer for AI codin
 - `$codex-plan <description>` — creates a lightweight workspace at `.codex/tasks/YYYY-MM-DD-NNN-<slug>/TASK.md` when work needs a persistent plan or the user explicitly requests one. Small, clear edits do not require a workspace; file count alone is not a trigger. Artifacts are created only for a concrete need.
 - `$codex-spec <mission>` — creates a mission-scale spec workspace in `.codex/specs/` — interview → POC artifact → decision-complete SPEC + ROADMAP, approved once as a standing approval.
 - `$codex-spec-run <slug>` — executes an approved spec autonomously until final review — verifies acceptance, records ROADMAP task dispositions and evidence, blocks unchanged failure loops, and offers session rotation at phase boundaries.
-- `$codex-project-discovery` — interviews the user about a rough project idea and creates a raw synthesis plus structured project docs.
+- `$codex-project-docs` — when `.agents/skills/codex-project-docs/SKILL.md` is installed, initializes, adopts, updates, audits, or retires current project documentation. Discovery is a focused step when project intent remains unclear.
 - `$codex-checkpoint` — bulk-maintains current state, task/spec indexes, JOURNAL, and eligible durable knowledge; it is not the only knowledge write gate.
 - `$codex-handoff` — writes a single-slot session baton (`.codex/HANDOFF.md`) distilling the session's reasoning state when the context window is nearly full or an investigation pauses mid-flight; the next `$codex-start` consumes and deletes it.
-- `$codex-learn` — promotes validated recurring behavior into Codex guidelines and routes descriptive facts to knowledge.
+- `$codex-learn` — promotes validated recurring behavior into Codex guidelines and routes descriptive facts to their owners.
 - `$codex-doctor` — runs the read-only mechanical checker plus semantic health audit.
 - `$codex-refactor-memory` — consolidates Codex memory and performs controlled, in-place knowledge normalization.
 
@@ -41,12 +41,13 @@ See `.codex/guidelines/agent-delegation.md` for Codex subagent and parallel dele
 See `.codex/guidelines/spec-workflow.md` for mission-scale spec workspaces in `.codex/specs/` — the loop-engineering layer above tasks, executed autonomously by `$codex-spec-run` under a standing approval.
 See `.codex/guidelines/knowledge-management.md` for bounded retrieval and classification. Its maintenance reference supplies conditional capture, schema, lifecycle, and validation rules; load it under the triggers in Context Loading.
 Project knowledge: `.codex/knowledge/INDEX.md` is the root router surfaced by `$codex-start`; topic bodies are read on demand.
+When the optional Project Docs skill is present, use it for project-document ownership and lifecycle work. Core tasks still follow the repository's existing documentation convention when it is absent.
 
 ## Knowledge Contract
 
 - Map first: stay within 2 maps, 3 direct topics, and 2 one-hop related topics; inspect frontmatter, outline, and the smallest relevant section before a full body. Use bounded `rg`/Git evidence search only when routed context is insufficient; reading never writes.
 - Capture only facts that are descriptive, durable beyond current work, current, and evidenced; scope may be narrow. WIP/proposals/state stay in task/spec/CONTEXT, behavior goes through `$codex-learn`, and uncertainty remains a candidate or `review-needed`.
-- Patch the existing owner first and update the topic plus its reachable map atomically. Never auto-delete or auto-promote ambiguous unindexed files.
+- Find the owner of each fact first. Knowledge owns it only when no other authoritative source does; otherwise keep a pointer or minimal unique context. For a knowledge mutation, update the topic plus its reachable map atomically. Never auto-delete or auto-promote ambiguous unindexed files.
 - After every knowledge mutation, run `bash .codex/scripts/knowledge-check.sh --root .`. `$codex-start` never runs it.
 
 ## Agent Self-Evolution & Context Maintenance
@@ -54,5 +55,5 @@ Project knowledge: `.codex/knowledge/INDEX.md` is the root router surfaced by `$
 - "Do not assume a human will document your code patterns. If you build it, document it."
 - Existing Codex guidelines change → update the relevant file in `.codex/guidelines/`.
 - New domains/layers → create a new guideline file with flow-style `paths: [...]`, `description:`, `when_to_use:`, and inline `tags: [...]` frontmatter, then ensure `AGENTS.md` points to it when globally relevant.
-- Durable project facts → follow the four-invariant Knowledge Contract and its conditional maintenance reference; a natural-language mid-session update is sufficient when the capture gate passes.
+- Durable project facts → follow the four-invariant Knowledge Contract and its conditional maintenance reference; a natural-language mid-session update is sufficient when the capture gate passes. Keep one owner per fact across project docs, source references, and knowledge.
 - Live state → update `.codex/CONTEXT.md` through `$codex-checkpoint`.
