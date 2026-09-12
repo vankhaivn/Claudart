@@ -4,6 +4,8 @@ description: Orient a new CLAUDART session from current context, recent git hist
 
 Start this session with a lightweight CLAUDART orientation. This command is read-only, with one exception: consuming the handoff baton (Case H) deletes `.claude/HANDOFF.md` once the user resumes or discards it.
 
+The user's current request controls what happens after orientation. If it explicitly selects a task/spec or says to continue/resume the unambiguous current focus, honor that direction without asking again: complete the lightweight inventory, then load the selected workflow's canonical files and continue under its authorization rules. A startup scan never overrides or delays an explicit request.
+
 ## Procedure
 
 1. Check `.claude/HANDOFF.md`. If present, read it in full — it is a one-shot reasoning baton written by a previous session's `/handoff`. Note its `created:` date. Consumption flow: see Case H below. If absent (the normal state), continue silently.
@@ -38,7 +40,7 @@ Start this session with a lightweight CLAUDART orientation. This command is read
 
 ## Five Cases — What to Ask After the Report
 
-Decide based on what was found in steps 1-6. Case H takes precedence over all others; Case S coexists with Case A (report both, lead with whichever is awaiting the user).
+Decide based on what was found in steps 1-6 and the current request. An explicit task/spec selection or continue/resume instruction takes precedence over the prompts below. Otherwise Case H takes precedence; Case S coexists with Case A (report both, lead with whichever is awaiting the user).
 
 ### Case H — `.claude/HANDOFF.md` exists (a previous session handed off mid-flight)
 
@@ -64,11 +66,11 @@ For the most relevant spec (prefer `drafting`/`poc-review`/`awaiting-final-revie
 - **`awaiting-final-review`**: say:
   > "Spec `<slug>` passed its final gate and is waiting for your demo verification. Run `/spec-run <slug>` to surface the demo steps and final-gate evidence, then confirm to close or report what failed."
 - **`ready` / `running`**: say:
-  > "Spec `<slug>` is <status> (updated <date>). Run `/spec-run <slug>` (or the dated folder id if needed) to continue the loop — a fresh session like this one is the designed unit of work."
+  > "Spec `<slug>` is <status> (updated <date>). Run `/spec-run <slug>` (or the dated folder id if needed) to continue here; a fresh session is optional."
 - **`blocked`**: say:
   > "Spec `<slug>` is blocked — the last LEDGER.md entry records why and what unlocks it. Run `/spec-run <slug>` to investigate with a materially different path, or tell me if the external blocker cleared."
 
-Do NOT auto-start the loop; `/spec-run` is the user's call.
+Do not infer execution from an orientation-only request. When the current request explicitly says to run, implement, continue, or resume this approved spec, hand control to `/spec-run` without another confirmation.
 
 ### Case A — At least one task with `status: awaiting-review`, `in-progress`, or `blocked`
 
@@ -81,7 +83,7 @@ Pick the most recently updated one. The exact prompt depends on its status:
 - **`blocked`**: say:
   > "Task `<slug>` is blocked (updated <date>). Has the blocker cleared? If yes, I'll flip to in-progress and resume. If no, tell me what to work on instead."
 
-Do NOT auto-read the task body, auto-resume, or auto-confirm completion. Wait for explicit user direction. When the user confirms a resume, **warm the session**: read `TASK.md`, then only the next action's relevant code and linked supporting files (cap ~5 most relevant references) so you resume against real code, not the plan's description of it. Then follow the Resumption protocol in `.claude/rules/task-management.md` (reuse applicable evidence, verify relevant drift or gaps, and surface drift in Surprises; never replay all completed checks just because this is a new session).
+Do not infer resumption or completion from an orientation-only request. When the current request already selects or resumes the task, that is explicit direction: **warm the session** by reading `TASK.md`, then only the next action's relevant code and linked supporting files (cap ~5 most relevant references), and follow the Resumption protocol in `.claude/rules/task-management.md` without asking again. The same direct instruction satisfies `planning → in-progress` when the selected task is still planning. Reuse applicable evidence, verify relevant drift or gaps, and never replay all completed checks merely because this is a new session.
 
 ### Case B — No active task, but CONTEXT.md carries a handoff: `## Next Session Should Start By` is set, or an active `(no task)` micro-handoff sits under `## In Progress`
 

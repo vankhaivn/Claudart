@@ -66,9 +66,17 @@ for layer in claude codex; do
     refactor="$commands/codex-refactor-memory/SKILL.md"
   fi
 
-  for file in "$rule" "$plan"; do
-    assert_contains "$file" 'YYYY-MM-DD-NNN-<slug>/TASK.md' "$layer uses the workspace entrypoint"
-    assert_contains "$file" '**Default to `TASK.md` only.**' "$layer starts without attachments"
+  # Canonical artifact semantics live in the rule/guideline. The command/skill
+  # keeps only the entrypoint and routing needed to invoke that contract.
+  assert_contains "$plan" 'YYYY-MM-DD-NNN-<slug>/TASK.md' "$layer plan uses the workspace entrypoint"
+  assert_contains "$plan" '**Default to `TASK.md` only.**' "$layer plan starts without attachments"
+  assert_contains "$plan" 'Never automatically extract archives, execute attachments, or load all supporting files.' "$layer plan does not auto-process attachments"
+  assert_not_contains "$plan" 'One task per file.' "$layer plan drops the single-file storage restriction"
+  assert_not_contains "$plan" 'tasks/*.md' "$layer plan has no flat task discovery"
+
+  for file in "$rule"; do
+    assert_contains "$file" 'YYYY-MM-DD-NNN-<slug>/TASK.md' "$layer rule uses the workspace entrypoint"
+    assert_contains "$file" '**Default to `TASK.md` only.**' "$layer rule starts without attachments"
     assert_contains "$file" 'native-format' "$layer defines the native-format trigger"
     assert_contains "$file" 'important details would be lost in a short summary' "$layer defines necessary retained evidence"
     assert_contains "$file" 'Substantial task-specific research' "$layer defines the research trigger"
@@ -94,9 +102,8 @@ for layer in claude codex; do
   assert_contains "$rule" 'no compatibility or automatic migration path' "$layer supports only the current layout"
   assert_contains "$plan" 'Honor an explicit request for a persistent plan' "$layer honors small explicit plans"
   assert_contains "$plan" 'File count alone is not a reason.' "$layer avoids unnecessary planning"
-  assert_contains "$plan" 'If its status is not `planning`, leave this creation flow' "$layer resumes without resetting state"
+  assert_contains "$plan" 'resumption or review flow' "$layer resumes without resetting state"
   assert_contains "$plan" 'No implementation code, scaffolding, runnable POCs, or write-scope workers' "$layer closes the artifact planning loophole"
-  assert_contains "$plan" 'before substantive exploration' "$layer can retain necessary findings as they arise"
 
   assert_contains "$start" 'tasks/*/TASK.md' "$layer startup can recover a missing index"
   assert_contains "$start" 'Read `TASK.md` frontmatter' "$layer startup reads metadata only"

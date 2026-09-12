@@ -7,9 +7,9 @@ tags: [specs, loop-engineering, autonomy, cross-session, missions]
 
 # Spec Workflow (Loop Engineering)
 
-A **spec** is a mission: work too large for one task file — a whole game, a feature system, a client-demo POC. While active, it lives as a dated folder in `.claude/specs/YYYY-MM-DD-<slug>/` written once by an expensive planning session (`/spec`), then executed to the final-review gate across many sessions by `/spec-run` — often on a cheaper model — **without per-task human approval**. Completed and cancelled missions are archived under `.claude/specs/done/YYYY-MM-DD-<slug>/`. The folder, not any session, is the source of truth; every iteration assumes total amnesia and re-orients from files.
+A **spec** is a mission: work too large for one task file — a whole game, a feature system, a client-demo POC. While active, it lives as a dated folder in `.claude/specs/YYYY-MM-DD-<slug>/` written by `/spec`, then executed to the final-review gate by `/spec-run` **without per-task human approval**. Completed and cancelled missions are archived under `.claude/specs/done/YYYY-MM-DD-<slug>/`. The folder, not chat memory, is the source of truth across sessions and recovery.
 
-Missions sit **above** the task layer (`task-management.md`): a spec supersedes `/plan` for its scope, and its executor never creates `.claude/tasks/` files. Use `/plan` for a single feature or fix; use `/spec` when the deliverable is a demoable whole.
+Missions sit **above** the task layer (`task-management.md`): a spec supersedes `/plan` for its scope, and its executor never creates `.claude/tasks/` files. Use `/plan` for a bounded feature or fix whose decisions fit one task workspace. Use `/spec` for a defined mission that needs a POC-frozen intent, phased roadmap, standing approval, and multi-session convergence. Use `/project-discovery` when the user is still defining the project or product itself and needs synthesized project documentation before choosing an implementation mission. Unanswered spec-level details do not by themselves turn a defined mission into project discovery.
 
 ## File Layout
 
@@ -21,7 +21,7 @@ Missions sit **above** the task layer (`task-management.md`): a spec supersedes 
 └── YYYY-MM-DD-<slug>/
     ├── SPEC.md                 # What "done" means. Frozen at approval; changes require an explicit user-approved patch or amendment.
     ├── ROADMAP.md              # Phases → checkbox tasks with explicit dispositions.
-    ├── NOTES.md                # Working memory: orientation, pitfalls, decisions. Curated, re-read every iteration.
+    ├── NOTES.md                # Working memory: orientation, pitfalls, decisions. Curated and loaded as needed.
     ├── LEDGER.md               # Append-only evidence & history. Never rewritten.
     └── artifacts/              # POC HTML, mockups, generated references
 ```
@@ -132,7 +132,7 @@ An unmatched `task-started` or `delegated` (no later `task-completed`, `validati
 
 ## NOTES.md — the mission's working memory
 
-The ledger answers _what happened, in order_; NOTES answers _what every future iteration must know_. It is the spec-layer equivalent of a task file's Memory Hints + Decision Log — declarative and curated, re-read at every iteration, where the ledger's tail scrolls away.
+The ledger answers _what happened, in order_; NOTES answers _what future execution and recovery must know_. It is the spec-layer equivalent of a task file's Memory Hints + Decision Log — declarative and curated, loaded in full at initial/recovery boundaries and by relevant section during uninterrupted execution, while the ledger's tail scrolls away.
 
 ```markdown
 # NOTES — <Mission Title>
@@ -168,6 +168,8 @@ The ledger answers _what happened, in order_; NOTES answers _what every future i
 
 The user approves **SPEC + ROADMAP once** ("go" / "approved" / "ok làm đi" → status `ready`). That signal is a _standing approval_ covering every task and phase in the roadmap. **This is an explicit exception to `task-management.md`'s per-task gates**: inside a `running` spec the executor does not ask permission per task or per phase, does not park at `awaiting-review` between phases, and does not create task files.
 
+Approval and execution intent are separate signals. An approval-only message may end with the spec at `ready`. If the current message, or an earlier still-applicable instruction, explicitly says to implement, execute, start, continue, or resume after approval, `/spec` hands control directly to `/spec-run` in the same session: the runner flips `ready → running` and begins. A fresh session is available when useful, never a prerequisite. Material changes outside the approved SPEC still require amendment and renewed approval.
+
 Approval also fixes the **commit policy** (`commits:` in SPEC frontmatter): `user` (default — the executor never runs `git commit`; the user commits at rotations and gates), `per-task` or `per-phase` (the executor commits at each tick / phase close, message `spec(<slug>): <summary>`, so a long run always has restore points). The grant covers `git commit` only — never push, never history rewrites, regardless of policy.
 
 Planned human interaction points are exactly three:
@@ -180,9 +182,9 @@ Everything else stays autonomous. A task blocker stops that task; it stops the w
 
 ## The Loop (per iteration)
 
-1. **Re-orient.** Read `SPEC.md`, `ROADMAP.md`, `NOTES.md`, and the LEDGER tail (~30 lines). Never trust session memory of earlier iterations — after any compaction, these files are the only truth.
+1. **Load the state needed for this boundary.** On the initial run, a new session, recovery after interruption/compaction, an unmatched in-flight LEDGER event, or suspected drift, read `SPEC.md`, `ROADMAP.md`, and `NOTES.md` in full plus the relevant LEDGER tail (start with ~30 lines and expand through any open incident). During uninterrupted execution, re-read only the selected ROADMAP task and dependencies, its applicable SPEC scenarios and Must-NOT-Have constraints, Current Acceptance Delta, and LEDGER entries since the previous selection. The complete files remain canonical; selective reads only avoid reloading unchanged context.
 2. **Pick** the first runnable pending task whose dependencies are satisfied. Skip tasks marked `⚠ blocked` and invalid legacy struck-unticked rows; they are not runnable and keep their phase incomplete. Independent tasks in the same wave may fan out in parallel.
-3. **Execute.** Append `task-started` to the LEDGER before touching code — a mid-task compaction must be able to see what was in flight. Work solo, or delegate per `agent-delegation.md`, recording each spawn as a `delegated` LEDGER entry (unit, expected output) so a compaction never orphans a running worker — the LEDGER plays the role the active task file plays for `/plan` work. Worker prompts are self-contained (Goal / Scope / Constraints / Output — carry the roadmap task text and relevant SPEC lines; the worker has no other context).
+3. **Execute.** Append `task-started` to the LEDGER before touching code — a mid-task compaction must be able to see what was in flight. Work solo, or delegate per `agent-delegation.md`, recording each spawn as a `delegated` LEDGER entry (unit, expected output) so a compaction never orphans a running worker — the LEDGER plays the role the active task file plays for `/plan` work. Make worker prompts self-contained with the goal, ownership/scope, constraints, expected output, roadmap task text, and relevant SPEC lines so they remain correct regardless of optional inherited context.
 4. **Verify on a real surface.** Run the task's `verify:`. Tests alone never prove user-facing behavior — drive the app, open the page, compare UI against the POC artifact. A worker's "done" is a claim to check, not a result to record.
 5. **Tick and log.** Flip `- [ ]` → `- [x]`, re-read to confirm the intended task changed state, append a `task-completed` LEDGER entry with evidence, bump `updated:` in SPEC frontmatter. Clear any Current Acceptance Delta this evidence actually resolves. Route mission findings into NOTES; if the direct-promotion exception above applies, patch the knowledge owner + reachable map atomically and run `bash .claude/scripts/knowledge-check.sh`.
 6. **Phase boundary**: run the phase validation. On PASS, tick the SPEC scenarios it proves, clear the resolved delta, append `phase-validated`, then make a rotation offer. On FAIL, do not close the phase: append `validation-failed`, update Current Acceptance Delta, and reopen responsible work under the ROADMAP rule above. Never create a separate replay/verification task. Then continue under the convergence rules below.
@@ -202,13 +204,12 @@ A tripped breaker is a stop-and-report, never a silent retry loop and never a re
 
 ## Session Rotation
 
-Long sessions degrade (context pressure, compaction, host lag). Rotation is the designed unit of work, not an emergency:
+Long sessions can benefit from rotation, but rotation never gates authorized work:
 
-- **Offer rotation** at every phase boundary; mid-phase whenever a compaction occurred or context feels degraded (finish the in-flight task first); and in any case after ~8-10 completed tasks inside a long phase — don't wait for degradation to show.
-- The offer: report current phase, task inventory (`n/m`), and Current Acceptance Delta, then ask: _checkpoint and rotate now, or continue?_
+- **Offer rotation** at a phase boundary or after compaction/context degradation, once the in-flight task is safe. Report the current phase, task inventory (`n/m`), and Current Acceptance Delta with the option to checkpoint and rotate.
 - **On yes**: append a `rotation-checkpoint` LEDGER entry (one-line state + exact next task), bump `updated:`, then run the `/checkpoint` flow — it syncs the specs INDEX, refreshes CONTEXT's spec pointer, and collects NOTES' `→ graduate:` flags — and tell the user: open a fresh session, orient with `/start`, and run `/spec-run <slug>`.
-- **On no**: continue the loop.
-- Do **not** write `.claude/HANDOFF.md` for spec work — SPEC + ROADMAP + NOTES + LEDGER _are_ the baton, and the loop is amnesia-first by design.
+- **On no, or when no reply is available**: continue the already authorized loop. Do not stop merely to wait on the offer.
+- Do **not** write `.claude/HANDOFF.md` for spec work — SPEC + ROADMAP + NOTES + LEDGER already carry the recoverable state.
 
 ## Pausing & Interrupting
 
@@ -255,7 +256,7 @@ User confirmation closes either kind of successful final gate: flip `status: don
 drafting ──(POC + SPEC + ROADMAP written, presented)──▶ poc-review
 poc-review ──(user requests changes)──▶ drafting
 poc-review ──(user approves: standing "go")──▶ ready
-ready ──(/spec-run picks it up)──▶ running
+ready ──(/spec-run picks it up, in this or a later session)──▶ running
 running ──(all tasks completed/superseded; no blocker; full-baseline/scoped-review PASS)──▶ awaiting-final-review
 awaiting-final-review ──(user confirms)──▶ done
 awaiting-final-review ──(anchored defect or explicit bounded review patch)──▶ running
@@ -296,11 +297,12 @@ SPEC frontmatter is the source of truth; INDEX is a cache. Active lists status �
 ## Anti-Patterns
 
 - Asking permission per task or per phase while `running` — the standing approval exists precisely so the loop never blocks on the user.
+- Treating a rotation offer or lack of a reply as a reason to pause authorized work.
 - A roadmap that needs interview context ("as discussed", "the style we agreed on") — decision-complete or defective.
 - Code snippets in the roadmap (see Plan Altitude), or an executor "improving" SPEC acceptance criteria.
 - Ticking a box without running its `verify:`, or trusting a subagent's "done" without re-verifying.
 - Rewriting or deleting LEDGER history; rewriting phase goals instead of appending/striking tasks.
-- Burying durable knowledge in the LEDGER tail instead of NOTES.md — the ledger scrolls away; NOTES is what every iteration re-reads.
+- Burying durable knowledge in the LEDGER tail instead of NOTES.md — the ledger scrolls away; NOTES is the curated recovery surface.
 - Writing `HANDOFF.md` for spec work, or mirroring spec state into `tasks/index.md`.
 - Counting appended tasks or fresh ticks as progress while the same acceptance failure remains.
 - Retrying a failed acceptance without a materially different hypothesis, implementation, or verification.

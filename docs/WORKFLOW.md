@@ -101,13 +101,16 @@ The start command reads:
 
 It does not run the knowledge checker. Start is intended to be lightweight.
 
+The current request remains authoritative during startup. If it already names a task or specification to continue, or explicitly says to resume the unambiguous current focus, `start` completes the lightweight inventory and then enters that workflow without asking the user to select it again.
+
 ### Choose the right work mode
 
-| Mode          | Use it for                                                                  | Persistence                                |
-| ------------- | --------------------------------------------------------------------------- | ------------------------------------------ |
-| Direct work   | Small, clear, low-risk changes that do not need a durable plan              | Conversation and normal repository history |
-| Task plan     | Implementation needing a durable plan, meaningful decisions, or an explicit plan request       | `tasks/<task-id>/TASK.md`                       |
-| Specification | Mission-scale work needing shared approved intent and a multi-phase execution roadmap | One folder in `specs/`                     |
+| Mode              | Use it for                                                                                    | Persistence                                |
+| ----------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| Direct work       | Small, clear, low-risk changes that do not need a durable plan                                | Conversation and normal repository history |
+| Task plan         | A bounded implementation needing durable decisions, interruption support, or a requested plan | `tasks/<task-id>/TASK.md`                  |
+| Specification     | A defined mission needing POC-frozen intent, phases, and standing approval                    | One folder in `specs/`                     |
+| Project discovery | A rough project or product idea that first needs structured project documentation             | `docs/project/`                            |
 
 File count alone does not require a plan. Needing JSON, an image, or an archive does not require a specification. A small explicit plan stays brief, with `TASK.md` only unless supporting files are actually needed.
 
@@ -264,6 +267,8 @@ any state ── user cancels ──▶ cancelled
 
 Approval is expressed in ordinary language. Clear phrases such as “go,” “implement,” or “approved” can start an approved plan. Clear completion phrases such as “looks good,” “confirmed,” or “close it” allow the task to be archived.
 
+Resolve execution intent from the current message first, then from an earlier explicit instruction that is still applicable. A direct request to implement, start, continue, or resume satisfies `planning → in-progress`; the agent changes status before writing implementation and does not ask for the same authorization again. A request to create, explain, revise, or review the plan only keeps the planning lock. This precedence does not widen scope or remove the final human confirmation gate.
+
 Praise, questions, or manual edits to the task file are not treated as approval.
 
 Completion has two distinct steps:
@@ -279,7 +284,7 @@ A task file is a resumable plan, not proof that the repository has remained unch
 
 ## 6. Specification workflow
 
-Use `/spec <mission>` or `$codex-spec <mission>` for mission-scale scope that needs shared approved intent and a multi-phase execution roadmap—not merely because a task needs additional files.
+Use `/spec <mission>` or `$codex-spec <mission>` for a defined mission that needs shared approved intent, POC references, and a multi-phase execution roadmap—not merely because a task needs additional files. Use project discovery when the user is still defining the project or product itself; ordinary open details inside an already-defined mission stay in the spec interview.
 
 A specification workspace lives under:
 
@@ -300,19 +305,23 @@ Each workspace contains:
 
 ### Planning and approval
 
-The specification command interviews the user, records decisions in the workspace, and may create proof-of-concept artifacts. It then prepares a roadmap that another session can execute without access to the original interview.
+The specification command is the authoring protocol. It interviews the user, records decisions in the workspace, may create proof-of-concept artifacts, and prepares a roadmap that can be executed without access to the original interview. It does not write the product implementation.
 
 The user approves `SPEC.md` and `ROADMAP.md` once. That approval applies to the work inside the approved scope. It does not authorize unrelated refactoring or a change in product intent.
 
 The approved specification also records the commit policy. The default is no automatic commits; pushing is never implied.
 
+Approval and execution intent are separate. Approval alone may leave the specification at `ready`. If the current message or an earlier still-applicable instruction also says to implement, run, continue, or resume after approval, the author hands directly to the spec runner in the same session. Starting a fresh session remains an option, not a requirement. A material change outside the approved intent still requires amendment and renewed approval.
+
 ### Execution
 
-Run `/spec-run <slug>` or `$codex-spec-run <slug>` in a fresh session when practical.
+Run `/spec-run <slug>` or `$codex-spec-run <slug>` in the current or a later session.
 
-Each iteration:
+At the first run, after session change or compaction, during crash recovery, or when drift is suspected, the runner reads `SPEC.md`, `ROADMAP.md`, and `NOTES.md` in full plus enough of the ledger tail to recover any open incident. During uninterrupted iterations it reloads only the selected task and dependencies, applicable acceptance and scope constraints, the current acceptance delta, and new ledger entries. The full workspace remains canonical; incremental reads avoid repeating unchanged context.
 
-1. re-orients from the specification files;
+The loop then:
+
+1. loads the boundary-appropriate canonical state described above;
 2. selects the first runnable pending item;
 3. implements and verifies it on an appropriate real surface;
 4. updates the roadmap disposition;
@@ -321,11 +330,11 @@ Each iteration:
 
 A failed check is retried only when the hypothesis, implementation, or verifier has materially changed. Repeating the same failed attempt is not progress.
 
-At phase boundaries, rotate to a fresh session when useful. The specification workspace is the handoff; spec execution does not use `HANDOFF.md`.
+At a useful boundary, the runner may offer checkpoint and rotation while reporting phase progress and the current acceptance delta. The offer is nonblocking: if the user declines or does not reply, authorized work continues. On acceptance, the specification workspace is the handoff; spec execution does not use `HANDOFF.md`. The workflow honors explicit user or runtime budgets and does not invent resource estimates, model tiers, attempt limits, or rotation thresholds.
 
 ### Final review
 
-When all work is complete or explicitly superseded and no blocker remains, the executor runs a fresh acceptance gate. Every acceptance scenario must have current evidence before the specification moves to `awaiting-final-review`.
+When all work is complete or explicitly superseded and no blocker remains, the executor runs the applicable acceptance gate. The first gate and a materially amended mission establish a full baseline with the smallest non-redundant fresh check set. After a bounded review change, a scoped gate runs fresh checks for the actual affected surface and direct dependents while carrying forward unaffected evidence with an explicit rationale; uncertainty falls back to a full baseline. Every scenario must have valid evidence before the specification moves to `awaiting-final-review`.
 
 The user, not the agent, marks the specification done.
 
@@ -341,8 +350,11 @@ When work is delegated:
 - give each worker an explicit question or file scope;
 - keep explorers read-only;
 - give parallel writers disjoint ownership;
+- treat inherited conversation context as host-dependent and include every required goal, constraint, and acceptance condition in the worker prompt;
+- check whether the host shares a filesystem: on a shared filesystem, returned edits may already be present; in an isolated environment, integrate the returned patch or artifact explicitly;
 - avoid doing the same investigation locally and in a worker unless independent cross-checking is intentional;
 - integrate returned work in dependency order and validate each result;
+- verify the affected surface and its relevant dependents rather than trusting a worker's completion claim;
 - keep the parent agent responsible for the final outcome.
 
 The project includes three explicit-request-only specialist agents:

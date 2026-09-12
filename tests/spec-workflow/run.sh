@@ -95,6 +95,8 @@ assert_contains "$CLAUDE_RULE" \
   "Claude bounded patches require a defensible impact boundary"
 
 for runner in "$CODEX_RUNNER" "$CLAUDE_RUNNER"; do
+  assert_contains "$runner" "canonical contract" \
+    "runner delegates schema and invariants to the canonical rule"
   assert_contains "$runner" "full-baseline" \
     "runner can establish or refresh a full baseline"
   assert_contains "$runner" "scoped-review" \
@@ -112,19 +114,6 @@ for runner in "$CODEX_RUNNER" "$CLAUDE_RUNNER"; do
   assert_not_contains "$runner" "changed verifier, or cross-cutting change" \
     "runner does not treat every local verifier edit as cross-cutting"
 done
-
-assert_contains "$CODEX_RUNNER" \
-  'latest successful cumulative `final-gate` evidence state' \
-  "Codex runner chains cumulative scoped-review evidence"
-assert_contains "$CLAUDE_RUNNER" \
-  'latest successful `final-gate` baseline' \
-  "Claude runner chains cumulative scoped-review evidence"
-assert_contains "$CODEX_RUNNER" \
-  "semantically changed shared verifier/harness" \
-  "Codex runner falls back only for shared semantic verifier impact"
-assert_contains "$CLAUDE_RUNNER" \
-  "semantic change to a shared verifier/harness" \
-  "Claude runner falls back only for shared semantic verifier impact"
 
 for author in "$CODEX_AUTHOR" "$CLAUDE_AUTHOR"; do
   assert_contains "$author" "smallest non-redundant" \
