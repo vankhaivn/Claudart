@@ -2,7 +2,7 @@
 
 [English](README.md) · [Hướng dẫn quy trình](docs/WORKFLOW_VI.md)
 
-CLAUDART là một bộ quy trình đặt ngay trong repository dành cho Claude Code và Codex CLI. Trạng thái phiên làm việc, kế hoạch triển khai, kiến thức dự án và chỉ dẫn cho agent đều được lưu bằng Markdown và quản lý cùng mã nguồn.
+CLAUDART là một bộ quy trình đặt ngay trong repository dành cho Claude Code và Codex. Trạng thái phiên làm việc, kế hoạch triển khai, kiến thức dự án và chỉ dẫn cho agent đều được lưu bằng Markdown và quản lý cùng mã nguồn.
 
 Hai lớp Claude và Codex hoạt động độc lập. Bạn có thể cài một lớp hoặc cả hai. CLAUDART không cần cơ sở dữ liệu, daemon hay dịch vụ chạy nền.
 
@@ -32,14 +32,17 @@ Chọn lớp cần cài khi cần thiết:
 # Claude Code
 curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --claude
 
-# Codex CLI
+# Codex
 curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --codex
 
 # Cả hai
 curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --both
+
+# Thêm module Project Docs tùy chọn cho lớp đã chọn
+curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --claude --project-docs
 ```
 
-Trình cài đặt sao chép các file còn thiếu và bỏ qua file đã tồn tại. Tùy chọn `--force` sẽ ghi đè file hiện có, vì vậy chỉ dùng khi bạn thực sự muốn thay thế chúng.
+Trình cài đặt sao chép các file còn thiếu và bỏ qua file đã tồn tại. Bản cài mặc định chỉ chứa lớp core; `--project-docs` thêm command hoặc skill cùng references cho vòng đời tài liệu tùy chọn. Nó không tự tạo hoặc migrate tài liệu dự án. Tùy chọn `--force` sẽ ghi đè file hiện có, vì vậy chỉ dùng khi bạn thực sự muốn thay thế chúng.
 
 Với một bản cài Codex mới, trình cài đặt thêm `.codex/`, `.agents/skills/` và `AGENTS.md` ở thư mục gốc. Trong repository CLAUDART, file mẫu nguồn nằm tại `.codex/AGENTS.md`.
 
@@ -67,7 +70,7 @@ Sau đó bắt đầu phiên làm việc bình thường bằng `/start` hoặc 
 
 ## Quy trình hằng ngày
 
-| Mục đích                                               | Claude Code        | Codex CLI                |
+| Mục đích                                               | Claude Code        | Codex                    |
 | ------------------------------------------------------ | ------------------ | ------------------------ |
 | Định hướng phiên                                       | `/start`           | `$codex-start`           |
 | Tạo kế hoạch triển khai bền vững                       | `/plan <task>`     | `$codex-plan <task>`     |
@@ -77,6 +80,7 @@ Sau đó bắt đầu phiên làm việc bình thường bằng `/start` hoặc 
 | Xây dựng lại trạng thái hiện tại tại điểm dừng phù hợp | `/checkpoint`      | `$codex-checkpoint`      |
 | Biến cách làm lặp lại thành quy tắc                    | `/learn`           | `$codex-learn`           |
 | Kiểm tra bản cài đặt                                   | `/doctor`          | `$codex-doctor`          |
+| Bảo trì tài liệu dự án hiện hành (tùy chọn)            | `/project-docs`    | `$codex-project-docs`    |
 
 Dùng task plan khi quyết định quan trọng, phối hợp, gián đoạn hoặc review cần được lưu bền vững, hay khi user yêu cầu rõ ràng. Thay đổi nhỏ, rõ ràng không cần workspace; số lượng file không phải điều kiện tự động. Dùng spec cho phạm vi cấp mission cần ý định được duyệt chung và roadmap nhiều phase—không phải chỉ vì task cần ảnh, JSON hay archive.
 
@@ -96,11 +100,11 @@ Khi đã được yêu cầu triển khai hoặc tiếp tục, agent chuyển t�
 | `specs/`                    | Đặc tả công việc lớn và lịch sử thực thi         | Đọc khi đặc tả đang hoạt động                                        |
 | `HANDOFF.md`                | Bàn giao suy luận cho một phiên kế tiếp          | Phiên `/start` kế tiếp tiếp nhận rồi xóa                             |
 
-Ranh giới quan trọng nhất: **quy tắc nói agent nên làm việc như thế nào; knowledge ghi điều gì đang đúng về dự án; task và spec ghi công việc đang được thực hiện.**
+Ranh giới quan trọng nhất: **quy tắc nói agent nên làm việc như thế nào; knowledge giữ fact chưa có owner hiện hành phù hợp; task và spec ghi công việc đang được thực hiện.** Khi source, schema, generated reference hoặc tài liệu dự án đã sở hữu một fact, knowledge chỉ giữ route ngắn thay vì tạo bản kể lại cạnh tranh.
 
 Mỗi luồng công việc dùng một nơi lưu trạng thái: mặc định `.claude/` cho Claude hoặc `.codex/` cho Codex. Khi bạn yêu cầu host khác làm theo skill Codex, trạng thái `.codex/` vẫn là nguồn chính, còn công cụ tuân theo khả năng thực tế của host đó. Hai nơi lưu không tự đồng bộ.
 
-Rule workflow chỉ nạp khi cần. Loader Claude đã cài đặt tính đường dẫn import từ `.claude/CLAUDE.md`; chi tiết phỏng vấn discovery và bảo trì knowledge nằm trong `references/`. Tra cứu không phải nạp schema ghi knowledge; các vòng spec liên tục chỉ đọc trạng thái liên quan thay vì nạp lại toàn bộ tài liệu mission.
+Rule workflow chỉ nạp khi cần. Loader Claude đã cài đặt tính đường dẫn import từ `.claude/CLAUDE.md`; chi tiết bảo trì knowledge nằm trong `references/`. Module Project Docs tùy chọn dùng cho lifecycle request hoặc khi thay đổi tác động đến tài liệu hiện hành mà nó sở hữu; nó không chạy full audit ở start, checkpoint hoặc sau thay đổi nhỏ thông thường. Tra cứu không phải nạp schema ghi knowledge; các vòng spec liên tục chỉ đọc trạng thái liên quan thay vì nạp lại toàn bộ tài liệu mission.
 
 ## Agent chuyên biệt
 
@@ -133,6 +137,7 @@ npm run hooks:install
 
 - [Hướng dẫn quy trình](docs/WORKFLOW_VI.md)
 - [Workflow guide bằng tiếng Anh](docs/WORKFLOW.md)
+- [Module Project Docs](modules/project-docs/README.md)
 - [Quy trình tích hợp và nâng cấp](INTEGRATE.md)
 - [Hướng dẫn đóng góp](CONTRIBUTING.md)
 

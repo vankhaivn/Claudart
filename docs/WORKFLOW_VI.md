@@ -7,7 +7,7 @@ Tài liệu này hướng dẫn cách sử dụng CLAUDART sau khi cài đặt. 
 Các hợp đồng chi tiết dành cho máy vẫn nằm trong chính các file runtime:
 
 - Claude Code: `.claude/commands/` và `.claude/rules/`
-- Codex CLI: `.agents/skills/` và `.codex/guidelines/`
+- Codex: `.agents/skills/` và `.codex/guidelines/`
 
 Khi schema hoặc lifecycle của một command thay đổi, các file đó là nguồn chuẩn.
 
@@ -18,11 +18,13 @@ CLAUDART cung cấp hai lớp độc lập.
 | Runtime     | File được cài                                           | Dạng command                        | File nạp chính      |
 | ----------- | ------------------------------------------------------- | ----------------------------------- | ------------------- |
 | Claude Code | `.claude/`                                              | `/start`, `/plan`, v.v.             | `.claude/CLAUDE.md` |
-| Codex CLI   | `.codex/`, `.agents/skills/`, `AGENTS.md` ở thư mục gốc | `$codex-start`, `$codex-plan`, v.v. | `AGENTS.md`         |
+| Codex       | `.codex/`, `.agents/skills/`, `AGENTS.md` ở thư mục gốc | `$codex-start`, `$codex-plan`, v.v. | `AGENTS.md`         |
 
 Bạn có thể cài một lớp hoặc cả hai. Hai lớp có cùng mục tiêu, nhưng command và quy tắc delegation được viết theo cách vận hành riêng của từng công cụ.
 
 Cả hai lớp đều có cùng một knowledge checker viết bằng Bash, không cần dependency ngoài. CLAUDART không cần cơ sở dữ liệu hay tiến trình chạy nền.
+
+Project Docs là module tùy chọn. Nó chỉ thêm command hoặc skill cho vòng đời tài liệu khi được chọn lúc cài; quy trình core không tạo document pack và không tự chạy full audit tài liệu. Dùng module cho lifecycle request hoặc khi thay đổi tác động đến tài liệu hiện hành mà nó sở hữu.
 
 ## 2. Cài đặt hoặc tích hợp
 
@@ -32,14 +34,17 @@ Cả hai lớp đều có cùng một knowledge checker viết bằng Bash, khô
 # Claude Code, lựa chọn mặc định
 curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash
 
-# Codex CLI
+# Codex
 curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --codex
 
 # Cả hai runtime
 curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --both
+
+# Thêm module Project Docs tùy chọn cho lớp đã chọn
+curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --claude --project-docs
 ```
 
-Trình cài đặt sao chép file còn thiếu và bỏ qua file đã tồn tại, trừ khi bạn truyền `--force`. Cách này phù hợp với bản cài mới, không phù hợp để hợp nhất một cấu hình đã tùy chỉnh.
+Trình cài đặt sao chép file còn thiếu và bỏ qua file đã tồn tại, trừ khi bạn truyền `--force`. Bản cài mặc định chỉ có core; `--project-docs` thêm module vòng đời tài liệu tùy chọn và không tự tạo hoặc migrate tài liệu dự án. Cách này phù hợp với bản cài mới, không phù hợp để hợp nhất một cấu hình đã tùy chỉnh.
 
 Với bản cài Codex mới, trình cài đặt sao chép file mẫu `.codex/AGENTS.md` thành `AGENTS.md` ở thư mục gốc rồi xóa bản mẫu trùng lặp.
 
@@ -105,16 +110,16 @@ Request hiện tại vẫn là nguồn chỉ đạo trong lúc startup. Nếu re
 
 ### Chọn đúng chế độ làm việc
 
-| Chế độ            | Dùng khi                                                                                         | Nơi lưu                               |
-| ----------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------- |
-| Làm trực tiếp     | Thay đổi nhỏ, rõ ràng, ít rủi ro và không cần kế hoạch bền vững                                  | Cuộc trò chuyện và lịch sử repository |
-| Task plan         | Phần triển khai có giới hạn cần lưu quyết định, hỗ trợ gián đoạn hoặc được user yêu cầu lập plan | `tasks/<task-id>/TASK.md`             |
-| Spec              | Mission đã định hình cần intent được khóa bằng POC, nhiều phase và standing approval             | Một thư mục trong `specs/`            |
-| Project discovery | Ý tưởng project hoặc product còn thô, trước hết cần tài liệu project có cấu trúc                 | `docs/project/`                       |
+| Chế độ                         | Dùng khi                                                                                         | Nơi lưu                               |
+| ------------------------------ | ------------------------------------------------------------------------------------------------ | ------------------------------------- |
+| Làm trực tiếp                  | Thay đổi nhỏ, rõ ràng, ít rủi ro và không cần kế hoạch bền vững                                  | Cuộc trò chuyện và lịch sử repository |
+| Task plan                      | Phần triển khai có giới hạn cần lưu quyết định, hỗ trợ gián đoạn hoặc được user yêu cầu lập plan | `tasks/<task-id>/TASK.md`             |
+| Spec                           | Mission đã định hình cần intent được khóa bằng POC, nhiều phase và standing approval             | Một thư mục trong `specs/`            |
+| Module Project Docs (tùy chọn) | Khởi tạo, tiếp nhận, cập nhật, audit hoặc compact tài liệu hiện hành                             | Owner và router tài liệu đã có        |
 
 Số lượng file không tự tạo ra nhu cầu lập plan. Cần JSON, ảnh hay archive không đồng nghĩa với cần spec. Khi user yêu cầu plan cho việc nhỏ, giữ plan ngắn và chỉ có `TASK.md` trừ khi thực sự cần file hỗ trợ.
 
-Trong phạm vi đã được phê duyệt, spec thay thế task plan. Không tạo task file cho công việc đã thuộc một spec đang hoạt động.
+Trong phạm vi đã được phê duyệt, spec thay thế task plan. Không tạo task file cho công việc đã thuộc một spec đang hoạt động. Khi ý định product còn chưa rõ, dùng Project Docs nếu đã cài để thu thập bootstrap input và chỉ thiết lập các owner hiện hành cần thiết; module không ép document pack hoặc thư mục `docs/project/`.
 
 ### Kết thúc hoặc tạm dừng đúng cách
 
@@ -144,20 +149,22 @@ CLAUDART tách thông tin theo mục đích và thời gian tồn tại.
 
 ### Knowledge bền vững
 
-Knowledge store mang tính mô tả. Nội dung phù hợp thường gồm kiến trúc, thuật ngữ, quy tắc nghiệp vụ, hợp đồng với hệ thống ngoài và liên kết tới tài liệu chuẩn.
+Knowledge store mang tính mô tả. Nội dung phù hợp thường gồm kiến trúc, thuật ngữ, quy tắc nghiệp vụ, hợp đồng với hệ thống ngoài và liên kết tới tài liệu chuẩn. Mỗi claim có một owner: khi source, schema, generated reference, tài liệu dự án hoặc nguồn của team đã duy trì nội dung đó, knowledge trỏ tới nguồn ấy thay vì giữ một bản kể lại cạnh tranh. Bằng chứng trong source vẫn có thể hỗ trợ một nội dung tổng hợp riêng, hữu ích do knowledge sở hữu.
 
-Một claim nên vào knowledge khi nó:
+Một claim đủ điều kiện capture hoặc routing qua knowledge khi nó:
 
 1. có bằng chứng từ repository hoặc do user cung cấp;
 2. đang đúng;
 3. vẫn hữu ích sau khi task hiện tại kết thúc;
-4. được đặt vào topic đang sở hữu nhóm fact đó, nếu owner đã tồn tại.
+4. được route tới owner hiện có; chỉ tạo owner trong knowledge khi chưa có nguồn đang duy trì claim đó.
 
 Công việc đang làm, thiết kế đề xuất và phát hiện chỉ liên quan đến một task nên ở lại task, spec hoặc `CONTEXT.md` cho tới khi chúng thật sự trở thành kiến thức bền vững.
 
 Phép thử đơn giản:
 
 > Nếu task hiện tại bị hủy vào ngày mai, điều này vẫn đúng và vẫn hữu ích không?
+
+Tài liệu dự án dùng chung mô tả ý định product đã duyệt, kiến trúc, hướng dẫn vận hành và capability còn hỗ trợ theo convention của repository. Phân biệt ý định đã duyệt với hành vi đã triển khai hoặc phát hành. [Module Project Docs](../modules/project-docs/README.md) tùy chọn hỗ trợ init/adopt, cập nhật đúng phạm vi, audit chỉ đọc và compact đã được yêu cầu; task/spec giữ lịch sử thực thi.
 
 ### Truy xuất knowledge
 
@@ -284,7 +291,7 @@ Task file là kế hoạch có thể tiếp tục, không phải bằng chứng 
 
 ## 6. Quy trình spec
 
-Dùng `/spec <mission>` hoặc `$codex-spec <mission>` cho mission đã định hình cần intent được duyệt chung, POC làm tham chiếu và roadmap thực thi nhiều phase—không phải chỉ vì task cần thêm file. Dùng project discovery khi user vẫn đang định nghĩa chính project hoặc product; các chi tiết còn mở bên trong một mission đã rõ vẫn được giải quyết trong phần phỏng vấn của spec.
+Dùng `/spec <mission>` hoặc `$codex-spec <mission>` cho mission đã định hình cần intent được duyệt chung, POC làm tham chiếu và roadmap thực thi nhiều phase—không phải chỉ vì task cần thêm file. Khi project hoặc product vẫn chưa được định nghĩa, module Project Docs tùy chọn có thể thu thập bootstrap input trước khi lập mission; các chi tiết còn mở bên trong một mission đã rõ vẫn được giải quyết trong phần phỏng vấn của spec.
 
 Workspace của spec nằm tại:
 
@@ -371,18 +378,18 @@ Cấu hình Codex đi kèm giới hạn tối đa sáu thread subagent trong m�
 
 ## 8. Tham chiếu command
 
-| Claude Code          | Codex CLI                  | Mục đích                                                                                  |
-| -------------------- | -------------------------- | ----------------------------------------------------------------------------------------- |
-| `/start`             | `$codex-start`             | Định hướng phiên từ trạng thái hiện tại, index, knowledge routing và lịch sử Git gần nhất |
-| `/plan <task>`       | `$codex-plan <task>`       | Tạo task triển khai bền vững                                                              |
-| `/spec <mission>`    | `$codex-spec <mission>`    | Tạo và phê duyệt spec nhiều phase                                                         |
-| `/spec-run <slug>`   | `$codex-spec-run <slug>`   | Thực thi spec đã duyệt tới cổng final review                                              |
-| `/project-discovery` | `$codex-project-discovery` | Biến ý tưởng dự án còn thô thành tài liệu có cấu trúc                                     |
-| `/checkpoint`        | `$codex-checkpoint`        | Xây dựng lại trạng thái hiện tại, đồng bộ index và chắt lọc thông tin bền vững            |
-| `/handoff`           | `$codex-handoff`           | Lưu phần điều tra đang dở cho phiên kế tiếp                                               |
-| `/learn`             | `$codex-learn`             | Đưa hành vi lặp lại vào rule hoặc guideline                                               |
-| `/doctor`            | `$codex-doctor`            | Chạy kiểm tra cấu trúc và ngữ nghĩa                                                       |
-| `/refactor-memory`   | `$codex-refactor-memory`   | Chuẩn hóa và sắp xếp lại cấu trúc bộ nhớ ngay tại chỗ                                     |
+| Claude Code                | Codex                            | Mục đích                                                                                  |
+| -------------------------- | -------------------------------- | ----------------------------------------------------------------------------------------- |
+| `/start`                   | `$codex-start`                   | Định hướng phiên từ trạng thái hiện tại, index, knowledge routing và lịch sử Git gần nhất |
+| `/plan <task>`             | `$codex-plan <task>`             | Tạo task triển khai bền vững                                                              |
+| `/spec <mission>`          | `$codex-spec <mission>`          | Tạo và phê duyệt spec nhiều phase                                                         |
+| `/spec-run <slug>`         | `$codex-spec-run <slug>`         | Thực thi spec đã duyệt tới cổng final review                                              |
+| `/project-docs` (tùy chọn) | `$codex-project-docs` (tùy chọn) | Khởi tạo, tiếp nhận, cập nhật, audit hoặc compact tài liệu dự án hiện hành                |
+| `/checkpoint`              | `$codex-checkpoint`              | Xây dựng lại trạng thái hiện tại, đồng bộ index và chắt lọc thông tin bền vững            |
+| `/handoff`                 | `$codex-handoff`                 | Lưu phần điều tra đang dở cho phiên kế tiếp                                               |
+| `/learn`                   | `$codex-learn`                   | Đưa hành vi lặp lại vào rule hoặc guideline                                               |
+| `/doctor`                  | `$codex-doctor`                  | Chạy kiểm tra cấu trúc và ngữ nghĩa                                                       |
+| `/refactor-memory`         | `$codex-refactor-memory`         | Chuẩn hóa và sắp xếp lại cấu trúc bộ nhớ ngay tại chỗ                                     |
 
 ## 9. Cấu trúc sau khi cài
 
@@ -431,6 +438,8 @@ AGENTS.md
 ```
 
 Trong repository nguồn CLAUDART, `.codex/AGENTS.md` là template dùng để tạo `AGENTS.md` ở thư mục gốc khi cài mới.
+
+Khi được chọn, Project Docs thêm `.claude/commands/project-docs.md` cho Claude và `.agents/skills/codex-project-docs/` cho Codex. References của module hướng dẫn công việc tài liệu nhưng không tự tạo tài liệu dự án.
 
 ## 10. Bảo trì chính CLAUDART
 
