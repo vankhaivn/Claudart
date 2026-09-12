@@ -54,7 +54,7 @@ Dùng [INTEGRATE.md](../INTEGRATE.md). Quy trình tích hợp yêu cầu agent:
 
 1. so sánh dự án hiện tại với repository upstream hiện tại;
 2. phân biệt file không đổi, template CLAUDART đã cũ và nội dung riêng do dự án viết;
-3. trình bày rõ file nào sẽ được thêm, thay thế, hợp nhất, di chuyển hoặc loại bỏ;
+3. trình bày rõ file nào sẽ được thêm, thay thế, hợp nhất, di chuyển hoặc loại bỏ, cùng đề xuất module tùy chọn phù hợp để user lựa chọn;
 4. chờ phê duyệt trước khi ghi;
 5. giữ nguyên trạng thái đang dùng, workspace task và file đính kèm, spec và knowledge của dự án;
 6. chạy chuỗi đối soát hiện hành sau khi áp dụng thay đổi đã được duyệt.

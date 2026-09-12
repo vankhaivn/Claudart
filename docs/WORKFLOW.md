@@ -54,7 +54,7 @@ Use [INTEGRATE.md](../INTEGRATE.md). The integration protocol asks an agent to:
 
 1. compare the current project with the current upstream repository;
 2. identify unchanged files, stale CLAUDART templates, and project-authored customizations;
-3. present a concrete add, replace, merge, move, or retire plan;
+3. present a concrete add, replace, merge, move, or retire plan, including relevant optional-module recommendations for the user to select;
 4. wait for approval before writing;
 5. preserve live state, task workspaces and attachments, specification folders, and project knowledge;
 6. run the current reconciliation checks after the approved changes.

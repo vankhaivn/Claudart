@@ -54,7 +54,7 @@ Ask your coding agent to follow the integration protocol instead:
 
 > Read https://raw.githubusercontent.com/vankhaivn/Claudart/main/INTEGRATE.md and follow it to integrate or update CLAUDART in this project. Preserve project-specific content and show me the proposed changes before writing them.
 
-The protocol compares the current project with the current `main` branch and separates stale CLAUDART files from project-authored customizations.
+The protocol compares the current project with the current `main` branch and separates stale CLAUDART files from project-authored customizations. It also identifies relevant optional modules and explains recommendations in the proposed plan. You do not need to know their names in advance; a module is installed only if you include it in the approved plan. Installing Project Docs does not automatically reorganize existing docs or knowledge.
 
 ### First run
 

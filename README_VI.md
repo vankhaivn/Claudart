@@ -54,7 +54,7 @@ Hãy yêu cầu coding agent làm theo quy trình tích hợp:
 
 > Đọc https://raw.githubusercontent.com/vankhaivn/Claudart/main/INTEGRATE.md và làm theo để tích hợp hoặc cập nhật CLAUDART trong dự án này. Giữ nguyên nội dung riêng của dự án và trình bày các thay đổi dự kiến trước khi ghi file.
 
-Quy trình này so sánh dự án hiện tại với nhánh `main` mới nhất, đồng thời phân biệt file CLAUDART đã cũ với nội dung do dự án tự viết.
+Quy trình này so sánh dự án hiện tại với nhánh `main` mới nhất, đồng thời phân biệt file CLAUDART đã cũ với nội dung do dự án tự viết. Quy trình cũng nhận diện module tùy chọn phù hợp và giải thích đề xuất trong kế hoạch. Bạn không cần biết tên module từ trước; chỉ cài module được bạn chọn trong kế hoạch đã duyệt. Cài Project Docs không tự sắp xếp lại docs hoặc knowledge hiện có.
 
 ### Lần chạy đầu tiên
 

@@ -27,7 +27,7 @@ This file is a **protocol, not an installer**. Follow it top to bottom. It exist
    - otherwise default to the runtime already present;
    - if neither exists and the active agent runtime makes the choice obvious, state that assumption in the plan instead of asking unnecessarily;
    - if both are selected, classify each layer independently;
-   - select an optional module only when the user asks to add, update, remove, or reconcile that module. A core update must not silently install or uninstall a module.
+   - record explicit module choices or exclusions. A general integration or update request permits recommending relevant modules in Step 2; it does not silently select them for installation, update, or removal.
 4. Classify each selected layer:
    - **A — Clean adopt:** no meaningful AI operating layer exists yet; a bare loader file is allowed.
    - **B — Merge into an existing workflow:** the project already has its own agents, commands, rules, memory, or work conventions.
@@ -54,8 +54,9 @@ This file is a **protocol, not an installer**. Follow it top to bottom. It exist
 
    If cloning is unavailable, fetch current raw files on demand from `https://raw.githubusercontent.com/vankhaivn/Claudart/main/<path>`. Without history, preserve ambiguous differences and show the exact uncertainty instead of guessing.
 
-6. Enumerate the actual selected core-layer and optional-module payload from current upstream. Read `install.sh` as a payload and relocation reference, plus the loaders and every file in the proposed dependency closure. README, workflow, and contributing docs are orientation only; read them only when a real ambiguity requires them.
-7. Treat `install.sh` as a payload reference, not a merge tool. Do not execute it during Scenario B or C, do not use `--force`, and do not run any write-capable maintenance workflow before approval.
+6. Inspect the current `modules/` inventory and brief module descriptions. Recommend a module when the request or observed project gives it a concrete purpose; for example, existing discovery material or competing documentation owners can make Project Docs relevant. Respect an explicit core-only scope or module exclusion. This does not require a full docs audit or loading every module's detailed references.
+7. Enumerate the actual selected core-layer and proposed optional-module payload from current upstream. Read `install.sh` as a payload and relocation reference, plus the loaders and every file in the proposed dependency closure. README, workflow, and contributing docs are orientation only; read them only when a real ambiguity requires them.
+8. Treat `install.sh` as a payload reference, not a merge tool. Do not execute it during Scenario B or C, do not use `--force`, and do not run any write-capable maintenance workflow before approval.
 
 ## What CLAUDART contains
 
@@ -154,6 +155,8 @@ Before writing, classify the planned result under these actions:
 - `review-needed`.
 
 List the selected layers and optional modules, then exact paths for every write, merge, relocation, retirement, or ambiguity. Unchanged paths may be grouped by tree and count. For a collision-free Scenario A tree copied verbatim, you may report it as one grouped add with a generated file count instead of explaining every file; still list loader placement and live-state seeds separately. Any collision or non-verbatim action must be path-specific.
+
+Separate requested module changes from optional recommendations. For each recommendation, state the project-specific reason, runtime files it would add or change, and whether later `adopt` work would be useful. Ask the user to include or exclude it when approving the plan; an already explicit choice needs no repeat confirmation. Only modules included in the approved plan may change. Installing Project Docs does not itself authorize generating, moving, or compacting live docs or knowledge.
 
 For each merge, identify what current upstream content will be introduced and what downstream content will be preserved or relocated. For each retirement, identify the replacement or current owner. Mark live-state files explicitly as preserved.
 
