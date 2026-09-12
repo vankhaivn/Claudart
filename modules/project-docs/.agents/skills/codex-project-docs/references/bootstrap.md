@@ -12,7 +12,9 @@ Keep raw interview notes or synthesis in the active work surface while decisions
 
 Inventory only the relevant repo paths and existing docs router, source/schema/generated references, knowledge routes, task/spec records, and accessible team-owned sources. Record which topics already have a useful owner, which are duplicated, and which are genuinely missing or contradictory. Ask the person adopting the project about their responsibility and goals; do not require them to redecide company-owned product facts or speak as the original founder.
 
-Preserve custom, untracked, original-input, and team-owned documents. Do not overwrite an external source or migrate a repo-specific structure just to match a template. For conflicting claims, use the ownership procedure and seek the actual decision authority when evidence cannot resolve them. Report a concrete gap rather than creating a speculative page.
+For each affected topic, identify its current owner, evidence or gap, and smallest action (keep, update, link, or consolidate) in the existing work output. Follow the ownership reference before proposing a move. Healthy docs and knowledge may need no changes; do not add a manifest, force a new page, or rewrite the repository to complete adoption.
+
+Preserve custom, untracked, original-input, and team-owned documents. Do not overwrite an external source or migrate a repo-specific structure just to match a template. For conflicting claims, use the ownership procedure and seek the actual decision authority when evidence cannot resolve them. Report a concrete gap rather than creating a speculative page. Installation approval alone does not authorize authoring or moving live documentation; an adoption request authorizes only its scoped changes.
 
 ## Choose the smallest usable shape
 

@@ -166,6 +166,8 @@ A useful capture test is:
 
 Shared project docs describe approved product intent, architecture, operating guidance, and supported capabilities under the repository’s own convention. Keep approved intent distinct from implemented or released behavior. The optional [Project Docs module](../modules/project-docs/README.md) supports their init/adopt, targeted update, read-only audit, and authorized compaction; task/spec records retain execution history.
 
+For an established project, `adopt` retains valid current owners, including knowledge topics. A docs router can link to an existing architecture synthesis in knowledge; the subject or intended reader alone does not justify moving it. Reconcile only demonstrated gaps or overlap within the requested scope. A healthy setup may need no changes.
+
 ### Retrieval
 
 Knowledge retrieval is map-first and bounded:

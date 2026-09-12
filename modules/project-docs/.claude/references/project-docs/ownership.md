@@ -4,6 +4,8 @@
 
 For each fact or topic, identify one current owner and make other surfaces point to it or summarize only what their own purpose needs. Ownership follows the meaning and scope of a claim, not a blanket rule that all Markdown in one directory wins. Retain a fitting source already owned by the project team, including a source outside the repository, instead of copying it into an agent-owned file. Respect access and edit permissions for those sources.
 
+Retain an existing owner whose claims are evidenced, correctly scoped, and still maintained there, including a knowledge topic. Directory and whether people or agents read it are not sufficient reasons to move it. For example, an existing architecture synthesis in knowledge can remain authoritative, with the docs router linking to it. Source code may support that synthesis without making it a project-doc obligation. The table below guides ownership where it is missing or unsuitable; it does not override a valid existing owner.
+
 | Claim                                                                           | Likely owner                                                                                            |
 | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
 | Agreed product behavior, domain rules, and active constraints                   | Current project docs or an existing team/business source                                                |
@@ -14,6 +16,8 @@ For each fact or topic, identify one current owner and make other surfaces point
 | History and prior execution                                                     | Git, release records, or archived work; a decision record only if its rationale is still useful         |
 
 The project's existing docs router is the entry point. If a router is useful and none exists, `docs/README.md` is a default only when it fits the repository; a small project may need only one current page. The router should direct readers to the owner for each relevant topic and identify unresolved or unverified claims. Do not create a mandatory doc set, parallel backlog, owner database, or empty file merely to satisfy a category.
+
+Changing owners requires a concrete reason such as overlap, scope mismatch, or changed maintenance responsibility, within the user's existing authorization. Do not request per-file reconfirmation for an already authorized move. When evidence cannot resolve competing owners, leave their content intact and report the decision needed. Knowledge changes still follow the selected runtime's capture and checker contract.
 
 ## Keep intent and reality distinct
 

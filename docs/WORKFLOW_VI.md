@@ -166,6 +166,8 @@ Phép thử đơn giản:
 
 Tài liệu dự án dùng chung mô tả ý định product đã duyệt, kiến trúc, hướng dẫn vận hành và capability còn hỗ trợ theo convention của repository. Phân biệt ý định đã duyệt với hành vi đã triển khai hoặc phát hành. [Module Project Docs](../modules/project-docs/README.md) tùy chọn hỗ trợ init/adopt, cập nhật đúng phạm vi, audit chỉ đọc và compact đã được yêu cầu; task/spec giữ lịch sử thực thi.
 
+Với dự án đã phát triển, `adopt` giữ owner hiện hành hợp lệ, kể cả knowledge topic. Router tài liệu có thể trỏ tới nội dung tổng hợp kiến trúc đang nằm trong knowledge; chủ đề hay người đọc không tự quyết định việc chuyển file. Chỉ đối soát khoảng thiếu hoặc trùng lặp có bằng chứng trong phạm vi yêu cầu. Cấu trúc đã ổn có thể không cần thay đổi.
+
 ### Truy xuất knowledge
 
 Quy trình truy xuất bắt đầu từ map và có giới hạn:

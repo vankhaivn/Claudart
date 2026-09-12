@@ -15,7 +15,7 @@ curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh 
 curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --both --project-docs
 ```
 
-The installation adds `/project-docs` for Claude Code and `$codex-project-docs` for Codex, with matching ownership and maintenance references. Installation does not create a document pack, migrate an existing `docs/project/` tree, or add a new state store. The command or skill can author scoped documentation when the user asks it to do so.
+The installation adds `/project-docs` for Claude Code and `$codex-project-docs` for Codex, with matching ownership and maintenance references. Installation does not create a document pack, migrate an existing `docs/project/` tree, add a new document store under the module, or authorize authoring or moving live documentation. The command or skill can make scoped changes when the user asks it to do so.
 
 Use natural language or name a mode explicitly:
 
@@ -25,6 +25,8 @@ Use natural language or name a mode explicitly:
 - **Audit** to review ownership, routes, evidence, and drift without editing.
 - **Compact** to make an authorized cleanup of superseded or duplicate material.
 
-The module assigns one owner to each fact or topic. Approved intent, implemented behavior, and released or supported behavior remain distinct. Existing source, schemas, generated references, project documentation, and team-owned external documents retain ownership when they fit; knowledge owns only durable facts with no better current owner and otherwise routes readers to that source. A small router such as `docs/README.md` is a useful default when the repository needs one, not a required layout.
+The module assigns one owner to each fact or topic. Approved intent, implemented behavior, and released or supported behavior remain distinct. Existing source, schemas, generated references, project documentation, team-owned external documents, and knowledge retain ownership when evidence shows the topic scope and maintenance responsibility fit. A file's location or whether people or agents read it is not enough to move it. Architecture knowledge can remain authoritative and be linked from the docs router; source evidence can support a distinct synthesis owned by knowledge. A small router such as `docs/README.md` is a useful default when the repository needs one, not a required layout.
+
+Adoption records each affected topic's current owner, evidence or gap, and the smallest action: keep, update, link, or consolidate. A healthy docs-and-knowledge arrangement can require no change. Relocation needs a concrete reason such as overlap, scope mismatch, or changed maintenance responsibility; unresolved conflicts stay intact and are reported.
 
 Discovery is bootstrap input while intent is unclear, not a permanent authority. Current pages replace claims that evidence has superseded; Git, release records, and archived work retain history unless a decision record still has a practical purpose. The module does not run a full audit on every session, checkpoint, or small code change. A task or specification uses it only when its work changes what current documentation says.
