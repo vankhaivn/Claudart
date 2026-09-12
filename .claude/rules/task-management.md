@@ -1,5 +1,5 @@
 ---
-paths: ["**/*"]
+paths: [".claude/commands/plan.md"]
 description: How agents create, maintain, resume, and complete persistent implementation plans stored in `.claude/tasks/`. Replaces session-only plan mode with lightweight task workspaces.
 when_to_use: Whenever the user invokes `/plan`, when a task workspace is open or referenced, or when resuming work that may have an active task in `.claude/tasks/`.
 tags: [tasks, planning, persistence, cross-session]
@@ -176,7 +176,7 @@ The agent is drafting / awaiting approval to start.
 - **Do NOT modify any implementation code**, inside or outside the workspace. Artifact storage is not an implementation loophole.
 - **Allowed**: read-only exploration and writing `TASK.md`/`index.md`; persist supplied inputs, task notes, or evidence from otherwise permitted read-only investigation only when the artifact triggers pass. No implementation, scaffolding, runnable POCs, or write-scope workers before approval.
 - **Knowledge exception**: an eligible descriptive fact may update `.claude/knowledge/` mid-session only when the capture gates and an immediate-promotion trigger in `knowledge-management.md` pass. Patch owner + route atomically and run the checker. This never permits code edits or promotion of task/proposed state.
-- If the user requests a code change while a planning-locked task is open, ask whether to flip status to `in-progress` first.
+- Resolve authorization from the user's current message first, then from an earlier still-applicable instruction that has not been fulfilled or withdrawn. A direct instruction to implement, start, continue, or resume the task is the approval signal: flip to `in-progress` before the first implementation write and continue without asking again. A request to create, revise, explain, or review the plan only keeps the lock.
 
 ### Awaiting-Review Lock — `status: awaiting-review`
 
@@ -191,16 +191,18 @@ Both locks are enforced by convention, not tool restriction. Honor them strictly
 
 ## Approval Signal (planning → in-progress)
 
-The agent must judge from natural-language cues, not require a slash command. Treat these as approval:
+The agent must judge from natural-language cues, not require a slash command or a second confirmation. The current message has precedence; if it is silent on execution, preserve any earlier explicit, still-applicable implementation instruction. Treat these as approval:
 
 - "go", "go ahead", "implement", "approved", "do it", "ok làm đi", "ok start", "proceed", "ship it"
 - Direct instructions referring to a step ("start with step 1")
+- Direct requests to continue or resume an existing task, including a task selected in the same message as startup/orientation
 
 Treat these as NOT approval (still in planning):
 
 - "looks good but…" — they want a revision
 - Questions about the plan
 - Requests to add/remove/reorder steps
+- Requests whose stated outcome is only a plan, explanation, or review
 
 On approval: flip frontmatter `status: planning → in-progress`, bump `updated:` to today, then begin executing the first unchecked step. The `delegation:` field carries any recorded delegation strategy into execution — see "Delegation strategy" below; its values and gating semantics live in `agent-delegation.md`.
 
@@ -284,7 +286,7 @@ A new session resuming a task must:
 
 1. Read `TASK.md` for status, decisions, progress, and the next action; load only supporting files explicitly needed for that action. Do not recursively read the workspace.
 2. Check whether relevant code, inputs, or evidence changed since recorded verification. Reuse still-applicable evidence; rerun only checks needed to resolve drift or an evidence gap, plus mandatory repository checks. Do not replay every completed step merely because a new session began.
-3. If reality drifted from what the file expects, append a Surprises entry and ask the user whether to adapt the plan or revisit prior steps.
+3. If reality drifted from what the file expects, append a Surprises entry. Continue within the already authorized outcome when the adaptation is local and preserves scope and acceptance; ask only when the drift requires a material scope, behavior, architecture, dependency, cost, security/privacy, or data decision.
 4. Only then proceed with the next unchecked step.
 
 Never assume the file is still accurate without verification. Memory Hints are the future session's orientation and candidate surface, not automatic authority; verify claims against current evidence before acting or promoting them.

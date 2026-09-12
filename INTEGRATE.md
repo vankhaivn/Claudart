@@ -62,7 +62,7 @@ This map is orientation only; the current source tree and its references are aut
 
 **Claude layer** (`.claude/`):
 
-- `commands/`, `agents/`, and path-scoped `rules/`;
+- `commands/`, `agents/`, path-scoped `rules/`, and conditionally loaded `references/`;
 - `knowledge/INDEX.md` plus optional maps and topics;
 - read-only scripts under `scripts/`;
 - `CLAUDE.md`, `CONTEXT.md`, and append-only `JOURNAL.md`;
@@ -70,12 +70,12 @@ This map is orientation only; the current source tree and its references are aut
 
 **Codex layer** (`.codex/` + `.agents/skills/`):
 
-- Codex-native skills under `.agents/skills/codex-*`;
-- `.codex/guidelines/`, `.codex/knowledge/`, `.codex/scripts/`, `.codex/agents/`, and `.codex/config.toml`;
+- Codex-native skills under `.agents/skills/codex-*`, including their referenced support files;
+- `.codex/guidelines/`, `.codex/references/`, `.codex/knowledge/`, `.codex/scripts/`, `.codex/agents/`, and `.codex/config.toml`;
 - `.codex/CONTEXT.md`, `.codex/JOURNAL.md`, `.codex/tasks/`, and `.codex/specs/`;
 - `.codex/AGENTS.md` as the source template for the canonical downstream root `AGENTS.md`.
 
-When integrating both layers, preserve intent parity between mirrored Claude and Codex contracts without forcing byte identity where tool mechanics differ.
+When integrating both layers, preserve intent parity between mirrored Claude and Codex contracts without forcing byte identity where tool mechanics differ. Preserve the loader's one-state-layer rule: use the native layer by default or the user's explicit alternate choice, with host-native tools; never infer permission to synchronize state stores.
 
 Task workspaces use `tasks/YYYY-MM-DD-NNN-<slug>/TASK.md` and `tasks/done/<task-id>/TASK.md` in either layer. `TASK.md` is the only required file; `artifacts/` is created only for a concrete task need. Install only empty task seeds, never live upstream tasks or test fixtures. Preserve downstream workspace contents and storage/Git policies; do not bulk-read, extract, or normalize attachments during integration.
 
@@ -187,7 +187,7 @@ Run bounded mechanical checks against the selected layers and changed dependency
 
 2. Confirm every approved add, replacement, merge, relocation, and retirement reached its intended final path.
 3. Compare every supposedly verbatim template-owned file with current upstream using `cmp`, checksums, or `git diff --no-index`, accounting only for approved relocation. Any unexplained drift fails verification.
-4. For merged loaders and indexes, confirm both the required current CLAUDART routes and the project-authored sections identified in the plan remain present.
+4. For merged loaders and indexes, confirm both the required current CLAUDART routes and the project-authored sections identified in the plan remain present. Resolve actual Claude `@` imports relative to each importing file, including nested targets: `@rules/ai-behavior.md` is relative to the installed `.claude/CLAUDE.md`. Preserve conditional plain routes and narrow rule scopes; do not make every workflow global or require an automatic import for every rule. An intentionally empty task/spec seed may have no glob matches. Verify referenced `references/` files are included in the dependency closure and installed at the paths used by their entrypoints.
 5. Confirm referenced commands, skills, rules, guidelines, agents, scripts, indexes, and config paths exist; no loader, rule, or guideline auto-loads `JOURNAL.md` or `HANDOFF.md`; existing live-state bodies were not replaced; changed shell scripts pass `bash -n`; changed command/skill/agent/rule/guideline frontmatter still satisfies the current upstream contract; and mirrored contracts remain consistent when both layers changed.
 6. Inspect current upstream `scripts/`. If it ships a documented read-only installation verifier that can target another root, run it exactly as documented. If none exists, that absence is not a failure; run the current upstream knowledge checker for each selected layer instead. With the current interface:
 

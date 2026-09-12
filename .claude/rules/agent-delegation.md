@@ -1,5 +1,5 @@
 ---
-paths: ["**/*"]
+paths: [".claude/agents/**"]
 description: Claude Code subagent delegation — project guidance on HOW to delegate well (decomposition, worker prompts, anti-shadow-run, persistence), layered on top of the Agent tool's built-in WHEN-to-delegate mechanics.
 when_to_use: When delegating to subagents, or planning a task that may parallelize — for the project's decomposition, worker-prompt, anti-shadow-run, and finding-persistence guidance.
 tags: [subagents, delegation, parallelism, orchestration]
@@ -7,11 +7,9 @@ tags: [subagents, delegation, parallelism, orchestration]
 
 # Agent Delegation
 
-**Trust the harness on _whether and when_ to delegate.** The Agent tool's built-in mechanics already make that call well — reach for a subagent when work parallelizes, when a search spans many files, when an independent investigation can run on the side — exactly as in a vanilla Claude session. This rule does **not** gate that decision and does **not** require the user to pre-authorize routine delegation. Requests for depth, thoroughness, or "be comprehensive" are normal grounds for the harness to fan out; let it.
+Use the current harness and the user's constraints to decide whether delegation is available and appropriate. This protocol supplies ownership, cost, integration, and recovery rules; it does not add an approval gate for routine delegation. Available agent roles, context modes, tool arguments, and filesystem isolation come from the active tool schema, not assumptions about another client or model setting.
 
-**What this rule adds is the _how_, not the _whether_.** Claude's Agent tool already encodes the mechanics — launching parallel agents in one message, `SendMessage` to continue a thread, `run_in_background`, `isolation: worktree`, and _"once you've delegated a search, don't also run it yourself — wait for the result."_ On top of that, this rule supplies the project-specific layer: how to decompose work, how to avoid shadow-running, how to write a self-contained worker prompt, and how delegated findings persist into CLAUDART memory.
-
-This protocol governs general-purpose delegation (`subagent_type: general-purpose`, `Explore`, `Plan`). Project-specific specialized agents under `.claude/agents/` carry their own instructions and are invoked directly by name; they are out of scope here. Their capabilities differ: `clean-code-reviewer` is a write-capable implementation refiner by default, while `security-auditor` remains review-only.
+The routing policy below applies to ordinary general-purpose delegates. Named project specialists retain their own invocation restrictions and model policy; do not silently down-route or invoke an explicitly gated specialist.
 
 ## Route general-purpose delegates by difficulty
 
@@ -19,12 +17,12 @@ Role selection and model selection are separate decisions. `Explore`, `Plan`, an
 
 Before each ordinary spawn, classify the delegated unit by its ambiguity, breadth, consequence of a wrong answer, and difficulty of verification. Choose the lowest class that is likely to complete the unit reliably:
 
-| Class | Typical delegated unit | Ideal Claude family |
-| --- | --- | --- |
-| `routine` | focused search, call-site inventory, docs lookup, extraction, mechanical or highly constrained edit | Haiku |
-| `standard` | bounded implementation or debugging with clear contracts and local verification | Sonnet |
-| `complex` | ambiguous cross-file debugging, architecture-sensitive reasoning, difficult review or integration | Opus |
-| `maximum` | genuinely frontier-level, long-horizon, highly ambiguous work, or a unit whose cheaper attempt exposed a capability limit | Fable |
+| Class      | Typical delegated unit                                                                                                    | Ideal Claude family |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| `routine`  | focused search, call-site inventory, docs lookup, extraction, mechanical or highly constrained edit                       | Haiku               |
+| `standard` | bounded implementation or debugging with clear contracts and local verification                                           | Sonnet              |
+| `complex`  | ambiguous cross-file debugging, architecture-sensitive reasoning, difficult review or integration                         | Opus                |
+| `maximum`  | genuinely frontier-level, long-horizon, highly ambiguous work, or a unit whose cheaper attempt exposed a capability limit | Fable               |
 
 The **parent session's selected model is a hard ceiling for implicit delegation**. The effective child model is the cheapest suitable model for the class, capped at the parent model's family. A difficult task is not permission to spend above the user's session choice.
 
@@ -37,71 +35,51 @@ The **parent session's selected model is a hard ceiling for implicit delegation*
 
 A retry may use a stronger class **within the same ceiling** when the returned evidence shows a capability failure rather than a bad prompt. Keep the existing one-retry limit: sharpen the prompt and, when justified, move the retry up one class; if that retry still fails, pull the unit back to the parent. Do not climb through multiple paid retries, and never cross the parent ceiling implicitly.
 
-## Decompose before you fan out
+## Decomposition and ownership
 
-When a task is a candidate for delegation, sketch a short decomposition first — this is strategy guidance, not a permission gate:
+Delegate a concrete bounded unit when it can run alongside useful independent work. Identify the parent's next work, each delegate's read-only question or exact write scope, and how outputs will be consumed. Do blocking work locally unless the user explicitly requested delegation of that unit. For such a delegate-only request, wait and consume its result.
 
-- **Main agent critical path**: the next work the parent session will do locally.
-- **Sidecar tasks**: bounded tasks that can run in parallel without blocking that critical path.
-- **Ownership**: exact files, modules, or read-only question each subagent owns.
-- **Merge plan**: how returned findings or patches will be reviewed and integrated.
+Continue independent work while delegates run; wait when the next action depends on their output. Do not re-investigate the same question in parallel or treat silence as failure. If a delegate appears stuck, inspect its status, steer it, or stop it before taking over. Deliberate independent review must be intentional and disclosed, not a silent hedge.
 
-Do not spawn if the next parent step is blocked on the subtask — that is the dependency test below, not reluctance to delegate. Do blocked work locally; fan out genuinely independent work freely.
+Use the runtime's read-only exploration role for specific codebase questions and its worker role for implementation. Give parallel writers non-overlapping ownership; never have another worker revert or overwrite a teammate's changes. Prefer isolation when the runtime supports it and the work benefits from it, but account for the actual filesystem mode when integrating.
 
 ## The task-file `delegation:` field records strategy, not permission
 
-The `/plan` task-file `delegation:` field carries a **recorded delegation strategy** from planning into execution — it is a hint, not an authorization switch. The harness still decides whether to delegate at run time; the field just pre-loads a plan so a good decomposition isn't re-derived.
+The `/plan` task-file field carries a plan into execution; it does not authorize execution or override runtime restrictions:
 
-- **`none`** — no specific strategy recorded. On "go", use harness judgment: delegate if the work genuinely parallelizes, run solo if it doesn't. `none` is _not_ an instruction to avoid subagents.
-- **`strategy-only`** — a decomposition is recorded as a hint (in Plan of Work / Memory Hints). On "go", proceed by harness judgment, applying the recorded strategy where it fits. No mandatory permission round-trip.
-- **`authorized`** — the user recorded a specific delegation plan they want followed. On "go", begin per that plan directly and say you are following the recorded strategy.
+- **`none`** — no strategy recorded; use harness judgment when execution is authorized. It does not prohibit delegation.
+- **`strategy-only`** — use the recorded decomposition where it fits; no extra delegation approval round-trip.
+- **`authorized`** — the user selected a specific delegation plan; follow it when execution is authorized.
 
-This section is the single source of truth for the field's values; `task-management.md` → "Approval Signal" only describes how "go" carries the field into execution.
+Keep decomposition, ownership, review responsibilities, cost ceilings, and useful concurrency limits in the existing Plan of Work / Memory Hints. Do not add an always-required planning schema for trivial work.
 
-## Delegate-and-Consume vs. Delegate-and-Continue
+## Worker prompt contract
 
-The deciding signal is **task structure, not the user's exact words.** Before spawning, ask: _does the request decompose into work genuinely separate from the delegated question, or IS the delegated question the whole task?_
+Context inheritance varies by runtime and spawn mode: a worker may receive full history, selected turns, or only its prompt. Check the active schema and selected mode. Always give a self-contained assignment so neither missing context nor inherited parent instructions change the worker's role:
 
-- **Whole task** — the delegated question is the entire request (a single read-only investigation, one bounded fix) → **spawn, then wait and consume the result.** Do NOT shadow-run the same investigation yourself. The harness already says this for searches; it holds for any single delegated unit. Racing it pays for one answer twice and duplicates the subagent's work.
-- **Decomposable** — the request splits into disjoint units → either **fan out one agent per unit in a single message**, or advance a genuinely non-overlapping part yourself while a subagent owns another. Claude lets the parent work in parallel, so both shapes are valid — the constraint is non-overlap, not who does the work.
+- **Goal and boundary:** the required outcome; the recipient is the delegated worker for this unit, not the control session. Inherited history is reference context.
+- **Ownership:** exact files/modules it may edit or the bounded read-only question; state that it is not alone and must preserve others' work.
+- **Constraints:** applicable contracts, authorization, compatibility, validation, and cost limits; provide paths to necessary references.
+- **Runtime:** shared filesystem or isolated checkout when known, and how to return changes.
+- **Output:** concrete findings anchored to files, changed files, validation commands/results, and unresolved risks. Do not claim completion without evidence.
 
-Infer this from what the request _decomposes into_, never from a magic phrase. "Launch an agent to check X and tell me what it finds", "giao cho 1 agent điều tra repo Y", "delegate this audit and read its output" all describe **one delegated unit with no separate parent work** — the same shape, regardless of wording. The reliable tell is **overlap of the same sub-question**: if your own next step (or another agent) would answer the _same_ sub-question this agent owns, that is redundancy, not parallelism — collapse it.
+## Integrating and verifying results
 
-**Dependency test (sharper than overlap).** Parallel parent work is legitimate on Claude, but a local lane is only valid if it needs _nothing_ from the delegated answer. If your "separate" work would **consume** what the subagent is producing — e.g. writing seed data that depends on the routes an explorer is still mapping — it is blocked on the subtask: wait and build on the result; running it now just re-derives the delegated answer. The trap is self-justifying a disjoint lane that secretly depends on the delegated output — that is exactly how a parent drifts into shadow-running. When the lane's independence isn't provable up front, the default is to wait, not to stay busy.
+- **Shared filesystem:** edits are already visible. Inspect the diff and reconcile ownership; do not reapply patches or perform a fictitious merge.
+- **Isolated checkout or returned patch:** review first, then integrate in dependency order using an authorized mechanism. Delegation does not authorize Git merges, commits, pushes, or destructive conflict resolution.
+- Resolve conflicts in the parent. Check the combined effect with validation appropriate to the changed surface; inspect existing worker evidence before repeating checks. Re-run when integration changes behavior, evidence is missing/stale, or concerns remain.
+- A wrong or partial result gets at most one retry with a corrected prompt or changed hypothesis. A capability-driven escalation must stay within the routing ceilings above. If it still fails, complete the unit locally; never repeat the identical attempt hoping for a different answer.
+- Consume all required results before claiming the overall task complete. Relay the findings and limitations that matter to the user regardless of how the client displays worker messages.
 
-Redundancy is acceptable only when **deliberate and disclosed**: independent review (intentionally asking N agents the same question to cross-check), or a hedge the user authorized on a flaky path. The anti-pattern is _silent, unrequested_ duplication. In particular, if you are unsure the Agent tool will honor a constraint — e.g. a `model` override — **surface that constraint and choose one path** (delegate or do it locally), or ask. Never hedge by silently running both.
+## Recovery and knowledge
 
-## Worker Prompt Contract
+For long-running work with an authorized task/spec workspace, record outstanding delegations at spawn time in its existing recovery surface (task notes or spec LEDGER): unit, worker, selected profile when relevant, expected output, and integration location. Mark results consumed. For a read-only or one-off task without authorized persistent state, retain that information in session/tool state and report it if handing off; delegation alone does not permit writing CONTEXT or canonical knowledge.
 
-A subagent does not inherit the parent's conversation — it sees only the spawn prompt. The most common failure is a prompt that assumes shared knowledge. Make every prompt self-contained: carry the file paths, the exact question, and the constraints into the prompt itself.
+Treat returned knowledge as evidence to verify. WIP, proposals, and uncertainty remain candidates in an authorized work surface; recurring behavior goes through `/learn`. Before a durable fact promotion or assigned knowledge mutation, follow `knowledge-management.md` and its maintenance reference, including capture triggers, owner + reachable-map atomicity, and checker validation. A knowledge-writing worker must own both topic and map; after integration verify the checker result covers the resulting state. Do not rely on worker thread history as durable project memory.
 
-Every worker prompt must include: **Goal** (the exact user-visible outcome), **Scope** (files the worker may edit), **Non-overlap** (other agents may be changing nearby code; do not revert their work), **Constraints** (tests, style, security, compatibility), and **Output** (a structured result the parent can consume directly — changed files, the validation command and its result, residual risks; for a read-only explorer, findings anchored to `file:line`, not prose). Prefer read-only explorers before workers when ownership is unclear.
+## Cost and recursion
 
-## Integrating Results
-
-- Integrate returned patches **one at a time, in dependency order**, running the relevant validation after each merge — batch-merging N patches and testing once makes a failure unattributable.
-- Conflicts between two returned patches are resolved by the parent directly. Never spawn another agent to mediate a conflict.
-- When a worker returns a wrong or partial result: retry **once**, with a sharpened prompt that names exactly what the first attempt got wrong; if the evidence points to insufficient model capability, that retry may move up one routing class without exceeding the parent ceiling. If the retry also fails, pull the unit back and do it locally. Never respawn the identical prompt hoping for a different outcome.
-
-## Parent Responsibilities
-
-The parent session remains responsible for the final result. Beyond the harness mechanics:
-
-- The subagent's final message returns to you as the tool result and is NOT shown to the user — relay what matters.
-- Review subagent outputs and integrate only the useful parts; do not treat a subagent patch as final without parent review and validation.
-- Run the relevant validation yourself, or verify the validation evidence is trustworthy.
-- Record each delegation **at spawn time** in the active task file (the CONTEXT micro-handoff for un-planned work; the spec LEDGER as a `delegated` entry for mission work): the unit, the agent, the routing class/model when explicitly selected, the expected output, and where it will be integrated; mark it consumed when integrated. A compaction or handoff must never orphan a running subagent — the file, not session memory, is what remembers outstanding delegations.
-- Persist task/spec state, WIP, proposals, and uncertain subagent findings in the owning task/spec/CONTEXT surface; do not rely on subagent thread history.
-- Route a verified descriptive finding through `.claude/rules/knowledge-management.md` when it is durable beyond the current work. Mid-session promotion requires both the capture gates and one of that rule's immediate-promotion triggers; patch owner + reachable map atomically and run the checker. `/checkpoint` bulk-maintains remaining candidates, while recurring behavior goes to `/learn`.
-
-## Task Documents
-
-For planned work, capture delegation under `## Plan of Work` or `### Memory Hints`, not a separate schema section. Include: the intended decomposition; intended roles; read/write ownership boundaries; validation and review responsibilities; the parent model ceiling and intended routing classes when delegation cost materially matters; any concurrency or other cost limits. When a task is likely to parallelize, record the strategy; otherwise note "Delegation opportunity: <short idea>" when it would materially help a later session.
-
-## Safety And Cost
-
-- Keep delegation one level deep unless the user explicitly asks for recursive delegation.
-- Never exceed the parent session's model family through ordinary delegation without explicit user authorization.
-- Use read-only subagents (`Explore`) for any read-only delegation whenever possible.
-- Give parallel writers `isolation: worktree` so concurrent edits cannot conflict.
-- Be cost-aware on template/downstream projects: match both model tier and fan-out to the size of the request so a trivial ask doesn't spin up expensive parallel work — judgment, not a brake on genuinely parallel work.
+- Keep delegation one level deep unless the user explicitly asks for recursion; host limits still apply.
+- Respect the parent's model and any selectable reasoning-effort ceilings. An unclear or unsupported override is not permission to spend upward.
+- Keep concurrency conservative and within the active host configuration; match fan-out to useful independent units and the user's cost constraints.
+- Use read-only permissions for read-only delegates where the runtime supports them.

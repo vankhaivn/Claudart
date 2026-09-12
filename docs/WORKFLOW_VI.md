@@ -101,13 +101,16 @@ Command start đọc:
 
 Start không chạy knowledge checker. Mục tiêu của nó là khởi động nhẹ và nhanh.
 
+Request hiện tại vẫn là nguồn chỉ đạo trong lúc startup. Nếu request đã chỉ rõ task hoặc spec cần tiếp tục, hoặc yêu cầu resume focus hiện tại không mơ hồ, `start` hoàn tất phần inventory nhẹ rồi đi vào workflow đó mà không hỏi user chọn lại.
+
 ### Chọn đúng chế độ làm việc
 
-| Chế độ        | Dùng khi                                                                             | Nơi lưu                               |
-| ------------- | ------------------------------------------------------------------------------------ | ------------------------------------- |
-| Làm trực tiếp | Thay đổi nhỏ, rõ ràng, ít rủi ro và không cần kế hoạch bền vững                      | Cuộc trò chuyện và lịch sử repository |
-| Task plan     | Triển khai cần kế hoạch bền vững, quyết định đáng lưu hoặc user yêu cầu plan rõ ràng          | `tasks/<task-id>/TASK.md`               |
-| Spec          | Công việc cấp mission cần ý định được duyệt chung và roadmap thực thi nhiều phase | Một thư mục trong `specs/`            |
+| Chế độ            | Dùng khi                                                                                         | Nơi lưu                               |
+| ----------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------- |
+| Làm trực tiếp     | Thay đổi nhỏ, rõ ràng, ít rủi ro và không cần kế hoạch bền vững                                  | Cuộc trò chuyện và lịch sử repository |
+| Task plan         | Phần triển khai có giới hạn cần lưu quyết định, hỗ trợ gián đoạn hoặc được user yêu cầu lập plan | `tasks/<task-id>/TASK.md`             |
+| Spec              | Mission đã định hình cần intent được khóa bằng POC, nhiều phase và standing approval             | Một thư mục trong `specs/`            |
+| Project discovery | Ý tưởng project hoặc product còn thô, trước hết cần tài liệu project có cấu trúc                 | `docs/project/`                       |
 
 Số lượng file không tự tạo ra nhu cầu lập plan. Cần JSON, ảnh hay archive không đồng nghĩa với cần spec. Khi user yêu cầu plan cho việc nhỏ, giữ plan ngắn và chỉ có `TASK.md` trừ khi thực sự cần file hỗ trợ.
 
@@ -264,6 +267,8 @@ bất kỳ trạng thái nào ── user hủy ──▶ cancelled
 
 Việc phê duyệt dùng ngôn ngữ tự nhiên. Các câu rõ ràng như “go”, “implement”, “approved” hoặc “làm đi” có thể bắt đầu một plan đã duyệt. Các câu như “looks good”, “confirmed”, “đóng task” hoặc “xong” cho phép archive task.
 
+Xác định ý định thực thi từ message hiện tại trước, rồi mới dùng chỉ dẫn rõ ràng trước đó nếu nó vẫn còn hiệu lực. Request trực tiếp yêu cầu implement, start, continue hoặc resume đã đủ cho chuyển trạng thái `planning → in-progress`; agent đổi status trước khi sửa implementation và không hỏi lại cùng quyền đó. Request chỉ yêu cầu tạo, giải thích, chỉnh hoặc review plan vẫn giữ khóa planning. Quy tắc ưu tiên này không mở rộng scope và không bỏ cổng xác nhận cuối của user.
+
 Lời khen, câu hỏi hoặc việc user tự sửa task file không được coi là phê duyệt.
 
 Completion có hai bước riêng:
@@ -279,7 +284,7 @@ Task file là kế hoạch có thể tiếp tục, không phải bằng chứng 
 
 ## 6. Quy trình spec
 
-Dùng `/spec <mission>` hoặc `$codex-spec <mission>` cho phạm vi cấp mission cần ý định được duyệt chung và roadmap thực thi nhiều phase—không phải chỉ vì task cần thêm file.
+Dùng `/spec <mission>` hoặc `$codex-spec <mission>` cho mission đã định hình cần intent được duyệt chung, POC làm tham chiếu và roadmap thực thi nhiều phase—không phải chỉ vì task cần thêm file. Dùng project discovery khi user vẫn đang định nghĩa chính project hoặc product; các chi tiết còn mở bên trong một mission đã rõ vẫn được giải quyết trong phần phỏng vấn của spec.
 
 Workspace của spec nằm tại:
 
@@ -300,19 +305,23 @@ Mỗi workspace gồm:
 
 ### Lập kế hoạch và phê duyệt
 
-Command spec phỏng vấn user, ghi quyết định vào workspace và có thể tạo artifact thử nghiệm. Sau đó nó chuẩn bị roadmap đủ rõ để một phiên khác thực thi mà không cần biết cuộc phỏng vấn ban đầu.
+Command spec là protocol authoring. Nó phỏng vấn user, ghi quyết định vào workspace, có thể tạo artifact thử nghiệm và chuẩn bị roadmap đủ rõ để thực thi mà không cần biết cuộc phỏng vấn ban đầu. Nó không viết implementation của product.
 
 User phê duyệt `SPEC.md` và `ROADMAP.md` một lần. Phê duyệt này áp dụng cho phần việc nằm trong scope đã duyệt. Nó không cho phép refactor không liên quan hoặc tự thay đổi product intent.
 
 Spec đã duyệt cũng ghi commit policy. Mặc định agent không tự commit; việc push không bao giờ được ngầm cho phép.
 
+Phê duyệt và ý định thực thi là hai tín hiệu riêng. Chỉ phê duyệt có thể để spec ở trạng thái `ready`. Nếu message hiện tại hoặc chỉ dẫn trước đó vẫn còn hiệu lực cũng yêu cầu implement, run, continue hoặc resume sau khi duyệt, author chuyển thẳng sang spec runner trong cùng phiên. Mở phiên mới vẫn là một lựa chọn, không phải điều kiện bắt buộc. Thay đổi đáng kể ngoài intent đã duyệt vẫn phải sửa spec và xin duyệt lại.
+
 ### Thực thi
 
-Khi phù hợp, chạy `/spec-run <slug>` hoặc `$codex-spec-run <slug>` trong một phiên mới.
+Chạy `/spec-run <slug>` hoặc `$codex-spec-run <slug>` trong phiên hiện tại hoặc một phiên sau.
 
-Mỗi vòng lặp:
+Ở lần chạy đầu, sau khi đổi phiên hoặc compaction, khi phục hồi sau gián đoạn, hoặc khi nghi ngờ drift, runner đọc đầy đủ `SPEC.md`, `ROADMAP.md` và `NOTES.md`, cùng phần đuôi ledger đủ để phục hồi incident đang mở. Trong các vòng lặp liên tục không bị gián đoạn, runner chỉ nạp task đã chọn và dependency, acceptance và ràng buộc scope liên quan, current acceptance delta, cùng các ledger entry mới. Toàn bộ workspace vẫn là nguồn chuẩn; cách đọc tăng dần này tránh nạp lại context không đổi.
 
-1. định hướng lại từ các file spec;
+Sau đó loop:
+
+1. nạp canonical state phù hợp với boundary như mô tả ở trên;
 2. chọn work item pending đầu tiên còn thực thi được;
 3. triển khai và kiểm tra trên bề mặt thực phù hợp;
 4. cập nhật trạng thái item trong roadmap;
@@ -321,11 +330,11 @@ Mỗi vòng lặp:
 
 Một check thất bại chỉ được thử lại khi giả thuyết, implementation hoặc verifier đã thay đổi đáng kể. Lặp lại cùng một lần thử thất bại không phải là tiến triển.
 
-Tại ranh giới giữa các phase, có thể chuyển sang phiên mới khi hữu ích. Workspace spec chính là phần bàn giao; quá trình chạy spec không dùng `HANDOFF.md`.
+Ở ranh giới phù hợp, runner có thể đề nghị checkpoint và chuyển phiên, đồng thời báo tiến độ phase cùng current acceptance delta. Đề nghị này không chặn loop: nếu user từ chối hoặc không trả lời, phần việc đã được cho phép vẫn tiếp tục. Khi user đồng ý, workspace spec chính là phần bàn giao; quá trình chạy spec không dùng `HANDOFF.md`. Workflow tuân theo budget rõ ràng do user hoặc runtime đặt ra và không tự bịa resource estimate, model tier, giới hạn số lần thử hay ngưỡng chuyển phiên.
 
 ### Review cuối
 
-Khi mọi work item đã hoàn tất hoặc được supersede rõ ràng và không còn blocker, executor chạy một acceptance gate mới. Mọi acceptance scenario phải có bằng chứng hiện tại trước khi spec chuyển sang `awaiting-final-review`.
+Khi mọi work item đã hoàn tất hoặc được supersede rõ ràng và không còn blocker, executor chạy acceptance gate phù hợp. Gate đầu tiên và mission vừa được sửa đáng kể thiết lập full baseline bằng tập fresh check nhỏ nhất không trùng lặp. Sau một thay đổi review có giới hạn, scoped gate chạy fresh check cho bề mặt thực sự bị ảnh hưởng cùng dependency trực tiếp, đồng thời giữ lại bằng chứng không bị ảnh hưởng với lý do rõ ràng; nếu không bảo vệ được ranh giới thì quay về full baseline. Mọi scenario phải có bằng chứng hợp lệ trước khi spec chuyển sang `awaiting-final-review`.
 
 User, không phải agent, xác nhận spec đã hoàn tất.
 
@@ -341,8 +350,11 @@ Khi giao việc cho subagent:
 - giao cho mỗi worker một câu hỏi hoặc phạm vi file rõ ràng;
 - giữ explorer ở chế độ chỉ đọc;
 - các writer chạy song song phải sở hữu phạm vi tách biệt;
+- coi context hội thoại được kế thừa là tùy thuộc host và đưa đầy đủ goal, constraint cùng acceptance condition cần thiết vào prompt của worker;
+- kiểm tra host có dùng chung filesystem hay không: với filesystem dùng chung, edit worker trả về có thể đã hiện diện; trong môi trường cô lập, phải tích hợp patch hoặc artifact được trả về một cách rõ ràng;
 - tránh tự làm lại cùng investigation mà worker đã nhận, trừ khi chủ đích là kiểm tra độc lập;
 - tích hợp kết quả theo thứ tự phụ thuộc và validate từng phần;
+- kiểm tra bề mặt bị ảnh hưởng cùng các dependency liên quan thay vì tin vào lời khẳng định hoàn tất của worker;
 - agent cha chịu trách nhiệm cuối cùng.
 
 Project có ba agent chuyên biệt chỉ chạy khi được gọi rõ ràng:

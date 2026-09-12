@@ -4,10 +4,11 @@ This repository contains CLAUDART, a markdown-based operating layer for AI codin
 
 ## Context Loading
 
-- Read `.codex/CONTEXT.md` for current session state before meaningful work.
+- Use `.codex/` as the default state layer. If the user explicitly chooses another CLAUDART layer (for example, asks Codex to follow the Claude `/start` command), keep that selected layer as the state authority for the work while using the actual host's tools and agent capabilities. Do not read, synchronize, or migrate both state stores automatically.
+- Read the selected layer's CONTEXT and relevant indexes before meaningful work; preserve current user instructions over stale saved state. The paths below describe the default Codex layer.
 - Read `.codex/tasks/index.md` (if it exists) for active implementation plans.
 - Read `.codex/guidelines/ai-behavior.md`, then load only the additional guideline files relevant to the current task. Do not read every guideline blindly.
-- Read `.codex/guidelines/knowledge-management.md` in full only when the task retrieves, writes, audits, or refactors project knowledge, or when the user asks for a knowledge update or prior-project evidence.
+- Read `.codex/guidelines/knowledge-management.md` when retrieving project knowledge. For knowledge writes, audits, or refactors, also follow `.codex/references/knowledge-maintenance.md`; retrieval alone does not require it.
 - Do not auto-load `.codex/JOURNAL.md`; use it only for explicit history or learning tasks.
 - Do not auto-load `.codex/HANDOFF.md`; it is a one-shot session baton consumed by `$codex-start`.
 - Do not auto-load `.codex/tasks/*/TASK.md` bodies or task artifacts. Read the selected `TASK.md` when resuming or working on it, then only supporting files needed for the next action.
@@ -34,11 +35,11 @@ This repository contains CLAUDART, a markdown-based operating layer for AI codin
 ## Guidelines
 
 See `.codex/guidelines/ai-behavior.md` for universal AI behavior guidelines.
-See `.codex/guidelines/code-health.md` for the continuous, behavior-preserving implementation baseline applied whenever code or code-adjacent artifacts are inspected or changed.
+See `.codex/guidelines/code-health.md` for the continuous, behavior-preserving implementation baseline when implementing or reviewing code or code-adjacent artifacts; read the sections relevant to the change and its verification.
 See `.codex/guidelines/task-management.md` for the lightweight task-workspace workflow that replaces session-only plan mode.
 See `.codex/guidelines/agent-delegation.md` for Codex subagent and parallel delegation protocol. Trust the harness on whether to delegate; the guideline supplies the how — decomposition, self-contained worker prompts, anti-shadow-run discipline, and persisting delegated findings.
 See `.codex/guidelines/spec-workflow.md` for mission-scale spec workspaces in `.codex/specs/` — the loop-engineering layer above tasks, executed autonomously by `$codex-spec-run` under a standing approval.
-See `.codex/guidelines/knowledge-management.md` for the full knowledge routing, capture, schema, lifecycle, and validation contract. Load it only under the trigger in Context Loading.
+See `.codex/guidelines/knowledge-management.md` for bounded retrieval and classification. Its maintenance reference supplies conditional capture, schema, lifecycle, and validation rules; load it under the triggers in Context Loading.
 Project knowledge: `.codex/knowledge/INDEX.md` is the root router surfaced by `$codex-start`; topic bodies are read on demand.
 
 ## Knowledge Contract
@@ -53,5 +54,5 @@ Project knowledge: `.codex/knowledge/INDEX.md` is the root router surfaced by `$
 - "Do not assume a human will document your code patterns. If you build it, document it."
 - Existing Codex guidelines change → update the relevant file in `.codex/guidelines/`.
 - New domains/layers → create a new guideline file with flow-style `paths: [...]`, `description:`, `when_to_use:`, and inline `tags: [...]` frontmatter, then ensure `AGENTS.md` points to it when globally relevant.
-- Durable project facts → follow the four-invariant Knowledge Contract and the full knowledge guideline; a natural-language mid-session update is sufficient when the capture gate passes.
+- Durable project facts → follow the four-invariant Knowledge Contract and its conditional maintenance reference; a natural-language mid-session update is sufficient when the capture gate passes.
 - Live state → update `.codex/CONTEXT.md` through `$codex-checkpoint`.

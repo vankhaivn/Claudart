@@ -22,7 +22,7 @@ The first doctor run establishes a read-only baseline; refactor performs one con
 1. Run `git status --short`. Preserve unrelated user changes and stop for direction only when overlapping edits make the refactor unsafe.
 2. Resolve the active memory index: installed projects normally use root `AGENTS.md`; the CLAUDART source template may use `.codex/AGENTS.md` as the installer source. If both differ and local evidence does not identify the owner, ask before overwriting either.
 3. Inventory `.codex/CONTEXT.md`, `.codex/JOURNAL.md`, guidelines, knowledge, tasks, specs, skills, agents, and recent Git history. Never read `.env` or expose secrets.
-4. Read `.codex/guidelines/knowledge-management.md` in full before inspecting or changing knowledge.
+4. Read `.codex/guidelines/knowledge-management.md` and `.codex/references/knowledge-maintenance.md` before inspecting or changing knowledge.
 5. Require `.codex/scripts/knowledge-check.sh`. If it is missing, report a High-severity installation problem and stop before knowledge writes.
 6. Run `bash .codex/scripts/knowledge-check.sh --root .` and retain its pre-change findings. Exit `1` is a finding baseline; exit `2` is a checker usage/runtime failure, so stop before knowledge writes.
 
@@ -53,7 +53,7 @@ Route content by meaning before reorganizing files. Do not move WIP or a propose
 
 1. Trim the active `AGENTS.md` to project identity, selective context loading, core workflows, security/repository-wide constraints, and pointers. Never require reading every guideline blindly. Keep it under 100 lines where practical; if it still exceeds 150 lines, flag that explicitly in the final report.
 2. Reconcile stale references to deprecated or duplicate memory files. Follow the repository convention for byte-identical duplicates; ask before removing a divergent file or choosing a winner.
-3. Keep the four compact knowledge invariants in `AGENTS.md` and the full contract in `knowledge-management.md`.
+3. Keep the four compact knowledge invariants in `AGENTS.md` and the retrieval contract in `knowledge-management.md`, with conditional schema/capture/lifecycle detail in `.codex/references/knowledge-maintenance.md`. Preserve the loader's explicit state-layer selection and host-native tool usage; do not synchronize stores automatically.
 4. Ensure every relevant guideline has `paths:`, `description:`, `when_to_use:`, and `tags:` frontmatter and a clear owner. Keep flow-style `paths`/`tags`.
 5. Verify concrete guideline claims against repository sources. Classify mismatches as guideline-stale, source-debt, open-work, or needs-user-decision; do not weaken a desired invariant merely because source currently violates it.
 6. Detect kitchen-sink files, near-duplicates, stale temporary wording, and repeated facts. Keep a rule in its most specific owner and replace copies with pointers; merge, split, or remove semantic owners only with clear evidence and user confirmation.
@@ -66,7 +66,7 @@ Semantic audit results must identify guidelines changed, stale rules fixed, sour
 
 ## 5. Normalize Knowledge In Place
 
-Read every topic frontmatter, the root router, domain maps, and route targets. Use the canonical grammar and mutation rules from `knowledge-management.md`; do not restate or improvise a second schema.
+Read every topic frontmatter, the root router, domain maps, and route targets. Use the canonical grammar and mutation rules from `.codex/references/knowledge-maintenance.md`; do not restate or improvise a second schema.
 
 For each topic:
 

@@ -1,21 +1,22 @@
 ---
-description: Create a dated mission-scale spec workspace in .claude/specs/ — interview the user, freeze the intent in a reviewable POC artifact, then write a decision-complete SPEC + ROADMAP that a later (often cheaper) session can execute autonomously via /spec-run.
+description: Create or amend a dated mission-scale spec workspace in .claude/specs/, freeze intent in reviewable POC artifacts, and hand an approved mission to /spec-run when execution is requested.
 ---
 
-You are the expensive planning session. Everything you learn from the user in this conversation dies with it — the spec folder you produce is the only thing the executor will ever see. Spend the tokens here so `/spec-run` doesn't have to.
+You are the spec author. Preserve confirmed intent and execution-critical decisions in the spec folder so execution remains correct across sessions, compaction, and handoff to `/spec-run`.
 
 Before doing anything, read `.claude/rules/spec-workflow.md` and `.claude/rules/knowledge-management.md`. These rules define mission state and knowledge routing; this command does not duplicate them.
 
 ## Inputs
 
 - The user's request after `/spec` is the mission description. If empty, ask: "What's the mission?"
-- If the request is actually a single feature or fix, say so and suggest `/plan` instead. If it is a raw product idea with no repo and no scope at all, suggest `/project-discovery` first — `/spec` can then build on its `docs/project/` output.
+- Route a bounded feature or fix to `/plan`. Route an undefined project/product idea that first needs durable project documentation to `/project-discovery`. Keep a defined, demoable mission in `/spec` even when the interview still needs to settle mission-level details.
+- Track execution intent separately from approval. An explicit request to implement, execute, start, continue, or resume after approval remains applicable unless the user withdraws it; a request to author or approve the spec alone does not imply immediate execution.
 
 ## Procedure
 
 ### Step 1 — Read project context
 
-In parallel: `.claude/CONTEXT.md`, `.claude/specs/INDEX.md` (if an active spec already covers this mission, surface it and ask whether to continue it instead), the root knowledge router plus only relevant routed detail within the knowledge budget, `docs/project/` if present, and `git log -5 --oneline`. If the user continues an existing `drafting` spec — including an approved final-review scope amendment returned by `/spec-run` — reuse its dated folder; never create a duplicate mission folder.
+In parallel: `.claude/CONTEXT.md`, `.claude/specs/INDEX.md`, the root knowledge router plus only relevant routed detail under the knowledge rule's bounds, `docs/project/` if present, and `git log -5 --oneline`. If an active spec already covers the mission, honor an explicit current selection or continue/resume instruction without asking again; ask only when multiple plausible matches remain ambiguous. Reuse an existing `drafting` spec — including an approved final-review scope amendment returned by `/spec-run` — and route other statuses under the canonical state machine; never create a duplicate mission folder.
 
 Ensure `.claude/specs/done/` exists. Before deciding whether an existing spec is active, check its `SPEC.md` frontmatter status; a top-level spec folder with `status: done` or `status: cancelled` is stale archive state, not an active collision, and should be moved to `.claude/specs/done/` when syncing INDEX.
 
@@ -65,10 +66,10 @@ Re-read SPEC.md and ROADMAP.md as if this conversation never happened, pretendin
 
 Review SPEC.md (especially Must-NOT-Have) and ROADMAP.md. When you approve, that is a STANDING
 approval: /spec-run will execute the whole roadmap without asking again until the final review.
-Say "go" to approve — then open a fresh session, /start, and /spec-run <slug> (or the dated folder id if there are multiple active specs with the same short slug).
+Say "go" to approve. Add "and run it" to begin /spec-run in this session; you can also run it later in a fresh session if you prefer.
 ```
 
-Do NOT begin implementing, even after approval — on "go", flip `status → ready`, sync INDEX, and stop. Execution belongs to `/spec-run`.
+The author protocol never writes implementation code. On approval, flip `status → ready` and sync INDEX. If approval is the only instruction, stop at `ready`. If the current message or an earlier still-applicable instruction explicitly requests execution after approval, hand control directly to `/spec-run` in this session; the runner owns `ready → running` and all implementation. A fresh session is optional.
 
 ## Anti-Patterns
 

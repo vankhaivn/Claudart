@@ -1,26 +1,27 @@
 ---
 name: codex-spec
-description: Create a dated mission-scale spec workspace in .codex/specs/ — interview the user, freeze the intent in a reviewable POC artifact, then write a decision-complete SPEC + ROADMAP that a later (often cheaper) session can execute autonomously via $codex-spec-run.
+description: Create or amend a dated mission-scale spec workspace in .codex/specs/, freeze intent in reviewable POC artifacts, and hand an approved mission to $codex-spec-run when execution is requested.
 ---
 
 # Codex Spec
 
-You are the expensive planning session. Everything you learn from the user in this conversation dies with it — the spec folder you produce is the only thing the executor will ever see. Spend the tokens here so `$codex-spec-run` doesn't have to.
+You are the spec author. Preserve confirmed intent and execution-critical decisions in the spec folder so execution remains correct across sessions, compaction, and handoff to `$codex-spec-run`.
 
 Before doing anything, read `.codex/guidelines/spec-workflow.md`. That guideline defines the folder schema, the SPEC/ROADMAP/NOTES/LEDGER formats, the decision-complete bar, the status state machine, and the standing-approval semantics. This skill does not duplicate that contract; it orchestrates drafting.
 
 ## Inputs
 
 - The user's request after `$codex-spec` is the mission description. If empty, ask: "What's the mission?"
-- If the request is actually a single feature or fix, say so and suggest `$codex-plan` instead. If it is a raw product idea with no repo and no scope at all, suggest `$codex-project-discovery` first — `$codex-spec` can then build on its `docs/project/` output.
+- Route a bounded feature or fix to `$codex-plan`. Route an undefined project/product idea that first needs durable project documentation to `$codex-project-discovery`. Keep a defined, demoable mission in `$codex-spec` even when the interview still needs to settle mission-level details.
+- Track execution intent separately from approval. An explicit request to implement, execute, start, continue, or resume after approval remains applicable unless the user withdraws it; a request to author or approve the spec alone does not imply immediate execution.
 
 ## Procedure
 
 ### Step 1 — Read project context
 
-Read: `.codex/CONTEXT.md`, `.codex/specs/INDEX.md` (if an active spec already covers this mission, surface it and ask whether to continue it instead), `.codex/knowledge/INDEX.md`, `docs/project/` if present, and `git log -5 --oneline`. If the user continues an existing `drafting` spec — including an approved final-review scope amendment returned by `$codex-spec-run` — reuse its dated folder; never create a duplicate mission folder.
+Read: `.codex/CONTEXT.md`, `.codex/specs/INDEX.md`, `.codex/knowledge/INDEX.md`, `docs/project/` if present, and `git log -5 --oneline`. If an active spec already covers the mission, honor an explicit current selection or continue/resume instruction without asking again; ask only when multiple plausible matches remain ambiguous. Reuse an existing `drafting` spec — including an approved final-review scope amendment returned by `$codex-spec-run` — and route other statuses under the canonical state machine; never create a duplicate mission folder.
 
-If planning needs a knowledge route beyond the root index, read `.codex/guidelines/knowledge-management.md` in full and stay within its map/topic/section budget. Do not treat a proposed product state in discovery docs or SPEC as current project knowledge.
+If planning needs a knowledge route beyond the root index, read `.codex/guidelines/knowledge-management.md` in full and follow its bounded routing contract. Do not treat a proposed product state in discovery docs or SPEC as current project knowledge.
 
 Ensure `.codex/specs/done/` exists. Before deciding whether an existing spec is active, check its `SPEC.md` frontmatter status; a top-level spec folder with `status: done` or `status: cancelled` is stale archive state, not an active collision, and should be moved to `.codex/specs/done/` when syncing INDEX.
 
@@ -70,10 +71,10 @@ Re-read SPEC.md and ROADMAP.md as if this conversation never happened, pretendin
 
 Review SPEC.md (especially Must-NOT-Have) and ROADMAP.md. When you approve, that is a STANDING
 approval: $codex-spec-run will execute the whole roadmap without asking again until the final review.
-Say "go" to approve — then open a fresh session, $codex-start, and $codex-spec-run <slug> (or the dated folder id if there are multiple active specs with the same short slug).
+Say "go" to approve. Add "and run it" to begin $codex-spec-run in this session; you can also run it later in a fresh session if you prefer.
 ```
 
-Do NOT begin implementing, even after approval — on "go", flip `status → ready`, sync INDEX, and stop. Execution belongs to `$codex-spec-run`.
+The author protocol never writes implementation code. On approval, flip `status → ready` and sync INDEX. If approval is the only instruction, stop at `ready`. If the current message or an earlier still-applicable instruction explicitly requests execution after approval, hand control directly to `$codex-spec-run` in this session; the runner owns `ready → running` and all implementation. A fresh session is optional.
 
 ## Anti-Patterns
 

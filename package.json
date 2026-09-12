@@ -6,9 +6,10 @@
     "check:shell": "/bin/bash -n install.sh .claude/scripts/knowledge-check.sh .codex/scripts/knowledge-check.sh tests/knowledge-check/run.sh tests/spec-workflow/run.sh tests/task-workspaces/run.sh",
     "test:knowledge": "/bin/bash tests/knowledge-check/run.sh",
     "test:spec-workflow": "/bin/bash tests/spec-workflow/run.sh",
-    "check": "npm run format:md:check && npm run check:shell && npm run test:knowledge && npm run test:spec-workflow && npm run test:task-workspaces",
+    "check": "npm run format:md:check && npm run check:shell && npm run test:knowledge && npm run test:spec-workflow && npm run test:task-workspaces && npm run test:instruction-loading",
     "hooks:install": "git config core.hooksPath .githooks",
-    "test:task-workspaces": "/bin/bash tests/task-workspaces/run.sh"
+    "test:task-workspaces": "/bin/bash tests/task-workspaces/run.sh",
+    "test:instruction-loading": "node tests/instruction-loading/run.mjs"
   },
   "devDependencies": {
     "prettier": "3.8.3"

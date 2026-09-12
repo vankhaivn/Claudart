@@ -21,13 +21,19 @@ Task bodies (`.claude/tasks/*/TASK.md`) and artifacts are not auto-imported. Rea
 
 ## Domain Rules
 
-See @.claude/CONTEXT.md for the current state of work (updated by /checkpoint).
-See @.claude/rules/ai-behavior.md for universal AI behavior guidelines.
-See @.claude/rules/code-health.md for the continuous, behavior-preserving implementation baseline applied whenever code or code-adjacent artifacts are inspected or changed.
-See @.claude/rules/task-management.md for the lightweight task-workspace workflow that replaces native plan mode.
-See @.claude/rules/agent-delegation.md for how to delegate well to subagents (decomposition, worker prompts, anti-shadow-run, persistence) — the harness decides _whether_ to delegate; the rule adds the project's _how_.
-See @.claude/rules/spec-workflow.md for dated mission-scale spec workspaces in `.claude/specs/` with `done/` archives — the loop-engineering layer above tasks, executed autonomously by /spec-run under a standing approval.
-See @.claude/rules/knowledge-management.md for the always-available knowledge routing, capture, schema, and validation contract.
+Use `.claude/` as the default state layer. If the user explicitly chooses another CLAUDART layer (for example, asks Claude to follow a Codex skill), use that selected layer's CONTEXT, indexes, and workflow state as the authority for this work, with the actual host's tools and agent capabilities. Do not automatically load, synchronize, or migrate both state stores. Current user instructions take precedence over stale saved state.
+
+Before meaningful work, read the selected layer's CONTEXT and relevant indexes. For the default Claude layer, use `.claude/CONTEXT.md`. Task bodies and historical state remain on demand.
+
+See @rules/ai-behavior.md for universal behavior. Imports here resolve relative to this file; reserve automatic imports for universally needed instructions.
+
+Read these project-root paths only when their trigger applies. Conditional rules use command/reference scopes so reading startup indexes or metadata does not activate entire workflows:
+
+- `.claude/rules/code-health.md` when implementing or reviewing code or code-adjacent artifacts; use relevant sections and required verification.
+- `.claude/rules/task-management.md` when creating, executing, or resuming a persistent task.
+- `.claude/rules/agent-delegation.md` when planning delegation or consuming worker results; use the current runtime's capabilities.
+- `.claude/rules/spec-workflow.md` when authoring or executing a mission spec.
+- `.claude/rules/knowledge-management.md` when retrieving project knowledge; also read `.claude/references/knowledge-maintenance.md` before knowledge writes, audits, or refactors.
 
 Project knowledge: `.claude/knowledge/INDEX.md` is the root router surfaced by `/start`; it and topic bodies are not auto-imported. Route entries on demand under the knowledge rule.
 
@@ -35,6 +41,6 @@ Project knowledge: `.claude/knowledge/INDEX.md` is the root router surfaced by `
 
 - "Do not assume a human will document your code patterns. If you build it, document it."
 - Existing rules change -> update the relevant file in `.claude/rules/`.
-- New domains/layers -> CREATE a new rule file in `.claude/rules/` (with flow-style `paths: [...]`, `description:`, `when_to_use:`, and inline `tags: [...]` frontmatter) AND APPEND its `@` import to `.claude/CLAUDE.md`'s Domain Rules section.
+- New domains/layers -> CREATE a new rule file in `.claude/rules/` (with flow-style `paths: [...]`, `description:`, `when_to_use:`, and inline `tags: [...]` frontmatter) and add a conditional route in this file's Domain Rules section. Use narrow paths for conditional rules; reserve `@` imports for universal guidance, with paths relative to this file.
 - Durable descriptive facts that pass the knowledge rule -> patch the canonical topic and reachable map atomically, then run the knowledge checker. Mid-session natural-language updates are valid; `/checkpoint` is bulk maintenance, not the sole write gate.
 - Global changes -> update `.claude/CLAUDE.md` directly.

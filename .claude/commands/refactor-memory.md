@@ -139,19 +139,22 @@ Target: keep `.claude/CLAUDE.md` under 100 lines where practical. If it exceeds 
 
 ## 7. Cross-Link Rules
 
-Under a `## Domain Rules` heading in `.claude/CLAUDE.md`, add `@` imports for every rule file plus the live-state context file.
+Under `## Domain Rules` in `.claude/CLAUDE.md`, preserve a compact universal baseline and add conditional routes for domain/workflow guidance. Do not turn every rule into an automatic import or broaden its native `paths` merely to make it globally visible.
 
-Example:
+Resolve actual imports relative to the file containing them, including nested imports. For this installed loader:
 
 ```markdown
-See @.claude/CONTEXT.md for current session state, updated by `/checkpoint`.
-See @.claude/rules/ai-behavior.md for universal AI behavior guidelines.
-See @.claude/rules/architecture.md for architecture boundaries.
+See @rules/ai-behavior.md for universal AI behavior guidelines.
+Before meaningful work, read the selected state layer's CONTEXT; default: `.claude/CONTEXT.md`.
+Read `.claude/rules/code-health.md` when implementing or reviewing code.
+Read `.claude/rules/task-management.md` for persistent task work.
 ```
 
-**NEVER add `@.claude/JOURNAL.md`** as a loaded context reference. JOURNAL is intentionally excluded from session context to save tokens. If you find such an import or auto-load instruction in `.claude/CLAUDE.md` or `.claude/rules/`, remove it and warn the user in the final summary.
+Preserve the user's explicit state-layer choice. Default to `.claude/` for Claude work; when a user intentionally selects another layer, use its state while retaining the actual host's tools. Never auto-load or synchronize both stores. Keep current instructions authoritative over saved state.
 
-For the knowledge tier, add a **plain pointer line** (not an `@` import), e.g. `Project knowledge: see .claude/knowledge/INDEX.md (surfaced by /start; route entries on demand).` `/start` reads only the root router; later workflows may route bounded detail under `knowledge-management.md`. Knowledge files are never auto-imported.
+Never add automatic JOURNAL, HANDOFF, task-body, spec-body, or knowledge-body imports. Inspect resolved targets rather than matching one literal path spelling; remove actual prohibited auto-load edges and report the repair. Plain conditional paths and quoted examples are valid.
+
+Keep a plain root-router pointer, such as `.claude/knowledge/INDEX.md (surfaced by /start; route entries on demand)`. Route retrieval to `knowledge-management.md` and knowledge mutations/audits/refactors to `.claude/references/knowledge-maintenance.md`. Verify support files exist; preserve project-specific routing.
 
 ## 8. Wire Up AI Behavior Guidelines
 
@@ -164,7 +167,7 @@ For the knowledge tier, add a **plain pointer line** (not an `@` import), e.g. `
 
 ## 9. Audit Rules, Skills, And Agents
 
-Report proposed audit changes in a clear list before applying risky changes. Apply safe fixes such as missing references, stale deleted-file references, frontmatter corrections, missing `@.claude/CONTEXT.md` references, and JOURNAL `@` import removal. Ask before merging or deleting agents, rules, or skills.
+Report proposed audit changes in a clear list before applying risky changes. Apply safe fixes such as missing references, stale deleted-file references, frontmatter corrections, missing conditional CONTEXT routes, and JOURNAL `@` import removal. Ask before merging or deleting agents, rules, or skills.
 
 For every file in `.claude/rules/`:
 
@@ -172,7 +175,7 @@ For every file in `.claude/rules/`:
 - Flag block-list `paths:`; rules must use flow-style `paths: ["glob-a", "glob-b"]`.
 - Flag block-list `tags:`; rules must use inline `tags: [tag-a, tag-b]` style.
 - Run a glob check on each `paths:` entry. `paths: ["**/*"]` is valid for universal rules.
-- If a glob matches zero files, flag the rule as potentially dead and ask whether to remove or rescope it.
+- If a glob matches zero files, check whether it intentionally targets a future task/spec workspace or optional feature and remains explicitly routed. Do not rescope an empty seed globally; report only genuinely unreachable or stale guidance.
 - Replace long inlined code with `file:line` references.
 - Apply the Rule Quality Checklist.
 - Apply the semantic audit from Step 5 before declaring a rule healthy.
@@ -200,7 +203,7 @@ For `.claude/CONTEXT.md`:
 
 - Confirm it exists. If not, create a concise template.
 - Verify line count is at most 150. If exceeded, flag for user review and propose trimming or graduating long-lived items into `.claude/rules/`.
-- Confirm `@.claude/CONTEXT.md` is imported in `.claude/CLAUDE.md`. If missing, add it.
+- Confirm `.claude/CLAUDE.md` routes to the selected state layer's CONTEXT before meaningful work, defaulting to `.claude/CONTEXT.md`. If missing, add a plain conditional route, preserving an explicit alternate-layer choice.
 - Ensure it describes current state only.
 
 For `.claude/JOURNAL.md`:
@@ -225,7 +228,7 @@ For `.claude/specs/`:
 
 For `.claude/knowledge/`:
 
-- Read `.claude/rules/knowledge-management.md`; it is the semantic source of truth. If the folder or root router is missing, create the lean canonical scaffold.
+- Read `.claude/rules/knowledge-management.md` and `.claude/references/knowledge-maintenance.md`; together they are the semantic source of truth. If the folder or root router is missing, create the lean canonical scaffold.
 - Perform **one in-place normalization pass** over every topic and `_maps/*.md`, including unindexed files. Preserve every body verbatim and preserve curated root/map titles, hooks, grouping, ordering, and external routes.
 - Normalize frontmatter and routes to the rule's current grammar without inventing aliases, triggers, scope, relations, evidence, or lifecycle. `updated` changes only where this pass edits content; `last_verified` changes only after an actual evidence check.
 - Verify concrete claims against current sources/repository evidence. For a current canonical claim with sufficient evidence, set `status: active`, set `last_verified` to the verification date, and retain at least one `sources` or `verify` anchor. With insufficient or conflicting evidence, set `status: review-needed` and add a concise `status_note`; do not fabricate certainty. Preserve an explicitly evidenced `superseded` or `retired` lifecycle and its explanation.
@@ -254,7 +257,7 @@ Include these rules:
 
 - "Do not assume a human will document your code patterns. If you build it, document it."
 - Existing rules change → update the relevant file in `.claude/rules/`.
-- New domains/layers → CREATE a new rule file in `.claude/rules/` (with flow-style `paths: [...]`, `description:`, `when_to_use:`, and inline `tags: [...]` frontmatter) AND APPEND its `@` import to `.claude/CLAUDE.md`'s Domain Rules section.
+- New domains/layers → CREATE a new rule file in `.claude/rules/` (with flow-style `paths: [...]`, `description:`, `when_to_use:`, and inline `tags: [...]` frontmatter) and add a conditional Domain Rules route. Reserve automatic imports for universal guidance, using paths relative to the importing file.
 - Durable descriptive facts that pass `.claude/rules/knowledge-management.md` → patch the canonical owner and reachable map atomically, then run the checker. Scope may be local; task/spec state stays local.
 - Global changes → update `.claude/CLAUDE.md` directly.
 - Shared live state → update `.claude/CONTEXT.md` through `/checkpoint`, not through refactor-memory.

@@ -1,7 +1,7 @@
 ---
 paths: ["**/*"]
 description: Evidence-driven code-health rules for correct, cohesive, maintainable changes without speculative abstraction or unnecessary churn.
-when_to_use: Whenever inspecting, creating, changing, fixing, refactoring, or reviewing code or code-adjacent artifacts.
+when_to_use: When implementing, fixing, refactoring, or reviewing code or code-adjacent artifacts; load relevant sections for the change and its verification.
 tags: [code-health, correctness, architecture, maintainability, testing]
 ---
 
