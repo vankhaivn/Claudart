@@ -1,62 +1,48 @@
 ---
 paths: ["**/*"]
-description: Bounded routing, capture, schema, lifecycle, and validation contract for durable descriptive knowledge under `.claude/knowledge/`.
-when_to_use: Whenever project knowledge is read, searched, created, updated, routed, normalized, or reviewed.
+description: Bounded retrieval and classification contract for durable descriptive project knowledge under `.claude/knowledge/`; routes mutations and audits to the maintenance reference.
+when_to_use: When a task retrieves or searches project knowledge, classifies a possible durable fact, or audits, mutates, or refactors `.claude/knowledge/`.
 tags: [knowledge, memory, routing, validation]
 ---
 
 # Knowledge Management
 
-This rule is the semantic source of truth for `.claude/knowledge/`. Knowledge is durable descriptive fact, not task state or behavioral instruction.
+`.claude/knowledge/` stores durable **descriptive** project facts. Topic Markdown is the source of truth; `INDEX.md` and `_maps/*.md` are compact routers.
 
-## Retrieve With Progressive Disclosure
+This rule is the root contract for retrieval and classification. Routine `/start` reads only `.claude/knowledge/INDEX.md`; it does not load this rule, detail topics, domain maps, the maintenance reference, or the checker.
 
-- Read `.claude/knowledge/INDEX.md` first. Follow at most 2 matching `_maps/` routes, then at most 3 direct topics and 2 one-hop `related` topics.
-- Rank direct topics by exact name/alias, typed scope or symbol, trigger, title/description/type, then source match. Treat non-active material as context to verify, not current authority.
-- For each topic, inspect frontmatter and the heading outline first, then the smallest relevant section. Read the full body only when those layers cannot answer the question.
-- If routed context is still insufficient, search actual repository evidence with bounded `rg` and Git queries across knowledge, task/spec artifacts, JOURNAL, docs, and source. There is no recall command, and retrieval never writes or changes trust state.
+## Load Maintenance Detail Only When Needed
 
-## Capture And Route
+- For retrieval, prior-project evidence, or classification without a write, use this rule only.
+- If the task creates, updates, routes, normalizes, audits, or refactors knowledge, read `.claude/references/knowledge-maintenance.md` before acting. It owns write authorization triggers, lifecycle operations, canonical metadata and route schemas, and validation.
+- An instruction from an existing workflow to read `knowledge-management.md` “in full” for a knowledge mutation or audit means read both this rule and that maintenance reference. Do not load the maintenance reference for retrieval alone.
 
-Promote a claim only when it is descriptive, durable beyond the current work, current rather than proposed, and supported by evidence. A fact may be scoped to a path, component, platform, environment, or version; it need not apply project-wide.
+## Retrieve With A Fixed Budget
 
-- WIP, proposals, acceptance state, and task/spec chronology stay in the active task, spec, or `CONTEXT.md`.
-- Behavioral conventions and recurring corrections belong in `.claude/rules/`, normally through `/learn`.
-- Uncertain or conflicting observations stay as candidates in the owning work artifact, or make an existing owner `review-needed`; never present them as canonical fact.
-- Do not auto-write after every exploration. Promote immediately only when the user asks in natural language, a verified correction is needed to avoid continuing from a known-wrong fact, confirmed source drift requires an owner trust/content update, or a lifecycle command reaches its promotion boundary. `/checkpoint` bulk-maintains remaining candidates and routing, but is not the only write gate.
+1. Read `.claude/knowledge/INDEX.md`.
+2. Follow at most 2 relevant `_maps/*.md` routes.
+3. Select at most 3 direct topics using exact slug/name/alias first, then typed scope, triggers, description/type, and source match.
+4. For each topic, inspect frontmatter and the heading outline, then read the smallest relevant section. Read the full body only when the task needs the whole invariant or the smaller view is insufficient.
+5. Expand at most 2 one-hop `related` topics. Do not recurse through the graph.
+6. Treat `review-needed`, conflicting, superseded, or retired material as context to verify, not current authority.
 
-Before writing, confirm `.claude/scripts/knowledge-check.sh` exists. A missing checker is a High-severity installation problem and blocks the mutation. Patch the existing canonical owner before creating a topic. Every mutation updates the topic and its reachable root/domain-map route atomically, preserves curated titles, hooks, grouping, ordering, and external routes, and then runs:
+If routed context is insufficient, search actual repository evidence with bounded `rg` and Git queries across canonical sources, knowledge, task/spec archives, and targeted JOURNAL lines. Return file/section evidence and distinguish source text from inference. There is no recall command.
 
-```bash
-bash .claude/scripts/knowledge-check.sh
-```
+Retrieval never writes, promotes, deletes, changes trust state, or records telemetry.
 
-Never auto-delete knowledge or auto-promote an ambiguous unindexed file.
+## Classify Before Persistence
 
-## Canonical Frontmatter
+A claim qualifies for knowledge only when all four tests pass:
 
-Topic frontmatter requires `name`, `description`, `type`, `status`, and `updated`. An `active` topic also requires `last_verified` and at least one of `sources` or `verify`. A non-active topic carries `status_note` explaining its trust state and next action or successor.
+- **Descriptive**: it states what the project is or how it currently works, rather than how an agent should behave.
+- **Durable**: it remains useful beyond the current work. A narrowly scoped fact is valid when its scope says where it applies.
+- **Current**: it describes implemented reality rather than a proposal, acceptance target, roadmap, backlog, or intended future state.
+- **Evidenced**: repository evidence or an authoritative source supports it now.
 
-Optional fields are `aliases`, `triggers`, `scope`, `last_verified`, `sources`, `related`, `supersedes`, `verify`, `status_note`, and `sensitivity`.
+Route everything else by kind:
 
-- Topic `type`: `domain`, `architecture`, `integration`, `glossary`, `reference`, or `agent-context`.
-- `status`: `active`, `review-needed`, `superseded`, or `retired`.
-- `sensitivity`: `public`, `internal`, or `restricted`.
-- `name` is a bare lowercase kebab slug that exactly matches the file basename. `type`, `status`, `sensitivity`, `updated`, and `last_verified` are bare safe tokens or `YYYY-MM-DD` dates.
-- `description`, `verify`, and `status_note` are one-line double-quoted strings.
-- `related` items are typed as `knowledge:<slug>` or `rule:<slug>`; `supersedes` items are `knowledge:<slug>`.
-- `scope` items are typed selectors such as `path:<glob>`, `symbol:<name>`, `component:<name>`, `platform:<name>`, `environment:<name>`, or `version:<name>`.
-- Every list uses its key on one line followed by two-space-indented block items, each double-quoted; omit empty lists. Do not use flow lists, folded or multiline scalars, single quotes, inline comments, YAML anchors/tags, or unrecognized fields.
-- `updated` is the date of the latest content edit. `last_verified` changes only when evidence is checked.
+- WIP, proposals, task status, acceptance state, and discoveries local to current work stay in the active task, spec, or `CONTEXT.md`.
+- Recurring behavior, conventions, behavioral corrections, and reusable procedures go to the owning rule, normally through `/learn`.
+- Uncertain or conflicting observations remain candidates in the working artifact. Existing knowledge they call into question is not current authority until verified.
 
-## Maps And Size Bounds
-
-Every route is one line with no date:
-
-```text
-- [Title](relative.md) — <compact hook> · <type|map> · <status>
-```
-
-Domain maps live at `_maps/<domain>.md`, use the same metadata grammar with `type: map`, and allow only `active` or `review-needed`; active-map evidence requirements and review-needed `status_note` are the same as for topics. Maps do not use `related` or `supersedes`. Routing is root → domain map → topic only; maps never nest. Root may also preserve existing local external-document routes. Create domain maps when active topics exceed 24 or the root router exceeds 1,200 visible words. A topic over 10 KiB is an outline/section-first split candidate, never an automatic split.
-
-Every active topic must be reachable from the root exactly once through a direct route or one domain map. A review-needed topic may remain unindexed while ownership is ambiguous; if routed for visibility, route it at most once and never present it as active authority.
+Eligibility does not authorize a write. Never mutate knowledge merely because retrieval found a qualifying claim, and never capture automatically after exploration. When the task includes an authorized mutation or a lifecycle workflow reaches a possible promotion boundary, load the maintenance reference and apply its trigger, owner, routing, and validation contract.
