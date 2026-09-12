@@ -48,6 +48,40 @@ function importGraph(file, seen = new Set()) {
   for (const target of imports(file)) importGraph(target, seen);
   return seen;
 }
+// Output examples contain downstream-relative links inside fenced Markdown.
+// Only prose links declare module resources; keep checking those recursively.
+function resourceLinks(file) {
+  let fence;
+  const prose = [];
+  for (const line of read(file).split("\n")) {
+    const marker = /^ {0,3}(`{3,}|~{3,})(.*)$/.exec(line);
+    if (fence) {
+      if (
+        marker &&
+        marker[1][0] === fence[0] &&
+        marker[1].length >= fence.length &&
+        !marker[2].trim()
+      )
+        fence = undefined;
+      continue;
+    }
+    if (marker) fence = marker[1];
+    else prose.push(line);
+  }
+  return [...prose.join("\n").matchAll(/\]\(([^)#]+)(?:#[^)]*)?\)/g)]
+    .map((match) => match[1])
+    .filter((target) => !/^https?:/.test(target))
+    .map((target) => resolve(dirname(file), target));
+}
+function resourceGraph(file, seen = new Set()) {
+  assert(existsSync(file), `Missing resource: ${file}`);
+  if (seen.has(file)) return seen;
+  seen.add(file);
+  if (file.endsWith(".md")) {
+    for (const target of resourceLinks(file)) resourceGraph(target, seen);
+  }
+  return seen;
+}
 try {
   const source = join(scratch, "archive/claudart");
   mkdirSync(source, { recursive: true });
@@ -188,6 +222,74 @@ try {
     ".claude/commands/project-docs.md",
     ".agents/skills/codex-project-docs/SKILL.md",
   ];
+  check("output examples do not hide missing prose resource links", () => {
+    const fixture = join(scratch, "example links");
+    mkdirSync(fixture);
+    const entry = join(fixture, "entry.md");
+    const reference = join(fixture, "reference.md");
+    const asset = join(fixture, "template.md");
+    writeFileSync(
+      entry,
+      [
+        "````md",
+        "```md",
+        "[Output link](not-a-module-file.md)",
+        "```",
+        "````",
+        "~~~md",
+        "[Another output link](also-not-a-module-file.md)",
+        "~~~",
+        "[Reference](reference.md)",
+      ].join("\n"),
+    );
+    assert.throws(() => resourceGraph(entry), /Missing resource/);
+    writeFileSync(reference, "[Template](template.md)\n");
+    assert.throws(() => resourceGraph(entry), /Missing resource/);
+    writeFileSync(asset, "# Output template\n");
+    assert.deepEqual(resourceGraph(entry), new Set([entry, reference, asset]));
+  });
+  check(
+    "Project Docs output templates and example content match across runtimes",
+    () => {
+      const codex = join(moduleSource, ".agents/skills/codex-project-docs");
+      const claude = join(moduleSource, ".claude/references/project-docs");
+      for (const [from, to] of [
+        ["assets/templates", "assets/templates"],
+        ["references/examples", "examples"],
+      ]) {
+        const originals = files(join(codex, from));
+        assert.deepEqual(
+          originals.map((file) => file.slice(join(codex, from).length + 1)),
+          files(join(claude, to)).map((file) =>
+            file.slice(join(claude, to).length + 1),
+          ),
+        );
+        for (const file of originals) {
+          const relative = file.slice(join(codex, from).length + 1);
+          assert.equal(read(file), read(join(claude, to, relative)), relative);
+        }
+      }
+      const guides = [
+        join(codex, "references/templates.md"),
+        join(claude, "templates.md"),
+      ].map((file) =>
+        read(file)
+          .replaceAll("../assets/templates/", "assets/templates/")
+          .split("\n")
+          // Different link lengths change only the formatter's table padding.
+          .map((line) =>
+            line.startsWith("|")
+              ? line
+                  .split("|")
+                  .map((cell) => cell.trim().replace(/^-+$/, "---"))
+                  .join("|")
+              : line,
+          )
+          .join("\n"),
+      );
+      assert.equal(guides[0], guides[1]);
+    },
+  );
   for (const mode of ["claude", "codex", "both"]) {
     for (const moduleFirst of [false, true]) {
       const dest = join(scratch, `module ${mode} ${moduleFirst}`);
@@ -235,12 +337,9 @@ try {
                 read(file),
                 `Module differs: ${relative}`,
               );
-              for (const [, target] of read(installed).matchAll(
-                /\]\(([^)#]+)(?:#[^)]*)?\)/g,
-              )) {
-                if (/^https?:/.test(target)) continue;
+              for (const target of resourceLinks(installed)) {
                 assert(
-                  existsSync(resolve(dirname(installed), target)),
+                  existsSync(target),
                   `Broken module link: ${relative} -> ${target}`,
                 );
               }
@@ -252,6 +351,24 @@ try {
               2,
               "The optional module must not expand unconditional imports",
             );
+          }
+        },
+      );
+      check(
+        `${label}: all module resources are reachable from their entrypoint`,
+        () => {
+          for (const [folder, entry] of [
+            ...(mode !== "codex" ? [[".claude", moduleEntries[0]]] : []),
+            ...(mode !== "claude" ? [[".agents", moduleEntries[1]]] : []),
+          ]) {
+            const graph = resourceGraph(join(dest, entry));
+            for (const file of files(join(moduleSource, folder))) {
+              const relative = file.slice(moduleSource.length + 1);
+              assert(
+                graph.has(join(dest, relative)),
+                `Unreachable module resource: ${relative}`,
+              );
+            }
           }
         },
       );

@@ -16,4 +16,6 @@ Infer the operation from the request; an explicit mode name is optional:
 
 For any operation that selects or changes a source of authority, read [ownership](../references/project-docs/ownership.md). Read only the mode reference needed for this request. Release is a context for update or audit, not a release operation.
 
+When authoring a missing page or reshaping an unsuitable one, use the [output templates and filled examples](../references/project-docs/templates.md), selecting only the relevant template. Existing suitable owners need no template conversion.
+
 Inspect existing source, docs, task/spec records, and team-owned references within scope before asking for facts the repository can answer. Ask only when an unresolved choice would materially change the project's public behavior, ownership, permissions, or documentation scope. Preserve custom and external sources outside the user's authorized edits. Summarize changed owners, supporting evidence, unresolved gaps, and checks at handoff.
