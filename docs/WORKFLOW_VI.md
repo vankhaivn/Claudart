@@ -168,6 +168,10 @@ Tài liệu dự án dùng chung mô tả ý định product đã duyệt, kiế
 
 Với dự án đã phát triển, `adopt` giữ owner hiện hành hợp lệ, kể cả knowledge topic. Router tài liệu có thể trỏ tới nội dung tổng hợp kiến trúc đang nằm trong knowledge; chủ đề hay người đọc không tự quyết định việc chuyển file. Chỉ đối soát khoảng thiếu hoặc trùng lặp có bằng chứng trong phạm vi yêu cầu. Cấu trúc đã ổn có thể không cần thay đổi.
 
+Module cung cấp [template đầu ra thực tế và ví dụ đã điền](../modules/project-docs/README.md#output-templates-and-examples): router, phạm vi product, hành vi capability, kiến trúc, phát triển/kiểm thử, vận hành/phát hành/hỗ trợ và decision record tùy chọn cho quyết định quan trọng. Khi tạo hoặc sửa cấu trúc một trang, chọn mẫu phù hợp rồi điều chỉnh theo nguồn sở hữu và đường dẫn hiện có. Ý tưởng mới có thể chỉ cần product brief và router; không tạo trang kỹ thuật hoặc vận hành rỗng.
+
+Tài liệu behavior phân biệt quy tắc và yêu cầu chất lượng đã duyệt với thực tế triển khai và bản còn hỗ trợ. Trỏ thay đổi đang chờ tới task/spec; cập nhật đúng nguồn sở hữu khi có bằng chứng triển khai và phát hành. Compact thay thế nội dung hiện hành đã lỗi thời và bỏ phần tóm tắt pending đã hoàn tất, giữ lý do còn hữu ích và phiên bản còn hỗ trợ, không nối thêm nhật ký mỗi lần chỉnh sửa.
+
 ### Truy xuất knowledge
 
 Quy trình truy xuất bắt đầu từ map và có giới hạn:
@@ -441,7 +445,7 @@ AGENTS.md
 
 Trong repository nguồn CLAUDART, `.codex/AGENTS.md` là template dùng để tạo `AGENTS.md` ở thư mục gốc khi cài mới.
 
-Khi được chọn, Project Docs thêm `.claude/commands/project-docs.md` cho Claude và `.agents/skills/codex-project-docs/` cho Codex. References của module hướng dẫn công việc tài liệu nhưng không tự tạo tài liệu dự án.
+Khi được chọn, Project Docs thêm `.claude/commands/project-docs.md` cùng resources tại `.claude/references/project-docs/` cho Claude, và `.agents/skills/codex-project-docs/` cho Codex. Template đầu ra nằm trong `assets/templates/` của từng resource root; hướng dẫn chọn template dẫn tới các ví dụ đã điền. Resources này hướng dẫn công việc tài liệu nhưng không tự tạo tài liệu dự án.
 
 ## 10. Bảo trì chính CLAUDART
 

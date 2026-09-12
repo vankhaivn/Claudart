@@ -168,6 +168,10 @@ Shared project docs describe approved product intent, architecture, operating gu
 
 For an established project, `adopt` retains valid current owners, including knowledge topics. A docs router can link to an existing architecture synthesis in knowledge; the subject or intended reader alone does not justify moving it. Reconcile only demonstrated gaps or overlap within the requested scope. A healthy setup may need no changes.
 
+The module ships [actual output templates and filled examples](../modules/project-docs/README.md#output-templates-and-examples): router, product scope, capability behavior, architecture, development/testing, operations/release/support, and an optional significant-decision record. When creating or reshaping a page, select the relevant body and adapt it to existing owners and paths. A new idea may need only a product brief and router; do not generate empty technical or operational pages.
+
+Behavior docs distinguish approved rules and quality expectations from actual implementation and supported releases. Link the pending delta to its task/spec; update affected owners during implementation and release as evidence becomes available. Compaction replaces superseded current claims and removes resolved pending summaries, preserving useful rationale and still-supported versions without appending an edit diary.
+
 ### Retrieval
 
 Knowledge retrieval is map-first and bounded:
@@ -441,7 +445,7 @@ AGENTS.md
 
 In the CLAUDART source repository, `.codex/AGENTS.md` is the template used to create the root `AGENTS.md` during a clean installation.
 
-When selected, Project Docs adds `.claude/commands/project-docs.md` for Claude and `.agents/skills/codex-project-docs/` for Codex. Its references guide documentation work but create no project docs by themselves.
+When selected, Project Docs adds `.claude/commands/project-docs.md` with resources under `.claude/references/project-docs/` for Claude, and `.agents/skills/codex-project-docs/` for Codex. Output templates live under each resource root's `assets/templates/`; the template guide links filled examples. These resources guide documentation work but create no project docs by themselves.
 
 ## 10. Maintaining CLAUDART itself
 

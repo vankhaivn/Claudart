@@ -44,6 +44,8 @@ curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh 
 
 Trình cài đặt sao chép các file còn thiếu và bỏ qua file đã tồn tại. Bản cài mặc định chỉ chứa lớp core; `--project-docs` thêm command hoặc skill cùng references cho vòng đời tài liệu tùy chọn. Nó không tự tạo hoặc migrate tài liệu dự án. Tùy chọn `--force` sẽ ghi đè file hiện có, vì vậy chỉ dùng khi bạn thực sự muốn thay thế chúng.
 
+Project Docs có [template đầu ra và ví dụ đã điền](modules/project-docs/README.md#output-templates-and-examples) cho phạm vi product, hành vi, kiến trúc, phát triển và vận hành, được dẫn từ một router tài liệu nhỏ. Chỉ dùng phần đang cần nguồn sở hữu; docs và knowledge hiện có có thể tiếp tục giữ trách nhiệm của mình.
+
 Với một bản cài Codex mới, trình cài đặt thêm `.codex/`, `.agents/skills/` và `AGENTS.md` ở thư mục gốc. Trong repository CLAUDART, file mẫu nguồn nằm tại `.codex/AGENTS.md`.
 
 ### Dự án đã có cấu hình hoặc đã cài CLAUDART

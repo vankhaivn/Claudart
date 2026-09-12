@@ -79,6 +79,8 @@ This map is orientation only; the current source tree and its references are aut
 
 **Optional modules:** install only when selected. Project Docs lives under `modules/project-docs/` in upstream; overlay its `.claude/` and/or `.agents/` payload at the downstream root for the selected runtimes. This adds `.claude/commands/project-docs.md` or `.agents/skills/codex-project-docs/` and their referenced files. Do not copy the module's source wrapper or packaging README into the project. It supplies documentation-lifecycle guidance; it does not install a documentation tree or own a project's existing documentation by default.
 
+Include the selected module's output templates and filled examples in its resource closure, retaining their module-relative paths. They are reusable authoring resources, not live project docs: do not instantiate templates or apply the example snippets during integration. Preserve custom resource edits under the same reconciliation rules as other instructions.
+
 When integrating both layers, preserve intent parity between mirrored Claude and Codex contracts without forcing byte identity where tool mechanics differ. Preserve the loader's one-state-layer rule: use the native layer by default or the user's explicit alternate choice, with host-native tools; never infer permission to synchronize state stores.
 
 Task workspaces use `tasks/YYYY-MM-DD-NNN-<slug>/TASK.md` and `tasks/done/<task-id>/TASK.md` in either layer. `TASK.md` is the only required file; `artifacts/` is created only for a concrete task need. Install only empty task seeds, never live upstream tasks or test fixtures. Preserve downstream workspace contents and storage/Git policies; do not bulk-read, extract, or normalize attachments during integration.
