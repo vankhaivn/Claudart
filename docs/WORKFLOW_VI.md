@@ -65,14 +65,7 @@ Prompt gợi ý:
 
 ### Đối soát ban đầu
 
-Sau khi cài hoặc nâng cấp, chạy một lần chuỗi sau:
-
-```text
-Claude: /doctor → /refactor-memory → /doctor
-Codex:  $codex-doctor → $codex-refactor-memory → $codex-doctor
-```
-
-`doctor` kiểm tra cấu trúc và tính nhất quán về ngữ nghĩa. `refactor-memory` chuẩn hóa bộ nhớ ngay tại chỗ. Lần `doctor` thứ hai xác nhận trạng thái sau chuẩn hóa.
+Làm theo bước xác minh cơ học có giới hạn trong `INTEGRATE.md`. Baseline chung `doctor-check.sh` đã bao gồm một lần kiểm tra knowledge. Chỉ chạy đầy đủ `/doctor` hoặc `$codex-doctor` khi phát hiện cần xem xét ngữ nghĩa hoặc user yêu cầu. `refactor-memory` có ghi file, cần phạm vi và quyền thực hiện cụ thể; không tự động chạy tiếp. Sau khi sửa trong phạm vi được duyệt, xác minh lại các kiểm tra liên quan.
 
 ## 3. Một phiên làm việc thông thường
 
@@ -223,7 +216,9 @@ bash .claude/scripts/knowledge-check.sh --root .
 bash .codex/scripts/knowledge-check.sh --root .
 ```
 
-Trong quy trình bình thường, `/doctor` và `/refactor-memory` tự gọi checker phù hợp.
+`refactor-memory` gọi knowledge checker sau khi thay đổi knowledge. `/doctor` và `$codex-doctor` dùng `doctor-check.sh`, gọi checker đó đúng một lần và bổ sung kiểm tra cấu trúc, metadata, reference local rõ ràng và kích thước của layer được chọn. Không chạy knowledge checker lần nữa sau doctor.
+
+Để chỉ chạy baseline cơ học, dùng `bash .codex/scripts/doctor-check.sh --root . --layer codex` hoặc bản Claude tương ứng. Mặc định, script quét Markdown của operating layer; đích reference có thể là code/docs ở bất kỳ đâu trong repo. Thêm `--include docs` khi muốn quét cả Markdown của dự án. Script kiểm tra đích có tồn tại, bỏ qua ví dụ và nhắc đến đường dẫn không rõ nghĩa; không sửa file hay kết luận đúng sai về ngữ nghĩa. Xem [phạm vi, tùy chọn và exit status](../.codex/references/doctor-check.md).
 
 ## 5. Quy trình task bền vững
 

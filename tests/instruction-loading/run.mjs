@@ -110,9 +110,45 @@ try {
     });
   }
 
+  function verifyDoctor(dest, mode, label) {
+    for (const layer of ["claude", "codex"]) {
+      if (mode !== "both" && mode !== layer) continue;
+      check(
+        `${label}: ${layer} doctor helpers install and execute offline`,
+        () => {
+          for (const name of [
+            "doctor-check.sh",
+            "doctor-check.awk",
+            "knowledge-check.sh",
+          ]) {
+            const relative = `.${layer}/scripts/${name}`;
+            assert.equal(
+              read(join(dest, relative)),
+              read(join(root, relative)),
+            );
+          }
+          const output = execFileSync(
+            "/bin/bash",
+            [
+              join(dest, `.${layer}/scripts/doctor-check.sh`),
+              "--root",
+              dest,
+              "--layer",
+              layer,
+            ],
+            { cwd: dest, encoding: "utf8", stdio: "pipe" },
+          );
+          assert.match(output, /INFO\|D000\|/);
+          assert.doesNotMatch(output, /^ERROR\|/m);
+        },
+      );
+    }
+  }
+
   for (const mode of ["claude", "codex", "both"]) {
     const dest = join(scratch, `install ${mode}`);
     install(dest, [`--${mode}`]);
+    verifyDoctor(dest, mode, `${mode} core`);
     check(`${mode}: only selected runtime layers installed`, () => {
       assert.equal(existsSync(join(dest, ".claude")), mode !== "codex");
       assert.equal(existsSync(join(dest, ".codex")), mode !== "claude");
@@ -297,6 +333,7 @@ try {
       if (moduleFirst) args.reverse();
       install(dest, args);
       const label = `${mode}, module ${moduleFirst ? "first" : "last"}`;
+      verifyDoctor(dest, mode, label);
       check(`${label}: module overlays only selected runtime layers`, () => {
         assert.equal(
           existsSync(join(dest, moduleEntries[0])),

@@ -1,231 +1,70 @@
 ---
 name: codex-doctor
-description: Run a read-only Codex installation health check using the knowledge checker plus semantic audits of memory and workflow wiring.
+description: Run a read-only Codex installation health check with a mechanical baseline and bounded semantic audits.
 ---
 
 # Codex Doctor
 
-Run a read-only health check on this repository's CLAUDART installation from the Codex side. This is diagnostic only. Do not auto-fix anything. Report findings so the user can run `$codex-refactor-memory`, `/refactor-memory`, or edit files manually.
+Run a read-only health check of the selected Codex CLAUDART layer. Do not auto-fix anything. Report findings for the user to address with `$codex-refactor-memory` or a deliberate manual edit.
 
-## What to Check
+## Mechanical Baseline
 
-### 1. Required Structure
+Run the doctor helper exactly once before semantic review. For a normal downstream installation, use:
 
-- A Codex memory index exists: root `AGENTS.md` for an installed downstream project, or `.codex/AGENTS.md` for the CLAUDART source template copied by the installer. If both exist, compare them and flag drift.
-- `.codex/CONTEXT.md` exists. Warn if missing because the user may not have run checkpoint yet.
-- `.codex/JOURNAL.md` exists. Warn if missing.
-- `.codex/guidelines/` exists and contains at least `ai-behavior.md`, `code-health.md`, `task-management.md`, `agent-delegation.md`, `spec-workflow.md`, and `knowledge-management.md`.
-- `.codex/knowledge/` exists with `INDEX.md` (warn if missing — `$codex-refactor-memory` will recreate it).
-- `.codex/scripts/knowledge-check.sh` exists and is readable. Missing checker is **High** because doctor cannot mechanically validate the canonical knowledge contract; do not emulate it with ad hoc parsing.
-- `.codex/agents/` exists, even if the user removed shipped agents.
-- `.codex/config.toml` exists and contains an `[agents]` table with conservative delegation limits.
-- `.codex/tasks/` exists with `index.md` and `done/` subdirectory (warn if missing — `$codex-plan` will create on first use).
-- `.codex/specs/` exists with `INDEX.md` and `done/` archive folder (informational if missing — `$codex-spec` creates it on first use).
-- `.agents/skills/` exists and contains `codex-start`, `codex-checkpoint`, `codex-learn`, `codex-doctor`, `codex-refactor-memory`, `codex-plan`, `codex-handoff`, `codex-spec`, and `codex-spec-run`. `codex-project-docs` is optional; if present, check its skill and referenced files, but do not flag its absence.
+```bash
+bash .codex/scripts/doctor-check.sh --root . --layer codex
+```
 
-For each missing path, report which workflow would create or repair it.
+For explicit upstream CLAUDART source-template work, use `--layout source` and inspect `.codex/AGENTS.md` as the loader. Do not treat the maintainer root `AGENTS.md` as a duplicate installed loader.
 
-### 2. Frontmatter and Metadata Validity
+For nondefault options or coverage boundaries, read `.codex/references/doctor-check.md`.
 
-For every `.md` file under `.codex/guidelines/`:
+The helper owns its default selected-layer structural/readability checks, declared metadata subset and supported types, clear Markdown-resource/local-link checks, real Claude imports, loader/CONTEXT/HANDOFF size checks, and its single nested knowledge-check invocation. It does not claim full YAML/TOML validation or semantic health. Optional Project Docs may be absent. Use `--include` only for an explicitly requested extra Markdown source tree or file; do not turn doctor into a documentation-wide scan.
 
-- Verify the file starts with YAML frontmatter delimited by `---`.
-- Confirm `paths:`, `description:`, `when_to_use:`, and `tags:` are present.
-- Confirm `paths:` uses YAML flow sequence style, e.g. `paths: ["src/**/*.ts", "test/**/*.ts"]`. Flag block-list style (`paths:` followed by `- item`) because frontmatter conventions should stay compact and grep-friendly.
-- Confirm `tags:` uses inline YAML array style on one line, e.g. `tags: [architecture, nestjs, boundaries]`. Flag block-list style (`tags:` followed by `- item`) because tag indexing depends on single-line frontmatter.
-- Confirm `tags:` contains 1-5 lowercase kebab-case tags describing domain or scope.
-- Report malformed YAML, missing required keys, or obviously broken frontmatter.
+Preserve the helper output and exit status:
 
-For every `.agents/skills/*/SKILL.md` file:
+- Exit `0`: the mechanical baseline passed. Warnings and review items still require judgment.
+- Exit `1`: report its findings at the stated severity and continue semantic review.
+- Exit `2`, a missing/unreadable helper, or another helper runtime failure: report **High** and mark the mechanical health check incomplete; this installation cannot be declared healthy. Do not reproduce helper checks with ad hoc parsing.
 
-- Verify the file starts with YAML frontmatter.
-- Confirm `name:` and `description:` are present.
-- Confirm the skill contains sufficient procedure detail to execute the workflow.
+Only if the helper was unavailable and never started, the legacy `bash .codex/scripts/knowledge-check.sh --root .` may run once as a limited fallback. Label that result as incomplete mechanical health. If the helper ran, never rerun the knowledge checker.
 
-For every `.codex/agents/*.toml` file:
+## Semantic and Remaining Structural Review
 
-- Confirm `name`, `description`, `model`, `model_reasoning_effort`, `sandbox_mode`, and `developer_instructions` keys are present.
-- Confirm explorers and review-only/audit-only agents use `sandbox_mode = "read-only"`. A write-capable refiner or worker is valid only when its declared purpose explicitly requires implementation.
-- Confirm every write-capable agent clearly defines scope expectations, protects unrelated user work, requires validation, and warns that other agents may be editing in parallel.
+The baseline cannot decide whether prose is accurate or well-owned. Use bounded inspection and retain these reviews:
 
-### 3. Guideline Path Coverage
+- Confirm the selected loader routes to CONTEXT and universal behavior guidance, selectively routes other relevant guidance, and does not blindly auto-load guidelines, JOURNAL, or HANDOFF. A missing universal behavior or code-health route is **High**.
+- Confirm code-health and delegation guidance are usable for their stated triggers. Review delegation limits and whether delegation instructions preserve ownership, validation, parallel-edit safety, and the active harness policy.
+- For knowledge, read `.codex/guidelines/knowledge-management.md` and `.codex/references/knowledge-maintenance.md`; review sampled claims for capture quality, tier separation, ownership, authority, evidence, and bounded routing. Preserve intentional external routes and curated hooks. An ambiguous unindexed file or heuristic duplicate is a review item, not proof of an error. Confirm start loads only the knowledge root router, never runs a checker, and does not globally load topic bodies; Claude must not auto-import knowledge. Do not run a repository-wide documentation audit.
+- Confirm review-only/explorer agents use a read-only sandbox; write-capable agents need an implementation purpose, bounded ownership, protection of unrelated work, and validation. Review unsupported metadata with its native format contract; a parser review warning does not prove it malformed.
+- Check guideline tags follow the compact contract of 1–5 lowercase kebab-case tags. Review tag meaning, path coverage, agent descriptions, and overlap only as signals. A zero glob, matching tags, a short snippet, or prose wording alone is not a defect without contextual evidence.
+- Review operational path mentions excluded by the parser when they declare required inputs or routes; confirm those targets exist. Examples and bare path mentions alone do not make a file mandatory.
+- Keep JOURNAL checks to a header/head, line count, and tail spot-check. Review old CONTEXT `since:` decisions as graduation candidates; do not full-read state merely to count it.
+- Report stale metadata, long inlined snippets, hardcoded shell lists, vague skills, or descriptive-only guidelines as candidates for review after considering purpose and scope.
 
-For every guideline file in `.codex/guidelines/*.md`:
-
-- Read each glob pattern in `paths:`.
-- Verify each pattern matches at least one real file in the repo.
-- Patterns matching zero files -> flag as possibly dead guideline. Suggest re-scoping or removal.
-
-`paths: ["**/*"]` is allowed for universal guidelines such as `ai-behavior.md`.
-
-### 4. Codex Memory Cross-Linking
-
-- Determine the active memory index to inspect:
-  - If root `AGENTS.md` exists, read it.
-  - Otherwise read `.codex/AGENTS.md` and report that this is the template source copied to root by `install.sh`.
-  - If both exist, compare them and flag drift unless the project deliberately documents a different canonical file.
-- Confirm the memory index points Codex to `.codex/CONTEXT.md`, requires the universal behavior guideline, and tells agents to load other guidelines selectively by task.
-- Find the guideline section in the memory index.
-- For every explicit `.codex/guidelines/*.md` reference there, confirm the target file exists.
-- Require direct references for globally relevant workflow guidelines. A task-scoped guideline may instead be discoverable through clear frontmatter and targeted routing; do not require a pointer that would force every guideline to load.
-- Flag any instruction that blindly full-reads `.codex/guidelines/*.md`.
-
-### 5. AI Behavior Wiring
-
-- Confirm `.codex/guidelines/ai-behavior.md` exists.
-- Confirm the active memory index references `.codex/guidelines/ai-behavior.md`.
-- If missing, flag as High severity because universal behavior guidelines are not loaded.
-
-### 5a. Code Health Wiring
-
-- Confirm `.codex/guidelines/code-health.md` exists.
-- Confirm the active memory index references `.codex/guidelines/code-health.md` as the continuous implementation baseline for code and code-adjacent work.
-- If missing or unwired, flag as High because ordinary implementation would bypass the shared correctness, scope, behavior-preservation, testing, and validation contract.
-
-### 5b. Agent Delegation Wiring
-
-- Confirm `.codex/guidelines/agent-delegation.md` exists.
-- Confirm the active memory index references `.codex/guidelines/agent-delegation.md`.
-- Confirm `.codex/config.toml` caps subagent concurrency: `[agents] max_concurrent_threads_per_session` set to a positive integer. Flag values above 6 as Medium unless documented, because broad fan-out can create token cost and merge-conflict risk.
-- Confirm delegation guidance covers the "how" of delegation: decomposition before fan-out, self-contained worker prompts, no shadow-running a delegated question, and one-level delegation depth unless the user asks for recursion. If missing, flag as High because delegated work may be duplicated or unbounded.
-
-### 5c. Knowledge Base Wiring (`.codex/knowledge/`)
-
-Skip this section if `.codex/knowledge/` does not exist.
-
-Read `.codex/guidelines/knowledge-management.md` and `.codex/references/knowledge-maintenance.md` before this audit.
-
-#### Mechanical pass
-
-1. If `.codex/scripts/knowledge-check.sh` is missing or unreadable, report **High** and continue only with the semantic pass. Do not invent a replacement parser.
-2. Otherwise run `bash .codex/scripts/knowledge-check.sh --root .` exactly once with its default failure threshold. The checker is read-only; any changed file is a High-severity integrity failure.
-3. Interpret exit `1` as reported contract findings. Exit `2` is a checker usage, precondition, or internal/runtime failure; report it as High and continue only with the semantic pass.
-4. Report every checker finding with its path and severity. The checker owns restricted frontmatter grammar, enum/date/name checks, route reachability, map depth, typed relations/scope, local source resolution and source-newer-than-`last_verified` warnings, map/topic size thresholds, and sensitive absolute-path leakage.
-5. Treat an empty tier as informational. Treat an ambiguous unindexed file as a review item, not proof that it is active, retired, or safe to delete.
-
-#### Semantic pass
-
-The checker cannot decide whether prose is true or correctly tiered. Audit:
-
-- **Capture quality**: active claims are descriptive, durable beyond current work, current, and evidenced; narrowly scoped claims carry an accurate typed `scope`.
-- **Tier separation**: roadmap, backlog, acceptance state, WIP, proposals, and behavioral `MUST`/`NEVER` content do not masquerade as descriptive knowledge.
-- **Ownership**: overlapping facts have one focused canonical owner; related topics link rather than copy. Flag a sampled topic that repeats a claim already maintained by source, schema, generated reference, or project docs; a compact pointer or distinct useful synthesis is valid. Preserve deliberate external routes and curated hooks. Do not run a repository-wide documentation audit as part of doctor.
-- **Authority**: `review-needed`, conflicting, superseded, or retired topics are not presented as current authority; `status_note` and evidence explain the state.
-- **Verification meaning**: `updated` means content edit and `last_verified` means evidence check. Source drift takes priority over age; age alone is only a review nudge.
-- **Retrieval shape**: root → topic is acceptable for a small store; root → `_maps/<domain>.md` → topic is the only mapped shape. Maps never nest. A topic over 10 KiB is a reviewed split candidate, not an automatic rewrite.
-- **Loading behavior**: `$codex-start` reads only the root router and never runs this checker. Detail topics are not globally auto-loaded.
-
-Use bounded source inspection to verify suspicious claims. Never fetch URLs merely to satisfy doctor unless the user separately requested current external verification. Doctor remains read-only and never fixes, promotes, retires, supersedes, or deletes knowledge.
-
-### 6. CONTEXT/JOURNAL Wiring
-
-- Confirm `.codex/CONTEXT.md` is referenced in the active memory index.
-- `.codex/CONTEXT.md` line count must be at most 150. Use `wc -l`; do not full-read the file just to count.
-- Report approximate `.codex/CONTEXT.md` tokens using both estimates:
-  - `wc -w .codex/CONTEXT.md | awk '{printf "~%d tokens\n", $1 * 1.3}'`
-  - `wc -c .codex/CONTEXT.md | awk '{printf "~%d tokens (byte estimate)\n", $1 / 4}'`
-- Search the active memory index and `.codex/guidelines/` for any operational auto-load instruction for `.codex/JOURNAL.md`. If found, flag as Critical.
-- Search `.codex/CONTEXT.md` for `<!-- since: YYYY-MM-DD -->` comments. Flag items older than 30 days as graduation candidates if they remain in Recent Decisions or otherwise look durable. If an obviously long-lived decision has no `since:` comment, warn that future `$codex-checkpoint` should preserve/add one.
-- For `.codex/JOURNAL.md` integrity, use spot-checks rather than full reads:
-  - `head -n 20 .codex/JOURNAL.md`
-  - `wc -l .codex/JOURNAL.md`
-  - `tail -n 5 .codex/JOURNAL.md`
-- Skip deeper validation unless a malformed line is suspected.
-
-### 6b. Task Workspace Health (`.codex/tasks/`)
+### Task Workspace Health (`.codex/tasks/`)
 
 Skip this section if `.codex/tasks/` does not exist. Follow `.codex/guidelines/task-management.md`; this audit does not create or repair task content.
 
 - Confirm `.codex/tasks/index.md` exists. Missing -> Medium; suggest `$codex-checkpoint` to regenerate it. Count lines with `wc -l`: the 100-line ceiling and trim ladder remain unchanged.
 - Inspect only `.codex/tasks/*/TASK.md` and `.codex/tasks/done/*/TASK.md` in directly contained `YYYY-MM-DD-NNN-<slug>` directories. Exclude `done/` itself; never follow workspace or `TASK.md` symlinks or recursively parse attachments as tasks. Flat task files are outside the current contract, not a second discovery format.
-- Flag a dated directory missing `TASK.md`, or an invalid directory name, as Medium; preserve it for explicit repair. Do not invent metadata, migrate flat files, or remove unknown content.
-- Check `TASK.md` frontmatter: required `slug`, `status`, `created`, `updated`, `agent`, `delegation`, `tags`; `status` in {planning, in-progress, awaiting-review, blocked, done, cancelled}; `agent` in {claude, codex, both}; `delegation` in {none, strategy-only, authorized}. The directory must equal `<created>-<NNN>-<slug>`, with UTC date, sequence 001–999, and a 2–5-word lowercase kebab-case slug. Tags remain an inline array of 1–5 lowercase kebab-case values.
-- Flag top-level `done`/`cancelled` workspaces for whole-directory archival by `$codex-checkpoint`. Flag an archive destination collision or an archived non-terminal task as Medium; never overwrite, relocate, or change status during this audit. `awaiting-review` must remain active until the user confirms.
-- Cross-check index links against the actual `TASK.md` paths and status: every active workspace appears under Active, every listed entry exists, and Recently Done links use `done/<task-id>/TASK.md`. Suggest `$codex-checkpoint` for mismatches.
-- Required body sections remain `## Purpose`, `## Context & Orientation`, `## Plan of Work`, `## Concrete Steps`, `## Validation & Acceptance`, `## Decision Log`, `## Surprises & Discoveries`, and `## Outcomes & Retrospective`. Require `### Memory Hints`; `None.` is valid when no non-obvious context exists. Do not demand filler for simple tasks.
-- A `TASK.md`-only workspace is complete. Missing `artifacts/` or `### Workspace Files` is normal and must never produce a warning. Do not require NOTES, ROADMAP, LEDGER, manifests, or placeholder reports.
+- Flag a dated directory missing `TASK.md`, or an invalid directory name, as Medium; preserve it for explicit repair. Require `slug`, `status`, `created`, `updated`, `agent`, `delegation`, and `tags`; valid task status, agent, delegation, dated `<created>-<NNN>-<slug>` naming, and inline lowercase tags. Do not invent metadata, migrate flat files, or remove unknown content.
+- Flag a top-level `done`/`cancelled` workspace for whole-directory archival by `$codex-checkpoint`; flag archive collisions or archived non-terminal tasks as Medium. `awaiting-review` stays active until the user confirms. Cross-check index paths and status, including `done/<task-id>/TASK.md` under Recently Done.
+- Require `## Purpose`, `## Context & Orientation`, `## Plan of Work`, `## Concrete Steps`, `## Validation & Acceptance`, `## Decision Log`, `## Surprises & Discoveries`, and `## Outcomes & Retrospective`.
+- A `TASK.md`-only workspace is complete. Missing `artifacts/` or `### Workspace Files` is normal and must never produce a warning. `### Memory Hints` must exist; `None.` is valid. Do not require NOTES, ROADMAP, LEDGER, manifests, or placeholder reports.
 - When `### Workspace Files` exists, check only its explicit local references for existence and a concrete purpose. Flag missing required input/evidence or unexplained local-only dependencies; a documented external/reproducible reference is not a broken local link. Do not read artifact bodies, fetch external inputs, extract archives, execute files, generate replacements, or create directories as part of doctor.
-- Apply the canonical **Staleness Thresholds** in `.codex/guidelines/task-management.md`; surface stalled work and review gates without automatically changing status.
-- A `tasks/done/.gitkeep` beside a real archived `<task-id>/TASK.md` is redundant (Low); `$codex-refactor-memory` may remove that placeholder only. Task evidence is not a cleanup target.
 
-### 6c. Session Handoff Hygiene (`.codex/HANDOFF.md`)
+### Session Handoff and Spec Health
 
-`.codex/HANDOFF.md` is a transient single-slot baton written by `$codex-handoff` and consumed (deleted) by the next `$codex-start`. Absent is the normal state — never warn when it is missing.
+Absent `.codex/HANDOFF.md` is normal. If present, report it informationally; check its age and single-slot contract. Do not follow symlinks or create, delete, or consolidate handoff artifacts.
 
-- If present, it is an unconsumed baton. Report it informationally. If its frontmatter `created:` is more than 7 days old, flag as Medium — reasoning state rots fast; suggest resuming via `$codex-start` or deleting it.
-- Line count must be at most 150 (use `wc -l`). If exceeded, flag as High — the baton is drifting toward a transcript dump; `$codex-handoff`'s distillation rules were not honored.
-- Search the active memory index (`AGENTS.md` / `.codex/AGENTS.md`) and `.codex/guidelines/` for any operational auto-load instruction for `.codex/HANDOFF.md`. If found, flag as Critical — the baton is consumed once by `$codex-start`, never auto-loaded into every session.
-- Multiple handoff artifacts (`HANDOFF-*.md`, dated copies, a `handoff/` directory under `.codex/`) -> flag as Medium — violates the single-slot contract; suggest consolidating into one `HANDOFF.md` or deleting stale copies.
+For `.codex/specs/`, follow `.codex/guidelines/spec-workflow.md` for metadata, status, commits, and disposition contracts. Inspect only direct active and archived dated folders; never follow workspace/core-file symlinks, recursively parse attachments, or rewrite state.
 
-### 6d. Spec Workspace Health (`.codex/specs/`)
+- Verify INDEX ↔ folder agreement in both directions; each active/archived folder has `SPEC.md`, `ROADMAP.md`, `NOTES.md`, and `LEDGER.md`. Missing core files are Medium. `NOTES.md` stays at most 150 lines; spot-check the last 15 LEDGER lines for `### YYYY-MM-DD HH:MMZ — <event>` headings.
+- Require `SPEC.md` keys `slug`, `status`, `created`, `updated`, and `agent`; validate the dated folder name and valid spec status. At `poc-review` or later, every path under `## POC Artifacts` must exist.
+- Review ROADMAP dispositions: unchecked struck rows, struck terminal rows without `superseded by`, blocked rows without condition and `unlock:`, and status that contradicts runnable, blocked, or terminal rows are Medium. A top-level terminal spec should be archived; an archived non-terminal spec is Medium.
+- Apply the canonical staleness thresholds from `.codex/guidelines/task-management.md`; do not redefine them.
 
-Skip this section if `.codex/specs/` does not exist.
+## Reporting
 
-- Confirm `.codex/specs/INDEX.md` exists. If missing, flag as Medium — `$codex-spec` or `$codex-checkpoint` should regenerate it.
-- Confirm `.codex/specs/done/` exists. If missing, flag as Low — `$codex-spec` or `$codex-checkpoint` should create it.
-- INDEX ↔ folders match (both directions): every active `YYYY-MM-DD-<slug>/` folder directly under `.codex/specs/` with an active status must be listed under `## Active`; every archived `done/YYYY-MM-DD-<slug>/` folder with `status: done` or `status: cancelled` must be listed under `## Done`; every INDEX entry must point to an existing `SPEC.md` (dead -> Low).
-- Ignore `.codex/specs/done/` itself when enumerating active spec folders.
-- For every active or archived spec folder, confirm the core files exist: `SPEC.md`, `ROADMAP.md`, `NOTES.md`, `LEDGER.md`. Missing -> Medium.
-- `NOTES.md` line count ≤ 150 (`wc -l`). Exceeded -> Medium — the working memory is drifting toward a log; distill it and evaluate any durable descriptive candidates under the knowledge capture gate.
-- `SPEC.md` frontmatter: required keys `slug`, `status`, `created`, `updated`, `agent`; `status` in {drafting, poc-review, ready, running, blocked, awaiting-final-review, done, cancelled}; folder name must be `created` + `-` + `slug`; `commits` (if present) in {user, per-task, per-phase}.
-- For specs at `poc-review` or later: every `artifacts/` path referenced under `## POC Artifacts` must exist on disk. Missing -> Medium (the executor's frozen UI reference is gone).
-- ROADMAP disposition consistency: `- [ ] ~~task~~` -> Medium (invalid legacy state; reconcile it to checked + superseded or an explicit blocker before `$codex-spec-run`); a checked + struck row missing `superseded by <task-id or reason>` -> Medium; a blocked row missing either its condition or `unlock:` requirement -> Medium. Do not equate every plain unticked row with runnable work — honor dependency notes. `running` where dependency inspection finds no runnable pending row and at least one blocker -> Medium (the circuit-breaker/status transition was missed); `running` with every row terminal -> Medium (the final gate never ran); `blocked` with no explicit blocked row -> Medium (the diagnosis/unlock state is not durable); `blocked` where dependency inspection finds any independent runnable row -> Medium (the whole-loop transition happened too early); `awaiting-final-review` or `done` with any unticked row -> Medium (the final gate contradicts ROADMAP state). Top-level spec folder with `status: done`/`cancelled` -> Low (resync via `$codex-checkpoint` to archive it under `done/`). Archived spec folder whose status is not `done`/`cancelled` -> Medium (it is shelved in the wrong place). `status: done`/`cancelled` still listed under `## Active` in INDEX -> Low (resync via `$codex-checkpoint`).
-- Staleness (mirror the Staleness Thresholds table in `.codex/guidelines/task-management.md`; do not redefine the numbers): `running` stale as `in-progress`; `poc-review` and `awaiting-final-review` stale as `awaiting-review` — surface prominently, these wait on the user's verdict; `drafting` stale as `planning`.
-- `LEDGER.md` spot-check via `tail -n 15`: recent entries match the `### YYYY-MM-DD HH:MMZ — <event>` heading format. Do not slurp the whole file.
-
-### 7. Anti-Patterns
-
-- Inlined code blocks longer than about 5 lines inside guideline or agent files. These usually violate the no-stale-snippets rule.
-- Stale metadata such as `Last Updated: <date>`.
-- Hardcoded shell pattern lists inside agent instructions. Agents should use repository tooling or discover patterns from the codebase.
-- Vague Codex skills that do not contain sufficient detail to execute the workflow.
-- Agent delegation instructions that override the active harness policy or omit bounded decomposition, ownership, and parent validation.
-- Worker agent instructions that allow overlapping writes or omit ownership boundaries.
-- Mis-tiered guideline (descriptive, not prescriptive): a `.codex/guidelines/` file whose body states only facts (how a subsystem works, an integration detail, a domain term, a doc pointer) with no behavioral constraint (`MUST`/`NEVER`/`should`/`avoid`/`always`/`never`) -> flag as Low: it belongs with the fact's authoritative owner, or in `.codex/knowledge/` when no other owner exists. Universal guidance like `ai-behavior.md` is exempt.
-
-### 8. Size Sanity
-
-- Count lines in the active memory index. Target is under 100 lines.
-- Report approximate tokens using both estimates:
-  - `wc -w <active-memory-index> | awk '{printf "~%d tokens\n", $1 * 1.3}'`
-  - `wc -c <active-memory-index> | awk '{printf "~%d tokens (byte estimate)\n", $1 / 4}'`
-- If bloated, recommend `$codex-refactor-memory`.
-
-### 9. Guideline Tag Index And Overlap
-
-- Build a tag index from guideline frontmatter only, e.g. `grep -h '^tags:' .codex/guidelines/*.md | sort -u`.
-- Flag guidelines missing `tags:`, using block-list tags, or using vague/non-domain tags.
-- Use overlapping tags as an initial signal for possible duplicate guidelines; read bodies only when tags or paths suggest overlap.
-
-### 10. Agent Overlap
-
-For all files in `.codex/agents/`, compare their `description` and responsibilities.
-
-If two agents share more than 50% of trigger keywords or review scope, flag possible overlap. They may waste tokens or compete for the same work.
-
-## Output Format
-
-```text
-# CLAUDART Codex Health Check
-
-## Passing
-- [item 1]
-- [item 2]
-
-## Warnings
-[file:line or section] - [what is wrong] -> [suggested action]
-
-## Errors
-[file or section] - [what is broken] -> [suggested action]
-
-## Recommended Next Step
-[Single actionable suggestion]
-```
-
-If everything passes, output:
-
-```text
-CLAUDART Codex installation healthy. <n> guidelines, <n> knowledge entries, <n> agents, <n> skills, <n> specs. Delegation wiring: <ok/warnings>.
-```
-
-Reminder: this command is read-only. Never modify files.
+Use passing, warnings, errors, and one recommended next step. State whether the mechanical baseline ran and its result. Only declare the installation healthy when all mandatory mechanical checks ran and passed and the semantic and remaining structural checks also pass. Doctor is read-only and does not require a `$codex-doctor` → `$codex-refactor-memory` → `$codex-doctor` chain.

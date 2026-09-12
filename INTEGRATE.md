@@ -200,17 +200,17 @@ Run bounded mechanical checks against the selected layers and changed dependency
 3. Compare every supposedly verbatim template-owned file with current upstream using `cmp`, checksums, or `git diff --no-index`, accounting only for approved relocation. Any unexplained drift fails verification.
 4. For merged loaders and indexes, confirm both the required current CLAUDART routes and the project-authored sections identified in the plan remain present. Resolve actual Claude `@` imports relative to each importing file, including nested targets: `@rules/ai-behavior.md` is relative to the installed `.claude/CLAUDE.md`. Preserve conditional plain routes and narrow rule scopes; do not make every workflow global or require an automatic import for every rule. An intentionally empty task/spec seed may have no glob matches. Verify core and selected module references are included in the dependency closure and installed at the paths used by their entrypoints.
 5. Confirm referenced commands, skills, rules, guidelines, agents, scripts, indexes, and config paths exist; no loader, rule, or guideline auto-loads `JOURNAL.md` or `HANDOFF.md`; existing live-state bodies were not replaced; changed shell scripts pass `bash -n`; changed command/skill/agent/rule/guideline frontmatter still satisfies the current upstream contract; and mirrored contracts remain consistent when both layers changed.
-6. Inspect current upstream `scripts/`. If it ships a documented read-only installation verifier that can target another root, run it exactly as documented. If none exists, that absence is not a failure; run the current upstream knowledge checker for each selected layer instead. With the current interface:
+6. Run the current upstream read-only `doctor-check.sh` for each selected layer. This provides the mechanical structure, metadata, local-reference, and size baseline, and invokes the existing knowledge checker once. Do not run knowledge validation separately afterward. With the current interface:
 
    ```bash
-   bash /tmp/claudart-src/.claude/scripts/knowledge-check.sh \
+   bash /tmp/claudart-src/.claude/scripts/doctor-check.sh \
      --root "$PWD" --layer claude
 
-   bash /tmp/claudart-src/.codex/scripts/knowledge-check.sh \
+   bash /tmp/claudart-src/.codex/scripts/doctor-check.sh \
      --root "$PWD" --layer codex
    ```
 
-   Run only selected layers. If current upstream `--help` differs, follow it instead. Prefer the trusted source script over an unreviewed downstream copy.
+   Run only selected layers. Keep the trusted source scripts and their adjacent helpers together; do not execute an unreviewed downstream checker copy. If current upstream `--help` differs, follow it instead. Exit `1` means findings; exit `2` means incomplete verification or a runtime/usage failure. Exit `0` covers the declared mechanical checks, not semantic correctness. Use the report for checks it covers above, and inspect only the remaining patch-specific obligations; do not duplicate its scan. Additional project Markdown is opt-in with `--include`, and is not required merely because integration occurred.
 
 A mechanical failure may be fixed immediately only when its fix is already inside the approved plan. Any additional write requires a new proposed diff and explicit approval.
 

@@ -63,6 +63,8 @@ function frontmatter(line,    s,k,v,a) {
       else if (v !~ /^[\[{>|!&*]/ && !flow(v))
         finding("ERROR", "D305", NR, "required metadata needs a flow array")
       else if (!flow(v)) finding("WARNING", "D306", NR, "array syntax needs review")
+    } else if (k == "tools" && flow(v)) {
+      # Claude tool lists may be a scalar or a flow sequence.
     } else if (v == "") {
       pending_key=k; pending_array=0; pending_line=NR
     } else if (v ~ /^\[/ || v ~ /^\{/) {

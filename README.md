@@ -60,15 +60,9 @@ The protocol compares the current project with the current `main` branch and sep
 
 ### First run
 
-After installation or reconciliation, run the health and normalization sequence once:
+Begin a normal session with `/start` or `$codex-start`. Integration follows the bounded verification in [INTEGRATE.md](INTEGRATE.md); a full doctor or memory refactor is conditional on findings or your request.
 
-| Claude Code        | Codex CLI                |
-| ------------------ | ------------------------ |
-| `/doctor`          | `$codex-doctor`          |
-| `/refactor-memory` | `$codex-refactor-memory` |
-| `/doctor`          | `$codex-doctor`          |
-
-Then begin a normal session with `/start` or `$codex-start`.
+For a health audit, `/doctor` or `$codex-doctor` runs `doctor-check.sh` once, then reviews meaning and workflow consistency. The helper checks structure, metadata, explicit local references and size limits, and includes the existing knowledge checker. Link targets may be code or docs anywhere in the repository; additional Markdown sources are opt-in. See the [checker usage and limits](.codex/references/doctor-check.md). It is read-only and requires Bash 3.2 plus standard utilities, with no package installation.
 
 ## Daily workflow
 

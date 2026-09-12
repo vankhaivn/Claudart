@@ -316,6 +316,26 @@ try {
   );
 
   check(
+    "Claude agent metadata retains required tools and model with either tool-list form",
+    () => {
+      const dir = fixture("claude-agent-metadata", "claude");
+      const file = join(dir, ".claude/agents/custom.md");
+      const base = "---\nname: custom\ndescription: Test agent\n";
+      for (const tools of ["Read, Glob", "[Read, Glob]"]) {
+        write(file, `${base}tools: ${tools}\nmodel: custom-model\n---\n`);
+        const valid = run(dir, "claude");
+        assert.equal(valid.status, 0, valid.out);
+        assert.doesNotMatch(valid.out, /^ERROR\|D3/m);
+      }
+      write(file, `${base}---\n`);
+      const missing = run(dir, "claude");
+      assert.equal(missing.status, 1, missing.out);
+      assert.match(missing.out, /missing required metadata key tools/);
+      assert.match(missing.out, /missing required metadata key model/);
+    },
+  );
+
+  check(
     "custom models and multiline agent instructions remain supported",
     () => {
       const dir = fixture("agent-toml");

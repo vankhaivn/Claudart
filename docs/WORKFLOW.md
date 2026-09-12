@@ -65,14 +65,7 @@ A useful prompt is:
 
 ### Initial reconciliation
 
-Run this sequence once after installation or upgrade:
-
-```text
-Claude: /doctor → /refactor-memory → /doctor
-Codex:  $codex-doctor → $codex-refactor-memory → $codex-doctor
-```
-
-`doctor` checks structure and semantic consistency. `refactor-memory` normalizes the memory layout in place. A second `doctor` confirms that the resulting state is healthy.
+Follow the bounded mechanical verification in `INTEGRATE.md`. The shared `doctor-check.sh` baseline includes knowledge validation once. Run a full `/doctor` or `$codex-doctor` only when findings need semantic review or the user requests it. `refactor-memory` changes files and needs concrete scope and authorization; it is not an automatic next step. After an approved repair, verify the affected checks again.
 
 ## 3. A normal session
 
@@ -223,7 +216,9 @@ bash .claude/scripts/knowledge-check.sh --root .
 bash .codex/scripts/knowledge-check.sh --root .
 ```
 
-The normal `/doctor` and `/refactor-memory` commands call the relevant checker as part of their own workflows.
+`refactor-memory` calls the knowledge checker after knowledge changes. `/doctor` and `$codex-doctor` use `doctor-check.sh`, which calls that checker once and adds selected-layer structure, metadata, explicit local-reference, and size checks. Do not run knowledge validation a second time after doctor.
+
+For the mechanical baseline alone, run `bash .codex/scripts/doctor-check.sh --root . --layer codex` or its Claude counterpart. By default, it scans operating-layer Markdown; reference targets may be code or docs anywhere inside the repository. Add `--include docs` only when you want to scan project Markdown too. It checks target existence, skips examples and ambiguous path mentions, and never repairs files or decides semantic correctness. See [coverage, options, and exit statuses](../.codex/references/doctor-check.md).
 
 ## 5. Persistent task workflow
 

@@ -336,7 +336,8 @@ check_metadata() {
   [ -f "$ROOT/$meta_rel" ] && [ -r "$ROOT/$meta_rel" ] || return
   case "$meta_kind" in
     rule) required='paths description when_to_use tags' ;;
-    skill|agent) required='name description' ;;
+    skill) required='name description' ;;
+    agent) required='name description tools model' ;;
     command) required='description' ;;
   esac
   if ! awk -v mode=meta -v kind="$meta_kind" -v required_keys="$required" \

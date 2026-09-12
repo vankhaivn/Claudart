@@ -60,15 +60,9 @@ Quy trình này so sánh dự án hiện tại với nhánh `main` mới nhất,
 
 ### Lần chạy đầu tiên
 
-Sau khi cài hoặc đối soát, chạy một lần chuỗi kiểm tra và chuẩn hóa:
+Bắt đầu phiên bình thường bằng `/start` hoặc `$codex-start`. Khi tích hợp, làm theo bước xác minh giới hạn trong [INTEGRATE.md](INTEGRATE.md); chỉ chạy doctor đầy đủ hoặc refactor bộ nhớ khi có căn cứ hay yêu cầu của bạn.
 
-| Claude Code        | Codex CLI                |
-| ------------------ | ------------------------ |
-| `/doctor`          | `$codex-doctor`          |
-| `/refactor-memory` | `$codex-refactor-memory` |
-| `/doctor`          | `$codex-doctor`          |
-
-Sau đó bắt đầu phiên làm việc bình thường bằng `/start` hoặc `$codex-start`.
+Khi audit, `/doctor` hoặc `$codex-doctor` chạy `doctor-check.sh` một lần rồi kiểm tra ngữ nghĩa và tính nhất quán của workflow. Helper kiểm tra cấu trúc, metadata, reference local rõ ràng và giới hạn kích thước, đồng thời gọi knowledge checker hiện có. Đích reference có thể là code/docs ở bất kỳ đâu trong repo; chỉ quét thêm nguồn Markdown khi được chọn. Xem [cách dùng và giới hạn checker](.codex/references/doctor-check.md). Script chỉ đọc, dùng Bash 3.2 cùng tiện ích tiêu chuẩn, không cần cài package.
 
 ## Quy trình hằng ngày
 
