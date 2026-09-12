@@ -93,7 +93,7 @@ For every guideline file in `.codex/guidelines/*.md`:
 
 Skip this section if `.codex/knowledge/` does not exist.
 
-Read `.codex/guidelines/knowledge-management.md` in full before this audit.
+Read `.codex/guidelines/knowledge-management.md` and `.codex/references/knowledge-maintenance.md` before this audit.
 
 #### Mechanical pass
 

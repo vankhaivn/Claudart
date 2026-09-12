@@ -57,32 +57,34 @@ For every `.agents/skills/*/SKILL.md` file:
 For every rule file in `.claude/rules/*.md`:
 
 - Read each glob pattern in `paths:`.
-- Use Glob to verify each pattern matches at least one real file in the repo.
-- Patterns matching zero files → flag as **possibly dead rule**: either the codebase moved or the rule was scoped wrong. Suggest re-scoping or removal.
+- Use Glob to inspect which real files each pattern matches.
+- A zero-match pattern may be intentional for a future task/spec workspace or optional agent. Check its conditional loader/command route before reporting it as possibly dead; an empty seed is valid. Report only missing applicability or unreachable guidance, not absence of a universal import.
 - `paths: ["**/*"]` is allowed for universal rules such as `ai-behavior.md`.
 
 ### 4. .claude/CLAUDE.md ↔ Rules Cross-Linking
 
 - Read `.claude/CLAUDE.md`.
 - Find the `## Domain Rules` section.
-- For every `@.claude/rules/*.md` import there, confirm the target file exists.
-- For every file under `.claude/rules/`, confirm there is a matching `@` import in `.claude/CLAUDE.md`. Files without an import are loaded only when their `paths:` glob fires — flag this as **isolated rule** so the user knows it won't be globally visible.
+- Resolve each actual `@` import relative to its containing file, including reachable nested imports; confirm targets exist. For example, `@rules/ai-behavior.md` in `.claude/CLAUDE.md` resolves to `.claude/rules/ai-behavior.md`. A project-root prefix would incorrectly repeat `.claude/` here. Do not treat code examples or plain paths as active imports.
+- Conditional rules are reachable through an explicit loader/command route or matching native `paths` scope. Do not require an automatic import for every rule. Check referenced support files in `.claude/references/` and skill-local `references/` too.
+- Reserve broad `paths: ["**/*"]` and automatic imports for universal guidance. Flag unrelated task/spec/delegation workflows activating on ordinary source reads; preserve intentional narrow scopes.
+- Confirm the loader identifies one state layer for the current work: default `.claude/`, or the user's explicitly selected alternate layer. Using a Codex skill in Claude does not change the host's available tools or authorize synchronizing both state stores.
 
 ### 5. AI Behavior Wiring
 
 - Confirm `.claude/rules/ai-behavior.md` exists.
-- Confirm `.claude/CLAUDE.md` has `@.claude/rules/ai-behavior.md` (or equivalent reference) under Domain Rules. If missing, the universal behavior guidelines are not loaded — flag as **High** severity.
+- Confirm `.claude/CLAUDE.md` loads `@rules/ai-behavior.md` (or a valid equivalent universal route) under Domain Rules. If missing, the universal behavior guidelines are not loaded — flag as **High** severity.
 
 ### 5a. Code Health Wiring
 
 - Confirm `.claude/rules/code-health.md` exists.
-- Confirm `.claude/CLAUDE.md` has `@.claude/rules/code-health.md` (or equivalent reference) under Domain Rules. If missing, ordinary implementation bypasses the shared correctness, scope, behavior-preservation, testing, and validation contract — flag as **High** severity.
+- Confirm `.claude/CLAUDE.md` explicitly routes implementation/review to `.claude/rules/code-health.md` (an automatic import is not required) under Domain Rules. If missing, ordinary implementation bypasses the shared correctness, scope, behavior-preservation, testing, and validation contract — flag as **High** severity.
 
 ### 5b. CONTEXT/JOURNAL Wiring (token hygiene)
 
-- Confirm `@.claude/CONTEXT.md` is referenced in `.claude/CLAUDE.md` Domain Rules. If missing, current-state handoff isn't loaded — flag as **Medium**.
+- Confirm `.claude/CLAUDE.md` instructs reading the selected layer's CONTEXT before meaningful work, with `.claude/CONTEXT.md` as the default. A conditional plain path is valid; do not demand an automatic import. If the route is missing, current-state handoff is unreachable — flag as **Medium**.
 - `.claude/CONTEXT.md` line count must be ≤ 150 (use `wc -l`, do NOT full-read the file just to count). Also report approximate tokens using `wc -w .claude/CONTEXT.md | awk '{printf "~%d tokens", $1 * 1.3}'` and cross-check with `wc -c .claude/CONTEXT.md | awk '{printf "~%d tokens", $1 / 4}'`. If line count exceeded, flag as **High** — past the declarative ceiling, needs trimming or graduation via `/learn`.
-- **CRITICAL**: search `.claude/CLAUDE.md` AND every file in `.claude/rules/` for any `@.claude/JOURNAL.md` reference (use `grep -r '@.claude/JOURNAL.md' .claude/CLAUDE.md .claude/rules/`). If found, flag as **Critical** — JOURNAL must NEVER be loaded into session context (defeats the entire token-saving purpose). Recommend immediate removal.
+- **CRITICAL**: inspect the resolved active import graph and auto-load instructions for any JOURNAL target, regardless of path spelling. JOURNAL is for explicit history lookup, never automatic loading. Ignore quoted examples describing prohibited imports; recommend removing actual auto-load edges.
 - Search `.claude/CONTEXT.md` for `<!-- since: YYYY-MM-DD -->` comments. Flag items older than 30 days as graduation candidates if they remain in Recent Decisions or otherwise look durable. If an obviously long-lived decision has no `since:` comment, warn that future `/checkpoint` should preserve/add one.
 - For `.claude/JOURNAL.md` integrity, use spot-checks rather than full reads (the file may be large):
   - `head -n 20 .claude/JOURNAL.md` — verify the canonical header is intact.
@@ -110,7 +112,7 @@ Skip this section if `.claude/tasks/` does not exist. Follow `.claude/rules/task
 
 Skip this section if `.claude/knowledge/` does not exist.
 
-Read `.claude/rules/knowledge-management.md` and use the checker output as the mechanical baseline. Then audit only what requires semantic judgment:
+Read `.claude/rules/knowledge-management.md` and `.claude/references/knowledge-maintenance.md`, then use the checker output as the mechanical baseline. Then audit only what requires semantic judgment:
 
 - Confirm the root is a compact router and routing is root → optional domain map → topic, with no nested maps. Preserve intentional external routes. If active topics exceed 24 or the root exceeds 1,200 visible words without domain maps, flag **Low**.
 - Treat an empty tier as informational. An unindexed file with ambiguous intent is a review candidate, not automatically active, retired, or orphaned.
@@ -126,7 +128,7 @@ Read `.claude/rules/knowledge-management.md` and use the checker output as the m
 
 - If present, it is an unconsumed baton. Report it informationally. If its frontmatter `created:` is more than 7 days old, flag as **Medium** — reasoning state rots fast; suggest resuming via `/start` or deleting it.
 - Line count must be ≤ 150 (use `wc -l`). If exceeded, flag as **High** — the baton is drifting toward a transcript dump; `/handoff`'s distillation rules were not honored.
-- **CRITICAL**: run `grep -rn '@.claude/HANDOFF.md' .claude/CLAUDE.md .claude/rules/`. If found, flag as **Critical** — the baton is consumed once by `/start`, NEVER auto-loaded into every session.
+- **CRITICAL**: inspect the resolved active import graph and auto-load instructions for any HANDOFF target, regardless of path spelling. The baton is consumed once by `/start`, never auto-loaded into every session; quoted prohibition examples are not imports.
 - Multiple handoff artifacts (`HANDOFF-*.md`, dated copies, a `handoff/` directory under `.claude/`) → flag as **Medium** — violates the single-slot contract; suggest consolidating into one `HANDOFF.md` or deleting stale copies.
 
 ### 5f. Spec Workspace Health (`.claude/specs/`)

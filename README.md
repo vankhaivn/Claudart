@@ -82,19 +82,25 @@ Use a task plan when meaningful decisions, coordination, interruption, or review
 
 A task starts as `tasks/YYYY-MM-DD-NNN-<slug>/TASK.md` under the selected runtime. `TASK.md` is the only required file. Create `artifacts/` only for a concrete native-format input/output, necessary retained evidence, or substantial task-local research; short findings stay inline. There is no mandatory POC, ledger, repeated review loop, or session rotation. On user-confirmed closure, archive the whole directory. The current contract has no flat-task compatibility path; downstream upgrades adapt existing work deliberately.
 
+An explicit instruction to implement or resume carries through planning without a second approval prompt. Planning-only requests remain read-only, and final closure still needs user confirmation. An approved spec can transfer to its runner in the same session when execution was requested; session rotation is optional.
+
 ## How state is organized
 
-| Location                  | Purpose                                         | Loading behavior                                    |
-| ------------------------- | ----------------------------------------------- | --------------------------------------------------- |
-| `CONTEXT.md`              | Current project and work state                  | Read at session start; rewritten by checkpoint      |
-| `JOURNAL.md`              | Retired history                                 | Append-only; not loaded automatically               |
-| `rules/` or `guidelines/` | Prescriptive instructions for agent behavior    | Loaded when applicable                              |
-| `knowledge/`              | Durable descriptive facts about the project     | Routed through `INDEX.md`; details loaded on demand |
-| `tasks/`                  | Persistent implementation plans                 | Metadata at start; selected `TASK.md` and needed files on resume               |
-| `specs/`                  | Large-work specifications and execution records | Read when a specification is active                 |
-| `HANDOFF.md`              | One-session reasoning handoff                   | Consumed by the next start, then removed            |
+| Location                  | Purpose                                         | Loading behavior                                                 |
+| ------------------------- | ----------------------------------------------- | ---------------------------------------------------------------- |
+| `CONTEXT.md`              | Current project and work state                  | Read at session start; rewritten by checkpoint                   |
+| `JOURNAL.md`              | Retired history                                 | Append-only; not loaded automatically                            |
+| `rules/` or `guidelines/` | Prescriptive instructions for agent behavior    | Loaded when applicable                                           |
+| `knowledge/`              | Durable descriptive facts about the project     | Routed through `INDEX.md`; details loaded on demand              |
+| `tasks/`                  | Persistent implementation plans                 | Metadata at start; selected `TASK.md` and needed files on resume |
+| `specs/`                  | Large-work specifications and execution records | Read when a specification is active                              |
+| `HANDOFF.md`              | One-session reasoning handoff                   | Consumed by the next start, then removed                         |
 
 The important boundary is simple: **rules say how the agent should work; knowledge records what is true about the project; tasks and specifications record work in progress.**
+
+Each workstream uses one state layer: `.claude/` for Claude or `.codex/` for Codex by default. If you explicitly ask another host to follow a Codex skill, its `.codex/` state stays authoritative while tool use follows that host's actual capabilities. The two stores are not synchronized automatically.
+
+Workflow rules load when needed. Claude's installed loader resolves imports from `.claude/CLAUDE.md`; conditional discovery and knowledge-maintenance detail lives in `references/`. Retrieval does not load mutation schemas, and uninterrupted spec iterations read relevant state instead of repeatedly reloading all mission files.
 
 ## Specialized agents
 

@@ -42,7 +42,7 @@ Walk the conversation chronologically, comparing each assistant turn against the
    - **CRITICAL CONSTRAINT**: DO NOT shoehorn or force new concepts into an existing file if the match is less than 80%. It is strictly PREFERRED to create a new domain file rather than polluting existing specific rules.
    - Then, decide:
      - Existing domain (perfect match) → Update the exact file in `.claude/rules/`.
-     - New domain (no strong match) → Create a new `.md` file in `.claude/rules/` with complete YAML frontmatter and append the `@` import to `.claude/CLAUDE.md`.
+     - New domain (no strong match) → Create a new `.md` file in `.claude/rules/` with complete YAML frontmatter and add a conditional route to `.claude/CLAUDE.md`. Reserve automatic `@` imports for universal guidance and resolve them relative to the importing file.
      - Global standard (applies universally) → Update `.claude/CLAUDE.md` (or `.claude/rules/ai-behavior.md` if it's a behavioral rather than structural rule).
      - Descriptive fact → apply `.claude/rules/knowledge-management.md`. Promote it directly only if it is durable beyond the current work, current, evidenced, and correctly scoped. Patch the existing owner and reachable map atomically; leave WIP/proposals in the task/spec/CONTEXT surface and uncertainty/conflict as a candidate or `review-needed`.
 

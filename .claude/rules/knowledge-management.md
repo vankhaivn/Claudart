@@ -1,5 +1,5 @@
 ---
-paths: ["**/*"]
+paths: [".claude/references/knowledge-maintenance.md"]
 description: Bounded retrieval and classification contract for durable descriptive project knowledge under `.claude/knowledge/`; routes mutations and audits to the maintenance reference.
 when_to_use: When a task retrieves or searches project knowledge, classifies a possible durable fact, or audits, mutates, or refactors `.claude/knowledge/`.
 tags: [knowledge, memory, routing, validation]

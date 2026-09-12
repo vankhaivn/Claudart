@@ -82,19 +82,25 @@ Dùng task plan khi quyết định quan trọng, phối hợp, gián đoạn ho
 
 Task bắt đầu bằng `tasks/YYYY-MM-DD-NNN-<slug>/TASK.md` trong runtime đã chọn. `TASK.md` là file bắt buộc duy nhất. Chỉ tạo `artifacts/` cho input/output ở định dạng riêng, bằng chứng cần giữ hoặc nghiên cứu chi tiết của task; phát hiện ngắn nằm ngay trong plan. Không bắt buộc POC, ledger, vòng review lặp lại hay đổi phiên. Khi user xác nhận đóng, archive toàn bộ thư mục. Hợp đồng hiện hành không hỗ trợ task file phẳng; downstream chủ động điều chỉnh công việc đã có khi nâng cấp.
 
+Khi đã được yêu cầu triển khai hoặc tiếp tục, agent chuyển từ lập kế hoạch sang thực hiện mà không hỏi lại. Yêu cầu chỉ lập kế hoạch vẫn giữ chế độ chỉ đọc; đóng công việc cuối cùng vẫn cần user xác nhận. Spec đã duyệt có thể chuyển sang runner ngay trong cùng phiên nếu user đã yêu cầu thực thi; đổi phiên là tùy chọn.
+
 ## Cách tổ chức trạng thái
 
-| Vị trí                      | Mục đích                                         | Cách nạp                                            |
-| --------------------------- | ------------------------------------------------ | --------------------------------------------------- |
-| `CONTEXT.md`                | Trạng thái hiện tại của dự án và công việc       | Đọc khi bắt đầu phiên; được checkpoint viết lại     |
-| `JOURNAL.md`                | Lịch sử đã kết thúc                              | Chỉ nối thêm; không tự động nạp                     |
-| `rules/` hoặc `guidelines/` | Chỉ dẫn mang tính quy định cho hành vi của agent | Nạp khi phù hợp                                     |
-| `knowledge/`                | Các sự thật bền vững mô tả dự án                 | Định tuyến qua `INDEX.md`; chỉ đọc chi tiết khi cần |
-| `tasks/`                    | Kế hoạch triển khai bền vững                     | Metadata lúc start; `TASK.md` đã chọn và file cần thiết khi tiếp tục    |
-| `specs/`                    | Đặc tả công việc lớn và lịch sử thực thi         | Đọc khi đặc tả đang hoạt động                       |
-| `HANDOFF.md`                | Bàn giao suy luận cho một phiên kế tiếp          | Phiên `/start` kế tiếp tiếp nhận rồi xóa            |
+| Vị trí                      | Mục đích                                         | Cách nạp                                                             |
+| --------------------------- | ------------------------------------------------ | -------------------------------------------------------------------- |
+| `CONTEXT.md`                | Trạng thái hiện tại của dự án và công việc       | Đọc khi bắt đầu phiên; được checkpoint viết lại                      |
+| `JOURNAL.md`                | Lịch sử đã kết thúc                              | Chỉ nối thêm; không tự động nạp                                      |
+| `rules/` hoặc `guidelines/` | Chỉ dẫn mang tính quy định cho hành vi của agent | Nạp khi phù hợp                                                      |
+| `knowledge/`                | Các sự thật bền vững mô tả dự án                 | Định tuyến qua `INDEX.md`; chỉ đọc chi tiết khi cần                  |
+| `tasks/`                    | Kế hoạch triển khai bền vững                     | Metadata lúc start; `TASK.md` đã chọn và file cần thiết khi tiếp tục |
+| `specs/`                    | Đặc tả công việc lớn và lịch sử thực thi         | Đọc khi đặc tả đang hoạt động                                        |
+| `HANDOFF.md`                | Bàn giao suy luận cho một phiên kế tiếp          | Phiên `/start` kế tiếp tiếp nhận rồi xóa                             |
 
 Ranh giới quan trọng nhất: **quy tắc nói agent nên làm việc như thế nào; knowledge ghi điều gì đang đúng về dự án; task và spec ghi công việc đang được thực hiện.**
+
+Mỗi luồng công việc dùng một nơi lưu trạng thái: mặc định `.claude/` cho Claude hoặc `.codex/` cho Codex. Khi bạn yêu cầu host khác làm theo skill Codex, trạng thái `.codex/` vẫn là nguồn chính, còn công cụ tuân theo khả năng thực tế của host đó. Hai nơi lưu không tự đồng bộ.
+
+Rule workflow chỉ nạp khi cần. Loader Claude đã cài đặt tính đường dẫn import từ `.claude/CLAUDE.md`; chi tiết phỏng vấn discovery và bảo trì knowledge nằm trong `references/`. Tra cứu không phải nạp schema ghi knowledge; các vòng spec liên tục chỉ đọc trạng thái liên quan thay vì nạp lại toàn bộ tài liệu mission.
 
 ## Agent chuyên biệt
 

@@ -1,5 +1,5 @@
 ---
-paths: ["**/*"]
+paths: [".claude/commands/plan.md"]
 description: How agents create, maintain, resume, and complete persistent implementation plans stored in `.claude/tasks/`. Replaces session-only plan mode with lightweight task workspaces.
 when_to_use: Whenever the user invokes `/plan`, when a task workspace is open or referenced, or when resuming work that may have an active task in `.claude/tasks/`.
 tags: [tasks, planning, persistence, cross-session]
