@@ -44,7 +44,7 @@ curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh 
 
 The installer copies missing files and skips files that already exist. The default installation contains only the core layer; `--project-docs` adds the optional documentation-lifecycle command or skill and its references. It never creates or migrates your project documentation. `--force` overwrites existing files and should be used only when that is intentional.
 
-Project Docs includes [output templates and filled examples](modules/project-docs/README.md#output-templates-and-examples) for product scope, behavior, architecture, development, and operations, linked by a small documentation router. Use only the responsibilities that need an owner; existing docs and knowledge can retain theirs.
+Project Docs includes [output templates and filled examples](modules/project-docs/README.md#output-templates-and-examples) for product scope, behavior, architecture, development, and operations, linked by a small documentation router. Use only the responsibilities that need an owner; existing docs and knowledge can retain theirs. Templates adapt to local use, `main` latest, continuous deployment, or formal team releases; they preserve actual requirements without imposing a production-readiness process.
 
 A clean Codex installation adds `.codex/`, `.agents/skills/`, and a root `AGENTS.md`. The source template is stored at `.codex/AGENTS.md` in this repository.
 

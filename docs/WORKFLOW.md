@@ -170,7 +170,9 @@ For an established project, `adopt` retains valid current owners, including know
 
 The module ships [actual output templates and filled examples](../modules/project-docs/README.md#output-templates-and-examples): router, product scope, capability behavior, architecture, development/testing, operations/release/support, and an optional significant-decision record. When creating or reshaping a page, select the relevant body and adapt it to existing owners and paths. A new idea may need only a product brief and router; do not generate empty technical or operational pages.
 
-Behavior docs distinguish approved rules and quality expectations from actual implementation and supported releases. Link the pending delta to its task/spec; update affected owners during implementation and release as evidence becomes available. Compaction replaces superseded current claims and removes resolved pending summaries, preserving useful rationale and still-supported versions without appending an edit diary.
+Behavior docs distinguish approved rules and quality expectations from actual behavior in the relevant commit or use scope. Link the pending delta to its task/spec and update affected owners as evidence becomes available. Compaction replaces superseded current claims and removes resolved pending summaries, preserving useful rationale and any still-supported versions without appending an edit diary.
+
+Release is an optional delivery context, not a required project stage. An app used from `main` can document the evidenced revision and local run/check guidance without separate release notes, support tables, or an operations page. Continuous deployments use environment-specific evidence; teams with formal releases retain their actual approval, readiness, verification, recovery, and support requirements. Infer these needs from existing use and commitments, not personal/company labels. Audit does not treat missing formal release machinery as a defect by itself; real behavior or data problems still matter.
 
 ### Retrieval
 

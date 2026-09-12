@@ -170,7 +170,9 @@ Với dự án đã phát triển, `adopt` giữ owner hiện hành hợp lệ, 
 
 Module cung cấp [template đầu ra thực tế và ví dụ đã điền](../modules/project-docs/README.md#output-templates-and-examples): router, phạm vi product, hành vi capability, kiến trúc, phát triển/kiểm thử, vận hành/phát hành/hỗ trợ và decision record tùy chọn cho quyết định quan trọng. Khi tạo hoặc sửa cấu trúc một trang, chọn mẫu phù hợp rồi điều chỉnh theo nguồn sở hữu và đường dẫn hiện có. Ý tưởng mới có thể chỉ cần product brief và router; không tạo trang kỹ thuật hoặc vận hành rỗng.
 
-Tài liệu behavior phân biệt quy tắc và yêu cầu chất lượng đã duyệt với thực tế triển khai và bản còn hỗ trợ. Trỏ thay đổi đang chờ tới task/spec; cập nhật đúng nguồn sở hữu khi có bằng chứng triển khai và phát hành. Compact thay thế nội dung hiện hành đã lỗi thời và bỏ phần tóm tắt pending đã hoàn tất, giữ lý do còn hữu ích và phiên bản còn hỗ trợ, không nối thêm nhật ký mỗi lần chỉnh sửa.
+Tài liệu behavior phân biệt quy tắc và yêu cầu chất lượng đã duyệt với hành vi thực tế tại commit hoặc phạm vi sử dụng liên quan. Trỏ thay đổi đang chờ tới task/spec và cập nhật đúng nguồn sở hữu khi có bằng chứng. Compact thay thế nội dung hiện hành đã lỗi thời và bỏ phần tóm tắt pending đã hoàn tất, giữ lý do còn hữu ích và các phiên bản vẫn còn được hỗ trợ nếu có, không nối thêm nhật ký mỗi lần chỉnh sửa.
+
+Release là ngữ cảnh bàn giao tùy dự án, không phải giai đoạn bắt buộc. App dùng từ `main` có thể ghi nhận revision đã kiểm chứng và cách chạy/kiểm tra local mà không cần release notes, bảng support hay trang operations riêng. Deploy liên tục dùng bằng chứng theo môi trường; team có release chính thức vẫn giữ yêu cầu phê duyệt, readiness, kiểm chứng, phục hồi và support thực tế. Xác định nhu cầu theo cách sử dụng và cam kết hiện có, không theo nhãn personal/công ty. Audit không tự coi việc thiếu quy trình release chính thức là lỗi; vấn đề hành vi hoặc dữ liệu có thật vẫn cần được quan tâm.
 
 ### Truy xuất knowledge
 
