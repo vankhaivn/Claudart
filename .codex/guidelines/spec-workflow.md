@@ -46,9 +46,7 @@ commits: user # user | per-task | per-phase — the executor's git-commit grant,
 
 ## Mission
 
-> "<the user's original ask, quoted verbatim>"
-
-<2-3 sentences: what exists when this is done, who it will be demoed to.>
+<Write 2-3 self-contained sentences in project/documentation language that state the mission's end state, intended actors or use, observable behavior/demo, and material preserved boundaries or non-goals. Normalize the owner's intent; do not quote or preserve raw owner/agent conversational wording, interview chatter, or session meta-instructions. If conversational wording carries a real requirement, rewrite it as that requirement. A later executor must understand the mission without interview or chat history.>
 
 ## Acceptance Scenarios
 
@@ -286,6 +284,7 @@ SPEC frontmatter is the source of truth; INDEX is a cache. Active lists status �
 
 ## Anti-Patterns
 
+- **Persisting chat as Mission.** Do not copy owner or agent conversation into `Mission`; normalize the durable end state, intended behavior, and material boundaries into self-contained documentation language.
 - Asking permission per task or per phase while `running` — the standing approval exists precisely so the loop never blocks on the user.
 - Treating a rotation offer or lack of a reply as a reason to pause authorized work.
 - A roadmap that needs interview context ("as discussed", "the style we agreed on") — decision-complete or defective.
