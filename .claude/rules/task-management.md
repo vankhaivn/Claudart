@@ -81,9 +81,7 @@ tags: [1-5 lowercase kebab-case tags]
 
 ## Purpose
 
-> "<the user's original request, quoted verbatim — paraphrase is where intent bends>"
-
-<2-3 sentences: what someone gains after this change and how they can see it working.>
+<Write 2-3 self-contained sentences in project/documentation language that state the requested outcome, observable behavior, and material constraints or non-goals. Normalize the owner's intent; do not quote or preserve raw owner/agent conversational wording, politeness, frustration, corrections, or session meta-instructions. If conversational wording carries a real requirement, rewrite it as that requirement. A later session must understand the purpose without conversation history.>
 
 ## Context & Orientation
 
@@ -333,6 +331,7 @@ So: a task's existence is signalled in CONTEXT by a pointer line. The task's con
 
 ## Anti-Patterns
 
+- **Persisting chat as Purpose.** Do not copy owner or agent conversation into `Purpose`; normalize the durable outcome and material constraints into self-contained documentation language.
 - **Agent auto-completing.** Flipping `status` directly from `in-progress` to `done`, moving the workspace to `done/`, writing to JOURNAL, or updating Recently Done in `index.md` without a user completion signal. The agent's job is to reach `awaiting-review` and stop.
 - Editing code while `status: planning` or `status: awaiting-review`. Both states are read-only locks.
 - **Spawning write-scope subagents from a planning-locked task.** The lock forbids code edits, so any worker that writes must wait for `in-progress`; read-only exploration subagents are fine.
