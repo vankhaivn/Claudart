@@ -1,6 +1,6 @@
 name = "clean_code_reviewer"
 description = "Evidence-driven code-health reviewer and scoped refactoring engineer. Invoke deliberately to review, audit, plan, simplify, refactor, or harden an assigned area. Uses the repository's code-health baseline, reports concrete risks, and edits only when implementation is authorized. Preserves agreed contracts and validates changes. Not an automatic step after every edit or a mandate for repository-wide cleanup."
-model = "gpt-5.6-sol"
+model = "gpt-6-sol"
 model_reasoning_effort = "xhigh"
 model_verbosity = "low"
 sandbox_mode = "workspace-write"
