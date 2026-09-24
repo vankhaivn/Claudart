@@ -114,6 +114,12 @@ Mock genuine boundaries when useful, not every internal collaborator. A need to 
 
 A regression test should fail when its claimed defect is present. Never weaken assertions, skip coverage, or replace expected results merely to accept broken behavior. Update implementation-coupled tests deliberately when structure changes, while preserving their meaningful behavioral protection.
 
+Ground expected results in requirements, independently checked examples, invariants, or an appropriate reference. Current output, calling the behavior under test to compute its expected result, or copying its algorithm is not an independent correctness oracle. Shared setup is fine; characterization records existing behavior, not proof that it is correct.
+
+Use relevant existing tests to choose the smallest useful addition for a plausible regression or meaningful contract boundary. Coverage and test counts alone neither justify new cases nor establish correctness. Similar syntax or cross-layer overlap does not prove redundancy; consolidate only when retained checks preserve meaningful protection.
+
+Apply these criteria within existing implementation and review, without adding mandatory review rounds, agents, per-test justification/reporting, whole-suite audits, or mutation-testing passes. Names, inputs, and assertions normally suffice; explain only non-obvious expectations. Beyond existing project-required checks, extend verification only for a concrete assertion concern or uncovered material risk, using a bounded check in the affected scope.
+
 ## 10. Preserve Operability and Use Performance Evidence
 
 Keep failures diagnosable and preserve cancellation, timeout propagation, and resource cleanup. Add telemetry only when it answers a concrete operational question; avoid duplicate, noisy, sensitive, or unnecessarily high-cardinality output.
