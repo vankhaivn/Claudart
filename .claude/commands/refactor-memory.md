@@ -21,7 +21,7 @@ Execute the following steps systematically, without losing essential project con
 ## 1. Resolve The Memory Shape
 
 - Treat root `CLAUDE.md` as the canonical loader for current CLAUDART projects.
-- If legacy root `CLAUDE.md` also exists, compare it with root `CLAUDE.md` before changing either file.
+- If legacy `.claude/CLAUDE.md` also exists, compare it with root `CLAUDE.md` before changing either file.
   - If root `CLAUDE.md` is missing, propose relocating the legacy loader to root while preserving project-authored content.
   - If both are equivalent, retire the legacy duplicate only within the user's authorized scope.
   - If they differ, merge deliberately into root `CLAUDE.md`; never silently discard project-specific instructions from either file.
@@ -120,7 +120,7 @@ Semantic audit output must list:
 - split/merge actions that still need user confirmation;
 - rules proposed for reclassification into `.claudart/knowledge/` (descriptive content misfiled as behavior).
 
-## 6. Refactor .claude/CLAUDE.md
+## 6. Refactor root CLAUDE.md
 
 Trim root `CLAUDE.md` so it stays a concise memory index, not a knowledge dump.
 
@@ -247,7 +247,7 @@ If this repository is a base template whose `.claude/` and `.agents/` directorie
 
 - Do not add generated-marker comments to base template files.
 - Keep template language generic and avoid project-specific names unless the template is intentionally branded.
-- If an installer copies root `CLAUDE.md` to a downstream project, document that relationship clearly and keep both files synchronized.
+- Treat `.claude/CLAUDE.md` as the upstream source template and root `CLAUDE.md` as the installed project loader; do not maintain a second downstream copy under `.claude/`.
 - Do not assume a downstream project has the same languages, frameworks, docs, or tests as the template repository.
 
 ## 12. Append Agent Self-Evolution Section
@@ -269,7 +269,7 @@ Before the final summary, run or perform:
 
 - `git diff --stat`
 - `git status --short`
-- `wc -l .claude/CLAUDE.md .claudart/CONTEXT.md`
+- `wc -l CLAUDE.md .claudart/CONTEXT.md`
 - Search for stale references to deleted memory files.
 - Search root `CLAUDE.md` and `.claude/rules/` for JOURNAL auto-load instructions.
 - Confirm every rule listed in root `CLAUDE.md` exists on disk.
