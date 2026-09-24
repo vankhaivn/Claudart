@@ -2,7 +2,7 @@ name: Temporary shared-state preparation
 on:
   push:
     branches: [feat/16-shared-project-state]
-    paths: [.github/workflows/claudart-prepare.yml, .claudart-prepare.py]
+    paths: [.github/workflows/claudart-prepare.yml, .claudart-changes.patch.gz]
 permissions:
   contents: write
 jobs:
@@ -20,20 +20,30 @@ jobs:
           name: claudart-source
           path: /tmp/claudart-source.bundle
           retention-days: 1
-      - name: Apply scoped upstream changes
+      - name: Apply scoped upstream patch
         run: |
-          if test -f .claudart-prepare.py; then
-            python3 .claudart-prepare.py
+          if test -f .claudart-changes.patch.gz; then
+            gzip -dc .claudart-changes.patch.gz > /tmp/claudart-changes.patch
+            git apply --check /tmp/claudart-changes.patch
+            git apply /tmp/claudart-changes.patch
           fi
-      - name: Validate
+      - name: Install validation dependency
         run: |
           npm ci
+          tar -czf /tmp/claudart-prettier.tar.gz node_modules
+      - uses: actions/upload-artifact@v4
+        with:
+          name: claudart-devkit
+          path: /tmp/claudart-prettier.tar.gz
+          retention-days: 1
+      - name: Validate
+        run: |
           npm run check
           git diff --check
       - name: Publish validated tree on working branch
         run: |
-          if test -f .claudart-prepare.py; then
-            rm .claudart-prepare.py .github/workflows/claudart-prepare.yml
+          if test -f .claudart-changes.patch.gz; then
+            rm .claudart-changes.patch.gz .github/workflows/claudart-prepare.yml
             git config user.name 'van khai'
             git config user.email 'ryuzakisskaryzi@gmail.com'
             git add -A
