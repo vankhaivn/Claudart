@@ -506,6 +506,19 @@ try {
     },
   );
   check(
+    "legacy nested Claude loader is preserved without creating a duplicate root loader",
+    () => {
+      const dest = join(scratch, "legacy Claude loader");
+      mkdirSync(join(dest, ".claude"), { recursive: true });
+      const legacy = "# Legacy project-owned Claude loader\n\nSee @rules/ai-behavior.md\n";
+      writeFileSync(join(dest, ".claude/CLAUDE.md"), legacy);
+      install(dest, ["--claude", "--force"]);
+      assert.equal(read(join(dest, ".claude/CLAUDE.md")), legacy);
+      assert(!existsSync(join(dest, "CLAUDE.md")));
+      assert(existsSync(join(dest, ".claude/commands/start.md")));
+    },
+  );
+  check(
     "missing selected module fails before writing a partial install",
     () => {
       rmSync(join(source, "modules"), { recursive: true });
