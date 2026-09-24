@@ -199,6 +199,9 @@ if [[ "$INSTALL_CLAUDE" == true ]]; then
   if [[ -e "$DEST/CLAUDE.md" || -L "$DEST/CLAUDE.md" ]]; then
     printf '  %s  CLAUDE.md (existing project loader)\n' "$(yellow "keep")"
     (( SKIPPED++ )) || true
+  elif [[ -e "$DEST/.claude/CLAUDE.md" || -L "$DEST/.claude/CLAUDE.md" ]]; then
+    printf '  %s  .claude/CLAUDE.md (legacy loader; reconcile to root with INTEGRATE.md)\n' "$(yellow "keep")"
+    (( SKIPPED++ )) || true
   else
     copy_file_from_src ".claude/CLAUDE.md" "CLAUDE.md"
   fi
