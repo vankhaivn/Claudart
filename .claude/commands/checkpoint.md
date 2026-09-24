@@ -9,7 +9,7 @@ You are about to write a session checkpoint. The output is **not a log of what h
 1. **.claudart/CONTEXT.md is overwritten, not appended.** Anything not still true _right now_ must be removed.
 2. **.claudart/CONTEXT.md hard ceiling: 150 lines, target < 100.** If your draft exceeds 150, STOP and ask the user to trim manually or run `/refactor-memory`.
 3. **.claudart/JOURNAL.md is append-only.** Never edit or delete prior entries. Each new entry is a single line.
-4. **NEVER add `@.claudart/JOURNAL.md` to root `CLAUDE.md`.** JOURNAL is intentionally outside the loaded context to save tokens. If you find such an import, remove it and warn the user.
+4. **Never add `.claudart/JOURNAL.md` as auto-loaded context in `CLAUDE.md` or `.claude/rules/`. If such an auto-load already exists, remove that wiring and warn the user; JOURNAL remains append-only and outside session context.**
 5. **Skip JOURNAL entirely when there is nothing meaningful to record.** Empty entries pollute the file.
 6. **Task workspaces keep their own bodies and supporting files; CONTEXT.md never absorbs a task body.** But CONTEXT.md **should** still reference the currently-focused task by slug + path in `## In Progress` so `/start` sees both task and non-task work in one place. Two valid CONTEXT entries:
    - Task reference: `- Working task \`add-jwt-auth\` (see .claudart/tasks/2026-05-13-001-add-jwt-auth/TASK.md) <!-- since: YYYY-MM-DD -->`
