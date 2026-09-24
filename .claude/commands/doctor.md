@@ -12,7 +12,7 @@ Run the doctor helper exactly once before semantic review. For a normal downstre
 bash .claude/scripts/doctor-check.sh --root . --layer claude
 ```
 
-Installed projects use root `CLAUDE.md` as the Claude loader. For explicit upstream CLAUDART source-template work, use `--layout source` to inspect `.claude/CLAUDE.md` instead.
+Installed projects use `CLAUDE.md` as the Claude loader. For explicit upstream CLAUDART source-template work, use `--layout source` to inspect `.claude/CLAUDE.md` instead.
 
 For nondefault options or coverage boundaries, read `.claude/references/doctor-check.md`.
 
