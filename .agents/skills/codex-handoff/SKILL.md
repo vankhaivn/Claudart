@@ -1,6 +1,6 @@
 ---
 name: codex-handoff
-description: Write a single-slot session baton (.codex/HANDOFF.md) that distills this session's reasoning state — objective, hypothesis, evidence, dead ends, exact next step — so a fresh session can resume seamlessly. Run when the context window is nearly full or when pausing mid-investigation.
+description: Write a single-slot session baton (.claudart/HANDOFF.md) that distills this session's reasoning state — objective, hypothesis, evidence, dead ends, exact next step — so a fresh session can resume seamlessly. Run when the context window is nearly full or when pausing mid-investigation.
 ---
 
 # Codex Handoff
@@ -11,7 +11,7 @@ Distill. Never dump transcript.
 
 ## Hard Rules (read before doing anything)
 
-1. **Single slot.** `.codex/HANDOFF.md` is the only handoff file, and it is **overwritten**, not appended. It is a baton, not an archive: written once here, consumed once by the next `$codex-start`, then deleted. NEVER create dated copies, a `handoff/` folder, or a second slot.
+1. **Single slot.** `.claudart/HANDOFF.md` is the only handoff file, and it is replaced only after the existing baton is consumed, discarded or explicitly approved for replacement, not appended. It is a baton, not an archive: written once here, consumed once by the next `$codex-start`, then deleted. NEVER create dated copies, a `handoff/` folder, or a second slot.
 2. **Distill, don't transcribe.** No raw chat history, no message-by-message replay. Hard ceiling: 150 lines; target under 100. Repeated compaction is cumulatively lossy — a tight baton beats a long echo.
 3. **Verbatim tier.** Three things must be quoted word-for-word, never paraphrased:
    - explicit constraints or instructions the user stated (security rules, "don't touch X", style preferences);
@@ -19,11 +19,13 @@ Distill. Never dump transcript.
    - the quote anchoring where work stopped (see Hard Rule 7).
      Everything else gets distilled.
 4. **Route durable content out FIRST.** The baton holds conversational residue only. Before writing it, classify each claim: descriptive + durable beyond current work + current + evidenced → eligible knowledge when no other source owns it; when another source owns it, record its pointer or needed update as a candidate in the active task/spec or baton without editing that source during handoff; task/spec state, WIP, and proposals → the active task/spec; recurring behavior → a `$codex-learn` candidate; uncertainty/conflict → the working artifact or the baton's Working Hypothesis, never active knowledge. A scoped fact is valid when its scope is recorded. Content routed to another file does NOT also go into the baton.
-5. **Active task wins.** If an active task file covers this session's work, most content belongs THERE. The baton then holds only a pointer to the task plus live reasoning not yet written into it. Never duplicate task content into the baton. An active spec mission (`.codex/specs/`) wins the same way — route into its NOTES/LEDGER; a routine spec pause needs no baton at all, `$codex-spec-run` re-orients from the folder.
+5. **Active task wins.** If an active task file covers this session's work, most content belongs THERE. The baton then holds only a pointer to the task plus live reasoning not yet written into it. Never duplicate task content into the baton. An active spec mission (`.claudart/specs/`) wins the same way — route into its NOTES/LEDGER; a routine spec pause needs no baton at all, `$codex-spec-run` re-orients from the folder.
 6. **No code edits.** This skill writes memory only — `HANDOFF.md`, and optionally a task/spec file and eligible knowledge entries. Never code, and never `CONTEXT.md` (that is `$codex-checkpoint`'s file).
 7. **Next Step is anchored, not invented.** It must trace directly to the user's most recent explicit request and the work in flight immediately before this handoff, with a verbatim quote proving it. Never list tangential ideas, speculative improvements, or already-completed work.
 
 ## Procedure
+
+Before writing, inspect the shared handoff slot. Never silently overwrite an unconsumed baton from either runtime. Preserve it and report the conflict unless the user explicitly authorizes replacement. Re-read the slot immediately before the write; if its content changed, stop and reconcile instead of overwriting. Coordinate one writer at a time; no lock or automatic multi-writer safety is provided.
 
 ### Step 1 — Chronological analysis pass
 
@@ -41,7 +43,7 @@ Do not skip this pass. Writing the baton from general impressions produces a vib
 
 Apply Hard Rule 4 now. For any eligible knowledge write, read `.codex/guidelines/knowledge-management.md` in full, patch the existing owner first, update the topic plus its reachable route atomically, and run `bash .codex/scripts/knowledge-check.sh --root .`. If evidence is insufficient or conflicting, preserve a candidate in the owning work artifact; when that evidence invalidates an existing active owner, mark the owner `review-needed` with a precise `status_note` instead of leaving known-wrong material authoritative. Write task/spec updates first so the baton can reference them instead of carrying them.
 
-### Step 3 — Write `.codex/HANDOFF.md` (overwrite)
+### Step 3 — Write `.claudart/HANDOFF.md`
 
 Use exactly this skeleton. When a section is truly empty, write `None` — never invent content to fill it.
 
@@ -104,7 +106,7 @@ Tell the user, briefly: the baton is written, what was routed to knowledge or th
 ## Anti-Patterns
 
 - ❌ Dumping transcript fragments or message lists into the baton.
-- ❌ Dated handoff files, multiple slots, or a handoff archive. One file; overwrite; delete on consumption.
+- ❌ Dated handoff files, multiple slots, or a handoff archive. One file; explicit replacement; delete the verified baton on consumption.
 - ❌ Putting durable facts in the baton "to be safe" instead of routing them to `knowledge/` or the task file.
 - ❌ Copying any part of a task file's body into the baton.
 - ❌ A Next Step that doesn't trace to the user's latest explicit request.

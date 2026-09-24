@@ -5,7 +5,7 @@ and named evidence are invented. The snippets demonstrate documentation shape;
 they are not proof that an application, test, release, or operating procedure ran.
 
 The adopter finds a maintained router, source-backed behavior, an architecture
-synthesis in Codex knowledge, a runbook, and a work spec. The useful adoption
+synthesis in shared project knowledge, a runbook, and a work spec. The useful adoption
 keeps those owners instead of creating a generic document pack.
 
 ```text
@@ -15,7 +15,7 @@ ledgerline/
 │   ├── README.md                     # existing documentation router
 │   ├── capabilities/report-exports.md
 │   └── operations/export-runbook.md
-├── .codex/knowledge/
+├── .claudart/knowledge/
 │   ├── INDEX.md
 │   └── reporting-architecture.md     # existing technical synthesis
 ├── specs/background-csv-export.md    # proposed work and acceptance evidence
@@ -25,8 +25,8 @@ ledgerline/
 ```
 
 There is deliberately no `docs/architecture.md`: the retained knowledge synthesis
-is the architecture owner. The same principle applies when an existing
-`.claude/knowledge/` topic is the maintained architecture owner.
+is the architecture owner. Both runtime adapters use the same maintained topic
+under `.claudart/knowledge/`.
 
 The existing `docs/README.md` becomes a concise router and responsibility map:
 
@@ -35,7 +35,7 @@ The existing `docs/README.md` becomes a concise router and responsibility map:
 
 - [Report exports](capabilities/report-exports.md) — current supported behavior
   and approved product direction.
-- [Reporting architecture](../.codex/knowledge/reporting-architecture.md) —
+- [Reporting architecture](../.claudart/knowledge/reporting-architecture.md) —
   maintained technical synthesis and component boundaries.
 - [Development and testing](../README.md#development-and-testing) — local setup,
   test commands, and repository-owned verification.

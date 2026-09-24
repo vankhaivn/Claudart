@@ -18,7 +18,7 @@ usage() {
   cat <<'EOF'
 Usage: doctor-check.sh [options]
   --root DIR              Repository root (default: inferred from script path)
-  --layer claude|codex    Runtime layer (default: inferred from script path)
+  --layer claude|codex    Adapter to check (default: inferred from script path)
   --layout installed|source  Loader layout (default: installed)
   --include PATH          Add a Markdown file or tree under root (repeatable)
   --today YYYY-MM-DD      Forward a date to the knowledge checker
@@ -132,7 +132,7 @@ private_path() {
 
 excluded_prose() {
   case "/$1/" in
-    */.claude/tasks/*|*/.codex/tasks/*|*/.claude/specs/*|*/.codex/specs/*|*/.claude/knowledge/*|*/.codex/knowledge/*|*/.claude/CONTEXT.md/*|*/.codex/CONTEXT.md/*|*/.claude/JOURNAL.md/*|*/.codex/JOURNAL.md/*|*/.claude/HANDOFF.md/*|*/.codex/HANDOFF.md/*) return 0 ;;
+    */.claudart/tasks/*|*/.claudart/specs/*|*/.claudart/knowledge/*|*/.claudart/CONTEXT.md/*|*/.claudart/JOURNAL.md/*|*/.claudart/HANDOFF.md/*) return 0 ;;
   esac
   return 1
 }
@@ -208,23 +208,25 @@ require_dir() {
 }
 
 LAYER_DIR=.$LAYER
+STATE_DIR=.claudart
 if [ "$LAYER" = codex ]; then
   if [ "$LAYOUT" = source ]; then LOADER=.codex/AGENTS.md; else LOADER=AGENTS.md; fi
 else
   LOADER=.claude/CLAUDE.md
 fi
-require_dir "$LAYER_DIR" ERROR "restore CLAUDART installation"
+require_dir "$LAYER_DIR" ERROR "restore CLAUDART adapter"
+require_dir "$STATE_DIR" ERROR "restore shared project state"
 require_file "$LOADER" ERROR "restore the $LAYER loader"
-require_file "$LAYER_DIR/CONTEXT.md" WARNING "run the checkpoint workflow"
-require_file "$LAYER_DIR/JOURNAL.md" WARNING "run the checkpoint workflow"
-require_dir "$LAYER_DIR/knowledge" WARNING "run the refactor-memory workflow"
-require_file "$LAYER_DIR/knowledge/INDEX.md" WARNING "run the refactor-memory workflow"
-require_dir "$LAYER_DIR/tasks" WARNING "run the plan workflow"
-require_file "$LAYER_DIR/tasks/index.md" WARNING "run the checkpoint workflow"
-require_dir "$LAYER_DIR/tasks/done" WARNING "run the checkpoint workflow"
-require_dir "$LAYER_DIR/specs" INFO "run the spec workflow when needed"
-require_file "$LAYER_DIR/specs/INDEX.md" INFO "run the spec workflow when needed"
-require_dir "$LAYER_DIR/specs/done" INFO "run the spec workflow when needed"
+require_file "$STATE_DIR/CONTEXT.md" WARNING "run the checkpoint workflow"
+require_file "$STATE_DIR/JOURNAL.md" WARNING "run the checkpoint workflow"
+require_dir "$STATE_DIR/knowledge" WARNING "run the refactor-memory workflow"
+require_file "$STATE_DIR/knowledge/INDEX.md" WARNING "run the refactor-memory workflow"
+require_dir "$STATE_DIR/tasks" WARNING "run the plan workflow"
+require_file "$STATE_DIR/tasks/index.md" WARNING "run the checkpoint workflow"
+require_dir "$STATE_DIR/tasks/done" WARNING "run the checkpoint workflow"
+require_dir "$STATE_DIR/specs" INFO "run the spec workflow when needed"
+require_file "$STATE_DIR/specs/INDEX.md" INFO "run the spec workflow when needed"
+require_dir "$STATE_DIR/specs/done" INFO "run the spec workflow when needed"
 require_dir "$LAYER_DIR/scripts" ERROR "restore CLAUDART scripts"
 require_file "$LAYER_DIR/scripts/knowledge-check.sh" ERROR "restore knowledge checker"
 
@@ -243,16 +245,16 @@ line_count_signal() {
 }
 
 line_count_signal "$LOADER" 100 D110 WARNING
-line_count_signal "$LAYER_DIR/CONTEXT.md" 150 D111 WARNING
-if [ -f "$ROOT/$LAYER_DIR/HANDOFF.md" ] && ! has_symlink "$LAYER_DIR/HANDOFF.md"; then
-  add INFO D112 "$LAYER_DIR/HANDOFF.md" 1 "unconsumed handoff baton present"
-  line_count_signal "$LAYER_DIR/HANDOFF.md" 150 D113 ERROR
+line_count_signal "$STATE_DIR/CONTEXT.md" 150 D111 WARNING
+if [ -f "$ROOT/$STATE_DIR/HANDOFF.md" ] && ! has_symlink "$STATE_DIR/HANDOFF.md"; then
+  add INFO D112 "$STATE_DIR/HANDOFF.md" 1 "unconsumed handoff baton present"
+  line_count_signal "$STATE_DIR/HANDOFF.md" 150 D113 ERROR
   handoff_created=$(awk '
     NR==1 { if($0!="---") exit; next }
     $0=="---" { exit }
     NR>30 { exit }
     /^created:[ \t]*/ { sub(/^created:[ \t]*/,""); gsub(/["\047]/, ""); print; exit }
-  ' "$ROOT/$LAYER_DIR/HANDOFF.md" 2>/dev/null) || handoff_created=
+  ' "$ROOT/$STATE_DIR/HANDOFF.md" 2>/dev/null) || handoff_created=
   if [ -n "$handoff_created" ]; then
     selected_today=${TODAY_OVERRIDE:-$(date +%Y-%m-%d 2>/dev/null || :)}
     handoff_age=$(printf '%s\n%s\n' "$handoff_created" "$selected_today" | awk '
@@ -270,10 +272,10 @@ if [ -f "$ROOT/$LAYER_DIR/HANDOFF.md" ] && ! has_symlink "$LAYER_DIR/HANDOFF.md"
       NR==2 { today=ordinal($0); if(created<0 || today<0) print "invalid"; else print today-created }
     ')
     case "$handoff_age" in
-      invalid) add WARNING D114 "$LAYER_DIR/HANDOFF.md" 1 "handoff created date needs review" ;;
-      -*) add WARNING D114 "$LAYER_DIR/HANDOFF.md" 1 "handoff created date is in the future" ;;
-      ''|*[!0-9]*) add WARNING D114 "$LAYER_DIR/HANDOFF.md" 1 "handoff created date needs review" ;;
-      *) [ "$handoff_age" -le 7 ] || add WARNING D115 "$LAYER_DIR/HANDOFF.md" 1 "handoff is older than seven days" ;;
+      invalid) add WARNING D114 "$STATE_DIR/HANDOFF.md" 1 "handoff created date needs review" ;;
+      -*) add WARNING D114 "$STATE_DIR/HANDOFF.md" 1 "handoff created date is in the future" ;;
+      ''|*[!0-9]*) add WARNING D114 "$STATE_DIR/HANDOFF.md" 1 "handoff created date needs review" ;;
+      *) [ "$handoff_age" -le 7 ] || add WARNING D115 "$STATE_DIR/HANDOFF.md" 1 "handoff is older than seven days" ;;
     esac
   fi
 fi
@@ -516,14 +518,14 @@ if [ "$INCOMPLETE" -eq 0 ]; then
 fi
 
 # The existing knowledge checker is the sole owner of K diagnostics. Call it
-# exactly once, with selected root/layer/date/threshold, and forward its lines.
+# exactly once, with selected root/date/threshold, and forward its lines.
 KNOWLEDGE=$SCRIPT_DIR/knowledge-check.sh
 CONTRACT=0
 if [ ! -f "$KNOWLEDGE" ] || [ ! -r "$KNOWLEDGE" ] || [ -L "$KNOWLEDGE" ]; then
   add ERROR D910 "$LAYER_DIR/scripts/knowledge-check.sh" 1 "knowledge checker unavailable"
   INCOMPLETE=1
 else
-  knowledge_args=(--root "$ROOT" --layer "$LAYER" --fail-on "$FAIL_ON")
+  knowledge_args=(--root "$ROOT" --fail-on "$FAIL_ON")
   [ -z "$TODAY_OVERRIDE" ] || knowledge_args+=(--today "$TODAY_OVERRIDE")
   bash "$KNOWLEDGE" "${knowledge_args[@]}" >"$TMP_DIR/knowledge" 2>"$TMP_DIR/knowledge-err"
   knowledge_status=$?

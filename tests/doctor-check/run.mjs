@@ -55,9 +55,9 @@ function fixture(name, layer = "codex", layout = "installed") {
     "tasks/index.md",
     "specs/INDEX.md",
   ])
-    write(join(base, file), "# Test\n");
-  for (const folder of ["knowledge", "tasks/done", "specs/done", "scripts"])
-    mkdirSync(join(base, folder), { recursive: true });
+    write(join(dir, ".claudart", file), "# Test\n");
+  for (const folder of ["knowledge", "tasks/done", "specs/done"])
+    mkdirSync(join(dir, ".claudart", folder), { recursive: true });
   write(
     join(base, "scripts/knowledge-check.sh"),
     "#!/bin/bash\nexit 97\n",
@@ -374,9 +374,9 @@ try {
 
   check("oversized CONTEXT and HANDOFF report their distinct limits", () => {
     const dir = fixture("size-limits");
-    write(join(dir, ".codex/CONTEXT.md"), `${"context\n".repeat(151)}`);
+    write(join(dir, ".claudart/CONTEXT.md"), `${"context\n".repeat(151)}`);
     write(
-      join(dir, ".codex/HANDOFF.md"),
+      join(dir, ".claudart/HANDOFF.md"),
       `---\ncreated: 2026-09-01\n---\n${"handoff\n".repeat(151)}`,
     );
     const result = run(dir, "codex", ["--today", "2026-09-12"]);

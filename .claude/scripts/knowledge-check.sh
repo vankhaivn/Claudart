@@ -12,7 +12,6 @@ PROGRAM=${0##*/}
 FAIL_ON=error
 TODAY=$(date +%Y-%m-%d 2>/dev/null || :)
 ROOT_OVERRIDE=
-LAYER_OVERRIDE=
 SEP=$(printf '\034')
 
 usage() {
@@ -23,7 +22,6 @@ Read-only validation for a CLAUDART knowledge store.
 
 Options:
   --root DIR                 Repository root (default: inferred from script path)
-  --layer claude|codex       Runtime layer (default: inferred from script path)
   --today YYYY-MM-DD         Date used for deterministic freshness checks
   --fail-on error|warning    Exit 1 at this severity (default: error)
   --help                     Show this help
@@ -46,22 +44,11 @@ SCRIPT_DIR=$(CDPATH='' cd -- "$(dirname -- "$0")" 2>/dev/null && pwd -P) ||
 INFERRED_ROOT=$(CDPATH='' cd -- "$SCRIPT_DIR/../.." 2>/dev/null && pwd -P) ||
   usage_error "cannot infer the repository root"
 
-case "$SCRIPT_DIR" in
-  */.claude/scripts) INFERRED_LAYER=claude ;;
-  */.codex/scripts) INFERRED_LAYER=codex ;;
-  *) INFERRED_LAYER= ;;
-esac
-
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --root)
       [ "$#" -ge 2 ] || usage_error "--root requires a directory"
       ROOT_OVERRIDE=$2
-      shift 2
-      ;;
-    --layer)
-      [ "$#" -ge 2 ] || usage_error "--layer requires claude or codex"
-      LAYER_OVERRIDE=$2
       shift 2
       ;;
     --today)
@@ -90,16 +77,6 @@ done
 case "$FAIL_ON" in
   error | warning) ;;
   *) usage_error "--fail-on must be error or warning" ;;
-esac
-
-if [ -n "$LAYER_OVERRIDE" ]; then
-  LAYER=$LAYER_OVERRIDE
-else
-  LAYER=$INFERRED_LAYER
-fi
-case "$LAYER" in
-  claude | codex) ;;
-  *) usage_error "cannot infer layer; pass --layer claude or --layer codex" ;;
 esac
 
 if [ -n "$ROOT_OVERRIDE" ]; then
@@ -545,11 +522,17 @@ parse_metadata() {
   return 1
 }
 
-LAYER_DIR=.$LAYER
-KNOWLEDGE=$ROOT/$LAYER_DIR/knowledge
-KNOWLEDGE_REL=$LAYER_DIR/knowledge
+KNOWLEDGE=$ROOT/.claudart/knowledge
+KNOWLEDGE_REL=.claudart/knowledge
 INDEX=$KNOWLEDGE/INDEX.md
 INDEX_REL=$KNOWLEDGE_REL/INDEX.md
+
+# Reject a linked state root before reading any topic or router through it.
+if [ -L "$ROOT/.claudart" ]; then
+  add_finding ERROR K001 .claudart 1 "shared state directory must not be a symlink"
+  cat "$FINDINGS"
+  exit 1
+fi
 
 if [ ! -d "$KNOWLEDGE" ]; then
   add_finding ERROR K001 "$KNOWLEDGE_REL" 1 "knowledge directory is missing"
@@ -817,19 +800,13 @@ validate_relation() {
       fi
       ;;
     related:rule)
-      if [ "$LAYER" != claude ]; then
-        add_finding ERROR K140 "$relation_rel" "$relation_line" \
-          "rule relation is not native to the selected layer"
-      elif [ ! -f "$ROOT/.claude/rules/$relation_slug.md" ]; then
+      if [ ! -f "$ROOT/.claude/rules/$relation_slug.md" ]; then
         add_finding ERROR K141 "$relation_rel" "$relation_line" \
           "rule relation target does not exist"
       fi
       ;;
     related:guideline)
-      if [ "$LAYER" != codex ]; then
-        add_finding ERROR K140 "$relation_rel" "$relation_line" \
-          "guideline relation is not native to the selected layer"
-      elif [ ! -f "$ROOT/.codex/guidelines/$relation_slug.md" ]; then
+      if [ ! -f "$ROOT/.codex/guidelines/$relation_slug.md" ]; then
         add_finding ERROR K141 "$relation_rel" "$relation_line" \
           "guideline relation target does not exist"
       fi

@@ -42,12 +42,12 @@ The baseline cannot decide whether prose is accurate or well-owned. Use bounded 
 - Keep JOURNAL checks to a header/head, line count, and tail spot-check. Review old CONTEXT `since:` decisions as graduation candidates; do not full-read state merely to count it.
 - Report stale metadata, long inlined snippets, hardcoded shell lists, vague skills, or descriptive-only guidelines as candidates for review after considering purpose and scope.
 
-### Task Workspace Health (`.codex/tasks/`)
+### Task Workspace Health (`.claudart/tasks/`)
 
-Skip this section if `.codex/tasks/` does not exist. Follow `.codex/guidelines/task-management.md`; this audit does not create or repair task content.
+Skip this section if `.claudart/tasks/` does not exist. Follow `.codex/guidelines/task-management.md`; this audit does not create or repair task content.
 
-- Confirm `.codex/tasks/index.md` exists. Missing -> Medium; suggest `$codex-checkpoint` to regenerate it. Count lines with `wc -l`: the 100-line ceiling and trim ladder remain unchanged.
-- Inspect only `.codex/tasks/*/TASK.md` and `.codex/tasks/done/*/TASK.md` in directly contained `YYYY-MM-DD-NNN-<slug>` directories. Exclude `done/` itself; never follow workspace or `TASK.md` symlinks or recursively parse attachments as tasks. Flat task files are outside the current contract, not a second discovery format.
+- Confirm `.claudart/tasks/index.md` exists. Missing -> Medium; suggest `$codex-checkpoint` to regenerate it. Count lines with `wc -l`: the 100-line ceiling and trim ladder remain unchanged.
+- Inspect only `.claudart/tasks/*/TASK.md` and `.claudart/tasks/done/*/TASK.md` in directly contained `YYYY-MM-DD-NNN-<slug>` directories. Exclude `done/` itself; never follow workspace or `TASK.md` symlinks or recursively parse attachments as tasks. Flat task files are outside the current contract, not a second discovery format.
 - Flag a dated directory missing `TASK.md`, or an invalid directory name, as Medium; preserve it for explicit repair. Require `slug`, `status`, `created`, `updated`, `agent`, `delegation`, and `tags`; valid task status, agent, delegation, dated `<created>-<NNN>-<slug>` naming, and inline lowercase tags. Do not invent metadata, migrate flat files, or remove unknown content.
 - Flag a top-level `done`/`cancelled` workspace for whole-directory archival by `$codex-checkpoint`; flag archive collisions or archived non-terminal tasks as Medium. `awaiting-review` stays active until the user confirms. Cross-check index paths and status, including `done/<task-id>/TASK.md` under Recently Done.
 - Require `## Purpose`, `## Context & Orientation`, `## Plan of Work`, `## Concrete Steps`, `## Validation & Acceptance`, `## Decision Log`, `## Surprises & Discoveries`, and `## Outcomes & Retrospective`.
@@ -56,9 +56,9 @@ Skip this section if `.codex/tasks/` does not exist. Follow `.codex/guidelines/t
 
 ### Session Handoff and Spec Health
 
-Absent `.codex/HANDOFF.md` is normal. If present, report it informationally; check its age and single-slot contract. Do not follow symlinks or create, delete, or consolidate handoff artifacts.
+Absent `.claudart/HANDOFF.md` is normal. If present, report it informationally; check its age and single-slot contract. Do not follow symlinks or create, delete, or consolidate handoff artifacts.
 
-For `.codex/specs/`, follow `.codex/guidelines/spec-workflow.md` for metadata, status, commits, and disposition contracts. Inspect only direct active and archived dated folders; never follow workspace/core-file symlinks, recursively parse attachments, or rewrite state.
+For `.claudart/specs/`, follow `.codex/guidelines/spec-workflow.md` for metadata, status, commits, and disposition contracts. Inspect only direct active and archived dated folders; never follow workspace/core-file symlinks, recursively parse attachments, or rewrite state.
 
 - Verify INDEX ↔ folder agreement in both directions; each active/archived folder has `SPEC.md`, `ROADMAP.md`, `NOTES.md`, and `LEDGER.md`. Missing core files are Medium. `NOTES.md` stays at most 150 lines; spot-check the last 15 LEDGER lines for `### YYYY-MM-DD HH:MMZ — <event>` headings.
 - Require `SPEC.md` keys `slug`, `status`, `created`, `updated`, and `agent`; validate the dated folder name and valid spec status. At `poc-review` or later, every path under `## POC Artifacts` must exist.

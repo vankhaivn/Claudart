@@ -99,8 +99,8 @@ materialize() {
   fixture_name=$1
   fixture_layer=$2
   destination=$TMP_ROOT/$fixture_name-$fixture_layer
-  mkdir -p "$destination/.$fixture_layer"
-  cp -R "$FIXTURES/$fixture_name/layer/." "$destination/.$fixture_layer/"
+  mkdir -p "$destination/.claudart"
+  cp -R "$FIXTURES/$fixture_name/layer/." "$destination/.claudart/"
   if [ -d "$FIXTURES/$fixture_name/docs" ]; then
     cp -R "$FIXTURES/$fixture_name/docs" "$destination/docs"
   fi
@@ -131,7 +131,7 @@ healthy_claude=$MATERIALIZED
 snapshot "$healthy_claude" "$TMP_ROOT/healthy-before"
 run_checker "$CLAUDE_CHECKER" "$TMP_ROOT/healthy-claude.out" \
   --root "$healthy_claude" --today 2026-07-29 --fail-on warning
-assert_status "healthy direct store exits successfully with inferred Claude layer" 0
+assert_status "healthy direct store exits successfully through the Claude adapter" 0
 assert_empty "healthy direct store has no findings, including its valid related cycle"
 assert_no_code "old updated date is not stale when last_verified is recent" K150
 snapshot "$healthy_claude" "$TMP_ROOT/healthy-after"
@@ -147,48 +147,48 @@ materialize healthy-direct codex
 healthy_codex=$MATERIALIZED
 run_checker "$CODEX_CHECKER" "$TMP_ROOT/healthy-codex.out" \
   --root "$healthy_codex" --today 2026-07-29 --fail-on warning
-assert_status "healthy direct store exits successfully with inferred Codex layer" 0
+assert_status "healthy direct store exits successfully through the Codex adapter" 0
 assert_empty "Codex healthy direct store has no findings"
 
 space_root=$TMP_ROOT/project-with-spaces/project\ with\ spaces
-mkdir -p "$space_root/.claude"
-cp -R "$FIXTURES/healthy-direct/layer/." "$space_root/.claude/"
+mkdir -p "$space_root/.claudart"
+cp -R "$FIXTURES/healthy-direct/layer/." "$space_root/.claudart/"
 cp -R "$FIXTURES/healthy-direct/docs" "$space_root/docs"
 run_checker "$CLAUDE_CHECKER" "$TMP_ROOT/spaced-root.out" \
-  --root "$space_root" --layer claude --today 2026-07-29 --fail-on warning
+  --root "$space_root" --today 2026-07-29 --fail-on warning
 assert_status "repository root path containing spaces is handled safely" 0
 assert_empty "spaced repository root has no quoting-related findings"
 
 materialize domain-map claude
 domain_claude=$MATERIALIZED
 run_checker "$CLAUDE_CHECKER" "$TMP_ROOT/domain-map.out" \
-  --root "$domain_claude" --layer claude --today 2026-07-29 --fail-on warning
+  --root "$domain_claude" --today 2026-07-29 --fail-on warning
 assert_status "active domain map reaches its topic exactly once" 0
 assert_empty "healthy domain map allows a curated hook richer than description"
 
 materialize review-map-path claude
 review_map_root=$MATERIALIZED
 run_checker "$CLAUDE_CHECKER" "$TMP_ROOT/review-map-path.out" \
-  --root "$review_map_root" --layer claude --today 2026-07-29
+  --root "$review_map_root" --today 2026-07-29
 assert_status "review-needed map cannot establish an active authority path" 1
 assert_code "active topic behind a review-needed map reports K205" K205
 
 materialize lifecycle claude
 lifecycle_claude=$MATERIALIZED
 run_checker "$CLAUDE_CHECKER" "$TMP_ROOT/lifecycle-error-threshold.out" \
-  --root "$lifecycle_claude" --layer claude --today 2026-07-29 --fail-on error
+  --root "$lifecycle_claude" --today 2026-07-29 --fail-on error
 assert_status "warning-only lifecycle store passes the default error threshold" 0
 assert_code "unrouted review-needed entry is reported without auto-promotion" K206
 assert_no_code "superseded entry with reverse successor and status note is valid" K208
 assert_no_code "historical non-active entries do not emit perpetual staleness warnings" K150
 run_checker "$CLAUDE_CHECKER" "$TMP_ROOT/lifecycle-warning-threshold.out" \
-  --root "$lifecycle_claude" --layer claude --today 2026-07-29 --fail-on warning
+  --root "$lifecycle_claude" --today 2026-07-29 --fail-on warning
 assert_status "warning threshold fails on lifecycle warning" 1
 
 materialize invalid claude
 invalid_claude=$MATERIALIZED
 run_checker "$CLAUDE_CHECKER" "$TMP_ROOT/invalid-claude.out" \
-  --root "$invalid_claude" --layer claude --today 2026-07-29
+  --root "$invalid_claude" --today 2026-07-29
 assert_status "legacy and unsupported metadata exits with contract failure" 1
 for expected_code in K102 K103 K104 K108 K110 K111 K112 K113 K200; do
   assert_code "invalid fixture reports $expected_code" "$expected_code"
@@ -203,7 +203,7 @@ fi
 materialize invalid codex
 invalid_codex=$MATERIALIZED
 run_checker "$CODEX_CHECKER" "$TMP_ROOT/invalid-codex.out" \
-  --root "$invalid_codex" --layer codex --today 2026-07-29
+  --root "$invalid_codex" --today 2026-07-29
 assert_status "Codex invalid fixture exits with contract failure" 1
 awk -F '|' '{ print $1 "|" $2 "|" $4 }' "$TMP_ROOT/invalid-claude.out" \
   >"$TMP_ROOT/invalid-claude-codes"
@@ -219,7 +219,7 @@ fi
 materialize broken claude
 broken_claude=$MATERIALIZED
 run_checker "$CLAUDE_CHECKER" "$TMP_ROOT/broken.out" \
-  --root "$broken_claude" --layer claude --today 2026-07-29
+  --root "$broken_claude" --today 2026-07-29
 assert_status "dead routes, sources, and relations fail the checker" 1
 for expected_code in K120 K130 K131 K141 K201 K203 K204; do
   assert_code "broken fixture reports $expected_code" "$expected_code"
@@ -229,14 +229,14 @@ assert_no_code "HTML-commented dead route is ignored" K202
 empty_root=$TMP_ROOT/missing-knowledge
 mkdir -p "$empty_root"
 run_checker "$CLAUDE_CHECKER" "$TMP_ROOT/missing-knowledge.out" \
-  --root "$empty_root" --layer claude --today 2026-07-29
+  --root "$empty_root" --today 2026-07-29
 assert_status "missing knowledge directory is a contract failure, not runtime failure" 1
 assert_code "missing knowledge directory reports K001" K001
 
 missing_index=$TMP_ROOT/missing-index
-mkdir -p "$missing_index/.claude/knowledge"
+mkdir -p "$missing_index/.claudart/knowledge"
 run_checker "$CLAUDE_CHECKER" "$TMP_ROOT/missing-index.out" \
-  --root "$missing_index" --layer claude --today 2026-07-29
+  --root "$missing_index" --today 2026-07-29
 assert_status "missing INDEX is a contract failure, not runtime failure" 1
 assert_code "missing INDEX reports K002" K002
 
@@ -258,7 +258,7 @@ GIT_AUTHOR_DATE=2026-02-01T00:00:00Z \
 printf '\nDirty source change.\n' >>"$freshness_root/docs/canonical.md"
 printf '\nDirty historical change.\n' >>"$freshness_root/docs/historical.md"
 run_checker "$CLAUDE_CHECKER" "$TMP_ROOT/freshness.out" \
-  --root "$freshness_root" --layer claude --today 2026-02-02 --fail-on warning
+  --root "$freshness_root" --today 2026-02-02 --fail-on warning
 assert_status "Git source freshness warnings meet the warning threshold" 1
 assert_code "dirty source reports K133" K133
 assert_code "committed source newer than last_verified reports K134" K134
@@ -280,7 +280,7 @@ else
   fail "help is read-only and does not offer a fix mode"
 fi
 
-/bin/bash "$CLAUDE_CHECKER" --layer invalid >"$TMP_ROOT/usage.out" \
+/bin/bash "$CLAUDE_CHECKER" --unknown >"$TMP_ROOT/usage.out" \
   2>"$TMP_ROOT/usage.err"
 usage_status=$?
 if [ "$usage_status" -eq 2 ]; then

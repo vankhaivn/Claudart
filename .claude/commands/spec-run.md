@@ -1,12 +1,12 @@
 ---
-description: Execute an approved dated spec mission from .claude/specs/ under its standing approval until the canonical final-review gate or a real blocker.
+description: Execute an approved dated spec mission from .claudart/specs/ under its standing approval until the canonical final-review gate or a real blocker.
 ---
 
 Execute an approved mission. Before acting, read `.claude/rules/spec-workflow.md`; it is the canonical contract for state, roadmap dispositions, evidence, verification gates, circuit breakers, rotation, and closeout. Read `.claude/rules/agent-delegation.md` before delegation. This command supplies only runner routing.
 
 ## Resolve the mission
 
-The argument is a short slug or dated folder id. Resolve it from active `.claude/specs/*/SPEC.md` frontmatter under the rule's rules, excluding `done/`. If omitted, select the only active `ready`, `running`, `blocked`, or `awaiting-final-review` mission. Ask only when several candidates remain ambiguous. Report an archived match without running it; route `drafting` or `poc-review` to `/spec`.
+The argument is a short slug or dated folder id. Resolve it from active `.claudart/specs/*/SPEC.md` frontmatter under the rule's rules, excluding `done/`. If omitted, select the only active `ready`, `running`, `blocked`, or `awaiting-final-review` mission. Ask only when several candidates remain ambiguous. Report an archived match without running it; route `drafting` or `poc-review` to `/spec`.
 
 ## Load state at the right boundary
 

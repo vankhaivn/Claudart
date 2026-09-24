@@ -1,6 +1,6 @@
 ---
 name: codex-plan
-description: Create or resume a lightweight persistent task workspace in .codex/tasks/ when work benefits from a durable plan; execute it too when the user has already asked to implement.
+description: Create or resume a lightweight persistent task workspace in .claudart/tasks/ when work benefits from a durable plan; execute it too when the user has already asked to implement.
 ---
 
 # Codex Plan
@@ -16,11 +16,11 @@ Create or resume a persistent task workspace whose `TASK.md` is the authoritativ
 
 ## Create or select the workspace
 
-Read `.codex/CONTEXT.md`, `.codex/tasks/index.md` if present, the root knowledge router, only relevant routed project context, relevant project docs, and recent Git history. Use the guideline's shallow discovery rules because the index is a cache.
+Read `.claudart/CONTEXT.md`, `.claudart/tasks/index.md` if present, the root knowledge router, only relevant routed project context, relevant project docs, and recent Git history. Use the guideline's shallow discovery rules because the index is a cache.
 
 Reuse an active workspace that already owns the request. If several plausibly match and the user's selection is unclear, ask which one. Keep its id and history. When its status is not `planning`, route directly through the guideline's resumption or review flow.
 
-For a new task, allocate `.codex/tasks/YYYY-MM-DD-NNN-<slug>/TASK.md` under the canonical naming and collision rules. Seed it at `status: planning`, register it in `index.md`, and use the guideline's required structure. **Default to `TASK.md` only.** Create `artifacts/` only when the canonical artifact trigger passes; link existing project files and keep short findings in `TASK.md`. Never automatically extract archives, execute attachments, or load all supporting files.
+For a new task, allocate `.claudart/tasks/YYYY-MM-DD-NNN-<slug>/TASK.md` under the canonical naming and collision rules. Seed it at `status: planning`, register it in `index.md`, and use the guideline's required structure. **Default to `TASK.md` only.** Create `artifacts/` only when the canonical artifact trigger passes; link existing project files and keep short findings in `TASK.md`. Never automatically extract archives, execute attachments, or load all supporting files.
 
 ## Plan under the lock
 

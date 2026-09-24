@@ -8,6 +8,7 @@ import {
   readFileSync,
   readdirSync,
   rmSync,
+  symlinkSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
@@ -85,7 +86,13 @@ function resourceGraph(file, seen = new Set()) {
 try {
   const source = join(scratch, "archive/claudart");
   mkdirSync(source, { recursive: true });
-  for (const layer of [".claude", ".codex", ".agents", "modules/project-docs"])
+  for (const layer of [
+    ".claudart",
+    ".claude",
+    ".codex",
+    ".agents",
+    "modules/project-docs",
+  ])
     cpSync(join(root, layer), join(source, layer), { recursive: true });
   const archive = join(scratch, "source.tar.gz");
   execFileSync("tar", ["-czf", archive, "-C", dirname(source), "claudart"]);
@@ -436,7 +443,7 @@ try {
           "Custom team discovery skill.\n",
         [moduleEntries[0]]: "Custom project documentation command.\n",
         [moduleEntries[1]]: "Custom project documentation skill.\n",
-        ".codex/knowledge/team-route.md":
+        ".claudart/knowledge/team-route.md":
           "Existing team-owned knowledge route.\n",
       };
       for (const [relative, body] of Object.entries(custom)) {
@@ -551,6 +558,381 @@ try {
       );
     }
   });
+  // Shared-state behavior uses the real installer and checker binaries, not a
+  // test-only implementation of state selection. Fixtures are anonymous data.
+  const seeds = [
+    "CONTEXT.md",
+    "JOURNAL.md",
+    "knowledge/INDEX.md",
+    "tasks/index.md",
+    "tasks/done/.gitkeep",
+    "specs/INDEX.md",
+    "specs/done/.gitkeep",
+  ].sort();
+  function stateSnapshot(dest) {
+    const state = join(dest, ".claudart");
+    return files(state)
+      .sort()
+      .map((file) => [
+        file.slice(state.length + 1),
+        readFileSync(file).toString("hex"),
+      ]);
+  }
+  function variantArchive(name, mutate) {
+    const dir = join(scratch, name, "claudart");
+    cpSync(source, dir, { recursive: true });
+    mutate(dir);
+    const tar = join(scratch, `${name}.tar.gz`);
+    execFileSync("tar", ["-czf", tar, "-C", dirname(dir), "claudart"]);
+    return tar;
+  }
+  check("source distributes only the seven empty shared-state seeds", () => {
+    assert.deepEqual(
+      files(join(root, ".claudart"))
+        .map((f) => f.slice(join(root, ".claudart").length + 1))
+        .sort(),
+      seeds,
+    );
+    for (const adapter of [".claude", ".codex"])
+      for (const name of [
+        "CONTEXT.md",
+        "JOURNAL.md",
+        "HANDOFF.md",
+        "knowledge",
+        "tasks",
+        "specs",
+      ])
+        assert(!existsSync(join(root, adapter, name)), `${adapter}/${name}`);
+  });
+  check(
+    "current docs and runtime consumers use the shared state contract",
+    () => {
+      const productFiles = [
+        ...["README.md", "README_VI.md", "CONTRIBUTING.md", "INTEGRATE.md"].map(
+          (p) => join(root, p),
+        ),
+        ...["docs", ".claude", ".codex", ".agents", "modules"].flatMap((p) =>
+          files(join(root, p)),
+        ),
+      ];
+      for (const file of productFiles)
+        assert.doesNotMatch(
+          read(file),
+          /\.(?:claude|codex)\/(?:CONTEXT\.md|JOURNAL\.md|HANDOFF\.md|knowledge|tasks|specs)(?:\b|\/)/,
+          file,
+        );
+      for (const [adapter, rules, commands, suffix] of [
+        [".claude", ".claude/rules", ".claude/commands/", ".md"],
+        [".codex", ".codex/guidelines", ".agents/skills/codex-", "/SKILL.md"],
+      ]) {
+        for (const workflow of ["task-management", "spec-workflow"]) {
+          const contract = read(join(root, rules, `${workflow}.md`));
+          assert.match(
+            contract,
+            /Resume the same workspace regardless of its `agent` metadata/,
+          );
+          assert.match(
+            contract,
+            /Changing runtimes preserves scope, approval, execution evidence and review gates/,
+          );
+        }
+        assert.match(
+          read(join(root, `${commands}checkpoint${suffix}`)),
+          /Absence from this conversation is not completion/,
+        );
+        assert.match(
+          read(join(root, `${commands}handoff${suffix}`)),
+          /Never silently overwrite an unconsumed baton/,
+        );
+        assert.match(
+          read(join(root, `${commands}start${suffix}`)),
+          /confirm it is the same content/,
+        );
+        assert.doesNotMatch(
+          read(join(root, adapter, "scripts/doctor-check.sh")),
+          /\$LAYER_DIR\/(?:knowledge|tasks|specs|CONTEXT|JOURNAL|HANDOFF)/,
+        );
+      }
+    },
+  );
+  for (const mode of ["claude", "codex", "both"]) {
+    check(`${mode}: one shared seed set and no provider-specific state`, () => {
+      const dest = join(scratch, `shared-seeds-${mode}`);
+      install(dest, [`--${mode}`]);
+      assert.deepEqual(
+        stateSnapshot(dest).map(([path]) => path),
+        seeds,
+      );
+      for (const adapter of [".claude", ".codex"])
+        for (const name of [
+          "CONTEXT.md",
+          "JOURNAL.md",
+          "HANDOFF.md",
+          "knowledge",
+          "tasks",
+          "specs",
+        ])
+          assert(!existsSync(join(dest, adapter, name)), `${adapter}/${name}`);
+    });
+  }
+  for (const first of ["claude", "codex"]) {
+    check(
+      `${first}: adapter addition, reinstall and force preserve every state byte`,
+      () => {
+        const dest = join(scratch, `preserve-${first}`);
+        install(dest, [`--${first}`]);
+        const records = {
+          "CONTEXT.md":
+            "# Current work\n\nUnresolved work from another session.\n",
+          "JOURNAL.md":
+            "# History\n2026-09-20 | decision | Preserve the approved scope.\n",
+          "HANDOFF.md": `---\ncreated: 2026-09-20 09:00Z\nagent: ${first}\ntask: review-contract\n---\n# Unconsumed handoff\n`,
+          "tasks/index.md":
+            "## Active\n\n- [Review contract](2026-09-20-001-review-contract/TASK.md)\n",
+          "tasks/2026-09-20-001-review-contract/TASK.md": `---\nslug: review-contract\nstatus: awaiting-review\ncreated: 2026-09-20\nupdated: 2026-09-20\nagent: ${first}\ndelegation: none\ntags: [contract]\n---\n# Review contract\n\nUser confirmation is required before closure.\n`,
+          "tasks/2026-09-20-001-review-contract/artifacts/input.bin":
+            Buffer.from([0, 255, 128, 1, 10, 0, 13]),
+          "tasks/done/2026-09-19-001-reviewed-work/TASK.md":
+            "---\nstatus: done\n---\n# Retained archive\n",
+          "knowledge/INDEX.md":
+            "# Project Knowledge\n\n## Knowledge\n\n- _(none)_\n",
+          "knowledge/_maps/review-candidates.md":
+            "# Unindexed candidate preserved for review\n",
+          "specs/INDEX.md":
+            "## Active\n\n- [Approved mission](2026-09-20-approved-mission/SPEC.md)\n",
+          "specs/2026-09-20-approved-mission/SPEC.md": `---\nslug: approved-mission\nstatus: running\ncreated: 2026-09-20\nupdated: 2026-09-20\nagent: ${first}\ncommits: user\n---\n# Approved mission\n\n## Mission\nPreserve the approved scope and evidence.\n`,
+          "specs/2026-09-20-approved-mission/ROADMAP.md":
+            "# Roadmap\n\n- [x] P1.1 Verified fixture step\n- [ ] P1.2 Pending fixture step\n",
+          "specs/2026-09-20-approved-mission/LEDGER.md":
+            "# Evidence\n\n### 2026-09-20 09:00Z — task-completed P1.1\n\n- Evidence: retained fixture result.\n",
+          "specs/2026-09-20-approved-mission/NOTES.md":
+            "# Notes\n\nThe current task is still pending.\n",
+          "specs/2026-09-20-approved-mission/artifacts/reference.bin":
+            Buffer.from([7, 0, 255, 128]),
+        };
+        for (const [relative, body] of Object.entries(records)) {
+          const file = join(dest, ".claudart", relative);
+          mkdirSync(dirname(file), { recursive: true });
+          writeFileSync(file, body);
+        }
+        const before = stateSnapshot(dest);
+        const loader = "# Project-owned root instructions\n";
+        writeFileSync(join(dest, "AGENTS.md"), loader);
+        for (const args of [
+          [first === "claude" ? "--codex" : "--claude"],
+          ["--both"],
+          ["--both", "--force", "--project-docs"],
+        ]) {
+          install(dest, args);
+          assert.deepEqual(stateSnapshot(dest), before);
+          assert.equal(read(join(dest, "AGENTS.md")), loader);
+          assert(!existsSync(join(dest, ".codex/AGENTS.md")));
+        }
+        const payload = ".codex/guidelines/ai-behavior.md";
+        writeFileSync(join(dest, payload), "# Locally modified payload\n");
+        install(dest, ["--both", "--force"]);
+        assert.equal(read(join(dest, payload)), read(join(root, payload)));
+        assert.deepEqual(stateSnapshot(dest), before);
+      },
+    );
+  }
+  check(
+    "installer does not distribute upstream handoffs, live tasks or artifacts",
+    () => {
+      const tar = variantArchive("unselected-state", (dir) => {
+        const work = join(dir, ".claudart/tasks/2026-09-20-001-private-work");
+        mkdirSync(work, { recursive: true });
+        writeFileSync(join(work, "TASK.md"), "# Must not be installed\n");
+        writeFileSync(
+          join(dir, ".claudart/HANDOFF.md"),
+          "# Must not be installed\n",
+        );
+        writeFileSync(join(dir, ".claudart/unused.bin"), Buffer.from([0, 255]));
+      });
+      const dest = join(scratch, "ignore-upstream-work");
+      install(dest, ["--both", "--force"], tar);
+      assert.deepEqual(
+        stateSnapshot(dest).map(([path]) => path),
+        seeds,
+      );
+    },
+  );
+  check("missing shared seed fails before a partial installation", () => {
+    const tar = variantArchive("missing-state", (dir) =>
+      rmSync(join(dir, ".claudart/specs/INDEX.md")),
+    );
+    const dest = join(scratch, "missing-state-dest");
+    assert.throws(
+      () => install(dest, ["--both"], tar),
+      /Shared state seed is missing/,
+    );
+    assert.deepEqual(readdirSync(dest), []);
+  });
+  for (const [relative, kind] of [
+    [".claudart", "link"],
+    [".claudart/knowledge", "link"],
+    [".claudart/CONTEXT.md", "link"],
+    [".claudart/tasks", "file"],
+    [".claudart/CONTEXT.md", "directory"],
+    [".claudart/JOURNAL.md", "dangling"],
+  ]) {
+    check(
+      `installer refuses ${kind} at ${relative} before any payload writes`,
+      () => {
+        const dest = join(scratch, `collision-${checks}`);
+        const target = join(dest, relative);
+        const outside = join(scratch, `outside-${checks}`);
+        mkdirSync(outside);
+        writeFileSync(
+          join(outside, "sentinel"),
+          "Keep outside state intact.\n",
+        );
+        mkdirSync(dirname(target), { recursive: true });
+        if (kind === "link") symlinkSync(outside, target);
+        else if (kind === "dangling")
+          symlinkSync(join(outside, "absent"), target);
+        else if (kind === "file")
+          writeFileSync(target, "Keep collision intact.\n");
+        else mkdirSync(target);
+        assert.throws(
+          () => install(dest, ["--both", "--force"]),
+          /Shared state/,
+        );
+        assert(!existsSync(join(dest, ".claude")));
+        assert(!existsSync(join(dest, ".codex")));
+        assert.equal(
+          read(join(outside, "sentinel")),
+          "Keep outside state intact.\n",
+        );
+        assert.deepEqual(readdirSync(outside), ["sentinel"]);
+      },
+    );
+  }
+  check(
+    "both adapters validate the same knowledge from nested working directories",
+    () => {
+      const dest = join(scratch, "nested shared project");
+      install(dest, ["--both"]);
+      const fixture = join(
+        root,
+        "tests/knowledge-check/fixtures/healthy-direct",
+      );
+      cpSync(
+        join(fixture, "layer/knowledge"),
+        join(dest, ".claudart/knowledge"),
+        { recursive: true },
+      );
+      cpSync(join(fixture, "docs"), join(dest, "docs"), { recursive: true });
+      const topic = join(dest, ".claudart/knowledge/core-model.md");
+      writeFileSync(
+        topic,
+        read(topic).replace(
+          "related:\n",
+          'related:\n  - "rule:ai-behavior"\n  - "guideline:ai-behavior"\n',
+        ),
+      );
+      const cwd = join(dest, "src/nested");
+      mkdirSync(cwd, { recursive: true });
+      const before = stateSnapshot(dest);
+      for (const adapter of [".claude", ".codex"]) {
+        const args = [
+          join(dest, adapter, "scripts/knowledge-check.sh"),
+          "--today",
+          "2026-07-29",
+          "--fail-on",
+          "warning",
+        ];
+        const findings = execFileSync("/bin/bash", args, {
+          cwd,
+          encoding: "utf8",
+        });
+        assert.equal(findings, "");
+        const doctor = execFileSync(
+          "/bin/bash",
+          [
+            join(dest, adapter, "scripts/doctor-check.sh"),
+            "--today",
+            "2026-07-29",
+          ],
+          { cwd, encoding: "utf8" },
+        );
+        assert.match(doctor, /INFO\|D000\|/);
+        assert.doesNotMatch(doctor, /^ERROR\|/m);
+      }
+      assert.deepEqual(stateSnapshot(dest), before);
+      rmSync(join(dest, ".claude/rules/ai-behavior.md"));
+      for (const adapter of [".claude", ".codex"])
+        assert.throws(
+          () =>
+            execFileSync(
+              "/bin/bash",
+              [
+                join(dest, adapter, "scripts/knowledge-check.sh"),
+                "--today",
+                "2026-07-29",
+              ],
+              { cwd, stdio: "pipe" },
+            ),
+          (err) =>
+            err.status === 1 &&
+            /K141/.test(err.stdout.toString()) &&
+            !/K140/.test(err.stdout.toString()),
+        );
+    },
+  );
+  check(
+    "knowledge checker rejects a symlinked shared root without reading it",
+    () => {
+      const dest = join(scratch, "knowledge-linked-state");
+      install(dest, ["--both"]);
+      const outside = join(scratch, "linked-knowledge-target");
+      mkdirSync(join(outside, "knowledge"), { recursive: true });
+      writeFileSync(
+        join(outside, "knowledge/INDEX.md"),
+        "- [private marker](missing-file.md) — marker · reference · active\n",
+      );
+      rmSync(join(dest, ".claudart"), { recursive: true });
+      symlinkSync(outside, join(dest, ".claudart"));
+      for (const adapter of [".claude", ".codex"])
+        assert.throws(
+          () =>
+            execFileSync(
+              "/bin/bash",
+              [join(dest, adapter, "scripts/knowledge-check.sh")],
+              { stdio: "pipe" },
+            ),
+          (err) =>
+            err.status === 1 &&
+            /K001/.test(err.stdout.toString()) &&
+            !/private marker|K20/.test(err.stdout.toString()),
+        );
+    },
+  );
+  check(
+    "a missing shared store is not replaced by a provider-local fallback",
+    () => {
+      const dest = join(scratch, "no-shared-store");
+      install(dest, ["--both"]);
+      rmSync(join(dest, ".claudart"), { recursive: true });
+      for (const adapter of [".claude", ".codex"]) {
+        mkdirSync(join(dest, adapter, "knowledge"));
+        writeFileSync(
+          join(dest, adapter, "knowledge/INDEX.md"),
+          "# Project Knowledge\n\n## Knowledge\n\n- _(none)_\n",
+        );
+        assert.throws(
+          () =>
+            execFileSync(
+              "/bin/bash",
+              [join(dest, adapter, "scripts/knowledge-check.sh")],
+              { stdio: "pipe" },
+            ),
+          (err) => err.status === 1 && /K001/.test(err.stdout.toString()),
+        );
+      }
+    },
+  );
+
   console.log(`1..${checks}`);
 } finally {
   rmSync(scratch, { recursive: true, force: true });

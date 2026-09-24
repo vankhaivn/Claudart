@@ -11,9 +11,9 @@ Các hợp đồng chi tiết dành cho máy vẫn nằm trong chính các file 
 
 Khi schema hoặc lifecycle của một command thay đổi, các file đó là nguồn chuẩn.
 
-## 1. Chọn lớp runtime
+## 1. Chọn adapter runtime
 
-CLAUDART cung cấp hai lớp độc lập.
+CLAUDART cung cấp hai adapter runtime dùng chung thư mục trạng thái dự án `.claudart/`.
 
 | Runtime     | File được cài                                           | Dạng command                        | File nạp chính      |
 | ----------- | ------------------------------------------------------- | ----------------------------------- | ------------------- |
@@ -22,7 +22,7 @@ CLAUDART cung cấp hai lớp độc lập.
 
 Bạn có thể cài một lớp hoặc cả hai. Hai lớp có cùng mục tiêu, nhưng command và quy tắc delegation được viết theo cách vận hành riêng của từng công cụ.
 
-Cả hai lớp đều có cùng một knowledge checker viết bằng Bash, không cần dependency ngoài. CLAUDART không cần cơ sở dữ liệu hay tiến trình chạy nền.
+Mọi bản cài đều có seed trạng thái chung. Hai adapter có cùng một checker Bash cho `.claudart/knowledge/`, không cần dependency ngoài. CLAUDART không cần cơ sở dữ liệu hay tiến trình chạy nền.
 
 Project Docs là module tùy chọn. Nó chỉ thêm command hoặc skill cho vòng đời tài liệu khi được chọn lúc cài; quy trình core không tạo document pack và không tự chạy full audit tài liệu. Dùng module cho lifecycle request hoặc khi thay đổi tác động đến tài liệu hiện hành mà nó sở hữu.
 
@@ -44,9 +44,9 @@ curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh 
 curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --claude --project-docs
 ```
 
-Trình cài đặt sao chép file còn thiếu và bỏ qua file đã tồn tại, trừ khi bạn truyền `--force`. Bản cài mặc định chỉ có core; `--project-docs` thêm module vòng đời tài liệu tùy chọn và không tự tạo hoặc migrate tài liệu dự án. Cách này phù hợp với bản cài mới, không phù hợp để hợp nhất một cấu hình đã tùy chỉnh.
+Trình cài đặt tạo seed trạng thái còn thiếu và sao chép payload adapter đã chọn. Nó giữ nguyên `.claudart/` và root loader Codex đã có kể cả với `--force`; cờ này chỉ cập nhật payload adapter. Bản cài mặc định chỉ có core; `--project-docs` thêm module vòng đời tài liệu tùy chọn và không tự tạo hoặc migrate tài liệu dự án. Cách này phù hợp với bản cài mới, không phù hợp để hợp nhất một cấu hình đã tùy chỉnh.
 
-Với bản cài Codex mới, trình cài đặt sao chép file mẫu `.codex/AGENTS.md` thành `AGENTS.md` ở thư mục gốc rồi xóa bản mẫu trùng lặp.
+Với bản cài Codex mới, trình cài đặt đặt file mẫu `.codex/AGENTS.md` thành `AGENTS.md` ở thư mục gốc, không cài bản sao trùng lặp.
 
 ### Dự án đã có cấu hình hoặc cần nâng cấp
 
@@ -87,7 +87,9 @@ user review và đóng công việc
 
 ### Bắt đầu bằng bước định hướng
 
-Chạy `/start` hoặc `$codex-start`.
+Chạy `/start` hoặc `$codex-start`. Cả hai cùng tìm công việc trong `.claudart/`. Đổi runtime giữ nguyên phạm vi, phê duyệt, bằng chứng và cổng review; metadata `agent` ghi nguồn gốc, không cấp quyền.
+
+Điều phối việc ghi shared state và bàn giao tuần tự. Checkpoint giữ công việc chưa giải quyết của phiên khác. Handoff chưa được tiếp nhận không bị âm thầm ghi đè; trước khi xóa phải kiểm tra baton vẫn là bản đã đọc. Các workflow này không cung cấp atomic lock hay đồng bộ tự động giữa các checkout.
 
 Command start đọc:
 
@@ -224,7 +226,7 @@ bash .codex/scripts/knowledge-check.sh --root .
 
 Dùng `/plan <task>` hoặc `$codex-plan <task>` khi công việc cần tồn tại lâu hơn cuộc trò chuyện hiện tại.
 
-Command tạo `YYYY-MM-DD-NNN-<slug>/TASK.md` dưới `.claude/tasks/` hoặc `.codex/tasks/`, dùng ngày tạo UTC và số thứ tự trong ngày. `TASK.md` là file bắt buộc duy nhất và nguồn chuẩn cho scope, trạng thái, các bước, quyết định và nghiệm thu. Một task hữu ích cần ghi:
+Command tạo `YYYY-MM-DD-NNN-<slug>/TASK.md` dưới `.claudart/tasks/`, dùng ngày tạo UTC và số thứ tự trong ngày. `TASK.md` là file bắt buộc duy nhất và nguồn chuẩn cho scope, trạng thái, các bước, quyết định và nghiệm thu. Một task hữu ích cần ghi:
 
 - yêu cầu của user và mục tiêu có thể quan sát;
 - code, tài liệu và knowledge liên quan;
@@ -299,8 +301,8 @@ Dùng `/spec <mission>` hoặc `$codex-spec <mission>` cho mission đã định 
 Workspace của spec nằm tại:
 
 ```text
-.claude/specs/YYYY-MM-DD-<slug>/
-.codex/specs/YYYY-MM-DD-<slug>/
+.claudart/specs/YYYY-MM-DD-<slug>/
+.claudart/specs/YYYY-MM-DD-<slug>/
 ```
 
 Mỗi workspace gồm:
@@ -399,21 +401,30 @@ Cấu hình Codex đi kèm giới hạn tối đa sáu thread subagent trong m�
 Một bản cài Claude tập trung trong:
 
 ```text
-.claude/
-├── CLAUDE.md
+.claudart/
 ├── CONTEXT.md
 ├── JOURNAL.md
-├── commands/
-├── agents/
-├── rules/
+├── HANDOFF.md                  # Chỉ tồn tại khi có bàn giao
 ├── knowledge/
 │   └── INDEX.md
-├── scripts/
 ├── tasks/
 │   ├── index.md
 │   └── done/
 └── specs/
-    └── INDEX.md
+    ├── INDEX.md
+    └── done/
+```
+
+Claude Code thêm adapter riêng:
+
+```text
+.claude/
+├── CLAUDE.md
+├── commands/
+├── rules/
+├── agents/
+├── references/
+└── scripts/
 ```
 
 `HANDOFF.md` chỉ xuất hiện trong khoảng từ lúc handoff đến lần start kế tiếp. Workspace task, workspace spec, knowledge topic và map được tạo thêm khi dự án phát triển. Seed task trong bộ cài không chứa task đang làm hay artifact ví dụ.
@@ -425,19 +436,11 @@ AGENTS.md
 .agents/
 └── skills/
 .codex/
-├── CONTEXT.md
-├── JOURNAL.md
 ├── config.toml
 ├── agents/
 ├── guidelines/
-├── knowledge/
-│   └── INDEX.md
-├── scripts/
-├── tasks/
-│   ├── index.md
-│   └── done/
-└── specs/
-    └── INDEX.md
+├── references/
+└── scripts/
 ```
 
 Trong repository nguồn CLAUDART, `.codex/AGENTS.md` là template dùng để tạo `AGENTS.md` ở thư mục gốc khi cài mới.

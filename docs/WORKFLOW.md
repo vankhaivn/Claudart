@@ -11,9 +11,9 @@ The exact machine-facing contracts remain in the runtime files themselves:
 
 Those files are authoritative when a command schema or lifecycle detail changes.
 
-## 1. Choose a runtime layer
+## 1. Choose a runtime adapter
 
-CLAUDART provides two independent layers.
+CLAUDART provides two runtime adapters over one shared `.claudart/` project-state directory.
 
 | Runtime     | Installed files                                | Command form                             | Main loader         |
 | ----------- | ---------------------------------------------- | ---------------------------------------- | ------------------- |
@@ -22,7 +22,7 @@ CLAUDART provides two independent layers.
 
 Install either layer or both. The workflows have the same intent, but their command and delegation files are written for the mechanics of each tool.
 
-Both layers include the same dependency-free Bash knowledge checker. No database or background process is required.
+Every installation includes the shared state seeds. Both adapters include the same dependency-free Bash checker for `.claudart/knowledge/`. No database or background process is required.
 
 Project Docs is an optional module. It adds a documentation-lifecycle command or skill only when selected during installation; the core workflow neither creates a documentation pack nor runs a full documentation audit automatically. Use it for a lifecycle request or when a change affects current documentation it owns.
 
@@ -44,9 +44,9 @@ curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh 
 curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --claude --project-docs
 ```
 
-The installer copies files that are missing and skips existing files unless `--force` is supplied. The default installation is core only; `--project-docs` adds the optional documentation-lifecycle module and never generates or migrates actual project docs. It is suitable for a clean installation, not for merging a customized setup.
+The installer creates missing shared-state seeds and copies the selected adapter payload. It preserves existing `.claudart/` state and the Codex root loader even with `--force`; that flag refreshes adapter payload only. The default installation is core only; `--project-docs` adds the optional documentation-lifecycle module and never generates or migrates actual project docs. It is suitable for a clean installation, not for merging a customized setup.
 
-On a clean Codex installation, the installer copies the source template `.codex/AGENTS.md` to `AGENTS.md` at the project root and removes the duplicate template copy.
+On a clean Codex installation, the installer places the source template `.codex/AGENTS.md` at `AGENTS.md` in the project root without installing a duplicate.
 
 ### Existing project or upgrade
 
@@ -87,7 +87,9 @@ user review and closure
 
 ### Start with orientation
 
-Run `/start` or `$codex-start`.
+Run `/start` or `$codex-start`. Both commands discover the same `.claudart/` work records. Changing runtime preserves scope, approvals, evidence and review gates; `agent` metadata is provenance, not permission.
+
+Coordinate shared writes and use sequential handoff. Checkpoint retains unresolved work from other sessions. An unconsumed handoff is not silently overwritten, and consumption checks that the baton has not changed before deleting it. These workflows provide no atomic lock or automatic cross-checkout synchronization.
 
 The start command reads:
 
@@ -224,7 +226,7 @@ For the mechanical baseline alone, run `bash .codex/scripts/doctor-check.sh --ro
 
 Use `/plan <task>` or `$codex-plan <task>` when the work should survive the current conversation.
 
-The command creates `YYYY-MM-DD-NNN-<slug>/TASK.md` under `.claude/tasks/` or `.codex/tasks/`, using the UTC creation date and a daily sequence. `TASK.md` is the sole required file and authority for scope, status, steps, decisions, and acceptance. A useful task records:
+The command creates `YYYY-MM-DD-NNN-<slug>/TASK.md` under `.claudart/tasks/`, using the UTC creation date and a daily sequence. `TASK.md` is the sole required file and authority for scope, status, steps, decisions, and acceptance. A useful task records:
 
 - the user's request and observable purpose;
 - relevant code, documents, and knowledge pointers;
@@ -299,8 +301,8 @@ Use `/spec <mission>` or `$codex-spec <mission>` for a defined mission that need
 A specification workspace lives under:
 
 ```text
-.claude/specs/YYYY-MM-DD-<slug>/
-.codex/specs/YYYY-MM-DD-<slug>/
+.claudart/specs/YYYY-MM-DD-<slug>/
+.claudart/specs/YYYY-MM-DD-<slug>/
 ```
 
 Each workspace contains:
@@ -399,21 +401,30 @@ The shipped Codex configuration limits concurrent subagent threads to six per se
 A Claude installation centers on:
 
 ```text
-.claude/
-├── CLAUDE.md
+.claudart/
 ├── CONTEXT.md
 ├── JOURNAL.md
-├── commands/
-├── agents/
-├── rules/
+├── HANDOFF.md                  # Only when a handoff exists
 ├── knowledge/
 │   └── INDEX.md
-├── scripts/
 ├── tasks/
 │   ├── index.md
 │   └── done/
 └── specs/
-    └── INDEX.md
+    ├── INDEX.md
+    └── done/
+```
+
+Claude Code adds its adapter:
+
+```text
+.claude/
+├── CLAUDE.md
+├── commands/
+├── rules/
+├── agents/
+├── references/
+└── scripts/
 ```
 
 `HANDOFF.md` appears only between a handoff and the next start. Task workspaces, specification workspaces, knowledge topics, and maps are created as the project evolves. Installable task seeds contain no live tasks or example artifacts.
@@ -425,19 +436,11 @@ AGENTS.md
 .agents/
 └── skills/
 .codex/
-├── CONTEXT.md
-├── JOURNAL.md
 ├── config.toml
 ├── agents/
 ├── guidelines/
-├── knowledge/
-│   └── INDEX.md
-├── scripts/
-├── tasks/
-│   ├── index.md
-│   └── done/
-└── specs/
-    └── INDEX.md
+├── references/
+└── scripts/
 ```
 
 In the CLAUDART source repository, `.codex/AGENTS.md` is the template used to create the root `AGENTS.md` during a clean installation.

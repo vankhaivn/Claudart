@@ -1,6 +1,6 @@
 # Knowledge Maintenance
 
-Read this reference only when a task creates, updates, routes, normalizes, audits, or refactors `.claude/knowledge/`. Apply the four-part classification and retrieval bounds in `.claude/rules/knowledge-management.md` first. This reference does not grant authority beyond the current task.
+Read this reference only when a task creates, updates, routes, normalizes, audits, or refactors `.claudart/knowledge/`. Apply the four-part classification and retrieval bounds in `.claude/rules/knowledge-management.md` first. This reference does not grant authority beyond the current task.
 
 ## Capture Authority And Destination
 
@@ -71,7 +71,7 @@ sensitivity: internal
 - Optional fields are `aliases`, `triggers`, `scope`, `last_verified`, `sources`, `related`, `supersedes`, `verify`, `status_note`, and `sensitivity`.
 - Every list uses block form with two-space-indented, double-quoted items. Flow lists are forbidden.
 - `scope` items are typed `<selector>:<value>` strings; common selectors are `path`, `component`, `platform`, `environment`, `version`, and `symbol`.
-- `related` items are typed `knowledge:<slug>` or `rule:<slug>`. `supersedes` items are typed `knowledge:<slug>`.
+- `related` items are typed `knowledge:<slug>`, `rule:<slug>` (Claude rules), or `guideline:<slug>` (Codex guidelines). Targets must exist in the project, regardless of the calling runtime. `supersedes` items are typed `knowledge:<slug>`.
 - `sensitivity` is `public`, `internal`, or `restricted`.
 - Folded or multiline scalars, single quotes, inline comments, YAML anchors/tags, and unrecognized fields are forbidden.
 

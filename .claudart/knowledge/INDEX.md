@@ -1,4 +1,6 @@
-<!-- .codex/knowledge/INDEX.md — root router for durable descriptive project knowledge. $codex-start reads only this file. Mutations follow .codex/guidelines/knowledge-management.md and update the topic plus its reachable route atomically. -->
+<!-- .claudart/knowledge/INDEX.md — shared router for durable project knowledge.
+Startup reads this router only. Mutations follow the active adapter's knowledge contract
+and update the topic plus its reachable route atomically. -->
 
 # Project Knowledge
 
