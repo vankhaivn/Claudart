@@ -212,7 +212,7 @@ STATE_DIR=.claudart
 if [ "$LAYER" = codex ]; then
   if [ "$LAYOUT" = source ]; then LOADER=.codex/AGENTS.md; else LOADER=AGENTS.md; fi
 else
-  LOADER=.claude/CLAUDE.md
+  if [ "$LAYOUT" = source ]; then LOADER=.claude/CLAUDE.md; else LOADER=CLAUDE.md; fi
 fi
 require_dir "$LAYER_DIR" ERROR "restore CLAUDART adapter"
 require_dir "$STATE_DIR" ERROR "restore shared project state"
@@ -460,6 +460,12 @@ fi
 
 resolve_link() {
   link_source=$1; link_line=$2; link_raw=$3; link_kind=$4
+  link_base_source=$link_source
+  # The Claude source template is validated as though it were relocated to the
+  # downstream root, because its relative imports are authored for that target.
+  if [ "$LAYER" = claude ] && [ "$LAYOUT" = source ] && [ "$link_source" = .claude/CLAUDE.md ]; then
+    link_base_source=CLAUDE.md
+  fi
   link_target=$link_raw
   # An angle destination may contain spaces; discard any following title.
   case "$link_target" in
@@ -483,8 +489,8 @@ resolve_link() {
   case "$link_target" in *'%'*) add WARNING D204 "$link_source" "$link_line" "encoded local reference needs review"; return ;; esac
   case "$link_target" in
     /*) link_candidate=${link_target#/} ;;
-    *) case "$link_source" in
-         */*) link_candidate=${link_source%/*}/$link_target ;;
+    *) case "$link_base_source" in
+         */*) link_candidate=${link_base_source%/*}/$link_target ;;
          *) link_candidate=$link_target ;;
        esac ;;
   esac

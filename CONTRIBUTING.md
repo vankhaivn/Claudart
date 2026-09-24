@@ -151,7 +151,7 @@ After merge:
 
 ## Repository-Local Agent Guidance
 
-The root `CLAUDE.md` and root `AGENTS.md` in this source repository are intentionally **repository-only** pointers to this contribution workflow. They must remain separate from `.claude/CLAUDE.md` and `.codex/AGENTS.md`, which are part of CLAUDART's installable/runtime templates.
+The root `CLAUDE.md` and root `AGENTS.md` in this source repository are intentionally **repository-only** pointers to this contribution workflow. They remain separate from the installable source templates `.claude/CLAUDE.md` and `.codex/AGENTS.md`; the installer relocates those templates to downstream root `CLAUDE.md` and `AGENTS.md` respectively.
 
 Do not move this repository Git workflow into `.claude/rules/`, `.codex/guidelines/`, `.agents/skills/`, `install.sh`, or the downstream integration payload. A downstream project may use trunk-based development, GitFlow, GitHub Flow, Gerrit, stacked PRs, or another process entirely; CLAUDART must not overwrite that choice.
 
@@ -169,7 +169,7 @@ If you're contributing new logic, please adhere to our directory structure:
 - `modules/project-docs/`: optional Project Docs source, with `.claude/` and `.agents/` payloads overlaid at the downstream root only when selected. Keep packaging documentation outside the runtime payload and verify core-only and module-enabled installations.
 - `.codex/guidelines/agent-delegation.md`: Codex subagent delegation protocol. If you add or change Codex agents, keep this protocol accurate about authorization, ownership boundaries, and parent review responsibilities.
 - `.codex/AGENTS.md`: the **installable Codex root-loader source template**. The installer copies it to `AGENTS.md` at a downstream project root; it is distinct from this repository's root `AGENTS.md`.
-- `.claude/CLAUDE.md`: the installable Claude project-memory template; it is distinct from this repository's root `CLAUDE.md`.
+- `.claude/CLAUDE.md`: the installable Claude root-loader source template. The installer copies it to downstream root `CLAUDE.md`; it remains distinct from this source repository's maintainer-only root `CLAUDE.md`.
 - `INTEGRATE.md`: the AI-native install/upgrade protocol an agent follows to merge CLAUDART into an existing project (the alternative to `install.sh` for non-empty setups). Its "What CLAUDART contains" manifest is orientation only — the agent clones the repo as source of truth — but keep it roughly in sync when you add or remove a top-level piece.
 
 Knowledge-check fixtures must be anonymous and synthetic: do not copy proprietary repository names, absolute home paths, source bodies, credentials, or other downstream project data into this repository.

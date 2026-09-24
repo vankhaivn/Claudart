@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-CLAUDART keeps Claude-specific instructions inside `.claude/` and shared project state inside `.claudart/`. If Claude Code `/init` generates a root `CLAUDE.md`, copy its useful project-specific content into this file before running `/refactor-memory`.
+CLAUDART keeps Claude adapter internals inside `.claude/` and shared project state inside `.claudart/`. This source template is installed as the downstream project's root `CLAUDE.md`; keep project-specific loader content there and use `.claude/` for commands, agents, rules, references, and scripts.
 
 ## Core Commands
 
@@ -29,7 +29,7 @@ Keep scope, standing approvals, evidence and final-review gates when changing ru
 
 Shared files support sequential handoff, not automatic concurrent synchronization. Serialize writes to shared summaries, indexes and the handoff slot; preserve unrelated unresolved work. Do not create another state store or use a fallback store.
 
-See @rules/ai-behavior.md for universal behavior. Imports here resolve relative to this file; reserve automatic imports for universally needed instructions.
+See @.claude/rules/ai-behavior.md for universal behavior. Imports resolve relative to the installed root `CLAUDE.md`; reserve automatic imports for universally needed instructions.
 
 Read these project-root paths only when their trigger applies. Conditional rules use command/reference scopes so reading startup indexes or metadata does not activate entire workflows:
 
@@ -48,4 +48,4 @@ When the optional Project Docs command is present, use it for project-document o
 - Existing rules change -> update the relevant file in `.claude/rules/`.
 - New domains/layers -> CREATE a new rule file in `.claude/rules/` (with flow-style `paths: [...]`, `description:`, `when_to_use:`, and inline `tags: [...]` frontmatter) and add a conditional route in this file's Domain Rules section. Use narrow paths for conditional rules; reserve `@` imports for universal guidance, with paths relative to this file.
 - Durable descriptive facts that pass the knowledge rule -> find their owner first. Knowledge owns a fact only when no other authoritative source does; otherwise keep a pointer or minimal unique context. For a knowledge mutation, patch the topic and reachable map atomically, then run the checker. Mid-session natural-language updates are valid; `/checkpoint` is bulk maintenance, not the sole write gate.
-- Global changes -> update `.claude/CLAUDE.md` directly.
+- Global changes -> update root `CLAUDE.md` directly.

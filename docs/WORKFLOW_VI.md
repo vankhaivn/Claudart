@@ -17,7 +17,7 @@ CLAUDART cung cấp hai adapter runtime dùng chung thư mục trạng thái d�
 
 | Runtime     | File được cài                                           | Dạng command                        | File nạp chính      |
 | ----------- | ------------------------------------------------------- | ----------------------------------- | ------------------- |
-| Claude Code | `.claude/`                                              | `/start`, `/plan`, v.v.             | `.claude/CLAUDE.md` |
+| Claude Code | `.claude/`, `CLAUDE.md` ở thư mục gốc                   | `/start`, `/plan`, v.v.             | `CLAUDE.md`         |
 | Codex       | `.codex/`, `.agents/skills/`, `AGENTS.md` ở thư mục gốc | `$codex-start`, `$codex-plan`, v.v. | `AGENTS.md`         |
 
 Bạn có thể cài một lớp hoặc cả hai. Hai lớp có cùng mục tiêu, nhưng command và quy tắc delegation được viết theo cách vận hành riêng của từng công cụ.
@@ -44,9 +44,9 @@ curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh 
 curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --claude --project-docs
 ```
 
-Trình cài đặt tạo seed trạng thái còn thiếu và sao chép payload adapter đã chọn. Nó giữ nguyên `.claudart/` và root loader Codex đã có kể cả với `--force`; cờ này chỉ cập nhật payload adapter. Bản cài mặc định chỉ có core; `--project-docs` thêm module vòng đời tài liệu tùy chọn và không tự tạo hoặc migrate tài liệu dự án. Cách này phù hợp với bản cài mới, không phù hợp để hợp nhất một cấu hình đã tùy chỉnh.
+Trình cài đặt tạo seed trạng thái còn thiếu và sao chép payload adapter đã chọn. Nó giữ nguyên `.claudart/` và cả hai root loader đã có kể cả với `--force`; cờ này chỉ cập nhật payload adapter. Bản cài mặc định chỉ có core; `--project-docs` thêm module vòng đời tài liệu tùy chọn và không tự tạo hoặc migrate tài liệu dự án. Cách này phù hợp với bản cài mới, không phù hợp để hợp nhất một cấu hình đã tùy chỉnh.
 
-Với bản cài Codex mới, trình cài đặt đặt file mẫu `.codex/AGENTS.md` thành `AGENTS.md` ở thư mục gốc, không cài bản sao trùng lặp.
+Với bản cài mới, trình cài đặt đặt `.claude/CLAUDE.md` thành `CLAUDE.md` ở root cho Claude và `.codex/AGENTS.md` thành `AGENTS.md` ở root cho Codex, không cài bản sao adapter-local trùng lặp.
 
 ### Dự án đã có cấu hình hoặc cần nâng cấp
 

@@ -4,7 +4,7 @@
 #   curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash
 #
 # Options (pass after --):
-#   (no flags)   Install shared state (.claudart/) and Claude Code (.claude/)
+#   (no flags)   Install shared state (.claudart/) and Claude Code (.claude/ + CLAUDE.md)
 #   --claude     Install the Claude Code layer (explicit, same as default)
 #   --codex      Install shared state and Codex (.codex/ + .agents/ + AGENTS.md)
 #   --both       Install both Claude and Codex layers
@@ -52,7 +52,7 @@ SHARED PROJECT STATE
   .claudart/              Seeded once in every mode; existing state is preserved
 
 ADAPTERS
-  Claude Code (default)   .claude/
+  Claude Code (default)   .claude/  +  CLAUDE.md at project root
   Codex                   .codex/  +  .agents/  +  AGENTS.md at project root
   Both                    all of the above
 
@@ -170,8 +170,8 @@ copy_tree() {
 
   while IFS= read -r src_file; do
     local rel="${src_file#"$TMPDIR/$prefix"}"
-    # The Codex loader is installed at the project root, not inside its adapter.
-    if [[ "$rel" == .codex/AGENTS.md ]]; then continue; fi
+    # Runtime loaders are installed at the project root, not inside adapters.
+    if [[ "$rel" == .codex/AGENTS.md || "$rel" == .claude/CLAUDE.md ]]; then continue; fi
     copy_file_from_src "$prefix$rel" "$rel"
   done < <(find "$src_root" -type f | sort)
 }
@@ -191,8 +191,17 @@ for seed in "${STATE_SEEDS[@]}"; do
 done
 
 if [[ "$INSTALL_CLAUDE" == true ]]; then
-  printf '\n%s\n' "$(bold "Claude Code layer (.claude/)")"
+  printf '\n%s\n' "$(bold "Claude Code layer")"
   copy_tree ".claude"
+
+  # Loaders contain project-authored routes. Existing root content is reconciled
+  # by the integration protocol, not replaced by a forced payload refresh.
+  if [[ -e "$DEST/CLAUDE.md" || -L "$DEST/CLAUDE.md" ]]; then
+    printf '  %s  CLAUDE.md (existing project loader)\n' "$(yellow "keep")"
+    (( SKIPPED++ )) || true
+  else
+    copy_file_from_src ".claude/CLAUDE.md" "CLAUDE.md"
+  fi
 fi
 
 if [[ "$INSTALL_CODEX" == true ]]; then
@@ -226,7 +235,7 @@ fi
 printf '\n%s  Done. %d copied, %d skipped.\n\n' "$(bold "✓")" "$COPIED" "$SKIPPED"
 
 if [[ "$SKIPPED" -gt 0 ]]; then
-  printf '%s  Existing project state and the Codex root loader were preserved. Use INTEGRATE.md to reconcile custom instructions; --force refreshes adapter payload only.\n\n' "$(yellow "note")"
+  printf '%s  Existing project state and root loaders were preserved. Use INTEGRATE.md to reconcile custom instructions; --force refreshes adapter payload only.\n\n' "$(yellow "note")"
 fi
 
 printf '%s\n' "$(bold "Next steps:")"

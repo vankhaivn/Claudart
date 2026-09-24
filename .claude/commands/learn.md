@@ -4,19 +4,19 @@ description: Reflect on completed work, promote validated behavioral learning, a
 
 Please execute a Retrospective & Learning Protocol on the work you just completed.
 
-Based on the "Agent Self-Evolution & Context Maintenance" section in `.claude/CLAUDE.md`, perform this protocol. `/learn` may run mid-session. It primarily owns behavioral learning; it is not a required detour before an eligible descriptive fact can enter knowledge.
+Based on the "Agent Self-Evolution & Context Maintenance" section in root `CLAUDE.md`, perform this protocol. `/learn` may run mid-session. It primarily owns behavioral learning; it is not a required detour before an eligible descriptive fact can enter knowledge.
 
 ## Re-Ground In The Rule Set
 
 Before any retrospective:
 
-1. Read `.claude/CLAUDE.md` in full.
+1. Read root `CLAUDE.md` in full.
 2. Read every file in `.claude/rules/*.md` in full (use Glob first if you don't already know what exists).
 3. Read every file in `.claude/agents/*.md` whose tools you used during this session.
 4. Read `.claudart/CONTEXT.md` to know what state the work was in when this session started.
 5. Build a short mental index: rule name → core constraint → loophole keyword (if any).
 
-You cannot judge deviations against rules you haven't re-read. If `.claude/rules/` is empty or missing, note that and continue with `.claude/CLAUDE.md` only.
+You cannot judge deviations against rules you haven't re-read. If `.claude/rules/` is empty or missing, note that and continue with root `CLAUDE.md` only.
 
 ## Rule Refinement
 
@@ -25,7 +25,7 @@ Walk the conversation chronologically, comparing each assistant turn against the
 1. List every moment the human corrected you OR you deviated from a rule. For each one, answer: _"What rationalization did I use to justify the deviation?"_ — do not just say "I missed the rule".
 2. Did any rule fail because it only described the happy path without closing obvious loopholes?
 3. For each identified gap, update the rule using this pattern: `NEVER do X, even when Y seems like a good reason` — explicitly name the rationalization so future runs cannot reuse it.
-4. If rules contradict each other, resolve the contradiction immediately in `.claude/rules/` or `.claude/CLAUDE.md`.
+4. If rules contradict each other, resolve the contradiction immediately in `.claude/rules/` or root `CLAUDE.md`.
 5. Also save quiet _confirmations_: if the human accepted an unusual judgment call without pushback, that's a validated approach — record it so you don't drift away from it next time.
 
 ## Route What Was Learned
@@ -42,13 +42,13 @@ Walk the conversation chronologically, comparing each assistant turn against the
    - **CRITICAL CONSTRAINT**: DO NOT shoehorn or force new concepts into an existing file if the match is less than 80%. It is strictly PREFERRED to create a new domain file rather than polluting existing specific rules.
    - Then, decide:
      - Existing domain (perfect match) → Update the exact file in `.claude/rules/`.
-     - New domain (no strong match) → Create a new `.md` file in `.claude/rules/` with complete YAML frontmatter and add a conditional route to `.claude/CLAUDE.md`. Reserve automatic `@` imports for universal guidance and resolve them relative to the importing file.
-     - Global standard (applies universally) → Update `.claude/CLAUDE.md` (or `.claude/rules/ai-behavior.md` if it's a behavioral rather than structural rule).
+     - New domain (no strong match) → Create a new `.md` file in `.claude/rules/` with complete YAML frontmatter and add a conditional route to root `CLAUDE.md`. Reserve automatic `@` imports for universal guidance and resolve them relative to the importing file.
+     - Global standard (applies universally) → Update root `CLAUDE.md` (or `.claude/rules/ai-behavior.md` if it's a behavioral rather than structural rule).
      - Descriptive fact → apply `.claude/rules/knowledge-management.md`. Promote it directly only if it is durable beyond the current work, current, evidenced, and correctly scoped. Find the authoritative owner first; knowledge owns the fact only when no other current source does. Keep any knowledge copy to a route or minimal unique context and update its reachable map atomically; leave WIP/proposals in the task/spec/CONTEXT surface and uncertainty/conflict as a candidate or `review-needed`.
 
 4. If knowledge changed, run `bash .claude/scripts/knowledge-check.sh`. Report checker failures and never claim the mutation healthy while they remain.
 
-**Boundary**: `/learn` updates **rules, `.claudart/knowledge/`, and `.claude/CLAUDE.md` only**. Do NOT modify `.claudart/CONTEXT.md` (that's `/checkpoint`'s job) and do NOT rewrite `.claudart/JOURNAL.md` entries (it's append-only). You may read both as evidence. `/checkpoint` bulk-maintains remaining candidates but is not the sole knowledge write gate.
+**Boundary**: `/learn` updates **rules, `.claudart/knowledge/`, and root `CLAUDE.md` only**. Do NOT modify `.claudart/CONTEXT.md` (that's `/checkpoint`'s job) and do NOT rewrite `.claudart/JOURNAL.md` entries (it's append-only). You may read both as evidence. `/checkpoint` bulk-maintains remaining candidates but is not the sole knowledge write gate.
 
 ## Output Standard
 

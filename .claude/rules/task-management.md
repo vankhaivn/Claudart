@@ -340,7 +340,7 @@ So: a task's existence is signalled in CONTEXT by a pointer line. The task's con
 - Treating user enthusiasm or silence as approval. The signals listed in the cheat sheet are explicit and required.
 - Treating staleness as approval to cancel, delete, or reopen a task. Apply the Staleness Thresholds above and surface the needed user decision.
 - Copying a task's body (Steps / Decisions / Surprises / Memory Hints) into `.claudart/CONTEXT.md`. CONTEXT may _reference_ the active task by slug + path, but must never duplicate its content.
-- Importing task files into `.claude/CLAUDE.md`. Task files are working documents, not always-loaded rules.
+- Importing task files into root `CLAUDE.md`. Task files are working documents, not always-loaded rules.
 - Deleting completed task workspaces or their evidence. They are project history.
 - Creating a task without filling Memory Hints if any non-obvious context was discovered during planning.
 - Writing code into the plan. Concrete Steps carry decisions, constraints, and `verify:` checks — never snippets or line-level edits (see "Plan Altitude").
