@@ -35,5 +35,5 @@ When a formerly approved A, B, or C is truly superseded by E for the same scope,
 
 1. Name the exact claim, audience, scope, and candidate owners. Check source and decision evidence before choosing the winner; a newer timestamp or a longer document is not proof.
 2. Separate what is approved, implemented, released, proposed, and unknown. If evidence is incomplete, mark the gap in the appropriate current surface rather than asserting a replacement.
-3. Update the chosen owner and affected links or short summaries together when edits are authorized. Keep task/spec execution evidence in its work record. Apply the selected runtime's knowledge write and checker contract if changing `.codex/knowledge/` or `.claude/knowledge/`.
+3. Update the chosen owner and affected links or short summaries together when edits are authorized. Keep task/spec execution evidence in its work record. Apply the selected runtime's knowledge write and checker contract if changing `.claudart/knowledge/`.
 4. If a conflict depends on a team decision or a source outside edit authority, report the precise question and keep that source intact. Do not silently take ownership by copying it.

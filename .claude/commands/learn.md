@@ -13,7 +13,7 @@ Before any retrospective:
 1. Read `.claude/CLAUDE.md` in full.
 2. Read every file in `.claude/rules/*.md` in full (use Glob first if you don't already know what exists).
 3. Read every file in `.claude/agents/*.md` whose tools you used during this session.
-4. Read `.claude/CONTEXT.md` to know what state the work was in when this session started.
+4. Read `.claudart/CONTEXT.md` to know what state the work was in when this session started.
 5. Build a short mental index: rule name → core constraint → loophole keyword (if any).
 
 You cannot judge deviations against rules you haven't re-read. If `.claude/rules/` is empty or missing, note that and continue with `.claude/CLAUDE.md` only.
@@ -31,11 +31,11 @@ Walk the conversation chronologically, comparing each assistant turn against the
 ## Route What Was Learned
 
 1. Identify any core bug root-causes, architectural decisions, or new design patterns successfully validated in this session.
-2. **Pattern check via JOURNAL** — `.claude/JOURNAL.md` can grow to thousands of lines, so NEVER full-read it. Use this token-efficient strategy:
-   - **Tail first**: read only the last ~200 lines via `tail -n 200 .claude/JOURNAL.md` (Bash) or `Read` with an `offset` near EOF.
-   - **Grep when targeted**: if you suspect a specific pattern is recurring, use `grep '| decision |' .claude/JOURNAL.md` (or `pivot`) to surface only matching lines without loading the rest.
+2. **Pattern check via JOURNAL** — `.claudart/JOURNAL.md` can grow to thousands of lines, so NEVER full-read it. Use this token-efficient strategy:
+   - **Tail first**: read only the last ~200 lines via `tail -n 200 .claudart/JOURNAL.md` (Bash) or `Read` with an `offset` near EOF.
+   - **Grep when targeted**: if you suspect a specific pattern is recurring, use `grep '| decision |' .claudart/JOURNAL.md` (or `pivot`) to surface only matching lines without loading the rest.
    - Look for the same `decision` or `pivot` recurring 2+ times in what you read. A repeating decision is a strong signal that the underlying principle should graduate from CONTEXT/JOURNAL into `.claude/rules/`. Surface these candidates explicitly.
-   - Skip this step entirely if `.claude/JOURNAL.md` doesn't exist or has fewer than 5 entries.
+   - Skip this step entirely if `.claudart/JOURNAL.md` doesn't exist or has fewer than 5 entries.
 3. Before updating files:
    - First, use the rule-file list from the re-grounding pass.
    - Compare the new knowledge with the scope of these existing files.
@@ -48,7 +48,7 @@ Walk the conversation chronologically, comparing each assistant turn against the
 
 4. If knowledge changed, run `bash .claude/scripts/knowledge-check.sh`. Report checker failures and never claim the mutation healthy while they remain.
 
-**Boundary**: `/learn` updates **rules, `.claude/knowledge/`, and `.claude/CLAUDE.md` only**. Do NOT modify `.claude/CONTEXT.md` (that's `/checkpoint`'s job) and do NOT rewrite `.claude/JOURNAL.md` entries (it's append-only). You may read both as evidence. `/checkpoint` bulk-maintains remaining candidates but is not the sole knowledge write gate.
+**Boundary**: `/learn` updates **rules, `.claudart/knowledge/`, and `.claude/CLAUDE.md` only**. Do NOT modify `.claudart/CONTEXT.md` (that's `/checkpoint`'s job) and do NOT rewrite `.claudart/JOURNAL.md` entries (it's append-only). You may read both as evidence. `/checkpoint` bulk-maintains remaining candidates but is not the sole knowledge write gate.
 
 ## Output Standard
 

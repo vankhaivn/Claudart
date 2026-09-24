@@ -1,6 +1,6 @@
 ---
 name: codex-spec-run
-description: Execute an approved dated spec mission from .codex/specs/ under its standing approval until the canonical final-review gate or a real blocker.
+description: Execute an approved dated spec mission from .claudart/specs/ under its standing approval until the canonical final-review gate or a real blocker.
 ---
 
 # Codex Spec Run
@@ -9,7 +9,7 @@ Execute an approved mission. Before acting, read `.codex/guidelines/spec-workflo
 
 ## Resolve the mission
 
-The argument is a short slug or dated folder id. Resolve it from active `.codex/specs/*/SPEC.md` frontmatter under the guideline's rules, excluding `done/`. If omitted, select the only active `ready`, `running`, `blocked`, or `awaiting-final-review` mission. Ask only when several candidates remain ambiguous. Report an archived match without running it; route `drafting` or `poc-review` to `$codex-spec`.
+The argument is a short slug or dated folder id. Resolve it from active `.claudart/specs/*/SPEC.md` frontmatter under the guideline's rules, excluding `done/`. If omitted, select the only active `ready`, `running`, `blocked`, or `awaiting-final-review` mission. Ask only when several candidates remain ambiguous. Report an archived match without running it; route `drafting` or `poc-review` to `$codex-spec`.
 
 ## Load state at the right boundary
 

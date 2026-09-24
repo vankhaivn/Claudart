@@ -1,11 +1,11 @@
 ---
 name: codex-checkpoint
-description: Bulk-maintain Codex current state, task/spec indexes, JOURNAL history, and eligible durable project knowledge at a session boundary.
+description: Bulk-maintain shared project state, task/spec indexes, JOURNAL history, and eligible durable project knowledge at a session boundary.
 ---
 
 # CodexCheckpoint
 
-Update `.codex/CONTEXT.md` to reflect the current state of work from a Codex session. Sync `.codex/tasks/index.md` with current TASK.md states. Append meaningful retired items to `.codex/JOURNAL.md`. Run this at the end of meaningful sessions.
+Update `.claudart/CONTEXT.md` to reflect the current state of work from a Codex session. Sync `.claudart/tasks/index.md` with current TASK.md states. Append meaningful retired items to `.claudart/JOURNAL.md`. Run this at the end of meaningful sessions.
 
 The output is not a log of what happened. It is a declarative snapshot of what is true right now. Lifelong append is the failure mode this command exists to prevent.
 
@@ -13,33 +13,35 @@ Checkpoint is a bulk-maintenance boundary, not the only way to write knowledge. 
 
 ## Hard Rules
 
-1. `.codex/CONTEXT.md` is overwritten, not appended. Anything not still true right now must be removed.
-2. `.codex/CONTEXT.md` hard ceiling: 150 lines, target under 100. If your draft exceeds 150, stop and ask the user to trim manually or run `$codex-refactor-memory`.
-3. `.codex/JOURNAL.md` is append-only. Never edit or delete prior entries. Each new entry is a single line.
-4. Never add `.codex/JOURNAL.md` as auto-loaded context in `AGENTS.md` or `.codex/guidelines/`. If such an auto-load already exists, remove that wiring and warn the user; JOURNAL remains append-only and outside session context.
+1. `.claudart/CONTEXT.md` is overwritten, not appended. Anything not still true right now must be removed.
+2. `.claudart/CONTEXT.md` hard ceiling: 150 lines, target under 100. If your draft exceeds 150, stop and ask the user to trim manually or run `$codex-refactor-memory`.
+3. `.claudart/JOURNAL.md` is append-only. Never edit or delete prior entries. Each new entry is a single line.
+4. Never add `.claudart/JOURNAL.md` as auto-loaded context in `AGENTS.md` or `.codex/guidelines/`. If such an auto-load already exists, remove that wiring and warn the user; JOURNAL remains append-only and outside session context.
 5. Skip JOURNAL entirely when there is nothing meaningful to record. Empty entries pollute the file.
 6. Task workspaces keep their own bodies and supporting files; CONTEXT.md never absorbs a task body. But CONTEXT.md should still reference the currently-focused task by slug + path in `## In Progress` so `$codex-start` sees both task and non-task work in one place. Two valid CONTEXT entries:
-   - Task reference: `- Working task \`add-jwt-auth\` (see .codex/tasks/2026-05-13-001-add-jwt-auth/TASK.md) <!-- since: YYYY-MM-DD -->`
+   - Task reference: `- Working task \`add-jwt-auth\` (see .claudart/tasks/2026-05-13-001-add-jwt-auth/TASK.md) <!-- since: YYYY-MM-DD -->`
    - Ad-hoc non-task change the user requested without creating a `$codex-plan` (a quick tweak, a transient pivot): CONTEXT is its **only** home, so it gets a **micro-handoff** — intent in the user's words + files of interest + next step (see Step 4) — not just a one-line pointer.
      Checkpoint _syncs_ `tasks/index.md` AND ensures CONTEXT references the focus task, but never copies a task's Steps/Decisions/Surprises into CONTEXT.
 7. Subagent threads are not durable project memory. Do not store subagent ids, nicknames, or transient thread state in CONTEXT. Store only durable outcomes: decisions, unresolved blockers, validated findings, changed ownership boundaries, and next steps.
+
+8. Shared state belongs to the project, not this session. Preserve another session's unresolved work, blockers and next actions unless current evidence or the user resolves them. Absence from this conversation is not completion. Re-read CONTEXT and any index immediately before writing; if the file changed since inspection, reconcile the delta before replacing it. Serialize shared writes; this workflow is not a concurrent merge service.
 
 ## Procedure
 
 ### Step 1: Read Prior State
 
-- Read `.codex/CONTEXT.md`. If it does not exist, treat it as empty.
-- Read the last ~30 lines of `.codex/JOURNAL.md` to avoid duplicate entries. If it does not exist, create it later.
+- Read `.claudart/CONTEXT.md`. If it does not exist, treat it as empty.
+- Read the last ~30 lines of `.claudart/JOURNAL.md` to avoid duplicate entries. If it does not exist, create it later.
 - Skim the recent conversation and `git log -10 --oneline` to understand what changed since the last checkpoint.
 
 ### Step 2: Triage Every CONTEXT Item
 
-For each item currently in `.codex/CONTEXT.md`, decide one of:
+For each item currently in `.claudart/CONTEXT.md`, decide one of using current evidence; retain unresolved work outside this session:
 
 | Status                                                                                              | Action                                                                                                                            |
 | --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | Still true right now                                                                                | Keep it, refreshing wording if needed. Preserve any existing `<!-- since: YYYY-MM-DD -->` comment.                                |
-| Done / resolved / merged                                                                            | Drop it from `.codex/CONTEXT.md`. Candidate for JOURNAL if it was a real decision, completion, or pivot.                          |
+| Done / resolved / merged                                                                            | Drop it from `.claudart/CONTEXT.md`. Candidate for JOURNAL if it was a real decision, completion, or pivot.                       |
 | Superseded by newer state                                                                           | Drop the old item and write the new current state.                                                                                |
 | Broad recurring behavior relevant to future work                                                    | Propose moving it into `.codex/guidelines/` via `$codex-learn`, then drop it from CONTEXT.                                        |
 | Descriptive, durable-beyond-current-work, current, and evidenced project fact (scope may be narrow) | Flag for **Step 6c**, then drop it from CONTEXT after its owner or knowledge route is updated and the relevant validation passes. |
@@ -49,9 +51,9 @@ Pure tactical noise is dropped silently.
 
 ### Step 3: Add New State from This Session
 
-Add to `.codex/CONTEXT.md` only what is true now:
+Add to `.claudart/CONTEXT.md` only what is true now:
 
-- Work that is mid-stream, with `file:line` where useful. If the work is being tracked in a task file, reference it by slug + path (e.g., `Working task \`add-jwt-auth\` (see .codex/tasks/2026-05-13-001-add-jwt-auth/TASK.md)`). Do not duplicate the task body here.
+- Work that is mid-stream, with `file:line` where useful. If the work is being tracked in a task file, reference it by slug + path (e.g., `Working task \`add-jwt-auth\` (see .claudart/tasks/2026-05-13-001-add-jwt-auth/TASK.md)`). Do not duplicate the task body here.
 - Ad-hoc changes the user requested _without_ creating a `$codex-plan` (quick fixes, transient tweaks, mid-flight pivots). These have no task file, so CONTEXT **is** their handoff summary, not just a note. Give each _active_ one a **micro-handoff** (see Step 4 skeleton): the user's intent in their own words, the files of interest with `file:line`, and the next concrete step. Mark them `(no task)`.
 - Decisions just made that are not yet codified in guidelines.
 - Durable subagent outcomes that still matter after this session, such as a validated finding, unresolved worker/reviewer blocker, or changed ownership boundary. Do not mention subagent thread ids.
@@ -69,16 +71,16 @@ For every new bullet, append `<!-- since: YYYY-MM-DD -->` using today's date. If
 Use this skeleton. Omit any section that has nothing to say.
 
 ```markdown
-<!-- .codex/CONTEXT.md - current state of work. Updated by checkpoint. Declarative, not a log. -->
+<!-- .claudart/CONTEXT.md - current state of work. Updated by checkpoint. Declarative, not a log. -->
 
 ## In Progress
 
 <!-- planned work → one-line pointer; TASK.md routes the task details -->
 
-- Working task `<slug>` (see .codex/tasks/<task-id>/TASK.md) <!-- since: YYYY-MM-DD -->
+- Working task `<slug>` (see .claudart/tasks/<task-id>/TASK.md) <!-- since: YYYY-MM-DD -->
 <!-- mission work → one-line pointer; the spec folder holds the depth -->
 
-- Running spec `<slug>` (see .codex/specs/YYYY-MM-DD-<slug>/SPEC.md) <!-- since: YYYY-MM-DD -->
+- Running spec `<slug>` (see .claudart/specs/YYYY-MM-DD-<slug>/SPEC.md) <!-- since: YYYY-MM-DD -->
 <!-- un-planned work → CONTEXT is the only handoff, so each live thread gets a micro-handoff -->
 - <short label> (no task) <!-- since: YYYY-MM-DD -->
   > "<the user's intent, quoted in their own words>"
@@ -102,7 +104,7 @@ Count lines. If more than 150, stop and report to the user. Do not write the fil
 
 ### Step 5: Append to JOURNAL
 
-For every item dropped in Step 2 because it was done, decided, pivoted, or resolved, write one line to `.codex/JOURNAL.md` in this format:
+For every item dropped in Step 2 because it was done, decided, pivoted, or resolved, write one line to `.claudart/JOURNAL.md` in this format:
 
 ```text
 YYYY-MM-DD | <type> | <one-line summary, optional commit ref>
@@ -125,43 +127,43 @@ Examples:
 2026-04-30 | blocker-resolved | Redis available in staging
 ```
 
-If `.codex/JOURNAL.md` does not exist, create it with the canonical CLAUDART header before appending.
+If `.claudart/JOURNAL.md` does not exist, create it with the canonical CLAUDART header before appending.
 
 If there is nothing to journal, skip this step. Do not write empty entries.
 
 ### Step 6: Overwrite CONTEXT
 
-Now, and only now, write the new `.codex/CONTEXT.md` from Step 4.
+Now, and only now, write the new `.claudart/CONTEXT.md` from Step 4.
 
-### Step 6b: Sync .codex/tasks/index.md
+### Step 6b: Sync .claudart/tasks/index.md
 
-This step is independent of CONTEXT.md. Skip entirely if `.codex/tasks/` does not exist.
+This step is independent of CONTEXT.md. Skip entirely if `.claudart/tasks/` does not exist.
 
-1. List `.codex/tasks/*/TASK.md` from valid top-level workspace ids only, excluding `done/` itself and symlinked workspaces or `TASK.md` files. Read only frontmatter (`status`, `slug`, `created`, `updated`). Never recursively enumerate task bodies or parse attachments as tasks.
-2. List `.codex/tasks/done/*/TASK.md` at that exact depth. Read the same metadata. Flag an archived nonterminal task or a validly named workspace missing `TASK.md`; do not move, repair, or infer status automatically.
+1. List `.claudart/tasks/*/TASK.md` from valid top-level workspace ids only, excluding `done/` itself and symlinked workspaces or `TASK.md` files. Read only frontmatter (`status`, `slug`, `created`, `updated`). Never recursively enumerate task bodies or parse attachments as tasks.
+2. List `.claudart/tasks/done/*/TASK.md` at that exact depth. Read the same metadata. Flag an archived nonterminal task or a validly named workspace missing `TASK.md`; do not move, repair, or infer status automatically.
 3. Detect top-level workspaces whose `TASK.md` status is `done` or `cancelled`. These have been user-confirmed (or cancelled) and not yet archived. For each:
    - Confirm `Outcomes & Retrospective` is filled in `TASK.md`. If empty, report it; do not invent the outcome.
    - Before archiving, inspect only `TASK.md` Memory Hints and Related Docs for eligible knowledge candidates; use the full knowledge capture gate in Step 6c. Do not bulk-read supporting files or promote task/WIP/proposal state.
-   - Move the entire workspace to `.codex/tasks/done/<task-id>/`, preserving its id and all contents. Follow the task contract's archive safeguards: if the destination exists (including a symlink), stop that archive and report the collision; never overwrite, merge, or nest it. Confirm a successful move before updating references or journaling. Do not create, rewrite, extract, or delete artifacts.
-   - Append a completion/cancellation line linking `tasks/done/<task-id>/TASK.md` to `.codex/JOURNAL.md` only if the recent journal tail does not already contain that closure. Use the Phase 2a format from `.codex/guidelines/task-management.md`, with type `cancelled` for cancellation. Never rewrite journal history.
+   - Move the entire workspace to `.claudart/tasks/done/<task-id>/`, preserving its id and all contents. Follow the task contract's archive safeguards: if the destination exists (including a symlink), stop that archive and report the collision; never overwrite, merge, or nest it. Confirm a successful move before updating references or journaling. Do not create, rewrite, extract, or delete artifacts.
+   - Append a completion/cancellation line linking `tasks/done/<task-id>/TASK.md` to `.claudart/JOURNAL.md` only if the recent journal tail does not already contain that closure. Use the Phase 2a format from `.codex/guidelines/task-management.md`, with type `cancelled` for cancellation. Never rewrite journal history.
    - Update any live CONTEXT/HANDOFF pointer to the archived `TASK.md` without copying its body.
    - **DO NOT archive `awaiting-review` tasks.** They remain active until the user confirms; checkpoint never changes task status or ticks acceptance boxes.
-4. Rewrite `.codex/tasks/index.md` per the canonical **"`index.md` Format"** in `.codex/guidelines/task-management.md`, with links to `<task-id>/TASK.md` and `done/<task-id>/TASK.md`. Active includes `awaiting-review` with its ⏳ marker; Recently Done covers the last 14 days. Report any still-unarchived terminal workspace rather than linking it to a nonexistent archive.
+4. Rewrite `.claudart/tasks/index.md` per the canonical **"`index.md` Format"** in `.codex/guidelines/task-management.md`, with links to `<task-id>/TASK.md` and `done/<task-id>/TASK.md`. Active includes `awaiting-review` with its ⏳ marker; Recently Done covers the last 14 days. Report any still-unarchived terminal workspace rather than linking it to a nonexistent archive.
 5. Enforce the 100-line ceiling and trim ladder. Missing `artifacts/` is normal; checkpoint never creates supporting files.
 6. Flag stalled tasks using the **Staleness Thresholds** in `.codex/guidelines/task-management.md`; surface the needed user decision rather than cancelling or reopening work automatically.
 
-### Step 6b2: Sync .codex/specs/INDEX.md
+### Step 6b2: Sync .claudart/specs/INDEX.md
 
-Skip entirely if `.codex/specs/` does not exist.
+Skip entirely if `.claudart/specs/` does not exist.
 
-1. Ensure `.codex/specs/done/` exists.
-2. List `.codex/specs/*/SPEC.md` from top-level dated folders only (exclude `INDEX.md` and the `done/` subfolder). For each, read frontmatter only (`slug`, `status`, `created`, `updated`).
+1. Ensure `.claudart/specs/done/` exists.
+2. List `.claudart/specs/*/SPEC.md` from top-level dated folders only (exclude `INDEX.md` and the `done/` subfolder). For each, read frontmatter only (`slug`, `status`, `created`, `updated`).
 3. Detect any top-level spec whose `status` is `done` or `cancelled`. These have passed their user gate (or were cancelled) and were not yet archived. For each:
-   - Move the entire folder to `.codex/specs/done/<folder-id>/`, preserving the existing dated folder name.
-   - Append the completion/cancellation line to `.codex/JOURNAL.md` only if the recent journal tail does not already contain that spec completion/cancellation.
+   - Move the entire folder to `.claudart/specs/done/<folder-id>/`, preserving the existing dated folder name.
+   - Append the completion/cancellation line to `.claudart/JOURNAL.md` only if the recent journal tail does not already contain that spec completion/cancellation.
    - Before archiving, scan `NOTES.md` for `→ graduate:` flags: evaluate `knowledge/` flags against the capture gate in Step 6c, surface `$codex-learn` flags as proposals in the report, and clear only flags successfully routed or explicitly retained as candidates.
    - DO NOT archive `awaiting-final-review` specs. Those are explicitly waiting for user confirmation; archiving them defeats the final gate. They stay in the top-level specs folder and appear in the Active list.
-4. List `.codex/specs/done/*/SPEC.md`. For each, read frontmatter only (`slug`, `status`, `created`, `updated`). If any archived spec is not `done` or `cancelled`, flag it in the report and do not move it automatically.
+4. List `.claudart/specs/done/*/SPEC.md`. For each, read frontmatter only (`slug`, `status`, `created`, `updated`). If any archived spec is not `done` or `cancelled`, flag it in the report and do not move it automatically.
 5. Rewrite `INDEX.md` per the canonical format in `.codex/guidelines/spec-workflow.md` — Active entries link to top-level dated folders and include every status except `done`/`cancelled` (with the ⏳ marker on `poc-review` and `awaiting-final-review`); Done entries link to `done/<folder-id>/SPEC.md` and include `done`/`cancelled`.
 6. Flag stalled specs per the Staleness Thresholds table in `.codex/guidelines/task-management.md`, mapped as: `running` ↔ `in-progress`, `poc-review`/`awaiting-final-review` ↔ `awaiting-review`, `drafting` ↔ `planning`. List flagged specs in the report.
 7. Scan each Active spec's `NOTES.md` for `→ graduate:` flags: evaluate `knowledge/` flags in Step 6c, surface `$codex-learn` flags as proposals in the report, and clear only flags successfully routed or explicitly retained as candidates.
@@ -187,7 +189,7 @@ The Git diff remains the review surface. Checkpoint may bulk-promote eligible fa
 
 Output a 6-line summary:
 
-1. Lines in new `.codex/CONTEXT.md`.
+1. Lines in new `.claudart/CONTEXT.md`.
 2. Items kept, dropped, and added.
 3. JOURNAL entries appended, or `none`.
 4. Tasks synced: active=<n>, archived this run=<n>, stalled=<n>; specs synced: active=<n>, archived this run=<n>, stalled=<n>.

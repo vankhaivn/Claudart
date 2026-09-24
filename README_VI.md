@@ -4,7 +4,7 @@
 
 CLAUDART là một bộ quy trình đặt ngay trong repository dành cho Claude Code và Codex. Trạng thái phiên làm việc, kế hoạch triển khai, kiến thức dự án và chỉ dẫn cho agent đều được lưu bằng Markdown và quản lý cùng mã nguồn.
 
-Hai lớp Claude và Codex hoạt động độc lập. Bạn có thể cài một lớp hoặc cả hai. CLAUDART không cần cơ sở dữ liệu, daemon hay dịch vụ chạy nền.
+Claude và Codex có adapter riêng, dùng chung trạng thái dự án trong `.claudart/`. Bạn có thể cài một adapter hoặc cả hai. CLAUDART không cần cơ sở dữ liệu, daemon hay dịch vụ chạy nền.
 
 ## CLAUDART bổ sung những gì
 
@@ -42,11 +42,11 @@ curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh 
 curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --claude --project-docs
 ```
 
-Trình cài đặt sao chép các file còn thiếu và bỏ qua file đã tồn tại. Bản cài mặc định chỉ chứa lớp core; `--project-docs` thêm command hoặc skill cùng references cho vòng đời tài liệu tùy chọn. Nó không tự tạo hoặc migrate tài liệu dự án. Tùy chọn `--force` sẽ ghi đè file hiện có, vì vậy chỉ dùng khi bạn thực sự muốn thay thế chúng.
+Mọi chế độ cài đặt đều tạo seed `.claudart/` một lần cùng adapter đã chọn. Trình cài đặt sao chép file còn thiếu và giữ nguyên trạng thái dự án đã có. Bản cài mặc định chỉ chứa lớp core; `--project-docs` thêm command hoặc skill cùng references cho vòng đời tài liệu tùy chọn. Nó không tự tạo hoặc migrate tài liệu dự án. `--force` chỉ cập nhật payload adapter; shared state và root loader Codex đã có luôn được giữ nguyên. Dùng `INTEGRATE.md` để đối soát chỉ dẫn tùy chỉnh.
 
 Project Docs có [template đầu ra và ví dụ đã điền](modules/project-docs/README.md#output-templates-and-examples) cho phạm vi product, hành vi, kiến trúc, phát triển và vận hành, được dẫn từ một router tài liệu nhỏ. Chỉ dùng phần đang cần nguồn sở hữu; docs và knowledge hiện có có thể tiếp tục giữ trách nhiệm của mình. Template thích ứng với việc chạy local, dùng `main` latest, deploy liên tục hoặc release theo quy trình của team; giữ yêu cầu thực tế mà không tự áp thêm quy trình production-readiness.
 
-Với một bản cài Codex mới, trình cài đặt thêm `.codex/`, `.agents/skills/` và `AGENTS.md` ở thư mục gốc. Trong repository CLAUDART, file mẫu nguồn nằm tại `.codex/AGENTS.md`.
+Với một bản cài Codex mới, trình cài đặt thêm `.claudart/`, `.codex/`, `.agents/skills/` và `AGENTS.md` ở thư mục gốc. Trong repository CLAUDART, file mẫu nguồn nằm tại `.codex/AGENTS.md`.
 
 ### Dự án đã có cấu hình hoặc đã cài CLAUDART
 
@@ -80,7 +80,7 @@ Khi audit, `/doctor` hoặc `$codex-doctor` chạy `doctor-check.sh` một lần
 
 Dùng task plan khi quyết định quan trọng, phối hợp, gián đoạn hoặc review cần được lưu bền vững, hay khi user yêu cầu rõ ràng. Thay đổi nhỏ, rõ ràng không cần workspace; số lượng file không phải điều kiện tự động. Dùng spec cho phạm vi cấp mission cần ý định được duyệt chung và roadmap nhiều phase—không phải chỉ vì task cần ảnh, JSON hay archive.
 
-Task bắt đầu bằng `tasks/YYYY-MM-DD-NNN-<slug>/TASK.md` trong runtime đã chọn. `TASK.md` là file bắt buộc duy nhất. Chỉ tạo `artifacts/` cho input/output ở định dạng riêng, bằng chứng cần giữ hoặc nghiên cứu chi tiết của task; phát hiện ngắn nằm ngay trong plan. Không bắt buộc POC, ledger, vòng review lặp lại hay đổi phiên. Khi user xác nhận đóng, archive toàn bộ thư mục. Hợp đồng hiện hành không hỗ trợ task file phẳng; downstream chủ động điều chỉnh công việc đã có khi nâng cấp.
+Task nằm tại `.claudart/tasks/YYYY-MM-DD-NNN-<slug>/TASK.md`, dùng chung cho cả hai runtime. `TASK.md` là file bắt buộc duy nhất. Chỉ tạo `artifacts/` cho input/output ở định dạng riêng, bằng chứng cần giữ hoặc nghiên cứu chi tiết của task; phát hiện ngắn nằm ngay trong plan. Không bắt buộc POC, ledger, vòng review lặp lại hay đổi phiên. Khi user xác nhận đóng, archive toàn bộ thư mục. Task discovery chỉ dùng cấu trúc workspace này.
 
 Khi đã được yêu cầu triển khai hoặc tiếp tục, agent chuyển từ lập kế hoạch sang thực hiện mà không hỏi lại. Yêu cầu chỉ lập kế hoạch vẫn giữ chế độ chỉ đọc; đóng công việc cuối cùng vẫn cần user xác nhận. Spec đã duyệt có thể chuyển sang runner ngay trong cùng phiên nếu user đã yêu cầu thực thi; đổi phiên là tùy chọn.
 
@@ -88,17 +88,19 @@ Khi đã được yêu cầu triển khai hoặc tiếp tục, agent chuyển t�
 
 | Vị trí                      | Mục đích                                         | Cách nạp                                                             |
 | --------------------------- | ------------------------------------------------ | -------------------------------------------------------------------- |
-| `CONTEXT.md`                | Trạng thái hiện tại của dự án và công việc       | Đọc khi bắt đầu phiên; được checkpoint viết lại                      |
-| `JOURNAL.md`                | Lịch sử đã kết thúc                              | Chỉ nối thêm; không tự động nạp                                      |
+| `.claudart/CONTEXT.md`      | Trạng thái hiện tại của dự án và công việc       | Đọc khi bắt đầu phiên; được checkpoint viết lại                      |
+| `.claudart/JOURNAL.md`      | Lịch sử đã kết thúc                              | Chỉ nối thêm; không tự động nạp                                      |
 | `rules/` hoặc `guidelines/` | Chỉ dẫn mang tính quy định cho hành vi của agent | Nạp khi phù hợp                                                      |
-| `knowledge/`                | Các sự thật bền vững mô tả dự án                 | Định tuyến qua `INDEX.md`; chỉ đọc chi tiết khi cần                  |
-| `tasks/`                    | Kế hoạch triển khai bền vững                     | Metadata lúc start; `TASK.md` đã chọn và file cần thiết khi tiếp tục |
-| `specs/`                    | Đặc tả công việc lớn và lịch sử thực thi         | Đọc khi đặc tả đang hoạt động                                        |
-| `HANDOFF.md`                | Bàn giao suy luận cho một phiên kế tiếp          | Phiên `/start` kế tiếp tiếp nhận rồi xóa                             |
+| `.claudart/knowledge/`      | Các sự thật bền vững mô tả dự án                 | Định tuyến qua `INDEX.md`; chỉ đọc chi tiết khi cần                  |
+| `.claudart/tasks/`          | Kế hoạch triển khai bền vững                     | Metadata lúc start; `TASK.md` đã chọn và file cần thiết khi tiếp tục |
+| `.claudart/specs/`          | Đặc tả công việc lớn và lịch sử thực thi         | Đọc khi đặc tả đang hoạt động                                        |
+| `.claudart/HANDOFF.md`      | Bàn giao suy luận cho một phiên kế tiếp          | Phiên `/start` kế tiếp tiếp nhận rồi xóa                             |
 
 Ranh giới quan trọng nhất: **quy tắc nói agent nên làm việc như thế nào; knowledge giữ fact chưa có owner hiện hành phù hợp; task và spec ghi công việc đang được thực hiện.** Khi source, schema, generated reference hoặc tài liệu dự án đã sở hữu một fact, knowledge chỉ giữ route ngắn thay vì tạo bản kể lại cạnh tranh.
 
-Mỗi luồng công việc dùng một nơi lưu trạng thái: mặc định `.claude/` cho Claude hoặc `.codex/` cho Codex. Khi bạn yêu cầu host khác làm theo skill Codex, trạng thái `.codex/` vẫn là nguồn chính, còn công cụ tuân theo khả năng thực tế của host đó. Hai nơi lưu không tự đồng bộ.
+Cả hai adapter đọc và ghi cùng một `.claudart/`. Đổi runtime giữ nguyên phạm vi task/spec, phê duyệt, bằng chứng và cổng review cuối; metadata `agent` ghi nguồn gốc, không chọn store hay cấp quyền. Công cụ và chỉ dẫn thực thi theo khả năng của host hiện tại.
+
+Shared state hỗ trợ bàn giao tuần tự, không tự đồng bộ nhiều writer. Cần điều phối việc ghi summary, index và handoff; checkpoint giữ công việc chưa giải quyết của phiên khác và không âm thầm thay một handoff chưa tiếp nhận. Các checkout riêng vẫn tuân theo Git và quy trình cộng tác của dự án.
 
 Rule workflow chỉ nạp khi cần. Loader Claude đã cài đặt tính đường dẫn import từ `.claude/CLAUDE.md`; chi tiết bảo trì knowledge nằm trong `references/`. Module Project Docs tùy chọn dùng cho lifecycle request hoặc khi thay đổi tác động đến tài liệu hiện hành mà nó sở hữu; nó không chạy full audit ở start, checkpoint hoặc sau thay đổi nhỏ thông thường. Tra cứu không phải nạp schema ghi knowledge; các vòng spec liên tục chỉ đọc trạng thái liên quan thay vì nạp lại toàn bộ tài liệu mission.
 

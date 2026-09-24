@@ -4,12 +4,12 @@
 #   curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash
 #
 # Options (pass after --):
-#   (no flags)   Install the Claude Code layer (.claude/)
+#   (no flags)   Install shared state (.claudart/) and Claude Code (.claude/)
 #   --claude     Install the Claude Code layer (explicit, same as default)
-#   --codex      Install the Codex layer (.codex/ + .agents/ + AGENTS.md at root)
+#   --codex      Install shared state and Codex (.codex/ + .agents/ + AGENTS.md)
 #   --both       Install both Claude and Codex layers
 #   --project-docs  Add the optional Project Docs module to selected layers
-#   --force      Overwrite existing files
+#   --force      Refresh adapter files; preserve shared project state
 #   --help       Show this help text
 
 set -euo pipefail
@@ -45,10 +45,13 @@ OPTIONS
   --codex      Install the Codex layer instead
   --both       Install both Claude Code and Codex layers
   --project-docs  Add the optional Project Docs module to selected layers
-  --force      Overwrite files that already exist
+  --force      Refresh adapter files; never overwrite shared project state
   --help       Show this help text
 
-LAYERS
+SHARED PROJECT STATE
+  .claudart/              Seeded once in every mode; existing state is preserved
+
+ADAPTERS
   Claude Code (default)   .claude/
   Codex                   .codex/  +  .agents/  +  AGENTS.md at project root
   Both                    all of the above
@@ -100,6 +103,37 @@ if [[ "$INSTALL_PROJECT_DOCS" == true ]]; then
   fi
 fi
 
+# Shared state has a fixed, empty seed payload. Never copy live work, handoffs,
+# or arbitrary files from the upstream state tree into a project.
+STATE_SEEDS=(
+  CONTEXT.md JOURNAL.md knowledge/INDEX.md tasks/index.md
+  tasks/done/.gitkeep specs/INDEX.md specs/done/.gitkeep
+)
+
+# Preflight the complete seed set before any adapter or state write. Refuse
+# symlinks and type collisions instead of following them, even with --force.
+for seed in "${STATE_SEEDS[@]}"; do
+  if [[ ! -f "$TMPDIR/.claudart/$seed" || -L "$TMPDIR/.claudart/$seed" ]]; then
+    printf '%s Shared state seed is missing: %s\n' "$(red "error")" "$seed" >&2
+    exit 1
+  fi
+  remaining=".claudart/$seed"
+  parent="$DEST"
+  while [[ "$remaining" == */* ]]; do
+    parent="$parent/${remaining%%/*}"
+    remaining="${remaining#*/}"
+    if [[ -L "$parent" || ( -e "$parent" && ! -d "$parent" ) ]]; then
+      printf '%s Shared state requires real directories: %s\n' "$(red "error")" "$parent" >&2
+      exit 1
+    fi
+  done
+  target="$parent/$remaining"
+  if [[ -L "$target" || ( -e "$target" && ! -f "$target" ) ]]; then
+    printf '%s Shared state seed path has a type conflict: %s\n' "$(red "error")" "$target" >&2
+    exit 1
+  fi
+done
+
 # ── copy helpers ──────────────────────────────────────────────────────────────
 
 SKIPPED=0
@@ -136,6 +170,8 @@ copy_tree() {
 
   while IFS= read -r src_file; do
     local rel="${src_file#"$TMPDIR/$prefix"}"
+    # The Codex loader is installed at the project root, not inside its adapter.
+    if [[ "$rel" == .codex/AGENTS.md ]]; then continue; fi
     copy_file_from_src "$prefix$rel" "$rel"
   done < <(find "$src_root" -type f | sort)
 }
@@ -143,6 +179,16 @@ copy_tree() {
 # ── install ───────────────────────────────────────────────────────────────────
 
 printf '\n%s  Installing into %s\n' "$(bold "→")" "$DEST"
+
+printf '\n%s\n' "$(bold "Shared project state (.claudart/)")"
+for seed in "${STATE_SEEDS[@]}"; do
+  if [[ -f "$DEST/.claudart/$seed" ]]; then
+    printf '  %s  .claudart/%s (project state)\n' "$(yellow "keep")" "$seed"
+    (( SKIPPED++ )) || true
+  else
+    copy_file_from_src ".claudart/$seed" ".claudart/$seed"
+  fi
+done
 
 if [[ "$INSTALL_CLAUDE" == true ]]; then
   printf '\n%s\n' "$(bold "Claude Code layer (.claude/)")"
@@ -152,36 +198,16 @@ fi
 if [[ "$INSTALL_CODEX" == true ]]; then
   printf '\n%s\n' "$(bold "Codex layer")"
 
-  # Snapshot AGENTS.md state BEFORE copying so we know what the user already had.
-  AGENTS_AT_ROOT=false
-  AGENTS_IN_CODEX=false
-  [[ -f "$DEST/AGENTS.md" ]]        && AGENTS_AT_ROOT=true
-  [[ -f "$DEST/.codex/AGENTS.md" ]] && AGENTS_IN_CODEX=true
-
   copy_tree ".codex"
   copy_tree ".agents"
 
-  # AGENTS.md must live at project root for Codex to auto-load it.
-  # • User already had it at root OR in .codex/ → leave everything untouched.
-  # • Neither existed → install at root and remove the .codex/ copy that
-  #   copy_tree just created (avoid having two conflicting copies).
-  if [[ "$AGENTS_AT_ROOT" == false && "$AGENTS_IN_CODEX" == false ]]; then
-    copy_file_from_src ".codex/AGENTS.md" "AGENTS.md"
-    if [[ -f "$DEST/.codex/AGENTS.md" ]]; then
-      rm "$DEST/.codex/AGENTS.md"
-      printf '  %s  .codex/AGENTS.md (removed; canonical copy is at root)\n' "$(green "clean")"
-    fi
-  else
-    location="$( [[ "$AGENTS_AT_ROOT" == true ]] && echo "root" || echo ".codex/" )"
-    printf '  %s  AGENTS.md (already present at %s, skipping)\n' "$(yellow "skip")" "$location"
+  # Loaders contain project-authored routes. Existing root content is reconciled
+  # by the integration protocol, not replaced by a forced payload refresh.
+  if [[ -e "$DEST/AGENTS.md" || -L "$DEST/AGENTS.md" ]]; then
+    printf '  %s  AGENTS.md (existing project loader)\n' "$(yellow "keep")"
     (( SKIPPED++ )) || true
-  fi
-
-  # .codex/CODEX.md is deprecated when present; the template uses AGENTS.md as
-  # the sole Codex memory index. Remove the stale path during reconciliation.
-  if [[ -f "$DEST/.codex/CODEX.md" ]]; then
-    rm "$DEST/.codex/CODEX.md"
-    printf '  %s  .codex/CODEX.md (deprecated; content consolidated into AGENTS.md)\n' "$(green "clean")"
+  else
+    copy_file_from_src ".codex/AGENTS.md" "AGENTS.md"
   fi
 fi
 
@@ -200,17 +226,17 @@ fi
 printf '\n%s  Done. %d copied, %d skipped.\n\n' "$(bold "✓")" "$COPIED" "$SKIPPED"
 
 if [[ "$SKIPPED" -gt 0 ]]; then
-  printf '%s  Skipped files already exist in your project. Run with --force to overwrite them.\n\n' "$(yellow "note")"
+  printf '%s  Existing project state and the Codex root loader were preserved. Use INTEGRATE.md to reconcile custom instructions; --force refreshes adapter payload only.\n\n' "$(yellow "note")"
 fi
 
 printf '%s\n' "$(bold "Next steps:")"
 if [[ "$INSTALL_CLAUDE" == true ]]; then
-  printf '  Claude Code  →  open project, run /doctor → /refactor-memory → /doctor once\n'
+  printf '  Claude Code  →  open project, run /start\n'
 fi
 if [[ "$INSTALL_CODEX" == true ]]; then
   # The dollar-prefixed skill names are intentional literals.
   # shellcheck disable=SC2016
-  printf '  Codex        →  open project, run $codex-doctor → $codex-refactor-memory → $codex-doctor once\n'
+  printf '  Codex        →  open project, run $codex-start\n'
 fi
 if [[ "$INSTALL_PROJECT_DOCS" == true ]]; then
   printf '  Project Docs →  use init for a new idea, adopt for an existing project\n'

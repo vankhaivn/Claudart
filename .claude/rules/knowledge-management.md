@@ -1,15 +1,15 @@
 ---
 paths: [".claude/references/knowledge-maintenance.md"]
-description: Bounded retrieval and classification contract for durable descriptive project knowledge under `.claude/knowledge/`; routes mutations and audits to the maintenance reference.
-when_to_use: When a task retrieves or searches project knowledge, classifies a possible durable fact, or audits, mutates, or refactors `.claude/knowledge/`.
+description: Bounded retrieval and classification contract for durable descriptive project knowledge under `.claudart/knowledge/`; routes mutations and audits to the maintenance reference.
+when_to_use: When a task retrieves or searches project knowledge, classifies a possible durable fact, or audits, mutates, or refactors `.claudart/knowledge/`.
 tags: [knowledge, memory, routing, validation]
 ---
 
 # Knowledge Management
 
-`.claude/knowledge/` stores durable **descriptive** project facts and compact routes to other current owners. A topic owns a fact when no source code, schema, generated reference, project document, or other authoritative source already states that same claim as its maintained contract. Source code can be evidence for a distinct, useful synthesis in knowledge without owning that synthesis. `INDEX.md` and `_maps/*.md` are compact routers. Choose ownership by the subject and evidence, not by which agent or reader needs the information; keep one owner per fact and link from other surfaces.
+`.claudart/knowledge/` stores durable **descriptive** project facts and compact routes to other current owners. A topic owns a fact when no source code, schema, generated reference, project document, or other authoritative source already states that same claim as its maintained contract. Source code can be evidence for a distinct, useful synthesis in knowledge without owning that synthesis. `INDEX.md` and `_maps/*.md` are compact routers. Choose ownership by the subject and evidence, not by which agent or reader needs the information; keep one owner per fact and link from other surfaces.
 
-This rule is the root contract for retrieval and classification. Routine `/start` reads only `.claude/knowledge/INDEX.md`; it does not load this rule, detail topics, domain maps, the maintenance reference, or the checker.
+This rule is the root contract for retrieval and classification. Routine `/start` reads only `.claudart/knowledge/INDEX.md`; it does not load this rule, detail topics, domain maps, the maintenance reference, or the checker.
 
 ## Load Maintenance Detail Only When Needed
 
@@ -19,7 +19,7 @@ This rule is the root contract for retrieval and classification. Routine `/start
 
 ## Retrieve With A Fixed Budget
 
-1. Read `.claude/knowledge/INDEX.md`.
+1. Read `.claudart/knowledge/INDEX.md`.
 2. Follow at most 2 relevant `_maps/*.md` routes.
 3. Select at most 3 direct topics using exact slug/name/alias first, then typed scope, triggers, description/type, and source match.
 4. For each topic, inspect frontmatter and the heading outline, then read the smallest relevant section. Read the full body only when the task needs the whole invariant or the smaller view is insufficient.

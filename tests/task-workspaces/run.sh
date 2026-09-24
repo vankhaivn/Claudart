@@ -122,7 +122,7 @@ for layer in claude codex; do
     assert_not_contains "$file" 'tasks/*.md' "$layer consumer has no legacy active scan"
     assert_not_contains "$file" 'tasks/done/*.md' "$layer consumer has no legacy archive scan"
   done
-  seed="$REPO_ROOT/.$layer/tasks/index.md"
+  seed="$REPO_ROOT/.claudart/tasks/index.md"
   assert_contains "$seed" '<task-id>/TASK.md' "$layer seed points to the authoritative entrypoint"
   assert_not_contains "$seed" '](' "$layer ships no live task in its dashboard"
 done

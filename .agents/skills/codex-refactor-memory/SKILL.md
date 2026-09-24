@@ -21,7 +21,7 @@ The first doctor run establishes a read-only baseline; refactor performs one con
 
 1. Run `git status --short`. Preserve unrelated user changes and stop for direction only when overlapping edits make the refactor unsafe.
 2. Resolve the active memory index: installed projects normally use root `AGENTS.md`; the CLAUDART source template may use `.codex/AGENTS.md` as the installer source. If both differ and local evidence does not identify the owner, ask before overwriting either.
-3. Inventory `.codex/CONTEXT.md`, `.codex/JOURNAL.md`, guidelines, knowledge, tasks, specs, skills, agents, and recent Git history. Never read `.env` or expose secrets.
+3. Inventory `.claudart/CONTEXT.md`, `.claudart/JOURNAL.md`, guidelines, knowledge, tasks, specs, skills, agents, and recent Git history. Never read `.env` or expose secrets.
 4. Read `.codex/guidelines/knowledge-management.md` and `.codex/references/knowledge-maintenance.md` before inspecting or changing knowledge.
 5. Require `.codex/scripts/knowledge-check.sh`. If it is missing, report a High-severity installation problem and stop before knowledge writes.
 6. Run `bash .codex/scripts/knowledge-check.sh --root .` and retain its pre-change findings. Exit `1` is a finding baseline; exit `2` is a checker usage/runtime failure, so stop before knowledge writes.
@@ -30,11 +30,11 @@ The first doctor run establishes a read-only baseline; refactor performs one con
 
 - `AGENTS.md`: concise entrypoint and routing pointers, preferably under 100 lines.
 - `.codex/guidelines/`: durable prescriptive behavior.
-- `.codex/knowledge/`: eligible durable descriptive facts without another owner, plus compact routes or minimal unique agent context for externally owned facts.
-- `.codex/CONTEXT.md`: small declarative state true now.
-- `.codex/JOURNAL.md`: append-only history, never auto-loaded.
-- `.codex/tasks/` and `.codex/specs/`: working plans, proposals, acceptance state, and mission-local discoveries.
-- `.codex/HANDOFF.md`: optional single-use conversational baton.
+- `.claudart/knowledge/`: eligible durable descriptive facts without another owner, plus compact routes or minimal unique agent context for externally owned facts.
+- `.claudart/CONTEXT.md`: small declarative state true now.
+- `.claudart/JOURNAL.md`: append-only history, never auto-loaded.
+- `.claudart/tasks/` and `.claudart/specs/`: working plans, proposals, acceptance state, and mission-local discoveries.
+- `.claudart/HANDOFF.md`: optional single-use conversational baton.
 - `.agents/skills/` and `.codex/agents/`: executable workflows and bounded specialist roles.
 
 Route content by meaning before reorganizing files. Do not move WIP or a proposed future state into knowledge. Do not turn a descriptive fact into a guideline merely to keep it always loaded.
@@ -53,12 +53,12 @@ Route content by meaning before reorganizing files. Do not move WIP or a propose
 
 1. Trim the active `AGENTS.md` to project identity, selective context loading, core workflows, security/repository-wide constraints, and pointers. Never require reading every guideline blindly. Keep it under 100 lines where practical; if it still exceeds 150 lines, flag that explicitly in the final report.
 2. Reconcile stale references to deprecated or duplicate memory files. Follow the repository convention for byte-identical duplicates; ask before removing a divergent file or choosing a winner.
-3. Keep the four compact knowledge invariants in `AGENTS.md` and the retrieval contract in `knowledge-management.md`, with conditional schema/capture/lifecycle detail in `.codex/references/knowledge-maintenance.md`. Preserve the loader's explicit state-layer selection and host-native tool usage; do not synchronize stores automatically.
+3. Keep the four compact knowledge invariants in `AGENTS.md` and the retrieval contract in `knowledge-management.md`, with conditional schema/capture/lifecycle detail in `.codex/references/knowledge-maintenance.md`. Preserve `.claudart/` as the single shared state authority and retain host-native tool usage. Runtime selection does not choose or create another state store.
 4. Ensure every relevant guideline has `paths:`, `description:`, `when_to_use:`, and `tags:` frontmatter and a clear owner. Keep flow-style `paths`/`tags`.
 5. Verify concrete guideline claims against repository sources. Classify mismatches as guideline-stale, source-debt, open-work, or needs-user-decision; do not weaken a desired invariant merely because source currently violates it.
 6. Detect kitchen-sink files, near-duplicates, stale temporary wording, and repeated facts. Keep a rule in its most specific owner and replace copies with pointers; merge, split, or remove semantic owners only with clear evidence and user confirmation.
 7. Promote stable behavioral decisions from CONTEXT to the correct guideline through checkpoint semantics. Leave temporary decisions in CONTEXT. Route purely descriptive guideline content to its fact owner only after the capture gate passes and ask before removing the original guideline.
-8. Cross-link `.codex/CONTEXT.md`, the universal behavior guideline, every globally relevant workflow guideline, and the knowledge root router from `AGENTS.md`. Never auto-load JOURNAL, HANDOFF, task bodies, or knowledge details.
+8. Cross-link `.claudart/CONTEXT.md`, the universal behavior guideline, every globally relevant workflow guideline, and the knowledge root router from `AGENTS.md`. Never auto-load JOURNAL, HANDOFF, task bodies, or knowledge details.
 9. Ensure `ai-behavior.md` exists without overwriting user customizations. Follow the active harness policy for delegation; keep decomposition, disjoint ownership, non-overlap, parent validation, and durable result recording in `agent-delegation.md` instead of inventing a conflicting permission rule.
 10. Ensure `## Agent Self-Evolution & Context Maintenance` remains in `AGENTS.md`: project-wide behavior updates its owner guideline, new guideline owners get indexed, eligible descriptive facts use the knowledge contract, global Codex behavior updates `AGENTS.md`, and live state uses checkpoint.
 
@@ -90,11 +90,11 @@ After the normalization batch, run `bash .codex/scripts/knowledge-check.sh --roo
 
 ## 6. Preserve Live Workflow State
 
-- Create concise CONTEXT and JOURNAL scaffolds when missing. Rewrite `.codex/CONTEXT.md` only through checkpoint semantics, keep it under 150 lines, and ensure `AGENTS.md` references it.
+- Create concise CONTEXT and JOURNAL scaffolds when missing. Rewrite `.claudart/CONTEXT.md` only through checkpoint semantics, keep it under 150 lines, and ensure `AGENTS.md` references it.
 - Never rewrite or prune JOURNAL; use tail and targeted `rg`, and remove any instruction that auto-loads it.
 - If task/spec directories are missing while their skills exist, create only their canonical seed indexes and archive placeholders. Do not rewrite, move, close, or change task/spec bodies; their owning workflows manage state and archives.
 - Remove an archive `.gitkeep` only when a real archived workspace (`tasks/done/<task-id>/TASK.md` or `specs/done/<folder-id>/SPEC.md`) already makes it redundant, and report the removal.
-- Task inventory uses only `.codex/tasks/*/TASK.md` and `.codex/tasks/done/*/TASK.md` at the depths defined by `task-management.md`; never recursively read attachments or follow workspace/`TASK.md` symlinks. Preserve every task workspace and its supporting files. Do not create `artifacts/`, extract archives, rewrite evidence, migrate flat tasks, or treat missing optional files as repair targets.
+- Task inventory uses only `.claudart/tasks/*/TASK.md` and `.claudart/tasks/done/*/TASK.md` at the depths defined by `task-management.md`; never recursively read attachments or follow workspace/`TASK.md` symlinks. Preserve every task workspace and its supporting files. Do not create `artifacts/`, extract archives, rewrite evidence, migrate flat tasks, or treat missing optional files as repair targets.
 - Do not store subagent ids or transient thread state in durable memory.
 - Treat an empty knowledge tier as valid. Do not populate it merely to make refactor appear productive.
 
@@ -111,7 +111,7 @@ After the normalization batch, run `bash .codex/scripts/knowledge-check.sh --roo
 
 When the repository is a distributable template:
 
-- Treat `.codex/` and `.agents/` as generic payload, not live maintainer state.
+- Treat `.codex/` and `.agents/` as adapter payload. The distributed `.claudart/` contains only empty shared seeds, never live maintainer state.
 - Preserve the documented relationship between `.codex/AGENTS.md` and the downstream root `AGENTS.md`.
 - Do not add generated-marker comments, project-specific frameworks, private paths, or downstream names to the payload.
 - Do not assume adopters share this repository's languages, tooling, docs, tasks, specs, or knowledge.

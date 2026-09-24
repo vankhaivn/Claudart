@@ -11,9 +11,9 @@ Turn corrections and repeated lessons from completed work into durable behavior.
 
 1. Read `AGENTS.md` in full.
 2. Read the guideline, skill, and agent files that governed this session. Use frontmatter and targeted `rg` to find relevant owners; do not read every guideline blindly.
-3. Read `.codex/CONTEXT.md` for current shared state.
+3. Read `.claudart/CONTEXT.md` for current shared state.
 4. If the retrospective may retrieve or mutate project knowledge, read `.codex/guidelines/knowledge-management.md` in full. Otherwise do not load it.
-5. For recurrence evidence, tail at most ~200 lines of `.codex/JOURNAL.md`, then use targeted `rg` for matching decisions or pivots. Never full-read JOURNAL by default.
+5. For recurrence evidence, tail at most ~200 lines of `.claudart/JOURNAL.md`, then use targeted `rg` for matching decisions or pivots. Never full-read JOURNAL by default.
 6. Build a compact rule index: owner → core constraint → known loophole. Include every agent/skill instruction that materially governed the session.
 
 ## 2. Extract Behavioral Lessons
@@ -61,8 +61,8 @@ Guideline frontmatter uses `paths:`, `description:`, `when_to_use:`, and `tags:`
 
 ## Boundaries
 
-- Do not modify `.codex/CONTEXT.md`; checkpoint owns it.
-- Do not rewrite or delete `.codex/JOURNAL.md`.
+- Do not modify `.claudart/CONTEXT.md`; checkpoint owns it.
+- Do not rewrite or delete `.claudart/JOURNAL.md`.
 - Do not auto-delete, retire, supersede, or promote ambiguous knowledge.
 - Do not create a guideline for a descriptive fact or a knowledge topic for behavior.
 - Execute safe, in-scope memory changes, validate them, and report each file touched and why.

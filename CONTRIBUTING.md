@@ -34,7 +34,7 @@ Search existing Issues and pull requests first. For a new enhancement, open an I
 
 We welcome new AI commands and highly specialized agents. If you add a durable Claude-side rule, command, or agent, maintain the Codex-native equivalent too when the concept applies to both tools.
 
-Use the repository Git and GitHub workflow below for CLAUDART source changes. Add or modify files within the relevant AI layer: `.claude/` for Claude Code, `.codex/` plus `.agents/skills/` for Codex. Session state lives inside each layer (`.claude/CONTEXT.md`, `.claude/JOURNAL.md`, `.codex/CONTEXT.md`, `.codex/JOURNAL.md`).
+Use the repository Git and GitHub workflow below for CLAUDART source changes. Add or modify files within the relevant AI layer: `.claude/` for Claude Code, `.codex/` plus `.agents/skills/` for Codex. Project state lives in `.claudart/`, shared by both adapters. Distribute only empty CONTEXT/JOURNAL and knowledge/task/spec seeds; never commit live maintainer work into the installable state payload.
 
 If you've changed APIs, commands, or the knowledge contract, update both English and Vietnamese documentation where a mirrored page exists.
 
@@ -161,7 +161,7 @@ If you're contributing new logic, please adhere to our directory structure:
 
 - `.claude/commands/`: CLAUDART slash commands (`/learn`, `/checkpoint`, etc.). Your command files here should detail the steps the AI takes.
 - `.claude/agents/`: Highly specialized role-based instruction sets (`reviewer.md`, `architect.md`, etc.). Make sure agent prompts are self-contained and heavily instruct the AI on its specific persona and constraints.
-- `.claude/knowledge/` and `.codex/knowledge/`: Durable, **descriptive** project reference — domain, architecture, glossary, and pointers to canonical docs in other folders. Distinct from rules/guidelines (prescriptive). Only the root `INDEX.md` is surfaced by `start`; optional `_maps/`, topic outlines, and the smallest useful sections are loaded on demand.
+- `.claudart/knowledge/`: Durable, **descriptive** project reference — domain, architecture, glossary, and pointers to canonical docs in other folders. Distinct from rules/guidelines (prescriptive). Only the root `INDEX.md` is surfaced by `start`; optional `_maps/`, topic outlines, and the smallest useful sections are loaded on demand.
 - `.claude/rules/knowledge-management.md` and `.codex/guidelines/knowledge-management.md`: the mirrored semantic contract for capture, lifecycle, bounded retrieval, and project-fact classification. Keep their intent in parity.
 - `.claude/scripts/knowledge-check.sh` and `.codex/scripts/knowledge-check.sh`: byte-identical copies of the dependency-free, read-only mechanical checker. Change and test them as one unit.
 - `.claude/scripts/doctor-check.sh` and `.codex/scripts/doctor-check.sh`, with adjacent `doctor-check.awk`: mirrored mechanical doctor helpers. Keep each pair byte-identical, preserve the single knowledge-check invocation, and test both runtime installations with anonymous offline fixtures.

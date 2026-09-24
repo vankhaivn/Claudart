@@ -1,6 +1,6 @@
 ---
 name: codex-spec
-description: Create or amend a dated mission-scale spec workspace in .codex/specs/, freeze intent in reviewable POC artifacts, and hand an approved mission to $codex-spec-run when execution is requested.
+description: Create or amend a dated mission-scale spec workspace in .claudart/specs/, freeze intent in reviewable POC artifacts, and hand an approved mission to $codex-spec-run when execution is requested.
 ---
 
 # Codex Spec
@@ -19,13 +19,13 @@ Before doing anything, read `.codex/guidelines/spec-workflow.md`. That guideline
 
 ### Step 1 — Read project context
 
-Read: `.codex/CONTEXT.md`, `.codex/specs/INDEX.md`, `.codex/knowledge/INDEX.md`, relevant current project documents under the repository's convention, and `git log -5 --oneline`. If an active spec already covers the mission, honor an explicit current selection or continue/resume instruction without asking again; ask only when multiple plausible matches remain ambiguous. Reuse an existing `drafting` spec — including an approved final-review scope amendment returned by `$codex-spec-run` — and route other statuses under the canonical state machine; never create a duplicate mission folder.
+Read: `.claudart/CONTEXT.md`, `.claudart/specs/INDEX.md`, `.claudart/knowledge/INDEX.md`, relevant current project documents under the repository's convention, and `git log -5 --oneline`. If an active spec already covers the mission, honor an explicit current selection or continue/resume instruction without asking again; ask only when multiple plausible matches remain ambiguous. Reuse an existing `drafting` spec — including an approved final-review scope amendment returned by `$codex-spec-run` — and route other statuses under the canonical state machine; never create a duplicate mission folder.
 
 If planning needs a knowledge route beyond the root index, read `.codex/guidelines/knowledge-management.md` in full and follow its bounded routing contract. Do not treat a proposed product state in a draft document or SPEC as implemented project reality.
 
-Ensure `.codex/specs/done/` exists. Before deciding whether an existing spec is active, check its `SPEC.md` frontmatter status; a top-level spec folder with `status: done` or `status: cancelled` is stale archive state, not an active collision, and should be moved to `.codex/specs/done/` when syncing INDEX.
+Ensure `.claudart/specs/done/` exists. Before deciding whether an existing spec is active, check its `SPEC.md` frontmatter status; a top-level spec folder with `status: done` or `status: cancelled` is stale archive state, not an active collision, and should be moved to `.claudart/specs/done/` when syncing INDEX.
 
-For a new mission, create `.codex/specs/YYYY-MM-DD-<slug>/` using today's date and the slug rules from the guideline file, write a minimal `SPEC.md` with `slug: <slug>` and `status: drafting`, and register it in `INDEX.md` with the dated folder link. For a resumed draft, keep its existing dated id and history. From here on, the folder is where everything lands — not chat.
+For a new mission, create `.claudart/specs/YYYY-MM-DD-<slug>/` using today's date and the slug rules from the guideline file, write a minimal `SPEC.md` with `slug: <slug>` and `status: drafting`, and register it in `INDEX.md` with the dated folder link. For a resumed draft, keep its existing dated id and history. From here on, the folder is where everything lands — not chat.
 
 **Drafting lock**: while `status` is `drafting` or `poc-review`, write no implementation code and no scaffolding "to save time later". Normally write only the spec folder and `INDEX.md`; the spec guideline's narrow knowledge-maintenance exception remains available when the full capture gate and an immediate-promotion trigger in `knowledge-management.md` pass.
 
@@ -63,7 +63,7 @@ Re-read SPEC.md and ROADMAP.md as if this conversation never happened, pretendin
 ```
 ## Spec Ready for Review
 
-**Folder**: `.codex/specs/YYYY-MM-DD-<slug>/`
+**Folder**: `.claudart/specs/YYYY-MM-DD-<slug>/`
 **POC**: `artifacts/<file>` — open it and check it still matches your intent
 **Scenarios**: <n> acceptance scenarios | **Roadmap**: <m> phases, <k> tasks
 **Commit policy**: `commits: user` — the loop never commits; say "per-task" or "per-phase" before approving if you want git checkpoints during the run

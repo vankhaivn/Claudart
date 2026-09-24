@@ -1,13 +1,13 @@
 ---
 paths: [".claude/commands/plan.md"]
-description: How agents create, maintain, resume, and complete persistent implementation plans stored in `.claude/tasks/`. Replaces session-only plan mode with lightweight task workspaces.
-when_to_use: Whenever the user invokes `/plan`, when a task workspace is open or referenced, or when resuming work that may have an active task in `.claude/tasks/`.
+description: How agents create, maintain, resume, and complete persistent implementation plans stored in `.claudart/tasks/`. Replaces session-only plan mode with lightweight task workspaces.
+when_to_use: Whenever the user invokes `/plan`, when a task workspace is open or referenced, or when resuming work that may have an active task in `.claudart/tasks/`.
 tags: [tasks, planning, persistence, cross-session]
 ---
 
 # Task Management
 
-Plans live in `.claude/tasks/YYYY-MM-DD-NNN-<slug>/TASK.md`, not in session memory. **One task per workspace; `TASK.md` is the only required file and the authoritative plan.** It carries scope, status, decisions, progress, acceptance, and the next action. Supporting files are linked and loaded only when that action needs them. A future session must be able to resume from the workspace without conversation history.
+Plans live in `.claudart/tasks/YYYY-MM-DD-NNN-<slug>/TASK.md`, not in session memory. **One task per workspace; `TASK.md` is the only required file and the authoritative plan.** It carries scope, status, decisions, progress, acceptance, and the next action. Supporting files are linked and loaded only when that action needs them. A future session must be able to resume from the workspace without conversation history.
 
 Simple, clear work does not need a persistent task unless the user explicitly requests one. Use a task when meaningful decisions, coordination, interruption, or review benefit from a durable plan; file count alone is not a reason. A workspace adds storage, not execution scope or approval semantics. Artifact presence, count, size, or format never justifies a spec workflow.
 
@@ -17,12 +17,14 @@ Task files remain the owner for task state, WIP, proposed behavior, acceptance s
 
 For work that may parallelize, also follow `agent-delegation.md`. The `delegation:` frontmatter field records a delegation strategy at planning time and carries it into execution at the approval signal; its values and whether they gate delegation are defined there, not in this file.
 
-Mission-scale work runs one layer up, in `.claude/specs/` (see `spec-workflow.md`), and **supersedes this rule within its scope**: an approved spec's standing approval replaces the per-task approval and review gates below, and a spec executor never creates task workspaces. Never run both layers over the same work.
+Mission-scale work runs one layer up, in `.claudart/specs/` (see `spec-workflow.md`), and **supersedes this rule within its scope**: an approved spec's standing approval replaces the per-task approval and review gates below, and a spec executor never creates task workspaces. Never run both layers over the same work.
+
+`.claudart/` is shared by both runtimes. Resume the same workspace regardless of its `agent` metadata; that field records provenance, not ownership, permission or a discovery filter. Changing runtimes preserves scope, approval, execution evidence and review gates. Serialize writes to the same work record and shared indexes; re-read current files before updating them.
 
 ## Workspace Layout
 
 ```text
-.claude/tasks/
+.claudart/tasks/
 ├── index.md
 ├── 2026-09-10-001-adjust-api-validation/
 │   └── TASK.md                              # Complete minimal workspace
@@ -160,7 +162,7 @@ blocked ──(blocker cleared)──▶ in-progress
 - **`in-progress`**: user has approved; agent may edit code as the plan dictates.
 - **`awaiting-review`**: agent believes the work is done; user has not yet verified. **No code edits allowed.** Agent is parked until user confirms or rejects.
 - **`blocked`**: external dependency missing. State the blocker in the Surprises section.
-- **`done`**: completed AND user-confirmed. Move the entire workspace to `tasks/done/<task-id>/`. Append one line to `.claude/JOURNAL.md`.
+- **`done`**: completed AND user-confirmed. Move the entire workspace to `tasks/done/<task-id>/`. Append one line to `.claudart/JOURNAL.md`.
 - **`cancelled`**: abandoned. Move the entire workspace to `tasks/done/<task-id>/` with Outcomes explaining why; follow the same archive safeguards as completion.
 
 ## Read-only Locks (Critical)
@@ -173,7 +175,7 @@ The agent is drafting / awaiting approval to start.
 
 - **Do NOT modify any implementation code**, inside or outside the workspace. Artifact storage is not an implementation loophole.
 - **Allowed**: read-only exploration and writing `TASK.md`/`index.md`; persist supplied inputs, task notes, or evidence from otherwise permitted read-only investigation only when the artifact triggers pass. No implementation, scaffolding, runnable POCs, or write-scope workers before approval.
-- **Knowledge exception**: an eligible descriptive fact may update `.claude/knowledge/` mid-session only when the capture gates and an immediate-promotion trigger in `knowledge-management.md` pass. Patch owner + route atomically and run the checker. This never permits code edits or promotion of task/proposed state.
+- **Knowledge exception**: an eligible descriptive fact may update `.claudart/knowledge/` mid-session only when the capture gates and an immediate-promotion trigger in `knowledge-management.md` pass. Patch owner + route atomically and run the checker. This never permits code edits or promotion of task/proposed state.
 - Resolve authorization from the user's current message first, then from an earlier still-applicable instruction that has not been fulfilled or withdrawn. A direct instruction to implement, start, continue, or resume the task is the approval signal: flip to `in-progress` before the first implementation write and continue without asking again. A request to create, revise, explain, or review the plan only keeps the lock.
 
 ### Awaiting-Review Lock — `status: awaiting-review`
@@ -244,12 +246,12 @@ When the user gives a completion signal — "approved", "confirmed", "looks good
 
 1. Flip frontmatter `status: awaiting-review → done`.
 2. Bump `updated:`.
-3. Move the entire workspace to `.claude/tasks/done/<task-id>/`, keeping its id and all contents. If the destination already exists (including a symlink), stop and report the collision; never overwrite, merge, or nest the source into it. Verify the move succeeded before updating references or journaling. Preserve workspace-relative attachment links. Do not automatically delete artifacts or rewrite append-only history.
-4. Append one line to `.claude/JOURNAL.md`:
+3. Move the entire workspace to `.claudart/tasks/done/<task-id>/`, keeping its id and all contents. If the destination already exists (including a symlink), stop and report the collision; never overwrite, merge, or nest the source into it. Verify the move succeeded before updating references or journaling. Preserve workspace-relative attachment links. Do not automatically delete artifacts or rewrite append-only history.
+4. Append one line to `.claudart/JOURNAL.md`:
    ```
    YYYY-MM-DD | completed | <slug> — <one-line outcome>, see tasks/done/<task-id>/TASK.md
    ```
-5. Update `.claude/tasks/index.md`: remove from Active, add to Recently Done with `done/<task-id>/TASK.md`. Update any live CONTEXT/HANDOFF pointer to the new path; do not copy the task body.
+5. Update `.claudart/tasks/index.md`: remove from Active, add to Recently Done with `done/<task-id>/TASK.md`. Update any live CONTEXT/HANDOFF pointer to the new path; do not copy the task body.
 6. If a recurring pattern emerged, propose `/learn` to graduate it into a rule.
 7. Leave task-local outcomes in the archived task. Promote only eligible descriptive facts under `knowledge-management.md`; `/checkpoint` can bulk-maintain remaining candidates.
 
@@ -292,7 +294,7 @@ Never assume the file is still accurate without verification. Memory Hints are t
 ## `index.md` Format
 
 ```markdown
-<!-- .claude/tasks/index.md — dashboard of task workspaces. Maintained by /plan and /checkpoint. -->
+<!-- .claudart/tasks/index.md — dashboard of task workspaces. Maintained by /plan and /checkpoint. -->
 
 ## Active
 
@@ -323,7 +325,7 @@ Canonical numbers for flagging stalled tasks. `/start` surfaces them, `/checkpoi
 
 CONTEXT.md and task files are complementary, not exclusive:
 
-- **CONTEXT.md** holds two things: (a) a one-line pointer to the currently-focused task (`Working task \`<slug>\` (see .claude/tasks/<task-id>/TASK.md)`) so `/start`sees task work at a glance, and (b) ad-hoc work the user asked for **without** a`/plan` — quick fixes, transient tweaks, mid-flight pivots that don't justify a full task document.
+- **CONTEXT.md** holds two things: (a) a one-line pointer to the currently-focused task (`Working task \`<slug>\` (see .claudart/tasks/<task-id>/TASK.md)`) so `/start`sees task work at a glance, and (b) ad-hoc work the user asked for **without** a`/plan` — quick fixes, transient tweaks, mid-flight pivots that don't justify a full task document.
 - **Task file** holds the full body: Purpose, Plan of Work, Concrete Steps, Decisions, Memory Hints, etc.
 - **`tasks/index.md`** is the canonical dashboard for _all_ active tasks; CONTEXT only mentions the one in focus.
 
@@ -337,7 +339,7 @@ So: a task's existence is signalled in CONTEXT by a pointer line. The task's con
 - **Spawning write-scope subagents from a planning-locked task.** The lock forbids code edits, so any worker that writes must wait for `in-progress`; read-only exploration subagents are fine.
 - Treating user enthusiasm or silence as approval. The signals listed in the cheat sheet are explicit and required.
 - Treating staleness as approval to cancel, delete, or reopen a task. Apply the Staleness Thresholds above and surface the needed user decision.
-- Copying a task's body (Steps / Decisions / Surprises / Memory Hints) into `.claude/CONTEXT.md`. CONTEXT may _reference_ the active task by slug + path, but must never duplicate its content.
+- Copying a task's body (Steps / Decisions / Surprises / Memory Hints) into `.claudart/CONTEXT.md`. CONTEXT may _reference_ the active task by slug + path, but must never duplicate its content.
 - Importing task files into `.claude/CLAUDE.md`. Task files are working documents, not always-loaded rules.
 - Deleting completed task workspaces or their evidence. They are project history.
 - Creating a task without filling Memory Hints if any non-obvious context was discovered during planning.

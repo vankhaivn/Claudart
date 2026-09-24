@@ -21,12 +21,12 @@ This file is a **protocol, not an installer**. Follow it top to bottom. It exist
 ## Step 0 — Diagnose first, then fetch proportionally
 
 1. Work from the project root. Run `git status --short` when Git is available, record unrelated work, and do not disturb it.
-2. Inventory only relevant AI paths: `.claude/`, `.codex/`, `.agents/skills/`, root or nested `CLAUDE.md`, root `AGENTS.md`, and any overlapping custom commands, agents, rules, memory, tasks, specs, knowledge, or documentation routes in the requested scope.
+2. Inventory the shared project state and relevant AI paths: `.claudart/`, `.claude/`, `.codex/`, `.agents/skills/`, root or nested `CLAUDE.md`, root `AGENTS.md`, and any overlapping custom commands, agents, rules, memory, tasks, specs, knowledge, or documentation routes in the requested scope.
 3. Resolve the target layers and optional modules:
    - explicit user choice wins;
    - otherwise default to the runtime already present;
    - if neither exists and the active agent runtime makes the choice obvious, state that assumption in the plan instead of asking unnecessarily;
-   - if both are selected, classify each layer independently;
+   - if both are selected, classify each adapter independently and the shared state once;
    - record explicit module choices or exclusions. A general integration or update request permits recommending relevant modules in Step 2; it does not silently select them for installation, update, or removal.
 4. Classify each selected layer:
    - **A — Clean adopt:** no meaningful AI operating layer exists yet; a bare loader file is allowed.
@@ -62,28 +62,32 @@ This file is a **protocol, not an installer**. Follow it top to bottom. It exist
 
 This map is orientation only; the current source tree and its references are authoritative.
 
-**Claude layer** (`.claude/`):
+**Shared project state** (`.claudart/`, required in every installation):
 
-- `commands/`, `agents/`, path-scoped `rules/`, and conditionally loaded `references/`;
-- `knowledge/INDEX.md` plus optional maps and topics;
-- read-only scripts under `scripts/`;
-- `CLAUDE.md`, `CONTEXT.md`, and append-only `JOURNAL.md`;
-- persistent `tasks/` and mission-scale `specs/`.
+- `CONTEXT.md`, append-only `JOURNAL.md`, and the optional single-use `HANDOFF.md`;
+- `knowledge/INDEX.md` plus project-owned maps and topics;
+- `tasks/` and `specs/`, with indexes, complete workspaces, archives and artifacts.
 
-**Codex layer** (`.codex/` + `.agents/skills/`):
+Only empty seeds are distributed. Existing state is project-owned and preserved even during a forced adapter refresh. Never install a handoff or upstream work record. The state directory is not auto-imported; startup reads bounded indexes and metadata, with details on demand.
 
-- Codex-native skills under `.agents/skills/codex-*`, including their referenced support files;
-- `.codex/guidelines/`, `.codex/references/`, `.codex/knowledge/`, `.codex/scripts/`, `.codex/agents/`, and `.codex/config.toml`;
-- `.codex/CONTEXT.md`, `.codex/JOURNAL.md`, `.codex/tasks/`, and `.codex/specs/`;
+**Claude adapter** (`.claude/`):
+
+- `CLAUDE.md`, `commands/`, `agents/`, path-scoped `rules/`, and conditional `references/`;
+- read-only checker helpers under `scripts/`.
+
+**Codex adapter** (`.codex/` + `.agents/skills/`):
+
+- native skills under `.agents/skills/codex-*`, including referenced support files;
+- `.codex/guidelines/`, `.codex/references/`, `.codex/scripts/`, `.codex/agents/`, and `.codex/config.toml`;
 - `.codex/AGENTS.md` as the source template for the canonical downstream root `AGENTS.md`.
 
 **Optional modules:** install only when selected. Project Docs lives under `modules/project-docs/` in upstream; overlay its `.claude/` and/or `.agents/` payload at the downstream root for the selected runtimes. This adds `.claude/commands/project-docs.md` or `.agents/skills/codex-project-docs/` and their referenced files. Do not copy the module's source wrapper or packaging README into the project. It supplies documentation-lifecycle guidance; it does not install a documentation tree or own a project's existing documentation by default.
 
 Include the selected module's output templates and filled examples in its resource closure, retaining their module-relative paths. They are reusable authoring resources, not live project docs: do not instantiate templates or apply the example snippets during integration. Preserve custom resource edits under the same reconciliation rules as other instructions.
 
-When integrating both layers, preserve intent parity between mirrored Claude and Codex contracts without forcing byte identity where tool mechanics differ. Preserve the loader's one-state-layer rule: use the native layer by default or the user's explicit alternate choice, with host-native tools; never infer permission to synchronize state stores.
+When integrating both adapters, preserve intent parity without forcing byte identity where tool mechanics differ. Both loaders use `.claudart/` as the single state authority and the actual host's tools for execution. Switching adapters preserves task/spec scope, approval, evidence and review gates; provenance metadata does not select a store. No fallback store or automatic multi-writer synchronization is installed.
 
-Task workspaces use `tasks/YYYY-MM-DD-NNN-<slug>/TASK.md` and `tasks/done/<task-id>/TASK.md` in either layer. `TASK.md` is the only required file; `artifacts/` is created only for a concrete task need. Install only empty task seeds, never live upstream tasks or test fixtures. Preserve downstream workspace contents and storage/Git policies; do not bulk-read, extract, or normalize attachments during integration.
+Task workspaces use `.claudart/tasks/YYYY-MM-DD-NNN-<slug>/TASK.md` and `.claudart/tasks/done/<task-id>/TASK.md`. `TASK.md` is the only required file; `artifacts/` is created only for a concrete task need. Install only empty task seeds, never live upstream tasks or test fixtures. Preserve downstream workspace contents and storage/Git policies; do not bulk-read, extract, or normalize attachments during integration.
 
 The current upstream format is the standard: no flat-task compatibility layer or migration framework is installed. Downstream projects must adapt existing work deliberately before using the new task workflow. Report format mismatches and preserve the original files; any requested relocation still requires the explicit, path-specific approval below. Merely upgrading commands does not authorize moving or deleting task history.
 
@@ -93,14 +97,14 @@ Before proposing writes, distinguish:
 
 - **template-owned protocol:** commands, skills, rules, guidelines, agents, scripts, config, and other files intended to track current upstream;
 - **merge-owned indexes:** loaders and indexes whose project routes and ordering must be preserved;
-- **live state:** `CONTEXT.md`, `JOURNAL.md`, handoffs, task workspaces and attachments, spec bodies and mission folders, knowledge topics/maps, and equivalent project-owned state;
+- **live state:** shared `.claudart/CONTEXT.md`, `.claudart/JOURNAL.md`, handoffs, task workspaces and attachments, spec bodies and mission folders, knowledge topics/maps, and equivalent project-owned state;
 - **project-owned custom content:** instructions or workflows authored specifically for this project.
 
 Treat an optional module as a selected dependency closure, separate from the core layer. Classify existing discovery commands and references using the stale-vs-custom test below. List any proposed retirement in the reconciliation plan, identifying its replacement or the chosen core-only outcome. Generated discovery output, `docs/project/`, and other project documentation are live project-owned content; retiring a template command does not authorize deleting its output.
 
 ### Scenario A — Clean adopt
 
-Copy the current selected core-layer and optional-module payload. Splice CLAUDART routes into any existing canonical or overlapping loader, including `.claude/CLAUDE.md`, root `CLAUDE.md`, or root `AGENTS.md` as applicable; never replace project-authored loader content. For missing live-state files, create only the current empty seed/header. For Codex, place the source loader at the current canonical downstream location, normally root `AGENTS.md`, and avoid two competing loaders.
+Copy the current shared seeds once, selected adapter payload, and approved optional-module payload. Splice CLAUDART routes into any existing canonical or overlapping loader, including `.claude/CLAUDE.md`, root `CLAUDE.md`, or root `AGENTS.md` as applicable; never replace project-authored loader content. For missing live-state files, create only the current empty seed/header. For Codex, place the source loader at the current canonical downstream location, normally root `AGENTS.md`, and avoid two competing loaders.
 
 Scenario A is the fast path: do not inspect full history and do not schedule doctor or refactor-memory when Step 4 verification can prove the installation mechanically.
 
