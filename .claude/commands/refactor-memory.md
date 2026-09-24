@@ -6,7 +6,7 @@ Analyze the existing Claude memory layer in this repository and refactor it into
 
 The target shape is:
 
-- a concise `.claude/CLAUDE.md` as the Claude instruction index and entrypoint;
+- a concise `CLAUDE.md` as the Claude instruction index and entrypoint;
 - durable prescriptive behavior in scoped files under `.claude/rules/`;
 - eligible durable descriptive facts without another owner under `.claudart/knowledge/`, with compact routes or minimal unique agent context for externally owned facts;
 - current live state in `.claudart/CONTEXT.md`;
@@ -20,17 +20,18 @@ Execute the following steps systematically, without losing essential project con
 
 ## 1. Resolve The Memory Shape
 
-- Confirm whether the canonical memory file is root `CLAUDE.md` or `.claude/CLAUDE.md`.
-- If both root `CLAUDE.md` and `.claude/CLAUDE.md` exist, compare them.
-  - If they are identical, remove or ignore the duplicate according to the repository convention.
-  - If they differ, ask which file should win before overwriting either one. Typically `.claude/CLAUDE.md` is canonical for CLAUDART projects; root `CLAUDE.md` is what `/init` generates.
+- Treat `CLAUDE.md` as the canonical loader for current CLAUDART projects.
+- If legacy `.claude/CLAUDE.md` also exists, compare it with `CLAUDE.md` before changing either file.
+  - If `CLAUDE.md` is missing, propose relocating the legacy loader to root while preserving project-authored content.
+  - If both are equivalent, retire the legacy duplicate only within the user's authorized scope.
+  - If they differ, merge deliberately into `CLAUDE.md`; never silently discard project-specific instructions from either file.
 - Search skills, agents, and rules for references to deleted or deprecated memory files and update them during the refactor.
 
 ## 2. Analyze The Project
 
-- Determine the main framework, language, runtime, and architectural layers from `.claude/CLAUDE.md`, project structure, package manifests, build files, and existing docs.
+- Determine the main framework, language, runtime, and architectural layers from `CLAUDE.md`, project structure, package manifests, build files, and existing docs.
 - Identify the core logical layers, such as docs/contracts, database/repositories, API/controllers, UI/components, background jobs, runtime/deploy, or AI/model workflows.
-- Note linters, formatters, test runners, and validation commands detected. Delegate style rules to those tools instead of encoding them into `.claude/CLAUDE.md`.
+- Note linters, formatters, test runners, and validation commands detected. Delegate style rules to those tools instead of encoding them into `CLAUDE.md`.
 - For docs-first repositories, identify document layers, templates, workflows, and source-of-truth contracts.
 
 ## 3. Ensure The Rules Directory Exists
@@ -41,7 +42,7 @@ Use `.claude/rules/*.md` for durable semantic guidance with YAML frontmatter.
 
 ## 4. Extract Domain-Specific Rules
 
-Group detailed coding rules, boundaries, and validation requirements from `.claude/CLAUDE.md`, deprecated memory files, and repeated workflow decisions into a small set of logical rule files under `.claude/rules/`.
+Group detailed coding rules, boundaries, and validation requirements from `CLAUDE.md`, deprecated memory files, and repeated workflow decisions into a small set of logical rule files under `.claude/rules/`.
 
 **Route by type and owner first.** Split the candidate content: **prescriptive** material (an enforceable `MUST`/`NEVER`/should-avoid invariant — how to behave) becomes a rule; an eligible **descriptive** fact goes to its current authoritative source, or to `.claudart/knowledge/` when no other source owns it (Step 10). Knowledge may hold a compact route or minimal unique agent context for another owner. Do not file a fact as a rule and rely on Step 5 to re-route it later.
 
@@ -107,7 +108,7 @@ For every non-universal rule under `.claude/rules/`:
    - If a decision is still temporary, keep it in CONTEXT and do not bury it in rules.
 7. Detect mis-tiered content (a rule that belongs in knowledge).
    - `.claude/rules/` is **prescriptive** — each rule constrains behavior (an enforceable `MUST`/`NEVER`/should-avoid invariant). If a rule body is purely **descriptive** — it only states how a subsystem works, an integration detail, a domain term, or a doc pointer, with no constraint a reader could "follow" — it is misfiled.
-   - Propose moving it to `.claudart/knowledge/`: create or update the topic file + its `INDEX.md` entry, then remove the rule and its `@`-import from `.claude/CLAUDE.md`. Confirm with the user before removing a rule.
+   - Propose moving it to `.claudart/knowledge/`: create or update the topic file + its `INDEX.md` entry, then remove the rule and its `@`-import from `CLAUDE.md`. Confirm with the user before removing a rule.
    - This is the exact reverse of the Step 10 boundary (which pushes prescriptive content out of knowledge into rules). The descriptive/prescriptive boundary runs **both ways**.
 
 Semantic audit output must list:
@@ -119,9 +120,9 @@ Semantic audit output must list:
 - split/merge actions that still need user confirmation;
 - rules proposed for reclassification into `.claudart/knowledge/` (descriptive content misfiled as behavior).
 
-## 6. Refactor .claude/CLAUDE.md
+## 6. Refactor CLAUDE.md
 
-Trim `.claude/CLAUDE.md` so it stays a concise memory index, not a knowledge dump.
+Trim `CLAUDE.md` so it stays a concise memory index, not a knowledge dump.
 
 It should contain only:
 
@@ -133,18 +134,18 @@ It should contain only:
 - a clear rule that `.claudart/JOURNAL.md` is not auto-loaded;
 - the `## Agent Self-Evolution & Context Maintenance` section.
 
-Target: keep `.claude/CLAUDE.md` under 100 lines where practical. If it exceeds 100 lines, extract more into `.claude/rules/`, workflows, or project docs. If it exceeds 150 lines, flag it in the final summary.
+Target: keep `CLAUDE.md` under 100 lines where practical. If it exceeds 100 lines, extract more into `.claude/rules/`, workflows, or project docs. If it exceeds 150 lines, flag it in the final summary.
 
-**CRITICAL**: PURGE all domain-specific logic AND style/formatting rules — delegate styling to standard tools (Prettier, ESLint, Ruff, gofmt). Do not duplicate info already in `package.json` or `README.md`. Less is more. Route descriptive project facts pulled from `.claude/CLAUDE.md` to their current authoritative owner; use `.claudart/knowledge/` (Step 10) only when no other source owns them, or for a compact route. They do not belong in `.claude/rules/`.
+**CRITICAL**: PURGE all domain-specific logic AND style/formatting rules — delegate styling to standard tools (Prettier, ESLint, Ruff, gofmt). Do not duplicate info already in `package.json` or `README.md`. Less is more. Route descriptive project facts pulled from `CLAUDE.md` to their current authoritative owner; use `.claudart/knowledge/` (Step 10) only when no other source owns them, or for a compact route. They do not belong in `.claude/rules/`.
 
 ## 7. Cross-Link Rules
 
-Under `## Domain Rules` in `.claude/CLAUDE.md`, preserve a compact universal baseline and add conditional routes for domain/workflow guidance. Do not turn every rule into an automatic import or broaden its native `paths` merely to make it globally visible.
+Under `## Domain Rules` in `CLAUDE.md`, preserve a compact universal baseline and add conditional routes for domain/workflow guidance. Do not turn every rule into an automatic import or broaden its native `paths` merely to make it globally visible.
 
 Resolve actual imports relative to the file containing them, including nested imports. For this installed loader:
 
 ```markdown
-See @rules/ai-behavior.md for universal AI behavior guidelines.
+See @.claude/rules/ai-behavior.md for universal AI behavior guidelines.
 Before meaningful work, read `.claudart/CONTEXT.md` and relevant shared indexes.
 Read `.claude/rules/code-health.md` when implementing or reviewing code.
 Read `.claude/rules/task-management.md` for persistent task work.
@@ -162,7 +163,7 @@ Keep a plain root-router pointer, such as `.claudart/knowledge/INDEX.md (surface
 
 - If `.claude/rules/ai-behavior.md` does not exist, create a concise version with complete frontmatter and durable behavior rules.
 - If the user has customized `ai-behavior.md`, leave their content alone and only ensure the reference exists.
-- Do not inline `ai-behavior.md` into `.claude/CLAUDE.md`.
+- Do not inline `ai-behavior.md` into `CLAUDE.md`.
 - Add a single reference under `## Domain Rules`.
 
 ## 9. Audit Rules, Skills, And Agents
@@ -203,13 +204,13 @@ For `.claudart/CONTEXT.md`:
 
 - Confirm it exists. If not, create a concise template.
 - Verify line count is at most 150. If exceeded, flag for user review and propose trimming or graduating long-lived items into `.claude/rules/`.
-- Confirm `.claude/CLAUDE.md` routes to `.claudart/CONTEXT.md` before meaningful work. If missing, add a plain conditional route to the shared state.
+- Confirm `CLAUDE.md` routes to `.claudart/CONTEXT.md` before meaningful work. If missing, add a plain conditional route to the shared state.
 - Ensure it describes current state only.
 
 For `.claudart/JOURNAL.md`:
 
 - Confirm it exists. If not, create a concise append-only template.
-- Search `.claude/CLAUDE.md` and `.claude/rules/` for instructions that auto-load `.claudart/JOURNAL.md`. If found, remove them and warn the user.
+- Search `CLAUDE.md` and `.claude/rules/` for instructions that auto-load `.claudart/JOURNAL.md`. If found, remove them and warn the user.
 - Do not full-read JOURNAL by default. Use `tail` and targeted `rg` searches for pattern analysis.
 - Do not prune or rewrite JOURNAL entries. The file is append-only by contract.
 
@@ -246,12 +247,12 @@ If this repository is a base template whose `.claude/` and `.agents/` directorie
 
 - Do not add generated-marker comments to base template files.
 - Keep template language generic and avoid project-specific names unless the template is intentionally branded.
-- If an installer copies `.claude/CLAUDE.md` to a downstream project, document that relationship clearly and keep both files synchronized.
+- Treat `.claude/CLAUDE.md` as the upstream source template and `CLAUDE.md` as the installed project loader; do not maintain a second downstream copy under `.claude/`.
 - Do not assume a downstream project has the same languages, frameworks, docs, or tests as the template repository.
 
 ## 12. Append Agent Self-Evolution Section
 
-At the end of `.claude/CLAUDE.md`, ensure `## Agent Self-Evolution & Context Maintenance` exists.
+At the end of `CLAUDE.md`, ensure `## Agent Self-Evolution & Context Maintenance` exists.
 
 Include these rules:
 
@@ -259,7 +260,7 @@ Include these rules:
 - Existing rules change → update the relevant file in `.claude/rules/`.
 - New domains/layers → CREATE a new rule file in `.claude/rules/` (with flow-style `paths: [...]`, `description:`, `when_to_use:`, and inline `tags: [...]` frontmatter) and add a conditional Domain Rules route. Reserve automatic imports for universal guidance, using paths relative to the importing file.
 - Durable descriptive facts that pass `.claude/rules/knowledge-management.md` → find the authoritative owner; knowledge owns only facts without another owner and otherwise keeps compact routes or minimal unique context. For a knowledge mutation, patch the topic and reachable map atomically, then run the checker. Scope may be local; task/spec state stays local.
-- Global changes → update `.claude/CLAUDE.md` directly.
+- Global changes → update `CLAUDE.md` directly.
 - Shared live state → update `.claudart/CONTEXT.md` through `/checkpoint`, not through refactor-memory.
 
 ## 13. Verification
@@ -268,11 +269,11 @@ Before the final summary, run or perform:
 
 - `git diff --stat`
 - `git status --short`
-- `wc -l .claude/CLAUDE.md .claudart/CONTEXT.md`
+- `wc -l CLAUDE.md .claudart/CONTEXT.md`
 - Search for stale references to deleted memory files.
-- Search `.claude/CLAUDE.md` and `.claude/rules/` for JOURNAL auto-load instructions.
-- Confirm every rule listed in `.claude/CLAUDE.md` exists on disk.
-- Confirm `.claudart/knowledge/INDEX.md` exists and is referenced by a plain (non-`@`) pointer in `.claude/CLAUDE.md`; ambiguous unindexed files remain reported rather than silently routed.
+- Search `CLAUDE.md` and `.claude/rules/` for JOURNAL auto-load instructions.
+- Confirm every rule listed in `CLAUDE.md` exists on disk.
+- Confirm `.claudart/knowledge/INDEX.md` exists and is referenced by a plain (non-`@`) pointer in `CLAUDE.md`; ambiguous unindexed files remain reported rather than silently routed.
 - Run `bash .claude/scripts/knowledge-check.sh --fail-on warning` as the post-check even when the pre-check passed; record both outcomes and block completion on exit `2`.
 - Confirm the in-place knowledge normalization is idempotent and every `active` entry has `last_verified` plus `sources` or `verify`.
 - Confirm semantic rule findings were classified as accurate, rule-stale, source-debt, open-work, or needs-user-decision.
@@ -284,7 +285,7 @@ Do not run `git commit`, `git push`, `git merge`, `git rebase`, or similar histo
 Output a concise summary covering:
 
 1. Rule files and `.claudart/knowledge/` entries created, updated, or reclassified between tiers, including the in-place normalization result.
-2. `.claude/CLAUDE.md` changes and final line count.
+2. `CLAUDE.md` changes and final line count.
 3. Audit findings from Step 9, separated into auto-fixed and needs user decision.
 4. Semantic drift findings from Step 5, including source-debt items not fixed in memory.
 5. Deprecated memory files removed or retained.

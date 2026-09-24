@@ -160,6 +160,10 @@ try {
       assert.equal(existsSync(join(dest, ".claude")), mode !== "codex");
       assert.equal(existsSync(join(dest, ".codex")), mode !== "claude");
       assert.equal(existsSync(join(dest, ".agents")), mode !== "claude");
+      assert.equal(existsSync(join(dest, "CLAUDE.md")), mode !== "codex");
+      assert.equal(existsSync(join(dest, "AGENTS.md")), mode !== "claude");
+      assert(!existsSync(join(dest, ".claude/CLAUDE.md")));
+      assert(!existsSync(join(dest, ".codex/AGENTS.md")));
     });
     check(`${mode}: core install leaves optional Project Docs absent`, () => {
       assert(!existsSync(join(dest, ".claude/commands/project-docs.md")));
@@ -179,8 +183,13 @@ try {
       },
     );
     if (mode !== "codex") {
-      check(`${mode}: Claude imports resolve from the installed loader`, () => {
-        const graph = importGraph(join(dest, ".claude/CLAUDE.md"));
+      check(`${mode}: Claude loader is installed at root without a duplicate`, () => {
+        assert.equal(
+          read(join(dest, "CLAUDE.md")),
+          read(join(root, ".claude/CLAUDE.md")),
+        );
+        assert(!existsSync(join(dest, ".claude/CLAUDE.md")));
+        const graph = importGraph(join(dest, "CLAUDE.md"));
         assert(graph.has(join(dest, ".claude/rules/ai-behavior.md")));
         assert.equal(
           graph.size,
@@ -391,7 +400,7 @@ try {
           }
           if (mode !== "codex") {
             assert.equal(
-              importGraph(join(dest, ".claude/CLAUDE.md")).size,
+              importGraph(join(dest, "CLAUDE.md")).size,
               2,
               "The optional module must not expand unconditional imports",
             );
@@ -437,6 +446,7 @@ try {
           "# Approved intent\n\nE is approved; C is implemented.\n",
         "docs/releases/v1.md":
           "# Supported release\n\nVersion 1 remains supported.\n",
+        "CLAUDE.md": "# Custom Claude root loader\n",
         ".claude/commands/project-discovery.md":
           "Custom team interview; preserve this file.\n",
         ".agents/skills/codex-project-discovery/SKILL.md":
@@ -496,6 +506,19 @@ try {
     },
   );
   check(
+    "legacy nested Claude loader is preserved without creating a duplicate root loader",
+    () => {
+      const dest = join(scratch, "legacy Claude loader");
+      mkdirSync(join(dest, ".claude"), { recursive: true });
+      const legacy = "# Legacy project-owned Claude loader\n\nSee @rules/ai-behavior.md\n";
+      writeFileSync(join(dest, ".claude/CLAUDE.md"), legacy);
+      install(dest, ["--claude", "--force"]);
+      assert.equal(read(join(dest, ".claude/CLAUDE.md")), legacy);
+      assert(!existsSync(join(dest, "CLAUDE.md")));
+      assert(existsSync(join(dest, ".claude/commands/start.md")));
+    },
+  );
+  check(
     "missing selected module fails before writing a partial install",
     () => {
       rmSync(join(source, "modules"), { recursive: true });
@@ -515,24 +538,26 @@ try {
       assert.deepEqual(readdirSync(dest), []);
       install(dest, ["--both"], coreArchive);
       assert(existsSync(join(dest, "AGENTS.md")));
+      assert(existsSync(join(dest, "CLAUDE.md")));
+      assert(!existsSync(join(dest, ".claude/CLAUDE.md")));
     },
   );
-  check("regression fixture rejects a repeated .claude prefix", () => {
-    const fixture = join(scratch, "bad/.claude");
-    mkdirSync(join(fixture, "rules"), { recursive: true });
+  check("root Claude loader resolves adapter-prefixed imports", () => {
+    const fixture = join(scratch, "root-loader");
+    mkdirSync(join(fixture, ".claude/rules"), { recursive: true });
     writeFileSync(
-      join(fixture, "rules/ai-behavior.md"),
+      join(fixture, ".claude/rules/ai-behavior.md"),
       "Universal baseline\n",
+    );
+    writeFileSync(join(fixture, "CLAUDE.md"), "See @rules/ai-behavior.md\n");
+    assert.throws(
+      () => importGraph(join(fixture, "CLAUDE.md")),
+      /Missing import/,
     );
     writeFileSync(
       join(fixture, "CLAUDE.md"),
       "See @.claude/rules/ai-behavior.md\n",
     );
-    assert.throws(
-      () => importGraph(join(fixture, "CLAUDE.md")),
-      /Missing import/,
-    );
-    writeFileSync(join(fixture, "CLAUDE.md"), "See @rules/ai-behavior.md\n");
     assert.equal(importGraph(join(fixture, "CLAUDE.md")).size, 2);
   });
   check("conditional Claude workflows do not use universal path globs", () => {
@@ -716,8 +741,12 @@ try {
           writeFileSync(file, body);
         }
         const before = stateSnapshot(dest);
-        const loader = "# Project-owned root instructions\n";
-        writeFileSync(join(dest, "AGENTS.md"), loader);
+        const loaders = {
+          "AGENTS.md": "# Project-owned Codex root instructions\n",
+          "CLAUDE.md": "# Project-owned Claude root instructions\n",
+        };
+        for (const [name, body] of Object.entries(loaders))
+          writeFileSync(join(dest, name), body);
         for (const args of [
           [first === "claude" ? "--codex" : "--claude"],
           ["--both"],
@@ -725,8 +754,10 @@ try {
         ]) {
           install(dest, args);
           assert.deepEqual(stateSnapshot(dest), before);
-          assert.equal(read(join(dest, "AGENTS.md")), loader);
+          for (const [name, body] of Object.entries(loaders))
+            assert.equal(read(join(dest, name)), body);
           assert(!existsSync(join(dest, ".codex/AGENTS.md")));
+          assert(!existsSync(join(dest, ".claude/CLAUDE.md")));
         }
         const payload = ".codex/guidelines/ai-behavior.md";
         writeFileSync(join(dest, payload), "# Locally modified payload\n");

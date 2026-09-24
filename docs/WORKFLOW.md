@@ -17,7 +17,7 @@ CLAUDART provides two runtime adapters over one shared `.claudart/` project-stat
 
 | Runtime     | Installed files                                | Command form                             | Main loader         |
 | ----------- | ---------------------------------------------- | ---------------------------------------- | ------------------- |
-| Claude Code | `.claude/`                                     | `/start`, `/plan`, and so on             | `.claude/CLAUDE.md` |
+| Claude Code | `.claude/`, root `CLAUDE.md`                   | `/start`, `/plan`, and so on             | `CLAUDE.md`         |
 | Codex       | `.codex/`, `.agents/skills/`, root `AGENTS.md` | `$codex-start`, `$codex-plan`, and so on | `AGENTS.md`         |
 
 Install either layer or both. The workflows have the same intent, but their command and delegation files are written for the mechanics of each tool.
@@ -44,9 +44,9 @@ curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh 
 curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --claude --project-docs
 ```
 
-The installer creates missing shared-state seeds and copies the selected adapter payload. It preserves existing `.claudart/` state and the Codex root loader even with `--force`; that flag refreshes adapter payload only. The default installation is core only; `--project-docs` adds the optional documentation-lifecycle module and never generates or migrates actual project docs. It is suitable for a clean installation, not for merging a customized setup.
+The installer creates missing shared-state seeds and copies the selected adapter payload. It preserves existing `.claudart/` state and both root loaders even with `--force`; that flag refreshes adapter payload only. The default installation is core only; `--project-docs` adds the optional documentation-lifecycle module and never generates or migrates actual project docs. It is suitable for a clean installation, not for merging a customized setup.
 
-On a clean Codex installation, the installer places the source template `.codex/AGENTS.md` at `AGENTS.md` in the project root without installing a duplicate.
+On a clean installation, the installer places `.claude/CLAUDE.md` at root `CLAUDE.md` for Claude and `.codex/AGENTS.md` at root `AGENTS.md` for Codex, without installing duplicate adapter-local loaders.
 
 ### Existing project or upgrade
 

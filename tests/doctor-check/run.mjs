@@ -44,8 +44,8 @@ function fixture(name, layer = "codex", layout = "installed") {
   const base = join(dir, `.${layer}`);
   mkdirSync(base, { recursive: true });
   const loader =
-    layer === "codex" && layout === "installed"
-      ? join(dir, "AGENTS.md")
+    layout === "installed"
+      ? join(dir, layer === "codex" ? "AGENTS.md" : "CLAUDE.md")
       : join(base, layer === "codex" ? "AGENTS.md" : "CLAUDE.md");
   write(loader, "# Loader\n");
   for (const file of [
@@ -201,7 +201,7 @@ try {
     () => {
       const dir = fixture("healthy-codex");
       write(
-        join(dir, ".claude/CLAUDE.md"),
+        join(dir, "CLAUDE.md"),
         "[ignored other layer](missing-claude.md)\n",
       );
       const before = snapshot(dir);
@@ -221,7 +221,7 @@ try {
       const dir = fixture("healthy-claude", "claude");
       const result = run(dir, "claude");
       assert.equal(result.status, 0, result.out);
-      assert.match(result.out, /^INFO\|D000\|\.claude\/CLAUDE.md/m);
+      assert.match(result.out, /^INFO\|D000\|CLAUDE.md/m);
       assert.match(result.out, /^WARNING\|K777\|knowledge:1/m);
       assertOneInvocation(result.log);
     },
@@ -235,6 +235,21 @@ try {
       const result = run(dir, "codex", ["--layout", "source"]);
       assert.equal(result.status, 0, result.out);
       assert.match(result.out, /^INFO\|D000\|\.codex\/AGENTS.md/m);
+      assert.doesNotMatch(result.out, /missing-root\.md/);
+    },
+  );
+  check(
+    "Claude source layout validates root-relative template imports",
+    () => {
+      const dir = fixture("source-layout-claude", "claude", "source");
+      write(join(dir, "CLAUDE.md"), "[ignored root loader](missing-root.md)\n");
+      write(
+        join(dir, ".claude/CLAUDE.md"),
+        "# Source template\n\nSee @.claude/rules/ai-behavior.md\n",
+      );
+      const result = run(dir, "claude", ["--layout", "source"]);
+      assert.equal(result.status, 0, result.out);
+      assert.match(result.out, /^INFO\|D000\|\.claude\/CLAUDE.md/m);
       assert.doesNotMatch(result.out, /missing-root\.md/);
     },
   );
@@ -418,8 +433,8 @@ try {
     () => {
       const dir = fixture("links-boundaries", "claude");
       write(
-        join(dir, ".claude/CLAUDE.md"),
-        "[missing](docs/missing.md)\n<!-- [hidden](docs/hidden.md) -->\n`[inline](docs/inline.md)`\nFor example: [example](docs/example.md)\n[complex](docs/unclosed.md\n```md\n[fenced](docs/fenced.md)\n```\n@rules/ai-behavior.md\n@rules/missing.md\n",
+        join(dir, "CLAUDE.md"),
+        "[missing](docs/missing.md)\n<!-- [hidden](docs/hidden.md) -->\n`[inline](docs/inline.md)`\nFor example: [example](docs/example.md)\n[complex](docs/unclosed.md\n```md\n[fenced](docs/fenced.md)\n```\n@.claude/rules/ai-behavior.md\n@.claude/rules/missing.md\n",
       );
       const result = run(dir, "claude");
       assert.equal(result.status, 1, result.out);

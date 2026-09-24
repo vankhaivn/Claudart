@@ -102,7 +102,7 @@ Both adapters read and write the same `.claudart/` state. Switching runtimes pre
 
 Shared files support sequential handoff, not automatic multi-writer synchronization. Coordinate writes to summaries, indexes and the handoff slot; checkpoint preserves unrelated unresolved work and an unconsumed handoff is never silently replaced. Separate checkouts still follow the project's Git and collaboration policy.
 
-Workflow rules load when needed. Claude's installed loader resolves imports from `.claude/CLAUDE.md`; knowledge-maintenance detail lives in `references/`. The optional Project Docs module is used for lifecycle requests or when a change affects current documentation it owns; it does not run a full audit at start, checkpoint, or after an ordinary minor edit. Retrieval does not load mutation schemas, and uninterrupted spec iterations read relevant state instead of repeatedly reloading all mission files.
+Workflow rules load when needed. Claude's source template lives at `.claude/CLAUDE.md`, while installed projects use root `CLAUDE.md` and resolve adapter imports through `.claude/`; knowledge-maintenance detail lives in `references/`. The optional Project Docs module is used for lifecycle requests or when a change affects current documentation it owns; it does not run a full audit at start, checkpoint, or after an ordinary minor edit. Retrieval does not load mutation schemas, and uninterrupted spec iterations read relevant state instead of repeatedly reloading all mission files.
 
 ## Specialized agents
 

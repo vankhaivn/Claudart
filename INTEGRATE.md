@@ -70,10 +70,10 @@ This map is orientation only; the current source tree and its references are aut
 
 Only empty seeds are distributed. Existing state is project-owned and preserved even during a forced adapter refresh. Never install a handoff or upstream work record. The state directory is not auto-imported; startup reads bounded indexes and metadata, with details on demand.
 
-**Claude adapter** (`.claude/`):
+**Claude adapter** (root `CLAUDE.md` + `.claude/`):
 
-- `CLAUDE.md`, `commands/`, `agents/`, path-scoped `rules/`, and conditional `references/`;
-- read-only checker helpers under `scripts/`.
+- `.claude/CLAUDE.md` is the source template for the canonical downstream root `CLAUDE.md`; do not install a duplicate under `.claude/`;
+- `.claude/commands/`, `.claude/agents/`, path-scoped `.claude/rules/`, conditional `.claude/references/`, and read-only checker helpers under `.claude/scripts/`.
 
 **Codex adapter** (`.codex/` + `.agents/skills/`):
 
@@ -89,7 +89,7 @@ When integrating both adapters, preserve intent parity without forcing byte iden
 
 Task workspaces use `.claudart/tasks/YYYY-MM-DD-NNN-<slug>/TASK.md` and `.claudart/tasks/done/<task-id>/TASK.md`. `TASK.md` is the only required file; `artifacts/` is created only for a concrete task need. Install only empty task seeds, never live upstream tasks or test fixtures. Preserve downstream workspace contents and storage/Git policies; do not bulk-read, extract, or normalize attachments during integration.
 
-The current upstream format is the standard: no flat-task compatibility layer or migration framework is installed. Downstream projects must adapt existing work deliberately before using the new task workflow. Report format mismatches and preserve the original files; any requested relocation still requires the explicit, path-specific approval below. Merely upgrading commands does not authorize moving or deleting task history.
+The current upstream format is the standard: Claude uses root `CLAUDE.md` downstream, with `.claude/CLAUDE.md` retained only as the upstream source template. A legacy downstream `.claude/CLAUDE.md` must be reconciled deliberately under the same move/merge rules as any other loader relocation. No flat-task compatibility layer or general migration framework is installed. Downstream projects must adapt existing work deliberately before using the new task workflow. Report format mismatches and preserve the original files; any requested relocation still requires the explicit, path-specific approval below. Merely upgrading commands does not authorize moving or deleting task history.
 
 ## Step 1 — Derive the current delta
 
@@ -104,7 +104,7 @@ Treat an optional module as a selected dependency closure, separate from the cor
 
 ### Scenario A — Clean adopt
 
-Copy the current shared seeds once, selected adapter payload, and approved optional-module payload. Splice CLAUDART routes into any existing canonical or overlapping loader, including `.claude/CLAUDE.md`, root `CLAUDE.md`, or root `AGENTS.md` as applicable; never replace project-authored loader content. For missing live-state files, create only the current empty seed/header. For Codex, place the source loader at the current canonical downstream location, normally root `AGENTS.md`, and avoid two competing loaders.
+Copy the current shared seeds once, selected adapter payload, and approved optional-module payload. Splice CLAUDART routes into any existing canonical or overlapping loader; never replace project-authored loader content. For missing live-state files, create only the current empty seed/header. For Claude, place the source template `.claude/CLAUDE.md` at the canonical downstream root `CLAUDE.md`; treat an existing downstream `.claude/CLAUDE.md` as a legacy same-concept/different-file collision that must be reconciled or explicitly retired, not left as a competing loader. For Codex, place `.codex/AGENTS.md` at root `AGENTS.md` and avoid competing loaders.
 
 Scenario A is the fast path: do not inspect full history and do not schedule doctor or refactor-memory when Step 4 verification can prove the installation mechanically.
 
@@ -202,7 +202,7 @@ Run bounded mechanical checks against the selected layers and changed dependency
 
 2. Confirm every approved add, replacement, merge, relocation, and retirement reached its intended final path.
 3. Compare every supposedly verbatim template-owned file with current upstream using `cmp`, checksums, or `git diff --no-index`, accounting only for approved relocation. Any unexplained drift fails verification.
-4. For merged loaders and indexes, confirm both the required current CLAUDART routes and the project-authored sections identified in the plan remain present. Resolve actual Claude `@` imports relative to each importing file, including nested targets: `@rules/ai-behavior.md` is relative to the installed `.claude/CLAUDE.md`. Preserve conditional plain routes and narrow rule scopes; do not make every workflow global or require an automatic import for every rule. An intentionally empty task/spec seed may have no glob matches. Verify core and selected module references are included in the dependency closure and installed at the paths used by their entrypoints.
+4. For merged loaders and indexes, confirm both the required current CLAUDART routes and the project-authored sections identified in the plan remain present. Resolve actual Claude `@` imports relative to each importing file, including nested targets: `@.claude/rules/ai-behavior.md` is relative to the installed root `CLAUDE.md`. Preserve conditional plain routes and narrow rule scopes; do not make every workflow global or require an automatic import for every rule. An intentionally empty task/spec seed may have no glob matches. Verify core and selected module references are included in the dependency closure and installed at the paths used by their entrypoints.
 5. Confirm referenced commands, skills, rules, guidelines, agents, scripts, indexes, and config paths exist; no loader, rule, or guideline auto-loads `JOURNAL.md` or `HANDOFF.md`; existing live-state bodies were not replaced; changed shell scripts pass `bash -n`; changed command/skill/agent/rule/guideline frontmatter still satisfies the current upstream contract; and mirrored contracts remain consistent when both layers changed.
 6. Run the current upstream read-only `doctor-check.sh` for each selected layer. This provides the mechanical structure, metadata, local-reference, and size baseline, and invokes the existing knowledge checker once. Do not run knowledge validation separately afterward. With the current interface:
 
