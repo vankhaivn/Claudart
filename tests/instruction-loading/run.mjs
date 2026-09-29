@@ -661,10 +661,21 @@ try {
             /Changing runtimes preserves scope, approval, execution evidence and review gates/,
           );
         }
+        const checkpoint = read(join(root, `${commands}checkpoint${suffix}`));
         assert.match(
-          read(join(root, `${commands}checkpoint${suffix}`)),
+          checkpoint,
           /Absence from this conversation is not completion/,
         );
+        assert.match(
+          checkpoint,
+          /most specific applicable source: an active spec's/,
+        );
+        assert.match(checkpoint, /Never use broad staging such as/);
+        assert.match(
+          checkpoint,
+          /CHECKPOINT NOT PERSISTED IN GIT: commit required/,
+        );
+        assert(!checkpoint.includes("Do not run `git commit` yourself"));
         assert.match(
           read(join(root, `${commands}handoff${suffix}`)),
           /Never silently overwrite an unconsumed baton/,

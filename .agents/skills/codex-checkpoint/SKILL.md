@@ -185,6 +185,17 @@ For candidates from Step 2, Step 3, task close, or spec NOTES:
 
 The Git diff remains the review surface. Checkpoint may bulk-promote eligible facts, but it is not an exclusive write boundary.
 
+### Step 6d: Persist the Checkpoint When Authorized
+
+A checkpoint is durable in Git only after its in-scope changes are committed. Writing CONTEXT/JOURNAL/indexes or archiving a task/spec is not, by itself, a durable restore point.
+
+1. Inspect the final `git status --short` and relevant diffs after all checkpoint writes.
+2. Resolve commit authority from the most specific applicable source: an active spec's `commits:` policy when this checkpoint belongs to that spec, then explicit current or still-applicable user instructions and downstream project Git instructions. CLAUDART itself grants no commit or push authority. If the applicable spec cadence does not authorize a commit at this boundary, do not create an extra checkpoint commit.
+3. When commit is authorized at this boundary, identify only verified in-scope changes from the session plus checkpoint maintenance that belongs to the same scope. Preserve unrelated or pre-existing work. Never use broad staging such as `git add -A` or `git add .`; stage explicit paths or otherwise isolate only owned hunks. If a file mixes unrelated edits that cannot be separated safely, leave it unstaged and report that the checkpoint is not fully persisted.
+4. Commit the staged checkpoint set using the downstream project's required commit-message convention; if none exists, use a concise summary of the persisted work. Do not amend or rewrite existing history merely to absorb checkpoint state.
+5. A commit does not authorize push, merge, rebase/history rewrite, or Git configuration changes. Perform those only when separately authorized by the current user instruction or applicable downstream project policy.
+6. If commit is not authorized, commit fails, or any in-scope checkpoint change remains uncommitted, leave the worktree intact and report `CHECKPOINT NOT PERSISTED IN GIT: commit required` plus the concise reason. Never describe an uncommitted checkpoint as durable.
+
 ### Step 7: Report
 
 Output a 6-line summary:
@@ -194,9 +205,7 @@ Output a 6-line summary:
 3. JOURNAL entries appended, or `none`.
 4. Tasks synced: active=<n>, archived this run=<n>, stalled=<n>; specs synced: active=<n>, archived this run=<n>, stalled=<n>.
 5. Knowledge entries written/updated (list slugs, or `none`), candidates retained/review-needed, checker result, and anything proposed for `$codex-learn`.
-6. Reminder that the user must commit when they want this checkpoint persisted in Git history.
-
-Do not run `git commit` yourself or diagnose unrelated uncommitted work during this summary.
+6. Git persistence: the new commit SHA and summary when committed, otherwise `CHECKPOINT NOT PERSISTED IN GIT: commit required` plus the reason. Do not diagnose unrelated uncommitted work in this summary.
 
 ## When to Run This Command
 
