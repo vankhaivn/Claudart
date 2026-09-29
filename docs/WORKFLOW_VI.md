@@ -120,6 +120,8 @@ Trong phạm vi đã được phê duyệt, spec thay thế task plan. Không t�
 
 Dùng `/checkpoint` hoặc `$codex-checkpoint` tại một điểm dừng phù hợp. Checkpoint xây dựng lại trạng thái hiện tại, đồng bộ các index, ghi lịch sử đã kết thúc và chắt lọc những fact đủ điều kiện để lưu lâu dài.
 
+Checkpoint không tự cấp quyền Git. Sau khi bảo trì state, nó tuân theo nguồn cấp quyền commit cụ thể nhất: `commits:` của spec đang hoạt động khi áp dụng, chỉ dẫn hiện tại hoặc vẫn còn hiệu lực của user, rồi quy tắc Git của dự án downstream. Nếu được phép commit tại boundary đó, checkpoint chỉ lưu các thay đổi đã kiểm chứng và đúng phạm vi của phiên cùng phần bảo trì checkpoint, đồng thời giữ nguyên thay đổi không liên quan. Nếu chưa được phép, nó để nguyên worktree và báo rõ checkpoint chưa được lưu bền vững trong Git. Push và các thao tác thay đổi lịch sử cần quyền riêng.
+
 Chỉ dùng `/handoff` hoặc `$codex-handoff` khi một phần điều tra khó cần được tiếp tục trong phiên mới. Handoff ghi giả thuyết hiện tại, bằng chứng, các hướng đã loại, ràng buộc và bước tiếp theo chính xác. Nó không phải bản tóm tắt chung cho mọi phiên.
 
 ## 4. Bộ nhớ và knowledge

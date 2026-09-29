@@ -120,6 +120,8 @@ A specification replaces task plans within its approved scope. Do not create tas
 
 Use `/checkpoint` or `$codex-checkpoint` at a meaningful stopping point. Checkpoint rebuilds current state, synchronizes indexes, records retired history, and distills eligible durable facts.
 
+Checkpoint is not a blanket Git grant. After state maintenance, it follows the most specific applicable commit policy from an active spec, current or still-applicable user instructions, and the downstream project's Git instructions. When a commit is authorized at that boundary, it persists only verified in-scope session and checkpoint changes while preserving unrelated work. Otherwise it leaves the worktree intact and reports that the checkpoint is not persisted in Git. Pushes and history-changing operations require separate authorization.
+
 Use `/handoff` or `$codex-handoff` only when a difficult investigation must continue in a fresh session. Handoff records the current hypothesis, evidence, failed approaches, constraints, and exact next step. It is not a general session summary.
 
 ## 4. Memory and knowledge
