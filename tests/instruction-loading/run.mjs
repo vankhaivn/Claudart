@@ -666,7 +666,10 @@ try {
           checkpoint,
           /Absence from this conversation is not completion/,
         );
-        assert.match(checkpoint, /most specific applicable source: an active spec's/);
+        assert.match(
+          checkpoint,
+          /most specific applicable source: an active spec's/,
+        );
         assert.match(checkpoint, /Never use broad staging such as/);
         assert.match(
           checkpoint,
