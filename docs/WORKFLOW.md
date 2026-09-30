@@ -15,10 +15,10 @@ Those files are authoritative when a command schema or lifecycle detail changes.
 
 CLAUDART provides two runtime adapters over one shared `.claudart/` project-state directory.
 
-| Runtime     | Installed files                                | Command form                             | Main loader         |
-| ----------- | ---------------------------------------------- | ---------------------------------------- | ------------------- |
-| Claude Code | `.claude/`, root `CLAUDE.md`                   | `/start`, `/plan`, and so on             | `CLAUDE.md`         |
-| Codex       | `.codex/`, `.agents/skills/`, root `AGENTS.md` | `$codex-start`, `$codex-plan`, and so on | `AGENTS.md`         |
+| Runtime     | Installed files                                | Command form                             | Main loader |
+| ----------- | ---------------------------------------------- | ---------------------------------------- | ----------- |
+| Claude Code | `.claude/`, root `CLAUDE.md`                   | `/start`, `/plan`, and so on             | `CLAUDE.md` |
+| Codex       | `.codex/`, `.agents/skills/`, root `AGENTS.md` | `$codex-start`, `$codex-plan`, and so on | `AGENTS.md` |
 
 Install either layer or both. The workflows have the same intent, but their command and delegation files are written for the mechanics of each tool.
 

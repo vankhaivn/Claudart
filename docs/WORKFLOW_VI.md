@@ -15,10 +15,10 @@ Khi schema hoặc lifecycle của một command thay đổi, các file đó là 
 
 CLAUDART cung cấp hai adapter runtime dùng chung thư mục trạng thái dự án `.claudart/`.
 
-| Runtime     | File được cài                                           | Dạng command                        | File nạp chính      |
-| ----------- | ------------------------------------------------------- | ----------------------------------- | ------------------- |
-| Claude Code | `.claude/`, `CLAUDE.md` ở thư mục gốc                   | `/start`, `/plan`, v.v.             | `CLAUDE.md`         |
-| Codex       | `.codex/`, `.agents/skills/`, `AGENTS.md` ở thư mục gốc | `$codex-start`, `$codex-plan`, v.v. | `AGENTS.md`         |
+| Runtime     | File được cài                                           | Dạng command                        | File nạp chính |
+| ----------- | ------------------------------------------------------- | ----------------------------------- | -------------- |
+| Claude Code | `.claude/`, `CLAUDE.md` ở thư mục gốc                   | `/start`, `/plan`, v.v.             | `CLAUDE.md`    |
+| Codex       | `.codex/`, `.agents/skills/`, `AGENTS.md` ở thư mục gốc | `$codex-start`, `$codex-plan`, v.v. | `AGENTS.md`    |
 
 Bạn có thể cài một lớp hoặc cả hai. Hai lớp có cùng mục tiêu, nhưng command và quy tắc delegation được viết theo cách vận hành riêng của từng công cụ.
 
