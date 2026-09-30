@@ -38,6 +38,18 @@ Use the repository Git and GitHub workflow below for CLAUDART source changes. Ad
 
 If you've changed APIs, commands, or the knowledge contract, update both English and Vietnamese documentation where a mirrored page exists.
 
+### Write current-state contracts, not transition narratives
+
+When a change replaces an existing behavior, policy, schema, workflow, or instruction contract with a new one, make the final canonical surfaces describe the **current state directly**. Runtime instructions, installable templates, user-facing docs, and regression tests should stand on their own as if the superseded contract were not needed to understand the present behavior.
+
+- Remove transition-only wording such as "previously X, now Y", "no longer X", or similar audit narration when the old state has no current operational meaning.
+- Do not keep retired rule text or literals in regression tests merely to assert that they disappeared. Prefer assertions for the current positive contract.
+- Keep historical rationale in Issue, pull-request, and commit history when it materially helps review; do not copy that history into canonical product guidance by default.
+- Preserve old-state details only when they are themselves part of a live requirement, such as migration/upgrade instructions, backward compatibility, an active deprecation window, supported historical formats, rollback/recovery, or user-facing audit/history.
+- An absence assertion is appropriate only when that absence is a current security, compatibility, or correctness invariant, not as a memorial of the implementation path.
+
+Before opening or refreshing a PR that replaces a contract, review the **final file state**, not only the diff. Scan changed canonical surfaces for stale transition wording, superseded literals, and unnecessary legacy/audit notes, and remove them unless one of the live-requirement exceptions above applies.
+
 ## Git and GitHub Workflow
 
 CLAUDART uses a lightweight GitHub Flow:
