@@ -69,6 +69,7 @@ function fixture(name, layer = "codex", layout = "installed") {
     for (const name of [
       "ai-behavior",
       "code-health",
+      "git-workflow",
       "task-management",
       "agent-delegation",
       "spec-workflow",
@@ -101,6 +102,7 @@ function fixture(name, layer = "codex", layout = "installed") {
     for (const name of [
       "ai-behavior",
       "code-health",
+      "git-workflow",
       "task-management",
       "agent-delegation",
       "spec-workflow",

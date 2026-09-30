@@ -597,6 +597,31 @@ try {
       /gpt-\d+(?:\.\d+)?-(?:luna|sol|astra)/i,
     );
   });
+  check("Git workflow defaults to scoped local commits under higher policy", () => {
+    const claudeGit = read(join(root, ".claude/rules/git-workflow.md"));
+    const codexGit = read(join(root, ".codex/guidelines/git-workflow.md"));
+    for (const policy of [claudeGit, codexGit]) {
+      assert.match(policy, /local commit is authorized by default/);
+      assert.match(policy, /Never use broad staging such as `git add -A` or `git add .`/);
+      assert.match(policy, /Do not add AI\/model\/tool `Co-authored-by` trailers/);
+      assert.match(policy, /`codex\/\*`, `claude\/\*`, `agent\/\*`/);
+      assert.match(policy, /does \*\*not\*\* authorize push/);
+      assert.match(policy, /The parent integrates and verifies delegated work/);
+    }
+    assert.match(claudeGit, /~\/\.claude\/CLAUDE\.md/);
+    assert.match(claudeGit, /~\/\.claude\/settings\.json/);
+    assert.match(codexGit, /~\/\.codex\/AGENTS\.md/);
+    assert(
+      read(join(root, ".claude/CLAUDE.md")).includes(
+        ".claude/rules/git-workflow.md",
+      ),
+    );
+    assert(
+      read(join(root, ".codex/AGENTS.md")).includes(
+        ".codex/guidelines/git-workflow.md",
+      ),
+    );
+  });
   // Shared-state behavior uses the real installer and checker binaries, not a
   // test-only implementation of state selection. Fixtures are anonymous data.
   const seeds = [
