@@ -15,10 +15,10 @@ Those files are authoritative when a command schema or lifecycle detail changes.
 
 CLAUDART provides two runtime adapters over one shared `.claudart/` project-state directory.
 
-| Runtime     | Installed files                                | Command form                             | Main loader         |
-| ----------- | ---------------------------------------------- | ---------------------------------------- | ------------------- |
-| Claude Code | `.claude/`, root `CLAUDE.md`                   | `/start`, `/plan`, and so on             | `CLAUDE.md`         |
-| Codex       | `.codex/`, `.agents/skills/`, root `AGENTS.md` | `$codex-start`, `$codex-plan`, and so on | `AGENTS.md`         |
+| Runtime     | Installed files                                | Command form                             | Main loader |
+| ----------- | ---------------------------------------------- | ---------------------------------------- | ----------- |
+| Claude Code | `.claude/`, root `CLAUDE.md`                   | `/start`, `/plan`, and so on             | `CLAUDE.md` |
+| Codex       | `.codex/`, `.agents/skills/`, root `AGENTS.md` | `$codex-start`, `$codex-plan`, and so on | `AGENTS.md` |
 
 Install either layer or both. The workflows have the same intent, but their command and delegation files are written for the mechanics of each tool.
 
@@ -208,12 +208,16 @@ sources:
 ---
 ```
 
+`sources` names the files that own or prove the topic's claims, not every file that was read. The checker warns when a topic lists more than 10.
+
 The supported lifecycle states are:
 
 - `active`: current, verified authority;
-- `review-needed`: visible uncertainty or conflict that must be checked before use as authority;
+- `review-needed`: a claim that repository evidence should confirm is unverified, conflicting, or has drifted, and must be checked before use as authority;
 - `superseded`: replaced by another topic;
 - `retired`: intentionally historical.
+
+A topic may end with a `## Point-in-time observations` section for dated observations of runtime or environment state that the repository cannot confirm. The lifecycle state and `last_verified` describe the rest of the topic; observations are leads to re-check, never authority.
 
 The exact field grammar, routing limits, map thresholds, and mutation rules live in the runtime's `knowledge-management` rule or guideline.
 

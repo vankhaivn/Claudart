@@ -19,16 +19,24 @@ Never auto-write after every exploration. Never copy a transcript, chronology, o
 
 1. Confirm `.claude/scripts/knowledge-check.sh` exists before writing. A missing checker is a High-severity installation problem and blocks the mutation.
 2. Find the canonical owner for each fact. If a source, schema, generated reference, or project document owns it, update that owner within the authorized work and keep knowledge to a pointer or minimal unique context. Otherwise patch an existing focused knowledge topic before creating another.
-3. Verify the claim and record scope/source information without inventing metadata.
-4. Change the topic and its reachable route atomically in the same diff. Preserve curated hooks, grouping, order, and external routes.
-5. Do not auto-delete topics. Do not auto-promote, retire, or supersede an ambiguous unindexed file.
-6. After any knowledge mutation, run:
+3. Do not grow a topic past the 10 KiB detail budget. When the owner is at or over that budget, a new claim goes to a new focused topic if it has its own durable ownership boundary; otherwise keep it as a candidate in its work artifact and report the owner as needing a reviewed split. Correcting or removing an existing claim is always allowed. Splitting or compacting existing content is a reviewed change, never automatic.
+4. Verify the claim and record scope/source information without inventing metadata.
+5. Change the topic and its reachable route atomically in the same diff. Preserve curated hooks, grouping, order, and external routes.
+6. Do not auto-delete topics. Do not auto-promote, retire, or supersede an ambiguous unindexed file.
+7. After any knowledge mutation, run:
 
    ```bash
    bash .claude/scripts/knowledge-check.sh
    ```
 
 Fix in-scope mechanical failures before reporting success. For an audit or refactor, use the checker as the mechanical baseline and preserve its schema and severity output rather than recreating its parser.
+
+## Status Scope And Point-In-Time Observations
+
+- A topic may end with one `## Point-in-time observations` section. It holds observations of runtime or environment state that repository evidence cannot confirm. Each entry starts with its observation date (`YYYY-MM-DD`) and states one fact. A newer observation replaces the older one; the section is not a log, and it counts toward the detail budget.
+- `status` and `last_verified` describe the rest of the topic. An observation that cannot be confirmed is never a reason for `review-needed`.
+- `review-needed` means a claim outside that section is unverified, conflicting, or known to have drifted. `status_note` names that claim.
+- When another current source owns the topic's facts, reduce the topic to a route in the same mutation. `review-needed` is not a substitute for that reduction.
 
 ## Canonical Topic Frontmatter
 
@@ -67,6 +75,7 @@ sensitivity: internal
 - `status` is `active`, `review-needed`, `superseded`, or `retired`.
 - `updated` changes only when topic content changes. `last_verified` changes only after checking evidence.
 - An active topic additionally requires `last_verified` and at least one of `sources` or `verify`.
+- `sources` names only the files that own or prove the topic's claims: the contract, schema, configuration, or owner document whose change could invalidate a claim. It is not a record of files read. More than 10 sources means the topic covers too much or restates a document another source owns; narrow the topic or reduce it to a route.
 - Every non-active topic requires a one-line double-quoted `status_note` explaining the review need or lifecycle state.
 - Optional fields are `aliases`, `triggers`, `scope`, `last_verified`, `sources`, `related`, `supersedes`, `verify`, `status_note`, and `sensitivity`.
 - Every list uses block form with two-space-indented, double-quoted items. Flow lists are forbidden.
@@ -116,5 +125,6 @@ Every knowledge route is exactly one compact line with no date:
 - Every active topic must be reachable from the root exactly once through a direct route or one domain map.
 - A `review-needed` topic may remain unindexed while ownership is ambiguous. If routed for visibility, route it at most once and never present it as active authority.
 - Create domain maps when active topics exceed 24 or the root exceeds 1,200 visible words. Preserve deliberate direct and external routes while reorganizing.
-- A topic over 10 KiB is a split candidate, not an automatic rewrite. Keep using outline/section-first retrieval until a reviewed split preserves ownership and links.
+- A topic over 10 KiB is a reviewed-split candidate, not an automatic rewrite. Keep using outline/section-first retrieval until a reviewed split preserves ownership and links.
+- A topic over 4 KiB has at least two `##` sections, so retrieval can read one section instead of the whole body.
 - Hooks route; they do not summarize the whole topic or expose restricted details.

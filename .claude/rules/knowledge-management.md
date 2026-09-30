@@ -24,7 +24,7 @@ This rule is the root contract for retrieval and classification. Routine `/start
 3. Select at most 3 direct topics using exact slug/name/alias first, then typed scope, triggers, description/type, and source match.
 4. For each topic, inspect frontmatter and the heading outline, then read the smallest relevant section. Read the full body only when the task needs the whole invariant or the smaller view is insufficient.
 5. Expand at most 2 one-hop `related` topics. Do not recurse through the graph.
-6. Treat `review-needed`, conflicting, superseded, or retired material as context to verify, not current authority.
+6. Treat `review-needed`, conflicting, superseded, or retired material as context to verify, not current authority. Treat entries under a topic's `## Point-in-time observations` heading the same way, whatever the topic status.
 
 If routed context is insufficient, search actual repository evidence with bounded `rg` and Git queries across canonical sources, knowledge, task/spec archives, and targeted JOURNAL lines. Return file/section evidence and distinguish source text from inference. There is no recall command.
 
@@ -46,5 +46,6 @@ Route everything else by kind:
 - WIP, proposals, task status, acceptance state, and discoveries local to current work stay in the active task, spec, or `CONTEXT.md`.
 - Recurring behavior, conventions, behavioral corrections, and reusable procedures go to the owning rule, normally through `/learn`.
 - Uncertain or conflicting observations remain candidates in the working artifact. Existing knowledge they call into question is not current authority until verified.
+- An observation of runtime or environment state that repository evidence cannot confirm is not an authoritative claim. When it is worth keeping, it goes in the owning topic's `## Point-in-time observations` section under the maintenance reference.
 
 Eligibility does not authorize a write. Never mutate knowledge merely because retrieval found a qualifying claim, and never capture automatically after exploration. When the task includes an authorized mutation or a lifecycle workflow reaches a possible promotion boundary, load the maintenance reference and apply its trigger, owner, routing, and validation contract.

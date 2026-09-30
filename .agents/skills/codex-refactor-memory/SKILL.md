@@ -73,7 +73,7 @@ For each topic:
 1. Identify the owner of each fact and its evidence. Preserve the topic body, title, curated hook, grouping, ordering, and deliberate external routes during in-place normalization. Address duplicate ownership when the current request already includes semantic cleanup; otherwise report it for a scoped follow-up. Do not turn this normalization pass into a full project-document audit.
 2. Normalize frontmatter once using only supported fields and formats. Do not invent aliases, triggers, scope, sources, relations, verification dates, or lifecycle claims.
 3. Set `status: active` only when current evidence was actually checked. Record `last_verified` as the evidence-check date and ensure active topics have `sources` or `verify`.
-4. If evidence is insufficient or conflicting, use `status: review-needed` with a precise `status_note`; do not present uncertainty as active truth.
+4. If evidence is insufficient or conflicting, use `status: review-needed` with a precise `status_note`; do not present uncertainty as active truth. Entries under `## Point-in-time observations` are outside this verification and do not decide the status.
 5. Use `superseded` or `retired` only with clear repository evidence or user confirmation. Never infer lifecycle from age or absence from the map.
 6. Update the topic and its reachable root/domain-map route atomically. Route lines have no dates.
 
@@ -81,12 +81,12 @@ Store-wide rules:
 
 - A small store may remain root → topic. When active topics exceed 24 or the root exceeds 1,200 visible words, introduce `_maps/<domain>.md` from existing scope/grouping evidence while preserving curated and external routes; if ownership cannot be grouped safely, report the decision instead of guessing.
 - Domain maps route only to topics and never nest.
-- A topic over 10 KiB is a split candidate. Preserve it and report a reviewed split proposal; do not rewrite or split its body automatically.
+- Budget warnings — `K116` size, `K117` section structure, `K135` source count — need a reviewed body or ownership change that this pass does not make. Preserve the topic and report each as a candidate for a reviewed split or reduction to a route.
 - Report an ambiguous unindexed file with evidence. Never auto-promote, auto-delete, retire, or supersede it.
 - Do not regenerate the root or maps from frontmatter alone; hooks, grouping, ordering, and external routes carry human routing intent.
 - Do not add a recall command, write-on-read behavior, telemetry, database, or daemon.
 
-After the normalization batch, run `bash .codex/scripts/knowledge-check.sh --root . --fail-on warning`. Fix only supported mechanical failures; exit `2` blocks completion. Then repeat the normalization scan without changing inputs: it must produce no further diff. If a second pass would churn formatting or metadata, the refactor is not idempotent; stop and report the cause.
+After the normalization batch, run `bash .codex/scripts/knowledge-check.sh --root . --fail-on warning`. Fix only supported mechanical failures; exit `2` blocks completion. Exit `1` means findings remain: normalization is complete only when every remaining finding is a budget warning, and the report lists those. Then repeat the normalization scan without changing inputs: it must produce no further diff. If a second pass would churn formatting or metadata, the refactor is not idempotent; stop and report the cause.
 
 ## 6. Preserve Live Workflow State
 

@@ -226,6 +226,60 @@ for expected_code in K120 K130 K131 K141 K201 K203 K204; do
 done
 assert_no_code "HTML-commented dead route is ignored" K202
 
+materialize budgets claude
+budgets_root=$MATERIALIZED
+run_checker "$CLAUDE_CHECKER" "$TMP_ROOT/budgets.out" \
+  --root "$budgets_root" --today 2026-07-29
+assert_status "budget warnings pass the default error threshold" 0
+if [ "$(grep -c '^WARN|K135|' "$LAST_OUTPUT")" -eq 1 ] &&
+  grep -q '^WARN|K135|.claudart/knowledge/source-heavy.md:19|' "$LAST_OUTPUT"; then
+  pass "only the topic above 10 sources reports K135, at its first excess source"
+else
+  fail "only the topic above 10 sources reports K135, at its first excess source"
+  sed 's/^/  /' "$LAST_OUTPUT" >&2
+fi
+if [ "$(grep -c '^WARN|K117|' "$LAST_OUTPUT")" -eq 1 ] &&
+  grep -q '^WARN|K117|.claudart/knowledge/flat-large.md:1|' "$LAST_OUTPUT"; then
+  pass "only the large topic without two body sections reports K117"
+else
+  fail "only the large topic without two body sections reports K117"
+  sed 's/^/  /' "$LAST_OUTPUT" >&2
+fi
+run_checker "$CLAUDE_CHECKER" "$TMP_ROOT/budgets-warning-threshold.out" \
+  --root "$budgets_root" --today 2026-07-29 --fail-on warning
+assert_status "budget warnings meet the warning threshold" 1
+
+# The mutation contract is prose. These checks protect the mirrored wording; they
+# do not claim that the wording guarantees runtime compliance.
+for reference in \
+  "$REPO_ROOT/.claude/references/knowledge-maintenance.md" \
+  "$REPO_ROOT/.codex/references/knowledge-maintenance.md"; do
+  for contract in \
+    'Do not grow a topic past the 10 KiB detail budget.' \
+    'Correcting or removing an existing claim is always allowed.' \
+    'A topic over 4 KiB has at least two `##` sections' \
+    'It is not a record of files read.' \
+    'A topic may end with one `## Point-in-time observations` section.' \
+    '`status` and `last_verified` describe the rest of the topic.' \
+    '`review-needed` is not a substitute for that reduction.'; do
+    if grep -Fq -- "$contract" "$reference"; then
+      pass "${reference#"$REPO_ROOT/"} states: $contract"
+    else
+      fail "${reference#"$REPO_ROOT/"} states: $contract"
+    fi
+  done
+done
+for contract_owner in \
+  "$REPO_ROOT/.claude/rules/knowledge-management.md" \
+  "$REPO_ROOT/.codex/guidelines/knowledge-management.md"; do
+  contract='Treat entries under a topic'"'"'s `## Point-in-time observations` heading the same way'
+  if grep -Fq -- "$contract" "$contract_owner"; then
+    pass "${contract_owner#"$REPO_ROOT/"} keeps observations out of current authority"
+  else
+    fail "${contract_owner#"$REPO_ROOT/"} keeps observations out of current authority"
+  fi
+done
+
 empty_root=$TMP_ROOT/missing-knowledge
 mkdir -p "$empty_root"
 run_checker "$CLAUDE_CHECKER" "$TMP_ROOT/missing-knowledge.out" \
@@ -240,36 +294,71 @@ run_checker "$CLAUDE_CHECKER" "$TMP_ROOT/missing-index.out" \
 assert_status "missing INDEX is a contract failure, not runtime failure" 1
 assert_code "missing INDEX reports K002" K002
 
+# Commits one source change dated after the fixture's last_verified, then leaves
+# a second change uncommitted, in the repository at $1 for the paths in $2.
+drift_sources() {
+  drift_repo=$1
+  drift_prefix=$2
+  git -C "$drift_repo" init -q
+  git -C "$drift_repo" config user.name "Fixture Author"
+  git -C "$drift_repo" config user.email "fixture@example.invalid"
+  git -C "$drift_repo" add .
+  GIT_AUTHOR_DATE=2026-01-01T00:00:00Z \
+    GIT_COMMITTER_DATE=2026-01-01T00:00:00Z \
+    git -C "$drift_repo" commit -q -m "initial fixture"
+  printf '\nCommitted source change.\n' >>"$drift_repo/${drift_prefix}canonical.md"
+  printf '\nCommitted historical change.\n' >>"$drift_repo/${drift_prefix}historical.md"
+  git -C "$drift_repo" add "${drift_prefix}canonical.md" "${drift_prefix}historical.md"
+  GIT_AUTHOR_DATE=2026-02-01T00:00:00Z \
+    GIT_COMMITTER_DATE=2026-02-01T00:00:00Z \
+    git -C "$drift_repo" commit -q -m "update canonical source"
+  printf '\nDirty source change.\n' >>"$drift_repo/${drift_prefix}canonical.md"
+  printf '\nDirty historical change.\n' >>"$drift_repo/${drift_prefix}historical.md"
+}
+
+assert_drift() {
+  label=$1
+  if [ "$(grep -c '^WARN|K133|' "$LAST_OUTPUT")" -eq 1 ] &&
+    [ "$(grep -c '^WARN|K134|' "$LAST_OUTPUT")" -eq 1 ] &&
+    ! grep -q 'retired-history.md' "$LAST_OUTPUT"; then
+    pass "$label"
+  else
+    fail "$label"
+    sed 's/^/  /' "$LAST_OUTPUT" >&2
+  fi
+}
+
 materialize freshness claude
 freshness_root=$MATERIALIZED
-git -C "$freshness_root" init -q
-git -C "$freshness_root" config user.name "Fixture Author"
-git -C "$freshness_root" config user.email "fixture@example.invalid"
-git -C "$freshness_root" add .
-GIT_AUTHOR_DATE=2026-01-01T00:00:00Z \
-  GIT_COMMITTER_DATE=2026-01-01T00:00:00Z \
-  git -C "$freshness_root" commit -q -m "initial fixture"
-printf '\nCommitted source change.\n' >>"$freshness_root/docs/canonical.md"
-printf '\nCommitted historical change.\n' >>"$freshness_root/docs/historical.md"
-git -C "$freshness_root" add docs/canonical.md docs/historical.md
-GIT_AUTHOR_DATE=2026-02-01T00:00:00Z \
-  GIT_COMMITTER_DATE=2026-02-01T00:00:00Z \
-  git -C "$freshness_root" commit -q -m "update canonical source"
-printf '\nDirty source change.\n' >>"$freshness_root/docs/canonical.md"
-printf '\nDirty historical change.\n' >>"$freshness_root/docs/historical.md"
+drift_sources "$freshness_root" "docs/"
 run_checker "$CLAUDE_CHECKER" "$TMP_ROOT/freshness.out" \
   --root "$freshness_root" --today 2026-02-02 --fail-on warning
 assert_status "Git source freshness warnings meet the warning threshold" 1
 assert_code "dirty source reports K133" K133
 assert_code "committed source newer than last_verified reports K134" K134
-if [ "$(grep -c '^WARN|K133|' "$LAST_OUTPUT")" -eq 1 ] &&
-  [ "$(grep -c '^WARN|K134|' "$LAST_OUTPUT")" -eq 1 ] &&
-  ! grep -q 'retired-history.md' "$LAST_OUTPUT"; then
-  pass "Git freshness warnings are limited to active entries"
-else
-  fail "Git freshness warnings are limited to active entries"
-  sed 's/^/  /' "$LAST_OUTPUT" >&2
-fi
+assert_drift "Git freshness warnings are limited to active entries"
+
+# The checked root holds project state and is not a repository; the source lives
+# in a nested repository.
+materialize freshness workspace
+workspace_root=$MATERIALIZED
+drift_sources "$workspace_root/docs" ""
+run_checker "$CLAUDE_CHECKER" "$TMP_ROOT/freshness-workspace.out" \
+  --root "$workspace_root" --today 2026-02-02 --fail-on warning
+assert_status "source drift in a nested repository meets the warning threshold" 1
+assert_drift "source drift is checked in the repository that owns the source"
+
+# The checked root sits below the repository top level.
+nested_top=$TMP_ROOT/freshness-nested
+nested_root=$nested_top/packages/app
+mkdir -p "$nested_root/.claudart"
+cp -R "$FIXTURES/freshness/layer/." "$nested_root/.claudart/"
+cp -R "$FIXTURES/freshness/docs" "$nested_root/docs"
+drift_sources "$nested_top" "packages/app/docs/"
+run_checker "$CLAUDE_CHECKER" "$TMP_ROOT/freshness-nested.out" \
+  --root "$nested_root" --today 2026-02-02 --fail-on warning
+assert_status "source drift below a repository top level meets the warning threshold" 1
+assert_drift "source drift is checked when the root is below the repository top level"
 
 /bin/bash "$CLAUDE_CHECKER" --help >"$TMP_ROOT/help.out" 2>"$TMP_ROOT/help.err"
 help_status=$?

@@ -15,10 +15,10 @@ Khi schema hoặc lifecycle của một command thay đổi, các file đó là 
 
 CLAUDART cung cấp hai adapter runtime dùng chung thư mục trạng thái dự án `.claudart/`.
 
-| Runtime     | File được cài                                           | Dạng command                        | File nạp chính      |
-| ----------- | ------------------------------------------------------- | ----------------------------------- | ------------------- |
-| Claude Code | `.claude/`, `CLAUDE.md` ở thư mục gốc                   | `/start`, `/plan`, v.v.             | `CLAUDE.md`         |
-| Codex       | `.codex/`, `.agents/skills/`, `AGENTS.md` ở thư mục gốc | `$codex-start`, `$codex-plan`, v.v. | `AGENTS.md`         |
+| Runtime     | File được cài                                           | Dạng command                        | File nạp chính |
+| ----------- | ------------------------------------------------------- | ----------------------------------- | -------------- |
+| Claude Code | `.claude/`, `CLAUDE.md` ở thư mục gốc                   | `/start`, `/plan`, v.v.             | `CLAUDE.md`    |
+| Codex       | `.codex/`, `.agents/skills/`, `AGENTS.md` ở thư mục gốc | `$codex-start`, `$codex-plan`, v.v. | `AGENTS.md`    |
 
 Bạn có thể cài một lớp hoặc cả hai. Hai lớp có cùng mục tiêu, nhưng command và quy tắc delegation được viết theo cách vận hành riêng của từng công cụ.
 
@@ -208,12 +208,16 @@ sources:
 ---
 ```
 
+`sources` chỉ nêu các file sở hữu hoặc chứng minh claim của topic, không phải mọi file đã đọc. Checker cảnh báo khi một topic có hơn 10 source.
+
 Các trạng thái được hỗ trợ:
 
 - `active`: nguồn chuẩn hiện tại, đã được xác minh;
-- `review-needed`: có điểm chưa chắc hoặc xung đột, phải kiểm tra trước khi dùng như authority;
+- `review-needed`: có claim lẽ ra kiểm chứng được bằng repository nhưng chưa được kiểm, đang xung đột hoặc đã lệch; phải kiểm tra trước khi dùng như authority;
 - `superseded`: đã được topic khác thay thế;
 - `retired`: nội dung lịch sử được giữ lại có chủ đích.
+
+Topic có thể kết thúc bằng section `## Point-in-time observations` chứa các quan sát có ngày về trạng thái runtime hoặc môi trường mà repository không xác nhận được. Trạng thái lifecycle và `last_verified` mô tả phần còn lại của topic; quan sát chỉ là gợi ý để kiểm tra lại, không bao giờ là authority.
 
 Grammar field đầy đủ, giới hạn routing, ngưỡng tạo map và quy tắc mutation nằm trong rule hoặc guideline `knowledge-management` của runtime tương ứng.
 

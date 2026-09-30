@@ -138,7 +138,7 @@ This step is independent of CONTEXT.md. Skip entirely if `.claudart/tasks/` does
    - Before archiving, inspect only `TASK.md` Memory Hints and Related Docs for eligible knowledge candidates; use the full knowledge capture gate in Step 6c. Do not bulk-read supporting files or promote task/WIP/proposal state.
    - Move the entire workspace to `.claudart/tasks/done/<task-id>/`, preserving its id and all contents. Follow the task contract's archive safeguards: if the destination exists (including a symlink), stop that archive and report the collision; never overwrite, merge, or nest it. Confirm a successful move before updating references or journaling. Do not create, rewrite, extract, or delete artifacts.
    - Append a completion/cancellation line linking `tasks/done/<task-id>/TASK.md` to `.claudart/JOURNAL.md` only if the recent journal tail does not already contain that closure. Use the Phase 2a format from `.claude/rules/task-management.md`, with type `cancelled` for cancellation. Never rewrite journal history.
-   - Update any live CONTEXT/HANDOFF pointer to the archived `TASK.md` without copying its body.
+   - Update any live CONTEXT/HANDOFF pointer to the archived `TASK.md` without copying its body. Repair knowledge `sources` that point into the moved workspace as the archive flow in `.claude/rules/task-management.md` defines.
    - **DO NOT archive `awaiting-review` tasks.** They remain active until the user confirms; checkpoint never changes task status or ticks acceptance boxes.
 4. Rewrite `.claudart/tasks/index.md` per the canonical **"`index.md` Format"** in `.claude/rules/task-management.md`, with links to `<task-id>/TASK.md` and `done/<task-id>/TASK.md`. Active includes `awaiting-review` with its ⏳ marker; Recently Done covers the last 14 days. Report any still-unarchived terminal workspace rather than linking it to a nonexistent archive.
 5. Enforce the 100-line ceiling and trim ladder. Missing `artifacts/` is normal; checkpoint never creates supporting files.
@@ -151,7 +151,7 @@ Skip entirely if `.claudart/specs/` does not exist.
 1. Ensure `.claudart/specs/done/` exists.
 2. List `.claudart/specs/*/SPEC.md` from top-level dated folders only (exclude `INDEX.md` and the `done/` subfolder). For each, read frontmatter only (`slug`, `status`, `created`, `updated`).
 3. Detect any top-level spec whose `status` is `done` or `cancelled`. These have passed their user gate (or were cancelled) and were not yet archived. For each:
-   - Move the entire folder to `.claudart/specs/done/<folder-id>/`, preserving the existing dated folder name.
+   - Move the entire folder to `.claudart/specs/done/<folder-id>/`, preserving the existing dated folder name. Repair knowledge `sources` that point into the moved folder as the closure in `.claude/rules/spec-workflow.md` defines.
    - Append the completion/cancellation line to `.claudart/JOURNAL.md` only if the recent journal tail does not already contain that spec completion/cancellation.
    - Before archiving, scan `NOTES.md` for `→ graduate:` flags: route `knowledge/` flags into Step 6c and surface `/learn` flags as proposals. Clear only a claim that was successfully promoted or deliberately reclassified; keep unresolved candidates flagged in NOTES.
    - DO NOT archive `awaiting-final-review` specs. Those are explicitly waiting for user confirmation; archiving them defeats the final gate. They stay in the top-level specs folder and appear in the Active list.
@@ -169,7 +169,7 @@ Distill rather than copy work history. Keep task/spec state and proposals in the
 
 For each eligible claim:
 
-1. Route map-first and patch the existing canonical owner before creating a focused topic. Create a knowledge owner only when no other authoritative source owns that fact.
+1. Route map-first and patch the existing canonical owner before creating a focused topic, subject to the detail budget in `.claude/references/knowledge-maintenance.md`. Create a knowledge owner only when no other authoritative source owns that fact.
 2. Apply the canonical frontmatter, trust, scope, relation, and route grammar from the knowledge rule. Update `updated` only for a content edit and `last_verified` only for an evidence check.
 3. Update the topic and its reachable root/domain map atomically. Preserve curated titles, hooks, grouping, ordering, and external routes; never auto-promote an ambiguous unindexed file or auto-delete a topic.
 4. Run `bash .claude/scripts/knowledge-check.sh` after the final knowledge mutation. If it fails, report the exact findings and do not claim the knowledge update healthy.

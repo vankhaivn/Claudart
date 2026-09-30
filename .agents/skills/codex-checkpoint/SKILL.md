@@ -146,7 +146,7 @@ This step is independent of CONTEXT.md. Skip entirely if `.claudart/tasks/` does
    - Before archiving, inspect only `TASK.md` Memory Hints and Related Docs for eligible knowledge candidates; use the full knowledge capture gate in Step 6c. Do not bulk-read supporting files or promote task/WIP/proposal state.
    - Move the entire workspace to `.claudart/tasks/done/<task-id>/`, preserving its id and all contents. Follow the task contract's archive safeguards: if the destination exists (including a symlink), stop that archive and report the collision; never overwrite, merge, or nest it. Confirm a successful move before updating references or journaling. Do not create, rewrite, extract, or delete artifacts.
    - Append a completion/cancellation line linking `tasks/done/<task-id>/TASK.md` to `.claudart/JOURNAL.md` only if the recent journal tail does not already contain that closure. Use the Phase 2a format from `.codex/guidelines/task-management.md`, with type `cancelled` for cancellation. Never rewrite journal history.
-   - Update any live CONTEXT/HANDOFF pointer to the archived `TASK.md` without copying its body.
+   - Update any live CONTEXT/HANDOFF pointer to the archived `TASK.md` without copying its body. Repair knowledge `sources` that point into the moved workspace as the archive flow in `.codex/guidelines/task-management.md` defines.
    - **DO NOT archive `awaiting-review` tasks.** They remain active until the user confirms; checkpoint never changes task status or ticks acceptance boxes.
 4. Rewrite `.claudart/tasks/index.md` per the canonical **"`index.md` Format"** in `.codex/guidelines/task-management.md`, with links to `<task-id>/TASK.md` and `done/<task-id>/TASK.md`. Active includes `awaiting-review` with its ⏳ marker; Recently Done covers the last 14 days. Report any still-unarchived terminal workspace rather than linking it to a nonexistent archive.
 5. Enforce the 100-line ceiling and trim ladder. Missing `artifacts/` is normal; checkpoint never creates supporting files.
@@ -159,7 +159,7 @@ Skip entirely if `.claudart/specs/` does not exist.
 1. Ensure `.claudart/specs/done/` exists.
 2. List `.claudart/specs/*/SPEC.md` from top-level dated folders only (exclude `INDEX.md` and the `done/` subfolder). For each, read frontmatter only (`slug`, `status`, `created`, `updated`).
 3. Detect any top-level spec whose `status` is `done` or `cancelled`. These have passed their user gate (or were cancelled) and were not yet archived. For each:
-   - Move the entire folder to `.claudart/specs/done/<folder-id>/`, preserving the existing dated folder name.
+   - Move the entire folder to `.claudart/specs/done/<folder-id>/`, preserving the existing dated folder name. Repair knowledge `sources` that point into the moved folder as the closure in `.codex/guidelines/spec-workflow.md` defines.
    - Append the completion/cancellation line to `.claudart/JOURNAL.md` only if the recent journal tail does not already contain that spec completion/cancellation.
    - Before archiving, scan `NOTES.md` for `→ graduate:` flags: evaluate `knowledge/` flags against the capture gate in Step 6c, surface `$codex-learn` flags as proposals in the report, and clear only flags successfully routed or explicitly retained as candidates.
    - DO NOT archive `awaiting-final-review` specs. Those are explicitly waiting for user confirmation; archiving them defeats the final gate. They stay in the top-level specs folder and appear in the Active list.
@@ -179,7 +179,7 @@ For candidates from Step 2, Step 3, task close, or spec NOTES:
 
 1. Distill claims rather than copying chronology or task prose. Promote only claims that are descriptive, durable beyond the current work, current, and evidenced. A fact may be narrowly scoped when its typed `scope` records that boundary.
 2. Keep WIP/proposals/state in task/spec/CONTEXT. Route behavior to `$codex-learn`. Keep uncertainty as a candidate; when evidence contradicts an existing canonical owner, mark that owner `review-needed` with a `status_note` instead of asserting a replacement.
-3. Read the root router and the smallest relevant maps/topics within the guideline's budget. Patch the existing owner first; create a focused topic only when no owner exists.
+3. Read the root router and the smallest relevant maps/topics within the guideline's budget. Patch the existing owner first, subject to the detail budget in `.codex/references/knowledge-maintenance.md`; otherwise create a focused topic only when no owner exists.
 4. Write canonical frontmatter and update the topic plus its reachable root/domain-map route atomically. Preserve curated hooks, grouping, ordering, and external routes. Never auto-delete, retire, supersede, or promote an ambiguous unindexed file.
 5. After all knowledge mutations in this checkpoint, run `bash .codex/scripts/knowledge-check.sh --root .`. Repair in-scope mechanical failures before reporting success. If the checker is missing, stop the knowledge mutation and report a High-severity installation problem.
 
