@@ -278,7 +278,7 @@ Before the final summary, run or perform:
 - Confirm the in-place knowledge normalization is idempotent and every `active` entry has `last_verified` plus `sources` or `verify`.
 - Confirm semantic rule findings were classified as accurate, rule-stale, source-debt, open-work, or needs-user-decision.
 
-Do not run `git commit`, `git push`, `git merge`, `git rebase`, or similar history/remote-writing commands yourself.
+After validation, follow `.claude/rules/git-workflow.md` for local persistence. Commit the verified in-scope refactor result using the authority resolved by that shared policy. Push, merge, rebase/history rewrite, tags, and Git configuration remain separately authorized under that policy.
 
 ## 14. Final Summary
 
@@ -291,7 +291,7 @@ Output a concise summary covering:
 5. Deprecated memory files removed or retained.
 6. Verification commands/checks run.
 7. Remaining risks or user decisions.
-8. Suggest the user run `git diff` to review every change before committing.
+8. Git persistence result: committed SHA/message when local commit was allowed, or the concrete reason persistence remains pending; suggest reviewing the resulting diff or commit.
 
 Confirm completion only after every relevant step has been completed or explicitly marked not applicable.
 

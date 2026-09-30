@@ -59,6 +59,7 @@ Apply these rules with judgment. The user's outcome, applicable repository instr
 ## 6. Finish with Evidence, Not Ceremony
 
 - Inspect the final result for scope, correctness, compatibility, unnecessary complexity, and unrelated churn.
+- When implementation/change work is complete and verified, follow `.claude/rules/git-workflow.md` for local Git persistence before the final report. When higher-scope/repository policy permits normal local commits, use that authority directly; workflow-specific cadence or no-commit exceptions still apply.
 - Report the outcome, material changes, exact validation performed, and any concrete residual risk or assumption.
 - Keep communication proportional to the task. Do not dump hidden reasoning, repeat the prompt, narrate routine tool use, or produce a generic principles essay.
 - A no-op is a valid result when the requested outcome is already satisfied or a proposed change would make the system worse.

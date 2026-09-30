@@ -281,7 +281,7 @@ if [ -f "$ROOT/$STATE_DIR/HANDOFF.md" ] && ! has_symlink "$STATE_DIR/HANDOFF.md"
 fi
 if [ "$LAYER" = codex ]; then
   require_dir .codex/guidelines ERROR "restore core guidelines"
-  for rule in ai-behavior code-health task-management agent-delegation spec-workflow knowledge-management; do
+  for rule in ai-behavior code-health git-workflow task-management agent-delegation spec-workflow knowledge-management; do
     require_file ".codex/guidelines/$rule.md" ERROR "restore core guideline"
   done
   require_dir .codex/agents WARNING "restore agent metadata directory"
@@ -295,7 +295,7 @@ if [ "$LAYER" = codex ]; then
   queue_tree .codex/references
 else
   require_dir .claude/rules ERROR "restore core rules"
-  for rule in ai-behavior code-health task-management agent-delegation spec-workflow knowledge-management; do
+  for rule in ai-behavior code-health git-workflow task-management agent-delegation spec-workflow knowledge-management; do
     require_file ".claude/rules/$rule.md" ERROR "restore core rule"
   done
   require_dir .claude/commands ERROR "restore core commands"
