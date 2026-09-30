@@ -583,6 +583,20 @@ try {
       );
     }
   });
+  check("Codex delegation routing uses stable model family aliases", () => {
+    const delegation = read(
+      join(root, ".codex/guidelines/agent-delegation.md"),
+    );
+    assert.match(delegation, /`luna` → `sol` → `astra`/);
+    assert.match(
+      delegation,
+      /Resolve the selected family alias against the \*\*current\*\* `spawn_agent` model catalog/,
+    );
+    assert.doesNotMatch(
+      delegation,
+      /gpt-\d+(?:\.\d+)?-(?:luna|sol|astra)/i,
+    );
+  });
   // Shared-state behavior uses the real installer and checker binaries, not a
   // test-only implementation of state selection. Fixtures are anonymous data.
   const seeds = [
