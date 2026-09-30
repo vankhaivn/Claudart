@@ -14,7 +14,7 @@ CLAUDART provides a default for **local Git persistence**, not a competing autho
 1. Apply the active higher-scope Codex policy first. When available and relevant, include `~/.codex/AGENTS.md`, active approval/sandbox configuration, and tool restrictions in that decision. Do not weaken a tool-enforced or explicitly non-overridable restriction.
 2. Apply repository-local Git instructions and conventions next. They own required branch shape, commit format, protected paths, review flow, and any stricter approval rule.
 3. Apply the current user's explicit instruction for this work. A higher-scope rule such as "do not commit without explicit user approval" is satisfied only by an explicit user grant; silence is not approval. A current user denial always narrows CLAUDART's default.
-4. If no applicable source prohibits local commits or requires another approval, **local commit is authorized by default** after a coherent in-scope unit is verified. Do not invent an extra "shall I commit?" gate.
+4. If no applicable source prohibits local commits or requires another approval, **local commit is authorized by default** after a coherent in-scope unit is verified. No additional CLAUDART approval prompt is required.
 5. Workflow-local settings may narrow this default. In particular, a spec with `commits: user` disables automatic commits for that spec. A workflow-local setting never widens permission above a higher-scope restriction.
 
 If authority is unclear, keep the verified worktree intact and report the ambiguity instead of guessing.
