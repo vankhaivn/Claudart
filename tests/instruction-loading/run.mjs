@@ -648,7 +648,7 @@ try {
     ]) {
       const text = read(join(root, file));
       assert.match(text, /git-workflow\.md/);
-      assert.match(text, /commit the verified in-scope refactor result/);
+      assert.match(text, /[Cc]ommit the verified in-scope refactor result/);
       assert.doesNotMatch(text, /Do not run `git commit`/);
       assert.doesNotMatch(
         text,

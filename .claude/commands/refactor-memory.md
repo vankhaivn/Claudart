@@ -291,7 +291,7 @@ Output a concise summary covering:
 5. Deprecated memory files removed or retained.
 6. Verification commands/checks run.
 7. Remaining risks or user decisions.
-8. Suggest the user run `git diff` to review every change before committing.
+8. Git persistence result: committed SHA/message when local commit was allowed, or the concrete reason persistence remains pending; suggest reviewing the resulting diff or commit.
 
 Confirm completion only after every relevant step has been completed or explicitly marked not applicable.
 
