@@ -278,7 +278,7 @@ Before the final summary, run or perform:
 - Confirm the in-place knowledge normalization is idempotent and every `active` entry has `last_verified` plus `sources` or `verify`.
 - Confirm semantic rule findings were classified as accurate, rule-stale, source-debt, open-work, or needs-user-decision.
 
-After validation, follow `.claude/rules/git-workflow.md` for local persistence. Commit the verified in-scope refactor result when that shared policy allows it; do not create a separate user-commit gate. Push, merge, rebase/history rewrite, tags, and Git configuration remain separately authorized under that policy.
+After validation, follow `.claude/rules/git-workflow.md` for local persistence. Commit the verified in-scope refactor result using the authority resolved by that shared policy. Push, merge, rebase/history rewrite, tags, and Git configuration remain separately authorized under that policy.
 
 ## 14. Final Summary
 

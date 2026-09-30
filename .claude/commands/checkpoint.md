@@ -178,7 +178,7 @@ Checkpoint performs these writes autonomously as bulk maintenance; direct mid-se
 
 ### Step 6d — Persist through the shared Git workflow
 
-A checkpoint is durable in Git only when its in-scope delta is committed. Checkpoint does **not** define a separate commit-permission model; before any Git write, read `.claude/rules/git-workflow.md` and apply its higher-scope/runtime, repository, user, staging, identity, and remote/history rules.
+A checkpoint is durable in Git only when its in-scope delta is committed. For Git persistence, read `.claude/rules/git-workflow.md`; that shared contract owns higher-scope/runtime, repository, user, staging, identity, and remote/history rules.
 
 1. Inspect the final `git status --short` and relevant diffs after all checkpoint writes.
 2. Determine the checkpoint-owned delta: verified in-scope session work that is still uncommitted plus the CONTEXT/JOURNAL/index/archive/knowledge maintenance produced by this checkpoint. Preserve unrelated or pre-existing work.
