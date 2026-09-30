@@ -116,11 +116,19 @@ Số lượng file không tự tạo ra nhu cầu lập plan. Cần JSON, ảnh 
 
 Trong phạm vi đã được phê duyệt, spec thay thế task plan. Không tạo task file cho công việc đã thuộc một spec đang hoạt động. Khi ý định product còn chưa rõ, dùng Project Docs nếu đã cài để thu thập bootstrap input và chỉ thiết lập các owner hiện hành cần thiết; module không ép document pack hoặc thư mục `docs/project/`.
 
+### Lưu thay đổi bằng Git
+
+CLAUDART mặc định cho phép tạo **local commit** cho phần việc đã kiểm chứng và có phạm vi rõ ràng khi không có chỉ dẫn runtime/user ở scope cao hơn, quy tắc Git của repository hoặc giới hạn tool cấm việc đó hay yêu cầu một lần duyệt khác. Claude tuân theo policy scope cao hơn đang áp dụng như `~/.claude/CLAUDE.md` và `~/.claude/settings.json`; Codex tuân theo `~/.codex/AGENTS.md` cùng các giới hạn approval/sandbox đang hoạt động. Nếu policy scope cao hơn yêu cầu user phê duyệt commit rõ ràng thì yêu cầu đó vẫn có hiệu lực cho tới khi user thực sự cấp quyền.
+
+Chỉ commit thay đổi đúng scope do phiên hiện tại sở hữu sau khi verification liên quan đã pass. Giữ nguyên work khác và stage theo path/hunk cụ thể thay vì stage rộng. Commit message và branch name tuân theo convention của repository; CLAUDART không thêm co-author/generated-by mang danh AI/tool và không tạo namespace gắn danh agent như `codex/*`, `claude/*` hoặc `agent/*`. Quyền tạo local commit không bao hàm quyền push, merge, rewrite history, tạo tag hay sửa cấu hình Git.
+
+Review task vẫn là gate về nghiệm thu công việc, không phải gate bắt buộc cho Git persistence: implementation đã verify có thể đã có restore-point commit khi task chuyển sang `awaiting-review`; user vẫn là người xác nhận `done` và archive riêng. Subagent không tự có quyền tạo history commit chỉ vì được delegate; parent agent tích hợp, verify và persist kết quả theo cùng Git policy.
+
 ### Kết thúc hoặc tạm dừng đúng cách
 
 Dùng `/checkpoint` hoặc `$codex-checkpoint` tại một điểm dừng phù hợp. Checkpoint xây dựng lại trạng thái hiện tại, đồng bộ các index, ghi lịch sử đã kết thúc và chắt lọc những fact đủ điều kiện để lưu lâu dài.
 
-Checkpoint không tự cấp quyền Git. Sau khi bảo trì state, nó tuân theo nguồn cấp quyền commit cụ thể nhất: `commits:` của spec đang hoạt động khi áp dụng, chỉ dẫn hiện tại hoặc vẫn còn hiệu lực của user, rồi quy tắc Git của dự án downstream. Nếu được phép commit tại boundary đó, checkpoint chỉ lưu các thay đổi đã kiểm chứng và đúng phạm vi của phiên cùng phần bảo trì checkpoint, đồng thời giữ nguyên thay đổi không liên quan. Nếu chưa được phép, nó để nguyên worktree và báo rõ checkpoint chưa được lưu bền vững trong Git. Push và các thao tác thay đổi lịch sử cần quyền riêng.
+Checkpoint dùng chính Git workflow ở trên thay vì tự định nghĩa một mô hình cấp quyền riêng. Khi local commit được phép, nó persist phần delta đã verify thuộc checkpoint mà chưa được commit; khi policy scope cao hơn chặn commit hoặc không thể stage an toàn, nó giữ nguyên worktree và báo rõ phần persistence còn thiếu. Spec có `commits: user` vẫn là ngoại lệ no-auto-commit rõ ràng cho thay đổi thuộc spec đó.
 
 Chỉ dùng `/handoff` hoặc `$codex-handoff` khi một phần điều tra khó cần được tiếp tục trong phiên mới. Handoff ghi giả thuyết hiện tại, bằng chứng, các hướng đã loại, ràng buộc và bước tiếp theo chính xác. Nó không phải bản tóm tắt chung cho mọi phiên.
 
@@ -311,7 +319,7 @@ Mỗi workspace gồm:
 
 | File         | Mục đích                                                                              |
 | ------------ | ------------------------------------------------------------------------------------- |
-| `SPEC.md`    | Ý định đã duyệt, acceptance scenario, giới hạn scope và commit policy                 |
+| `SPEC.md`    | Ý định đã duyệt, acceptance scenario, giới hạn scope và commit cadence                |
 | `ROADMAP.md` | Các phase, work item có thể thực thi và checkpoint kiểm tra cho từng item             |
 | `NOTES.md`   | Knowledge làm việc đã được chọn lọc, quyết định, ràng buộc và acceptance gap hiện tại |
 | `LEDGER.md`  | Bằng chứng thực thi và validation dạng append-only                                    |
@@ -323,7 +331,7 @@ Command spec là protocol authoring. Nó phỏng vấn user, ghi quyết định
 
 User phê duyệt `SPEC.md` và `ROADMAP.md` một lần. Phê duyệt này áp dụng cho phần việc nằm trong scope đã duyệt. Nó không cho phép refactor không liên quan hoặc tự thay đổi product intent.
 
-Spec đã duyệt cũng ghi commit policy. Mặc định agent không tự commit; việc push không bao giờ được ngầm cho phép.
+Spec đã duyệt cũng ghi commit cadence. Mặc định là `per-task`: sau khi một ROADMAP task pass `verify:` và phần tick/evidence tương ứng đã được cập nhật, executor tạo local restore-point commit nếu Git policy chung cho phép. `per-phase` chờ phase validation pass; `user` tắt automatic commit cho spec đó. Cadence chỉ có thể thu hẹp hành vi local-commit mặc định của CLAUDART, không thể vượt qua lệnh cấm ở scope cao hơn, và không mode nào ngầm cho phép push.
 
 Phê duyệt và ý định thực thi là hai tín hiệu riêng. Chỉ phê duyệt có thể để spec ở trạng thái `ready`. Nếu message hiện tại hoặc chỉ dẫn trước đó vẫn còn hiệu lực cũng yêu cầu implement, run, continue hoặc resume sau khi duyệt, author chuyển thẳng sang spec runner trong cùng phiên. Mở phiên mới vẫn là một lựa chọn, không phải điều kiện bắt buộc. Thay đổi đáng kể ngoài intent đã duyệt vẫn phải sửa spec và xin duyệt lại.
 
@@ -341,6 +349,8 @@ Sau đó loop:
 4. cập nhật trạng thái item trong roadmap;
 5. nối bằng chứng vào ledger;
 6. ghi blocker kèm điều kiện cụ thể để tiếp tục.
+
+Với cadence mặc định `per-task`, restore point của task đã verify được commit sau khi roadmap/evidence của task được cập nhật. `per-phase` chỉ commit khi validation của cả phase pass; `user` để việc commit spec cho user. Cả ba mode vẫn phải tuân theo authority và staging rule của Git workflow chung.
 
 Một check thất bại chỉ được thử lại khi giả thuyết, implementation hoặc verifier đã thay đổi đáng kể. Lặp lại cùng một lần thử thất bại không phải là tiến triển.
 

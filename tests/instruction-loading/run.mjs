@@ -628,17 +628,53 @@ try {
       read(join(root, ".codex/guidelines/spec-workflow.md")),
     ];
     for (const contract of contracts) {
-      assert.match(contract, /commits: per-task # per-task \\| per-phase \\| user/);
+      assert.match(contract, /commits: per-task # per-task \| per-phase \| user/);
       assert.match(contract, /`per-task` is the default/);
-      assert.match(contract, /Follow `git-workflow\\.md`/);
-      assert.doesNotMatch(contract, /commits: user # user \\| per-task/);
+      assert.match(contract, /Follow `git-workflow\.md`/);
+      assert.doesNotMatch(contract, /commits: user # user \| per-task/);
     }
     for (const entrypoint of [
       ".claude/commands/spec.md",
       ".agents/skills/codex-spec/SKILL.md",
     ]) {
       const text = read(join(root, entrypoint));
-      assert.match(text, /\\*\\*Commit cadence\\*\\*: `commits: per-task` \\(default\\)/);
+      assert.match(text, /\*\*Commit cadence\*\*: `commits: per-task` \(default\)/);
+    }
+  });
+  check("Git consumers use the central policy while explicit exceptions remain", () => {
+    for (const file of [
+      ".claude/commands/refactor-memory.md",
+      ".agents/skills/codex-refactor-memory/SKILL.md",
+    ]) {
+      const text = read(join(root, file));
+      assert.match(text, /git-workflow\.md/);
+      assert.match(text, /commit the verified in-scope refactor result/);
+      assert.doesNotMatch(text, /Do not run `git commit`/);
+      assert.doesNotMatch(
+        text,
+        /Do not commit, push, merge, rebase, tag, or trigger CI\/CD without explicit user permission/,
+      );
+    }
+    for (const file of [
+      ".claude/rules/agent-delegation.md",
+      ".codex/guidelines/agent-delegation.md",
+    ]) {
+      const text = read(join(root, file));
+      assert.match(text, /does not authorize subagents to create Git commits/);
+      assert.match(text, /The parent owns Git-history integration/);
+    }
+    assert.match(
+      read(join(root, "INTEGRATE.md")),
+      /Do not commit, push, or merge\./,
+    );
+    for (const file of [
+      ".claude/agents/clean-code-reviewer.md",
+      ".codex/agents/clean-code-reviewer.toml",
+    ]) {
+      assert.match(
+        read(join(root, file)),
+        /Do not commit, push, rewrite history, or change Git configuration unless explicitly requested/,
+      );
     }
   });
   // Shared-state behavior uses the real installer and checker binaries, not a
@@ -724,11 +760,9 @@ try {
           checkpoint,
           /Absence from this conversation is not completion/,
         );
-        assert.match(
-          checkpoint,
-          /most specific applicable source: an active spec's/,
-        );
-        assert.match(checkpoint, /Never use broad staging such as/);
+        assert.match(checkpoint, /does \*\*not\*\* define a separate commit-permission model/);
+        assert.match(checkpoint, /git-workflow\.md/);
+        assert.match(checkpoint, /spec with `commits: user`/);
         assert.match(
           checkpoint,
           /CHECKPOINT NOT PERSISTED IN GIT: commit required/,

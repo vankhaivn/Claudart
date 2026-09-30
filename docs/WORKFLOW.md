@@ -116,11 +116,19 @@ File count alone does not require a plan. Needing JSON, an image, or an archive 
 
 A specification replaces task plans within its approved scope. Do not create task files for work already owned by an active specification. When product intent is still unclear, use Project Docs if installed to gather bootstrap input and establish only the current owners that are needed; it does not require a discovery pack or a `docs/project/` directory.
 
+### Git persistence
+
+CLAUDART allows verified, coherent **local commits by default** when no higher-scope runtime/user instruction, repository Git rule, or tool restriction prohibits them or requires another approval. Claude respects applicable higher-scope policy such as `~/.claude/CLAUDE.md` and `~/.claude/settings.json`; Codex respects applicable `~/.codex/AGENTS.md` and active approval/sandbox restrictions. A higher-scope requirement for explicit user approval remains binding until that approval is actually given.
+
+Commit only owned in-scope changes after their relevant verification passes. Preserve unrelated work and stage explicit paths or hunks rather than broad staging. Commit messages and branch names follow repository conventions; CLAUDART does not add AI/tool co-author or generated-by attribution and does not create agent-branded namespaces such as `codex/*`, `claude/*`, or `agent/*`. Permission to make a local commit never implies permission to push, merge, rewrite history, create tags, or change Git configuration.
+
+Task review remains a product/workflow gate, not a Git-persistence gate: verified task implementation may already have a local restore-point commit when the task reaches `awaiting-review`; the user still confirms `done` and archive separately. Subagents do not create history commits merely because work was delegated; the parent integrates, verifies, and persists their work under the same Git policy.
+
 ### End or pause cleanly
 
 Use `/checkpoint` or `$codex-checkpoint` at a meaningful stopping point. Checkpoint rebuilds current state, synchronizes indexes, records retired history, and distills eligible durable facts.
 
-Checkpoint is not a blanket Git grant. After state maintenance, it follows the most specific applicable commit policy from an active spec, current or still-applicable user instructions, and the downstream project's Git instructions. When a commit is authorized at that boundary, it persists only verified in-scope session and checkpoint changes while preserving unrelated work. Otherwise it leaves the worktree intact and reports that the checkpoint is not persisted in Git. Pushes and history-changing operations require separate authorization.
+Checkpoint uses that same Git workflow instead of defining a separate permission model. When local commits are allowed, it persists the verified checkpoint-owned delta that is not already committed; when a higher-scope rule blocks the commit or safe staging is impossible, it leaves the worktree intact and reports that persistence is still required. A spec with `commits: user` remains an explicit no-auto-commit exception for its spec-owned changes.
 
 Use `/handoff` or `$codex-handoff` only when a difficult investigation must continue in a fresh session. Handoff records the current hypothesis, evidence, failed approaches, constraints, and exact next step. It is not a general session summary.
 
@@ -311,7 +319,7 @@ Each workspace contains:
 
 | File         | Purpose                                                                        |
 | ------------ | ------------------------------------------------------------------------------ |
-| `SPEC.md`    | Approved intent, acceptance scenarios, scope limits, and commit policy         |
+| `SPEC.md`    | Approved intent, acceptance scenarios, scope limits, and commit cadence        |
 | `ROADMAP.md` | Phases, executable work items, and a verification checkpoint for each item     |
 | `NOTES.md`   | Curated working knowledge, decisions, constraints, and current acceptance gaps |
 | `LEDGER.md`  | Append-only execution and validation evidence                                  |
@@ -323,7 +331,7 @@ The specification command is the authoring protocol. It interviews the user, rec
 
 The user approves `SPEC.md` and `ROADMAP.md` once. That approval applies to the work inside the approved scope. It does not authorize unrelated refactoring or a change in product intent.
 
-The approved specification also records the commit policy. The default is no automatic commits; pushing is never implied.
+The approved specification also records its commit cadence. The default is `per-task`: after a ROADMAP task passes its `verify:` and its tick/evidence updates land, the executor creates a local restore-point commit when the shared Git policy permits it. `per-phase` waits for successful phase validation; `user` disables automatic commits for that spec. The cadence can narrow CLAUDART's normal local-commit behavior but never overrides a higher-scope prohibition, and none of these modes implies push.
 
 Approval and execution intent are separate. Approval alone may leave the specification at `ready`. If the current message or an earlier still-applicable instruction also says to implement, run, continue, or resume after approval, the author hands directly to the spec runner in the same session. Starting a fresh session remains an option, not a requirement. A material change outside the approved intent still requires amendment and renewed approval.
 
@@ -341,6 +349,8 @@ The loop then:
 4. updates the roadmap disposition;
 5. appends evidence to the ledger;
 6. records blockers with a concrete condition for resuming.
+
+With the default `per-task` cadence, a verified task restore point is committed after the task's roadmap/evidence updates. `per-phase` commits only after the whole phase validation passes; `user` leaves spec commits to the user. All three modes remain subject to the shared Git authority and staging rules.
 
 A failed check is retried only when the hypothesis, implementation, or verifier has materially changed. Repeating the same failed attempt is not progress.
 
