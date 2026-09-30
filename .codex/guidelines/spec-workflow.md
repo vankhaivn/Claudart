@@ -41,7 +41,7 @@ status: drafting # drafting | poc-review | ready | running | blocked | awaiting-
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
 agent: codex # claude | codex | both
-commits: user # user | per-task | per-phase — the executor's git-commit grant, chosen at approval; push is never granted
+commits: per-task # per-task | per-phase | user — spec commit cadence; git-workflow.md owns authority and remote/history limits
 ---
 
 # <Mission Title>
@@ -173,7 +173,7 @@ The user approves **SPEC + ROADMAP once** ("go" / "approved" / "ok làm đi" →
 
 Approval and execution intent are separate signals. An approval-only message may end with the spec at `ready`. If the current message, or an earlier still-applicable instruction, explicitly says to implement, execute, start, continue, or resume after approval, `$codex-spec` hands control directly to `$codex-spec-run` in the same session: the runner flips `ready → running` and begins. A fresh session is available when useful, never a prerequisite. Material changes outside the approved SPEC still require amendment and renewed approval.
 
-Approval also fixes the **commit policy** (`commits:` in SPEC frontmatter): `user` (default — the executor never runs `git commit`; the user commits at rotations and gates), `per-task` or `per-phase` (the executor commits at each tick / phase close, message `spec(<slug>): <summary>`, so a long run always has restore points). The grant covers `git commit` only — never push, never history rewrites, regardless of policy.
+Approval also fixes the **spec commit cadence** (`commits:` in SPEC frontmatter): `per-task` is the default and creates a restore point after each task's `verify:` passes and its tick/evidence updates land; `per-phase` commits after successful phase validation; `user` disables automatic commits for this spec. This field may narrow CLAUDART's normal local-commit behavior, but it never overrides a higher-scope Git restriction. Follow `git-workflow.md` for authority, staging scope, message/identity hygiene, and remote/history boundaries.
 
 Planned human interaction points are exactly three:
 
@@ -190,7 +190,11 @@ Everything else stays autonomous. A task blocker stops that task; it stops the w
 3. **Execute.** Append `task-started` to the LEDGER before touching code — a mid-task compaction must be able to see what was in flight. Work solo, or delegate under the active harness policy and `agent-delegation.md`; roadmap wave markings carry a prepared strategy, not a separate permission gate. Record each spawn as a `delegated` LEDGER entry (unit, expected output) so a compaction never orphans a running worker — the LEDGER plays the role the active task file plays for `$codex-plan` work. Make worker prompts self-contained with the goal, boundary, scope/non-overlap, constraints, expected output, roadmap task text, and relevant SPEC lines so they remain correct regardless of optional inherited context.
 4. **Verify on a real surface.** Run the task's `verify:`. Tests alone never prove user-facing behavior — drive the app, open the page, compare UI against the POC artifact. A worker's "done" is a claim to check, not a result to record.
 5. **Tick and log.** Flip `- [ ]` → `- [x]`, re-read to confirm the intended task changed state, append a `task-completed` LEDGER entry with evidence, bump `updated:` in SPEC frontmatter. Clear any Current Acceptance Delta this evidence actually resolves. Route mission-local constraints, pitfalls, decisions, and knowledge candidates into `NOTES.md`; promote an eligible fact immediately only under the knowledge-maintenance exception.
+
+   - After the task implementation, task-level verification, ROADMAP tick, LEDGER evidence, SPEC `updated:` change, and required in-scope state updates are complete, inspect the resulting diff. If `commits: per-task`, follow `git-workflow.md` and commit that verified coherent task restore point with message `spec(<slug>): <task-id> <summary>` unless repository conventions require another format. If higher-scope policy blocks the commit, keep the worktree intact, record/report the pending persistence, and continue the approved mission unless the Git condition itself makes further work unsafe. `per-phase` and `user` do not commit at this task boundary.
 6. **Phase boundary**: run the phase validation. On PASS, tick the SPEC scenarios it proves, clear the resolved delta, append `phase-validated`, then make a rotation offer. On FAIL, do not close the phase: append `validation-failed`, update Current Acceptance Delta, and reopen responsible work under the ROADMAP rule above. Never create a separate replay/verification task. Then continue under the convergence rules below.
+
+   - After a PASS has updated scenario evidence and appended `phase-validated`, if `commits: per-phase`, follow `git-workflow.md` and commit the verified phase restore point with message `spec(<slug>): phase <n> <summary>` unless repository conventions require another format. Do not add a duplicate phase commit under `per-task`; those task commits already own the implementation cadence. `user` remains no-auto-commit for the spec.
 
 ## Convergence & Circuit Breakers
 

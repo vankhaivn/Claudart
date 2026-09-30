@@ -26,7 +26,7 @@ The current request controls routing. A direct request to run, implement, contin
 
 Run the rule's loop until its final-review gate or a circuit breaker. Preserve the SPEC and Must-NOT-Have fences, ROADMAP disposition forms, Current Acceptance Delta, append-only LEDGER evidence, and smallest non-redundant verification rules. Derive impact from the actual changed surface when selecting `full-baseline` or `scoped-review`; every successful gate records the resulting revision or bounded worktree fingerprint and its `executed`, `covered`, and `reused` evidence.
 
-Honor `commits:` exactly; it never authorizes push or history rewrite. Honor explicit user/runtime budgets, but do not invent estimates, attempt limits, model tiers, or rotation thresholds.
+Honor `commits:` as the spec cadence under the applicable `git-workflow.md`: `per-task` (default), `per-phase`, or `user` (no automatic spec commits). The field never overrides higher-scope Git restrictions and never authorizes push or history rewrite. Honor explicit user/runtime budgets, but do not invent estimates, attempt limits, model tiers, or rotation thresholds.
 
 At a useful rotation boundary, surface phase progress and Current Acceptance Delta with an option to checkpoint and rotate. Continue authorized work when the user declines or gives no reply; the offer is never a pause gate. On affirmative rotation, follow the rule's checkpoint flow. A fresh session is optional.
 

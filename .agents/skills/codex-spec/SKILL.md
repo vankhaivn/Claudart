@@ -66,7 +66,7 @@ Re-read SPEC.md and ROADMAP.md as if this conversation never happened, pretendin
 **Folder**: `.claudart/specs/YYYY-MM-DD-<slug>/`
 **POC**: `artifacts/<file>` — open it and check it still matches your intent
 **Scenarios**: <n> acceptance scenarios | **Roadmap**: <m> phases, <k> tasks
-**Commit policy**: `commits: user` — the loop never commits; say "per-task" or "per-phase" before approving if you want git checkpoints during the run
+**Commit cadence**: `commits: per-task` (default) — verified ROADMAP tasks become local restore points when higher-scope Git policy allows; choose `per-phase` for larger integration commits or `user` to disable automatic spec commits
 **Open questions**: <list, or "none">
 
 Review SPEC.md (especially Must-NOT-Have) and ROADMAP.md. When you approve, that is a STANDING

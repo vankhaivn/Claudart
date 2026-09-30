@@ -622,6 +622,25 @@ try {
       ),
     );
   });
+  check("spec commit cadence defaults to per-task in both adapters", () => {
+    const contracts = [
+      read(join(root, ".claude/rules/spec-workflow.md")),
+      read(join(root, ".codex/guidelines/spec-workflow.md")),
+    ];
+    for (const contract of contracts) {
+      assert.match(contract, /commits: per-task # per-task \\| per-phase \\| user/);
+      assert.match(contract, /`per-task` is the default/);
+      assert.match(contract, /Follow `git-workflow\\.md`/);
+      assert.doesNotMatch(contract, /commits: user # user \\| per-task/);
+    }
+    for (const entrypoint of [
+      ".claude/commands/spec.md",
+      ".agents/skills/codex-spec/SKILL.md",
+    ]) {
+      const text = read(join(root, entrypoint));
+      assert.match(text, /\\*\\*Commit cadence\\*\\*: `commits: per-task` \\(default\\)/);
+    }
+  });
   // Shared-state behavior uses the real installer and checker binaries, not a
   // test-only implementation of state selection. Fixtures are anonymous data.
   const seeds = [
