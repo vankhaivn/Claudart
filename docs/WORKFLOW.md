@@ -208,6 +208,8 @@ sources:
 ---
 ```
 
+`sources` names the files that own or prove the topic's claims, not every file that was read. The checker warns when a topic lists more than 10.
+
 The supported lifecycle states are:
 
 - `active`: current, verified authority;

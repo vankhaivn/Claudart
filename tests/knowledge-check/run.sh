@@ -226,6 +226,22 @@ for expected_code in K120 K130 K131 K141 K201 K203 K204; do
 done
 assert_no_code "HTML-commented dead route is ignored" K202
 
+materialize budgets claude
+budgets_root=$MATERIALIZED
+run_checker "$CLAUDE_CHECKER" "$TMP_ROOT/budgets.out" \
+  --root "$budgets_root" --today 2026-07-29
+assert_status "budget warnings pass the default error threshold" 0
+if [ "$(grep -c '^WARN|K135|' "$LAST_OUTPUT")" -eq 1 ] &&
+  grep -q '^WARN|K135|.claudart/knowledge/source-heavy.md:19|' "$LAST_OUTPUT"; then
+  pass "only the topic above 10 sources reports K135, at its first excess source"
+else
+  fail "only the topic above 10 sources reports K135, at its first excess source"
+  sed 's/^/  /' "$LAST_OUTPUT" >&2
+fi
+run_checker "$CLAUDE_CHECKER" "$TMP_ROOT/budgets-warning-threshold.out" \
+  --root "$budgets_root" --today 2026-07-29 --fail-on warning
+assert_status "budget warnings meet the warning threshold" 1
+
 empty_root=$TMP_ROOT/missing-knowledge
 mkdir -p "$empty_root"
 run_checker "$CLAUDE_CHECKER" "$TMP_ROOT/missing-knowledge.out" \

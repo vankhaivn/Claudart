@@ -208,6 +208,8 @@ sources:
 ---
 ```
 
+`sources` chỉ nêu các file sở hữu hoặc chứng minh claim của topic, không phải mọi file đã đọc. Checker cảnh báo khi một topic có hơn 10 source.
+
 Các trạng thái được hỗ trợ:
 
 - `active`: nguồn chuẩn hiện tại, đã được xác minh;

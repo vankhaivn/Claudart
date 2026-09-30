@@ -596,6 +596,16 @@ scan_artifact() {
     add_finding WARN K115 "$artifact_rel" "$artifact_description_line" \
       "description exceeds the 320-byte routing budget"
   fi
+  if [ "$artifact_kind" = topic ]; then
+    # Anchor the finding at the first source beyond the budget.
+    artifact_excess_source_line=$(awk -v FS="$SEP" '
+      $1 == "L" && $2 == "sources" && ++count == 11 { print $4; exit }
+    ' "$TMP_DIR/meta.$artifact_id")
+    if [ -n "$artifact_excess_source_line" ]; then
+      add_finding WARN K135 "$artifact_rel" "$artifact_excess_source_line" \
+        "topic lists more than 10 sources"
+    fi
+  fi
   if [ "$artifact_status" = active ] && [ -n "$artifact_verified" ]; then
     verified_ordinal=$(date_ordinal "$artifact_verified")
   else

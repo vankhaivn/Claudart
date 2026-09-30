@@ -67,6 +67,7 @@ sensitivity: internal
 - `status` is `active`, `review-needed`, `superseded`, or `retired`.
 - `updated` changes only when topic content changes. `last_verified` changes only after checking evidence.
 - An active topic additionally requires `last_verified` and at least one of `sources` or `verify`.
+- `sources` names only the files that own or prove the topic's claims: the contract, schema, configuration, or owner document whose change could invalidate a claim. It is not a record of files read. More than 10 sources means the topic covers too much or restates a document another source owns; narrow the topic or reduce it to a route.
 - Every non-active topic requires a one-line double-quoted `status_note` explaining the review need or lifecycle state.
 - Optional fields are `aliases`, `triggers`, `scope`, `last_verified`, `sources`, `related`, `supersedes`, `verify`, `status_note`, and `sensitivity`.
 - Every list uses block form with two-space-indented, double-quoted items. Flow lists are forbidden.
