@@ -73,7 +73,7 @@ For each topic:
 1. Identify the owner of each fact and its evidence. Preserve the topic body, title, curated hook, grouping, ordering, and deliberate external routes during in-place normalization. Address duplicate ownership when the current request already includes semantic cleanup; otherwise report it for a scoped follow-up. Do not turn this normalization pass into a full project-document audit.
 2. Normalize frontmatter once using only supported fields and formats. Do not invent aliases, triggers, scope, sources, relations, verification dates, or lifecycle claims.
 3. Set `status: active` only when current evidence was actually checked. Record `last_verified` as the evidence-check date and ensure active topics have `sources` or `verify`.
-4. If evidence is insufficient or conflicting, use `status: review-needed` with a precise `status_note`; do not present uncertainty as active truth.
+4. If evidence is insufficient or conflicting, use `status: review-needed` with a precise `status_note`; do not present uncertainty as active truth. Entries under `## Point-in-time observations` are outside this verification and do not decide the status.
 5. Use `superseded` or `retired` only with clear repository evidence or user confirmation. Never infer lifecycle from age or absence from the map.
 6. Update the topic and its reachable root/domain-map route atomically. Route lines have no dates.
 

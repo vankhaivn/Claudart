@@ -213,9 +213,11 @@ sources:
 The supported lifecycle states are:
 
 - `active`: current, verified authority;
-- `review-needed`: visible uncertainty or conflict that must be checked before use as authority;
+- `review-needed`: a claim that repository evidence should confirm is unverified, conflicting, or has drifted, and must be checked before use as authority;
 - `superseded`: replaced by another topic;
 - `retired`: intentionally historical.
+
+A topic may end with a `## Point-in-time observations` section for dated observations of runtime or environment state that the repository cannot confirm. The lifecycle state and `last_verified` describe the rest of the topic; observations are leads to re-check, never authority.
 
 The exact field grammar, routing limits, map thresholds, and mutation rules live in the runtime's `knowledge-management` rule or guideline.
 

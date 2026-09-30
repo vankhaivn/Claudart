@@ -258,13 +258,26 @@ for reference in \
     'Do not grow a topic past the 10 KiB detail budget.' \
     'Correcting or removing an existing claim is always allowed.' \
     'A topic over 4 KiB has at least two `##` sections' \
-    'It is not a record of files read.'; do
+    'It is not a record of files read.' \
+    'A topic may end with one `## Point-in-time observations` section.' \
+    '`status` and `last_verified` describe the rest of the topic.' \
+    '`review-needed` is not a substitute for that reduction.'; do
     if grep -Fq -- "$contract" "$reference"; then
       pass "${reference#"$REPO_ROOT/"} states: $contract"
     else
       fail "${reference#"$REPO_ROOT/"} states: $contract"
     fi
   done
+done
+for contract_owner in \
+  "$REPO_ROOT/.claude/rules/knowledge-management.md" \
+  "$REPO_ROOT/.codex/guidelines/knowledge-management.md"; do
+  contract='Treat entries under a topic'"'"'s `## Point-in-time observations` heading the same way'
+  if grep -Fq -- "$contract" "$contract_owner"; then
+    pass "${contract_owner#"$REPO_ROOT/"} keeps observations out of current authority"
+  else
+    fail "${contract_owner#"$REPO_ROOT/"} keeps observations out of current authority"
+  fi
 done
 
 empty_root=$TMP_ROOT/missing-knowledge

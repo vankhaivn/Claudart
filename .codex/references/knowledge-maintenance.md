@@ -31,6 +31,13 @@ Never auto-write after every exploration. Never copy a transcript, chronology, o
 
 Fix in-scope mechanical failures before reporting success. For an audit or refactor, use the checker as the mechanical baseline and preserve its schema and severity output rather than recreating its parser.
 
+## Status Scope And Point-In-Time Observations
+
+- A topic may end with one `## Point-in-time observations` section. It holds observations of runtime or environment state that repository evidence cannot confirm. Each entry starts with its observation date (`YYYY-MM-DD`) and states one fact. A newer observation replaces the older one; the section is not a log, and it counts toward the detail budget.
+- `status` and `last_verified` describe the rest of the topic. An observation that cannot be confirmed is never a reason for `review-needed`.
+- `review-needed` means a claim outside that section is unverified, conflicting, or known to have drifted. `status_note` names that claim.
+- When another current source owns the topic's facts, reduce the topic to a route in the same mutation. `review-needed` is not a substitute for that reduction.
+
 ## Canonical Topic Frontmatter
 
 Every topic uses the restricted grammar below. Required fields are `name`, `description`, `type`, `status`, and `updated`.
