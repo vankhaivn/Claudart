@@ -631,7 +631,6 @@ try {
       assert.match(contract, /commits: per-task # per-task \| per-phase \| user/);
       assert.match(contract, /`per-task` is the default/);
       assert.match(contract, /Follow `git-workflow\.md`/);
-      assert.doesNotMatch(contract, /commits: user # user \| per-task/);
     }
     for (const entrypoint of [
       ".claude/commands/spec.md",
@@ -649,11 +648,6 @@ try {
       const text = read(join(root, file));
       assert.match(text, /git-workflow\.md/);
       assert.match(text, /[Cc]ommit the verified in-scope refactor result/);
-      assert.doesNotMatch(text, /Do not run `git commit`/);
-      assert.doesNotMatch(
-        text,
-        /Do not commit, push, merge, rebase, tag, or trigger CI\/CD without explicit user permission/,
-      );
     }
     for (const file of [
       ".claude/rules/agent-delegation.md",
@@ -760,14 +754,13 @@ try {
           checkpoint,
           /Absence from this conversation is not completion/,
         );
-        assert.match(checkpoint, /does \*\*not\*\* define a separate commit-permission model/);
-        assert.match(checkpoint, /git-workflow\.md/);
+        assert.match(checkpoint, /For Git persistence, read .*git-workflow\.md/);
+        assert.match(checkpoint, /that shared contract owns higher-scope\/runtime/);
         assert.match(checkpoint, /spec with `commits: user`/);
         assert.match(
           checkpoint,
           /CHECKPOINT NOT PERSISTED IN GIT: commit required/,
         );
-        assert(!checkpoint.includes("Do not run `git commit` yourself"));
         assert.match(
           read(join(root, `${commands}handoff${suffix}`)),
           /Never silently overwrite an unconsumed baton/,

@@ -128,7 +128,7 @@ Review task vẫn là gate về nghiệm thu công việc, không phải gate b�
 
 Dùng `/checkpoint` hoặc `$codex-checkpoint` tại một điểm dừng phù hợp. Checkpoint xây dựng lại trạng thái hiện tại, đồng bộ các index, ghi lịch sử đã kết thúc và chắt lọc những fact đủ điều kiện để lưu lâu dài.
 
-Checkpoint dùng chính Git workflow ở trên thay vì tự định nghĩa một mô hình cấp quyền riêng. Khi local commit được phép, nó persist phần delta đã verify thuộc checkpoint mà chưa được commit; khi policy scope cao hơn chặn commit hoặc không thể stage an toàn, nó giữ nguyên worktree và báo rõ phần persistence còn thiếu. Spec có `commits: user` vẫn là ngoại lệ no-auto-commit rõ ràng cho thay đổi thuộc spec đó.
+Checkpoint tuân theo Git workflow ở trên. Khi local commit được phép, nó persist phần delta đã verify thuộc checkpoint mà chưa được commit; khi policy scope cao hơn chặn commit hoặc không thể stage an toàn, nó giữ nguyên worktree và báo rõ phần persistence còn thiếu. Spec có `commits: user` vẫn là ngoại lệ no-auto-commit rõ ràng cho thay đổi thuộc spec đó.
 
 Chỉ dùng `/handoff` hoặc `$codex-handoff` khi một phần điều tra khó cần được tiếp tục trong phiên mới. Handoff ghi giả thuyết hiện tại, bằng chứng, các hướng đã loại, ràng buộc và bước tiếp theo chính xác. Nó không phải bản tóm tắt chung cho mọi phiên.
 

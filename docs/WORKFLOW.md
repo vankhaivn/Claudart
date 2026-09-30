@@ -128,7 +128,7 @@ Task review remains a product/workflow gate, not a Git-persistence gate: verifie
 
 Use `/checkpoint` or `$codex-checkpoint` at a meaningful stopping point. Checkpoint rebuilds current state, synchronizes indexes, records retired history, and distills eligible durable facts.
 
-Checkpoint uses that same Git workflow instead of defining a separate permission model. When local commits are allowed, it persists the verified checkpoint-owned delta that is not already committed; when a higher-scope rule blocks the commit or safe staging is impossible, it leaves the worktree intact and reports that persistence is still required. A spec with `commits: user` remains an explicit no-auto-commit exception for its spec-owned changes.
+Checkpoint follows that same Git workflow. When local commits are allowed, it persists the verified checkpoint-owned delta that is not already committed; when a higher-scope rule blocks the commit or safe staging is impossible, it leaves the worktree intact and reports that persistence is still required. A spec with `commits: user` remains an explicit no-auto-commit exception for its spec-owned changes.
 
 Use `/handoff` or `$codex-handoff` only when a difficult investigation must continue in a fresh session. Handoff records the current hypothesis, evidence, failed approaches, constraints, and exact next step. It is not a general session summary.
 
