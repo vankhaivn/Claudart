@@ -240,36 +240,71 @@ run_checker "$CLAUDE_CHECKER" "$TMP_ROOT/missing-index.out" \
 assert_status "missing INDEX is a contract failure, not runtime failure" 1
 assert_code "missing INDEX reports K002" K002
 
+# Commits one source change dated after the fixture's last_verified, then leaves
+# a second change uncommitted, in the repository at $1 for the paths in $2.
+drift_sources() {
+  drift_repo=$1
+  drift_prefix=$2
+  git -C "$drift_repo" init -q
+  git -C "$drift_repo" config user.name "Fixture Author"
+  git -C "$drift_repo" config user.email "fixture@example.invalid"
+  git -C "$drift_repo" add .
+  GIT_AUTHOR_DATE=2026-01-01T00:00:00Z \
+    GIT_COMMITTER_DATE=2026-01-01T00:00:00Z \
+    git -C "$drift_repo" commit -q -m "initial fixture"
+  printf '\nCommitted source change.\n' >>"$drift_repo/${drift_prefix}canonical.md"
+  printf '\nCommitted historical change.\n' >>"$drift_repo/${drift_prefix}historical.md"
+  git -C "$drift_repo" add "${drift_prefix}canonical.md" "${drift_prefix}historical.md"
+  GIT_AUTHOR_DATE=2026-02-01T00:00:00Z \
+    GIT_COMMITTER_DATE=2026-02-01T00:00:00Z \
+    git -C "$drift_repo" commit -q -m "update canonical source"
+  printf '\nDirty source change.\n' >>"$drift_repo/${drift_prefix}canonical.md"
+  printf '\nDirty historical change.\n' >>"$drift_repo/${drift_prefix}historical.md"
+}
+
+assert_drift() {
+  label=$1
+  if [ "$(grep -c '^WARN|K133|' "$LAST_OUTPUT")" -eq 1 ] &&
+    [ "$(grep -c '^WARN|K134|' "$LAST_OUTPUT")" -eq 1 ] &&
+    ! grep -q 'retired-history.md' "$LAST_OUTPUT"; then
+    pass "$label"
+  else
+    fail "$label"
+    sed 's/^/  /' "$LAST_OUTPUT" >&2
+  fi
+}
+
 materialize freshness claude
 freshness_root=$MATERIALIZED
-git -C "$freshness_root" init -q
-git -C "$freshness_root" config user.name "Fixture Author"
-git -C "$freshness_root" config user.email "fixture@example.invalid"
-git -C "$freshness_root" add .
-GIT_AUTHOR_DATE=2026-01-01T00:00:00Z \
-  GIT_COMMITTER_DATE=2026-01-01T00:00:00Z \
-  git -C "$freshness_root" commit -q -m "initial fixture"
-printf '\nCommitted source change.\n' >>"$freshness_root/docs/canonical.md"
-printf '\nCommitted historical change.\n' >>"$freshness_root/docs/historical.md"
-git -C "$freshness_root" add docs/canonical.md docs/historical.md
-GIT_AUTHOR_DATE=2026-02-01T00:00:00Z \
-  GIT_COMMITTER_DATE=2026-02-01T00:00:00Z \
-  git -C "$freshness_root" commit -q -m "update canonical source"
-printf '\nDirty source change.\n' >>"$freshness_root/docs/canonical.md"
-printf '\nDirty historical change.\n' >>"$freshness_root/docs/historical.md"
+drift_sources "$freshness_root" "docs/"
 run_checker "$CLAUDE_CHECKER" "$TMP_ROOT/freshness.out" \
   --root "$freshness_root" --today 2026-02-02 --fail-on warning
 assert_status "Git source freshness warnings meet the warning threshold" 1
 assert_code "dirty source reports K133" K133
 assert_code "committed source newer than last_verified reports K134" K134
-if [ "$(grep -c '^WARN|K133|' "$LAST_OUTPUT")" -eq 1 ] &&
-  [ "$(grep -c '^WARN|K134|' "$LAST_OUTPUT")" -eq 1 ] &&
-  ! grep -q 'retired-history.md' "$LAST_OUTPUT"; then
-  pass "Git freshness warnings are limited to active entries"
-else
-  fail "Git freshness warnings are limited to active entries"
-  sed 's/^/  /' "$LAST_OUTPUT" >&2
-fi
+assert_drift "Git freshness warnings are limited to active entries"
+
+# The checked root holds project state and is not a repository; the source lives
+# in a nested repository.
+materialize freshness workspace
+workspace_root=$MATERIALIZED
+drift_sources "$workspace_root/docs" ""
+run_checker "$CLAUDE_CHECKER" "$TMP_ROOT/freshness-workspace.out" \
+  --root "$workspace_root" --today 2026-02-02 --fail-on warning
+assert_status "source drift in a nested repository meets the warning threshold" 1
+assert_drift "source drift is checked in the repository that owns the source"
+
+# The checked root sits below the repository top level.
+nested_top=$TMP_ROOT/freshness-nested
+nested_root=$nested_top/packages/app
+mkdir -p "$nested_root/.claudart"
+cp -R "$FIXTURES/freshness/layer/." "$nested_root/.claudart/"
+cp -R "$FIXTURES/freshness/docs" "$nested_root/docs"
+drift_sources "$nested_top" "packages/app/docs/"
+run_checker "$CLAUDE_CHECKER" "$TMP_ROOT/freshness-nested.out" \
+  --root "$nested_root" --today 2026-02-02 --fail-on warning
+assert_status "source drift below a repository top level meets the warning threshold" 1
+assert_drift "source drift is checked when the root is below the repository top level"
 
 /bin/bash "$CLAUDE_CHECKER" --help >"$TMP_ROOT/help.out" 2>"$TMP_ROOT/help.err"
 help_status=$?

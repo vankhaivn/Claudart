@@ -675,13 +675,7 @@ fi
 
 GIT_READY=0
 if command -v git >/dev/null 2>&1; then
-  git_top=$(git -C "$ROOT" rev-parse --show-toplevel 2>/dev/null || :)
-  if [ -n "$git_top" ] && [ -d "$git_top" ]; then
-    git_top=$(CDPATH='' cd -- "$git_top" 2>/dev/null && pwd -P || :)
-    if [ "$git_top" = "$ROOT" ]; then
-      GIT_READY=1
-    fi
-  fi
+  GIT_READY=1
 fi
 
 validate_source() {
@@ -757,14 +751,17 @@ validate_source() {
       ;;
   esac
 
+  # Freshness follows the work tree that owns each source, so the checked root
+  # may be a multi-repository workspace or sit below a repository top level.
+  # A source outside every work tree yields no Git output and is not checked.
   if [ "$GIT_READY" -eq 1 ] && [ "$source_status" = active ] &&
     [ -n "$source_verified" ]; then
-    source_git_rel=${source_physical#"$ROOT"/}
-    if [ -n "$(git -C "$ROOT" status --porcelain -- "$source_git_rel" 2>/dev/null)" ]; then
+    source_git_path=./$(basename -- "$source_candidate")
+    if [ -n "$(git -C "$source_directory" status --porcelain -- "$source_git_path" 2>/dev/null)" ]; then
       add_finding WARN K133 "$source_rel" "$source_line" \
         "local source is dirty or untracked since its last verification"
     fi
-    source_commit_date=$(git -C "$ROOT" log -1 --format=%cs -- "$source_git_rel" 2>/dev/null || :)
+    source_commit_date=$(git -C "$source_directory" log -1 --format=%cs -- "$source_git_path" 2>/dev/null || :)
     if [ -n "$source_commit_date" ] && valid_date "$source_commit_date" &&
       [ "$source_commit_date" \> "$source_verified" ]; then
       add_finding WARN K134 "$source_rel" "$source_line" \
