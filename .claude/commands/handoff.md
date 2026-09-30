@@ -38,7 +38,7 @@ Do not skip this pass. Writing the baton from general impressions produces a vib
 
 ### Step 2 — Route durable content out
 
-Apply Hard Rule 4 now. Patch an existing knowledge owner before creating a topic, update its reachable route atomically, and run `bash .claude/scripts/knowledge-check.sh` after any knowledge mutation. If evidence is insufficient or conflicting, keep a candidate in the owning work artifact or mark the existing owner `review-needed`; do not make the baton or a new topic pretend certainty.
+Apply Hard Rule 4 now. Patch an existing knowledge owner before creating a topic, subject to the detail budget in `.claude/references/knowledge-maintenance.md`, update its reachable route atomically, and run `bash .claude/scripts/knowledge-check.sh` after any knowledge mutation. If evidence is insufficient or conflicting, keep a candidate in the owning work artifact or mark the existing owner `review-needed`; do not make the baton or a new topic pretend certainty.
 
 ### Step 3 — Write `.claudart/HANDOFF.md`
 

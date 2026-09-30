@@ -169,7 +169,7 @@ Distill rather than copy work history. Keep task/spec state and proposals in the
 
 For each eligible claim:
 
-1. Route map-first and patch the existing canonical owner before creating a focused topic. Create a knowledge owner only when no other authoritative source owns that fact.
+1. Route map-first and patch the existing canonical owner before creating a focused topic, subject to the detail budget in `.claude/references/knowledge-maintenance.md`. Create a knowledge owner only when no other authoritative source owns that fact.
 2. Apply the canonical frontmatter, trust, scope, relation, and route grammar from the knowledge rule. Update `updated` only for a content edit and `last_verified` only for an evidence check.
 3. Update the topic and its reachable root/domain map atomically. Preserve curated titles, hooks, grouping, ordering, and external routes; never auto-promote an ambiguous unindexed file or auto-delete a topic.
 4. Run `bash .claude/scripts/knowledge-check.sh` after the final knowledge mutation. If it fails, report the exact findings and do not claim the knowledge update healthy.

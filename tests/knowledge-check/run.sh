@@ -238,9 +238,34 @@ else
   fail "only the topic above 10 sources reports K135, at its first excess source"
   sed 's/^/  /' "$LAST_OUTPUT" >&2
 fi
+if [ "$(grep -c '^WARN|K117|' "$LAST_OUTPUT")" -eq 1 ] &&
+  grep -q '^WARN|K117|.claudart/knowledge/flat-large.md:1|' "$LAST_OUTPUT"; then
+  pass "only the large topic without two body sections reports K117"
+else
+  fail "only the large topic without two body sections reports K117"
+  sed 's/^/  /' "$LAST_OUTPUT" >&2
+fi
 run_checker "$CLAUDE_CHECKER" "$TMP_ROOT/budgets-warning-threshold.out" \
   --root "$budgets_root" --today 2026-07-29 --fail-on warning
 assert_status "budget warnings meet the warning threshold" 1
+
+# The mutation contract is prose. These checks protect the mirrored wording; they
+# do not claim that the wording guarantees runtime compliance.
+for reference in \
+  "$REPO_ROOT/.claude/references/knowledge-maintenance.md" \
+  "$REPO_ROOT/.codex/references/knowledge-maintenance.md"; do
+  for contract in \
+    'Do not grow a topic past the 10 KiB detail budget.' \
+    'Correcting or removing an existing claim is always allowed.' \
+    'A topic over 4 KiB has at least two `##` sections' \
+    'It is not a record of files read.'; do
+    if grep -Fq -- "$contract" "$reference"; then
+      pass "${reference#"$REPO_ROOT/"} states: $contract"
+    else
+      fail "${reference#"$REPO_ROOT/"} states: $contract"
+    fi
+  done
+done
 
 empty_root=$TMP_ROOT/missing-knowledge
 mkdir -p "$empty_root"

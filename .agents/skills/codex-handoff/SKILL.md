@@ -41,7 +41,7 @@ Do not skip this pass. Writing the baton from general impressions produces a vib
 
 ### Step 2 — Route durable content out
 
-Apply Hard Rule 4 now. For any eligible knowledge write, read `.codex/guidelines/knowledge-management.md` in full, patch the existing owner first, update the topic plus its reachable route atomically, and run `bash .codex/scripts/knowledge-check.sh --root .`. If evidence is insufficient or conflicting, preserve a candidate in the owning work artifact; when that evidence invalidates an existing active owner, mark the owner `review-needed` with a precise `status_note` instead of leaving known-wrong material authoritative. Write task/spec updates first so the baton can reference them instead of carrying them.
+Apply Hard Rule 4 now. For any eligible knowledge write, read `.codex/guidelines/knowledge-management.md` in full, patch the existing owner first, subject to the detail budget in `.codex/references/knowledge-maintenance.md`, update the topic plus its reachable route atomically, and run `bash .codex/scripts/knowledge-check.sh --root .`. If evidence is insufficient or conflicting, preserve a candidate in the owning work artifact; when that evidence invalidates an existing active owner, mark the owner `review-needed` with a precise `status_note` instead of leaving known-wrong material authoritative. Write task/spec updates first so the baton can reference them instead of carrying them.
 
 ### Step 3 — Write `.claudart/HANDOFF.md`
 

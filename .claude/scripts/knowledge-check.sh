@@ -605,6 +605,20 @@ scan_artifact() {
       add_finding WARN K135 "$artifact_rel" "$artifact_excess_source_line" \
         "topic lists more than 10 sources"
     fi
+    if [ -n "$(find "$artifact_file" -prune -size +4096c -print 2>/dev/null)" ]; then
+      # Count body headings only: skip the frontmatter and fenced code blocks.
+      artifact_sections=$(awk '
+        NR == 1 { next }
+        !body { if ($0 == "---") body = 1; next }
+        /^(```|~~~)/ { fenced = !fenced; next }
+        !fenced && /^## / { count++ }
+        END { print count + 0 }
+      ' "$artifact_file")
+      if [ "$artifact_sections" -lt 2 ]; then
+        add_finding WARN K117 "$artifact_rel" 1 \
+          "topic over 4 KiB has fewer than two level-2 sections"
+      fi
+    fi
   fi
   if [ "$artifact_status" = active ] && [ -n "$artifact_verified" ]; then
     verified_ordinal=$(date_ordinal "$artifact_verified")

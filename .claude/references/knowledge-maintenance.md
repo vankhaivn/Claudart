@@ -19,10 +19,11 @@ Never auto-write after every exploration. Never copy a transcript, chronology, o
 
 1. Confirm `.claude/scripts/knowledge-check.sh` exists before writing. A missing checker is a High-severity installation problem and blocks the mutation.
 2. Find the canonical owner for each fact. If a source, schema, generated reference, or project document owns it, update that owner within the authorized work and keep knowledge to a pointer or minimal unique context. Otherwise patch an existing focused knowledge topic before creating another.
-3. Verify the claim and record scope/source information without inventing metadata.
-4. Change the topic and its reachable route atomically in the same diff. Preserve curated hooks, grouping, order, and external routes.
-5. Do not auto-delete topics. Do not auto-promote, retire, or supersede an ambiguous unindexed file.
-6. After any knowledge mutation, run:
+3. Do not grow a topic past the 10 KiB detail budget. When the owner is at or over that budget, a new claim goes to a new focused topic if it has its own durable ownership boundary; otherwise keep it as a candidate in its work artifact and report the owner as needing a reviewed split. Correcting or removing an existing claim is always allowed. Splitting or compacting existing content is a reviewed change, never automatic.
+4. Verify the claim and record scope/source information without inventing metadata.
+5. Change the topic and its reachable route atomically in the same diff. Preserve curated hooks, grouping, order, and external routes.
+6. Do not auto-delete topics. Do not auto-promote, retire, or supersede an ambiguous unindexed file.
+7. After any knowledge mutation, run:
 
    ```bash
    bash .claude/scripts/knowledge-check.sh
@@ -117,5 +118,6 @@ Every knowledge route is exactly one compact line with no date:
 - Every active topic must be reachable from the root exactly once through a direct route or one domain map.
 - A `review-needed` topic may remain unindexed while ownership is ambiguous. If routed for visibility, route it at most once and never present it as active authority.
 - Create domain maps when active topics exceed 24 or the root exceeds 1,200 visible words. Preserve deliberate direct and external routes while reorganizing.
-- A topic over 10 KiB is a split candidate, not an automatic rewrite. Keep using outline/section-first retrieval until a reviewed split preserves ownership and links.
+- A topic over 10 KiB is a reviewed-split candidate, not an automatic rewrite. Keep using outline/section-first retrieval until a reviewed split preserves ownership and links.
+- A topic over 4 KiB has at least two `##` sections, so retrieval can read one section instead of the whole body.
 - Hooks route; they do not summarize the whole topic or expose restricted details.

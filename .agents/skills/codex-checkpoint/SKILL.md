@@ -179,7 +179,7 @@ For candidates from Step 2, Step 3, task close, or spec NOTES:
 
 1. Distill claims rather than copying chronology or task prose. Promote only claims that are descriptive, durable beyond the current work, current, and evidenced. A fact may be narrowly scoped when its typed `scope` records that boundary.
 2. Keep WIP/proposals/state in task/spec/CONTEXT. Route behavior to `$codex-learn`. Keep uncertainty as a candidate; when evidence contradicts an existing canonical owner, mark that owner `review-needed` with a `status_note` instead of asserting a replacement.
-3. Read the root router and the smallest relevant maps/topics within the guideline's budget. Patch the existing owner first; create a focused topic only when no owner exists.
+3. Read the root router and the smallest relevant maps/topics within the guideline's budget. Patch the existing owner first, subject to the detail budget in `.codex/references/knowledge-maintenance.md`; otherwise create a focused topic only when no owner exists.
 4. Write canonical frontmatter and update the topic plus its reachable root/domain-map route atomically. Preserve curated hooks, grouping, ordering, and external routes. Never auto-delete, retire, supersede, or promote an ambiguous unindexed file.
 5. After all knowledge mutations in this checkpoint, run `bash .codex/scripts/knowledge-check.sh --root .`. Repair in-scope mechanical failures before reporting success. If the checker is missing, stop the knowledge mutation and report a High-severity installation problem.
 
