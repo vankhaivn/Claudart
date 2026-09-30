@@ -70,7 +70,7 @@ Provide the smallest context that preserves the relevant contracts and evidence;
 ## Integrating and verifying results
 
 - **Shared filesystem:** edits are already visible. Inspect the diff and reconcile ownership; do not reapply patches or perform a fictitious merge.
-- **Isolated checkout or returned patch:** review first, then integrate in dependency order using an authorized mechanism. Delegation does not authorize Git merges, commits, pushes, or destructive conflict resolution.
+- **Isolated checkout or returned patch:** review first, then integrate in dependency order using an authorized mechanism. Delegation does not authorize subagents to create Git commits, merges, pushes, or destructive conflict resolution. The parent owns Git-history integration: inspect and verify the combined result, then stage/commit it under `.claude/rules/git-workflow.md` when that policy allows.
 - Resolve conflicts in the parent. Check the combined effect with validation appropriate to the changed surface; inspect existing worker evidence before repeating checks. Re-run when integration changes behavior, evidence is missing/stale, or concerns remain.
 - Apply the per-unit retry budget above; changing the worker or model does not reset it.
 - Consume all required results before claiming the overall task complete. Relay the findings and limitations that matter to the user regardless of how the client displays worker messages.

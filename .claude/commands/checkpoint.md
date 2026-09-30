@@ -176,16 +176,15 @@ For each eligible claim:
 
 Checkpoint performs these writes autonomously as bulk maintenance; direct mid-session promotion remains valid only under the knowledge rule's capture gates and immediate-promotion triggers. The git diff is the review surface.
 
-### Step 6d — Persist the checkpoint when authorized
+### Step 6d — Persist through the shared Git workflow
 
-A checkpoint is durable in Git only after its in-scope changes are committed. Writing CONTEXT/JOURNAL/indexes or archiving a task/spec is not, by itself, a durable restore point.
+A checkpoint is durable in Git only when its in-scope delta is committed. Checkpoint does **not** define a separate commit-permission model; before any Git write, read `.claude/rules/git-workflow.md` and apply its higher-scope/runtime, repository, user, staging, identity, and remote/history rules.
 
 1. Inspect the final `git status --short` and relevant diffs after all checkpoint writes.
-2. Resolve commit authority from the most specific applicable source: an active spec's `commits:` policy when this checkpoint belongs to that spec, then explicit current or still-applicable user instructions and downstream project Git instructions. CLAUDART itself grants no commit or push authority. If the applicable spec cadence does not authorize a commit at this boundary, do not create an extra checkpoint commit.
-3. When commit is authorized at this boundary, identify only verified in-scope changes from the session plus checkpoint maintenance that belongs to the same scope. Preserve unrelated or pre-existing work. Never use broad staging such as `git add -A` or `git add .`; stage explicit paths or otherwise isolate only owned hunks. If a file mixes unrelated edits that cannot be separated safely, leave it unstaged and report that the checkpoint is not fully persisted.
-4. Commit the staged checkpoint set using the downstream project's required commit-message convention; if none exists, use a concise summary of the persisted work. Do not amend or rewrite existing history merely to absorb checkpoint state.
-5. A commit does not authorize push, merge, rebase/history rewrite, or Git configuration changes. Perform those only when separately authorized by the current user instruction or applicable downstream project policy.
-6. If commit is not authorized, commit fails, or any in-scope checkpoint change remains uncommitted, leave the worktree intact and report `CHECKPOINT NOT PERSISTED IN GIT: commit required` plus the concise reason. Never describe an uncommitted checkpoint as durable.
+2. Determine the checkpoint-owned delta: verified in-scope session work that is still uncommitted plus the CONTEXT/JOURNAL/index/archive/knowledge maintenance produced by this checkpoint. Preserve unrelated or pre-existing work.
+3. If the shared Git workflow authorizes a local commit at this boundary, stage only the owned paths/hunks and commit the coherent checkpoint delta using the repository's message convention. Do nothing when the owned delta is already fully persisted.
+4. Respect workflow-local narrowing. In particular, a spec with `commits: user` remains no-auto-commit for its spec-owned changes; checkpoint must not use its maintenance role to bypass that choice.
+5. If higher-scope policy blocks the commit, staging cannot be isolated safely, or the commit fails, leave the worktree intact and report `CHECKPOINT NOT PERSISTED IN GIT: commit required` plus the concise reason. Never describe an uncommitted checkpoint as durable.
 
 ### Step 7 — Report
 
