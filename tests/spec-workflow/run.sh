@@ -73,6 +73,20 @@ for rule in "$CODEX_RULE" "$CLAUDE_RULE"; do
     "rule requires an exact review anchor"
   assert_not_contains "$rule" "last full baseline" \
     "rule does not skip evidence from earlier scoped reviews"
+  assert_contains "$rule" \
+    'Repair every knowledge `sources` entry that points into the moved folder' \
+    "rule keeps knowledge sources resolvable after archiving"
+  assert_contains "$rule" \
+    "Run the knowledge checker after the move if any knowledge file changed." \
+    "rule validates knowledge against the archived layout"
+done
+
+for checkpoint in \
+  "$REPO_ROOT/.agents/skills/codex-checkpoint/SKILL.md" \
+  "$REPO_ROOT/.claude/commands/checkpoint.md"; do
+  assert_contains "$checkpoint" \
+    'Repair knowledge `sources` that point into the moved folder' \
+    "checkpoint spec archive keeps knowledge sources resolvable"
 done
 
 assert_contains "$CODEX_RULE" \

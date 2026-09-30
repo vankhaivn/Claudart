@@ -251,7 +251,7 @@ When the user gives a completion signal — "approved", "confirmed", "looks good
    ```
    YYYY-MM-DD | completed | <slug> — <one-line outcome>, see tasks/done/<task-id>/TASK.md
    ```
-5. Update `.claudart/tasks/index.md`: remove from Active, add to Recently Done with `done/<task-id>/TASK.md`. Update any live CONTEXT/HANDOFF pointer to the new path; do not copy the task body.
+5. Update `.claudart/tasks/index.md`: remove from Active, add to Recently Done with `done/<task-id>/TASK.md`. Update any live CONTEXT/HANDOFF pointer to the new path; do not copy the task body. Repair every knowledge `sources` entry that points into the moved workspace so it names the archived path; a path repair changes neither `updated` nor `last_verified`. When a repair was made, run the knowledge checker.
 6. If a recurring pattern emerged, propose `/learn` to graduate it into a rule.
 7. Leave task-local outcomes in the archived task. Promote only eligible descriptive facts under `knowledge-management.md`; `/checkpoint` can bulk-maintain remaining candidates.
 
