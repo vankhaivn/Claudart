@@ -17,7 +17,7 @@ Read `.claudart/CONTEXT.md`, `.claudart/tasks/index.md` if present, the root kno
 
 Reuse an active workspace that already owns the request. If several plausibly match and the user's selection is unclear, ask which one. Keep its id and history. When its status is not `planning`, route directly through the rule's resumption or review flow.
 
-For a new task, allocate `.claudart/tasks/YYYY-MM-DD-NNN-<slug>/TASK.md` under the canonical naming and collision rules. Seed it at `status: planning`, register it in `index.md`, and use the rule's required structure. **Default to `TASK.md` only.** Create `artifacts/` only when the canonical artifact trigger passes; link existing project files and keep short findings in `TASK.md`. Never automatically extract archives, execute attachments, or load all supporting files.
+For a new task, allocate `.claudart/tasks/YYYY-MM-DD-NNN-<slug>/TASK.md` under the canonical naming and collision rules. Seed it at `status: planning`, register it in `index.md`, and use the rule's required structure. Classify the completion reviewer before the plan is ready: choose `user` whenever any acceptance is user-visible/product-subjective, user-owned, external/unobservable, mixed, or ambiguous; choose `agent` only when every acceptance criterion is objective and agent-verifiable. Record the rationale in the Decision Log. A legacy task with no reviewer remains user-reviewed. **Default to `TASK.md` only.** Create `artifacts/` only when the canonical artifact trigger passes; link existing project files and keep short findings in `TASK.md`. Never automatically extract archives, execute attachments, or load all supporting files.
 
 ## Plan under the lock
 
@@ -25,7 +25,7 @@ While status is `planning`, inspect relevant evidence read-only and maintain onl
 
 Before presenting the plan, read it once with fresh eyes and fix missing context or references. Report its workspace, status, step/check counts, and open questions.
 
-If the user asked only for planning, stop at `planning` and tell them that a direct "go" or implementation request will start it. If execution is already authorized by the current request or an earlier still-applicable instruction, do not ask again: flip to `in-progress`, bump `updated:`, and execute through the rule's progress and two-phase completion contract. The final `awaiting-review → done` transition still requires the user's confirmation.
+If the user asked only for planning, stop at `planning` and tell them that a direct "go" or implementation request will start it. If execution is already authorized by the current request or an earlier still-applicable instruction, do not ask again: flip to `in-progress`, bump `updated:`, and execute through the rule's progress and reviewer-gated completion contract. User-reviewed tasks still stop at `awaiting-review`; agent-reviewed tasks may self-close only after every acceptance criterion is proven under the conservative reviewer rules.
 
 ## Boundaries
 

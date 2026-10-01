@@ -11,7 +11,7 @@ The user's current request controls what happens after orientation. If it explic
 1. Check `.claudart/HANDOFF.md`. If present, read it in full — it is a one-shot reasoning baton written by a previous session in either runtime. Note its `created:` date. Consumption flow: see Case H below. If absent (the normal state), continue silently.
 2. Read `.claudart/CONTEXT.md` if it exists. If missing, say the project has no shared project context yet and suggest `/checkpoint` after meaningful work.
 3. Read `.claudart/tasks/index.md` if it exists and extract `## Active`. If missing, use shallow `.claudart/tasks/*/TASK.md` discovery and report that `/checkpoint` should regenerate the index; a missing cache does not prove there are no tasks.
-4. Resolve Active entries only to `.claudart/tasks/<YYYY-MM-DD-NNN-slug>/TASK.md` and verify existence. Use valid top-level workspace ids during fallback discovery; exclude `done/` itself and symlinked workspaces or `TASK.md` files. Read `TASK.md` frontmatter (`status`, `updated`, `created`, `slug`) only; flag missing/broken references for `/checkpoint`. Do not read task bodies or artifact contents, recurse into workspaces, or create supporting files during startup.
+4. Resolve Active entries only to `.claudart/tasks/<YYYY-MM-DD-NNN-slug>/TASK.md` and verify existence. Use valid top-level workspace ids during fallback discovery; exclude `done/` itself and symlinked workspaces or `TASK.md` files. Read `TASK.md` frontmatter (`status`, `updated`, `created`, `slug`, `reviewer`) only; treat a missing legacy `reviewer` as `user` without rewriting it; flag missing/broken references for `/checkpoint`. Do not read task bodies or artifact contents, recurse into workspaces, or create supporting files during startup.
 5. Read `.claudart/knowledge/INDEX.md` if it exists — the root router only. Count visible route lines under `## Knowledge` that match the canonical Markdown route grammar; ignore HTML comments/templates and `- _(none)_`, so a seed index reports zero. Do not follow domain-map or topic links during startup. Later work follows the bounded map-first retrieval in `.claude/rules/knowledge-management.md`.
 6. Read `.claudart/specs/INDEX.md` if it exists — the INDEX only. Extract entries under `## Active`. Do NOT read SPEC/ROADMAP/NOTES/LEDGER bodies in `/start`.
 7. Run `git log -3 --oneline`. If the directory is not a git repo or has fewer than three commits, report what is available.
@@ -78,17 +78,18 @@ Do not infer execution from an orientation-only request. When the current reques
 
 ### Case A — At least one task with `status: awaiting-review`, `in-progress`, or `blocked`
 
-Pick the most recently updated one. The exact prompt depends on its status:
+Pick the most recently updated one. The exact prompt depends on its status and reviewer:
 
-- **`awaiting-review`**: a previous session reported the task complete and is waiting for the user's verification. Say:
-  > "Task `<slug>` is `awaiting-review` — a previous session finished it and is waiting for your verification. Open `.claudart/tasks/<task-id>/TASK.md` to review draft Outcomes. Confirm to close, or tell me what didn't work and I'll flip it back to `in-progress`."
-- **`in-progress`**: say:
-  > "There's an active task `<slug>` (in-progress, updated <date>). Want to resume? I'll read TASK.md and check whether recorded evidence still applies to the next step. Or tell me to start something else."
-- **`blocked`**: say:
+- `awaiting-review` with `reviewer: user` or no legacy reviewer: a previous session finished the agent-verifiable work and is waiting for concrete user acceptance. Say:
+  > "Task `<slug>` is `awaiting-review` — it still has a user-owned review surface. Open `.claudart/tasks/<task-id>/TASK.md` to see exactly what remains to verify. Confirm to close, or tell me what didn't work and I'll flip it back to `in-progress`."
+- `awaiting-review` with `reviewer: agent`: this is inconsistent state, not user approval debt. Say:
+  > "Task `<slug>` is marked `reviewer: agent` but is parked at `awaiting-review`. That state should be reconciled from its recorded acceptance evidence rather than waiting for your sign-off. Tell me to resume it and I'll apply the reviewer-gated closeout contract."
+- `in-progress`: say:
+  > "There's an active task `<slug>` (in-progress, updated <date>, reviewer <user|agent>). Want to resume? I'll read TASK.md and check whether recorded evidence still applies to the next step. Or tell me to start something else."
+- `blocked`: say:
   > "Task `<slug>` is blocked (updated <date>). Has the blocker cleared? If yes, I'll flip to in-progress and resume. If no, tell me what to work on instead."
 
 Do not infer resumption or completion from an orientation-only request. When the current request already selects or resumes the task, that is explicit direction: **warm the session** by reading `TASK.md`, then only the next action's relevant code and linked supporting files (cap ~5 most relevant references), and follow the Resumption protocol in `.claude/rules/task-management.md` without asking again. The same direct instruction satisfies `planning → in-progress` when the selected task is still planning. Reuse applicable evidence, verify relevant drift or gaps, and never replay all completed checks merely because this is a new session.
-
 ### Case B — No active task, but CONTEXT.md carries a handoff: `## Next Session Should Start By` is set, or an active `(no task)` micro-handoff sits under `## In Progress`
 
 Surface the Next-Session line (or the micro-handoff's label and its `Next:` step) and ask:

@@ -82,7 +82,7 @@ handoff chỉ khi cần tiếp tục phần điều tra trong phiên mới
   ↓
 checkpoint tại một điểm dừng có ý nghĩa
   ↓
-user review và đóng công việc
+user review khi cần, nếu không thì đóng bằng bằng chứng
 ```
 
 ### Bắt đầu bằng bước định hướng
@@ -122,7 +122,7 @@ CLAUDART mặc định cho phép tạo **local commit** cho phần việc đã k
 
 Chỉ commit thay đổi đúng scope do phiên hiện tại sở hữu sau khi verification liên quan đã pass. Giữ nguyên work khác và stage theo path/hunk cụ thể thay vì stage rộng. Commit message và branch name tuân theo convention của repository; CLAUDART không thêm co-author/generated-by mang danh AI/tool và không tạo namespace gắn danh agent như `codex/*`, `claude/*` hoặc `agent/*`. Quyền tạo local commit không bao hàm quyền push, merge, rewrite history, tạo tag hay sửa cấu hình Git.
 
-Review task vẫn là gate về nghiệm thu công việc, không phải gate bắt buộc cho Git persistence: implementation đã verify có thể đã có restore-point commit khi task chuyển sang `awaiting-review`; user vẫn là người xác nhận `done` và archive riêng. Subagent không tự có quyền tạo history commit chỉ vì được delegate; parent agent tích hợp, verify và persist kết quả theo cùng Git policy.
+Review task vẫn là gate về nghiệm thu công việc, không phải gate bắt buộc cho Git persistence. Task do user review có thể đã có restore-point commit khi tới `awaiting-review`; user vẫn sở hữu nghiệm thu cuối. Task do agent review chỉ được đóng khi mọi tiêu chí đều khách quan, agent quan sát được và có bằng chứng cụ thể. Cả hai đường đều không tự cấp quyền push, merge, deploy hay hành động external khác. Subagent không tự có quyền tạo history commit chỉ vì được delegate; parent agent tích hợp, verify và persist kết quả theo cùng Git policy.
 
 ### Kết thúc hoặc tạm dừng đúng cách
 
@@ -246,6 +246,7 @@ Command tạo `YYYY-MM-DD-NNN-<slug>/TASK.md` dưới `.claudart/tasks/`, dùng 
 - code, tài liệu và knowledge liên quan;
 - kế hoạch có thứ tự và một checkpoint kiểm tra cho mỗi bước;
 - tiêu chí nghiệm thu;
+- reviewer cuối (`user` hoặc `agent`) và lý do reviewer đó thực sự quan sát được bề mặt nghiệm thu cuối;
 - quyết định quan trọng cùng các phương án đã loại;
 - phát hiện làm thay đổi kế hoạch;
 - kết quả và phần nhìn lại sau khi hoàn tất.
@@ -271,11 +272,20 @@ Artifact tuân theo chính sách riêng tư, lưu trữ và Git của dự án d
 
 Định dạng thư mục là hợp đồng task hiện hành duy nhất. Khi nâng cấp, downstream phải chủ động điều chỉnh công việc đã có; không có nhánh tương thích task file phẳng hay migration tự động.
 
+### Reviewer khi hoàn tất
+
+Mỗi task mới ghi `reviewer: user | agent`.
+
+Dùng `user` khi bất kỳ tiêu chí nào là user-visible hoặc mang tính product/chủ quan (ví dụ visual/UX, typography, animation, copy hoặc tone), cần môi trường external/device/account/deployment do user sở hữu, được giao rõ cho user, trộn nghiệm thu của user với máy, hoặc còn mơ hồ. Chỉ dùng `agent` khi toàn bộ tiêu chí đều khách quan, tái lập được, agent quan sát trực tiếp được và có bằng chứng cụ thể như test, reproduction, benchmark, build, static check hoặc artifact xác định. Có test không tự chuyển quyền review từ user sang agent.
+
+Phân loại theo hướng bảo thủ: task cũ thiếu reviewer được xem là `user`; agent được phép nâng `agent → user` khi xuất hiện tiêu chí mới; sau khi đã bắt đầu execution, agent không được tự hạ `user → agent` nếu chưa có user phê duyệt rõ ràng và kiểm lại toàn bộ điều kiện.
+
 ### State machine
 
 ```text
 planning ── user phê duyệt ──▶ in-progress
-in-progress ── agent hoàn tất ──▶ awaiting-review
+in-progress ── reviewer: agent + mọi tiêu chí đã được chứng minh ──▶ done
+in-progress ── reviewer: user + validation của agent hoàn tất ──▶ awaiting-review
 awaiting-review ── user xác nhận ──▶ done
 awaiting-review ── user báo lỗi ──▶ in-progress
 in-progress ── gặp blocker ──▶ blocked
@@ -286,21 +296,21 @@ bất kỳ trạng thái nào ── user hủy ──▶ cancelled
 `planning` và `awaiting-review` là hai trạng thái khóa việc sửa source:
 
 - Ở `planning`, agent có thể chỉnh `TASK.md` và giữ ghi chú, input được cung cấp hoặc bằng chứng chỉ đọc cần thiết. Không được triển khai, kể cả bên trong `artifacts/`.
-- Ở `awaiting-review`, agent giữ nguyên implementation và bằng chứng đang được review trong lúc chờ user.
+- Ở `awaiting-review`, agent giữ nguyên implementation và bằng chứng trong lúc chờ bề mặt review cụ thể của user. Trạng thái này chỉ dành cho `reviewer: user` (và task cũ chưa có reviewer).
 - Khi user báo vấn đề, task được mở lại và quay về `in-progress`.
 
 ### Phê duyệt và hoàn tất
 
-Việc phê duyệt dùng ngôn ngữ tự nhiên. Các câu rõ ràng như “go”, “implement”, “approved” hoặc “làm đi” có thể bắt đầu một plan đã duyệt. Các câu như “looks good”, “confirmed”, “đóng task” hoặc “xong” cho phép archive task.
+Việc phê duyệt dùng ngôn ngữ tự nhiên. Các câu rõ ràng như “go”, “implement”, “approved” hoặc “làm đi” có thể bắt đầu một plan đã duyệt. Với task do user review, các câu như “looks good”, “confirmed”, “đóng task” hoặc “xong” vẫn là tín hiệu đóng.
 
-Xác định ý định thực thi từ message hiện tại trước, rồi mới dùng chỉ dẫn rõ ràng trước đó nếu nó vẫn còn hiệu lực. Request trực tiếp yêu cầu implement, start, continue hoặc resume đã đủ cho chuyển trạng thái `planning → in-progress`; agent đổi status trước khi sửa implementation và không hỏi lại cùng quyền đó. Request chỉ yêu cầu tạo, giải thích, chỉnh hoặc review plan vẫn giữ khóa planning. Quy tắc ưu tiên này không mở rộng scope và không bỏ cổng xác nhận cuối của user.
+Xác định ý định thực thi từ message hiện tại trước, rồi mới dùng chỉ dẫn rõ ràng trước đó nếu nó vẫn còn hiệu lực. Request trực tiếp yêu cầu implement, start, continue hoặc resume đã đủ cho chuyển trạng thái `planning → in-progress`; agent đổi status trước khi sửa implementation và không hỏi lại cùng quyền đó. Request chỉ yêu cầu tạo, giải thích, chỉnh hoặc review plan vẫn giữ khóa planning.
 
-Lời khen, câu hỏi hoặc việc user tự sửa task file không được coi là phê duyệt.
+Đóng task phụ thuộc vào reviewer đã ghi:
 
-Completion có hai bước riêng:
+1. **`reviewer: user`:** sau khi toàn bộ phần agent tự kiểm được đã pass, status chuyển thành `awaiting-review`. Agent phải nêu chính xác bề mặt user-visible, chủ quan, external hoặc thuộc user vẫn cần nghiệm thu. User xác nhận thì task mới sang `done`.
+2. **`reviewer: agent`:** agent chỉ được chuyển thẳng `in-progress → done` khi mọi tiêu chí vẫn đủ điều kiện agent review và đều có bằng chứng cụ thể. Nếu bằng chứng thiếu, cũ, chưa chắc chắn, nằm ngoài khả năng quan sát, trộn với nghiệm thu user hoặc thuộc quyền user thì không được tự đóng; task phải tiếp tục active, chuyển blocked hoặc nâng thành `reviewer: user`.
 
-1. **Agent hoàn tất:** triển khai và validation xong; trạng thái chuyển thành `awaiting-review`.
-2. **User xác nhận:** user review kết quả; task chuyển sang `done`, toàn bộ thư mục chuyển vào `tasks/done/<task-id>/`, và journal nhận một dòng lịch sử ngắn. Hủy task cũng giữ nguyên cả workspace. Không ghi đè đích archive; các liên kết tương đối tới artifact vẫn hoạt động sau khi di chuyển.
+Task `done` hợp lệ được archive nguyên thư mục vào `tasks/done/<task-id>/` và journal nhận một dòng lịch sử ngắn. Hủy task cũng giữ nguyên cả workspace. Không ghi đè đích archive; liên kết tương đối tới artifact vẫn hoạt động sau khi di chuyển. Lời khen, câu hỏi, im lặng hoặc việc user tự sửa task file không được coi là lý do bỏ cổng review của user.
 
 ### Tiếp tục ở phiên sau
 

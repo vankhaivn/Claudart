@@ -73,6 +73,7 @@ status: planning # planning | in-progress | awaiting-review | blocked | done | c
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
 agent: codex # claude | codex | both
+reviewer: user # user | agent — see "Completion Reviewer" below
 delegation: none # none | strategy-only | authorized — see "Delegation strategy" below
 tags: [1-5 lowercase kebab-case tags]
 ---
@@ -144,13 +145,39 @@ The task file is the interface between the session that plans and the session th
 - A step may stay vague about _how_ as long as its `verify:` is sharp about _what success is_. Verification substitutes for detail: it catches executor drift at the step where it happens, at a fraction of the tokens.
 - A well-written step can be handed verbatim to a subagent as the **Goal** of a worker prompt (see `agent-delegation.md`). Self-contained means it carries the decisions, constraints, and verify — not the answer.
 
+## Completion Reviewer
+
+Every newly created task records `reviewer: user | agent` before implementation starts. This field names who owns **final acceptance**, not who implements the task. A legacy task with no `reviewer` is treated as `user`; readers must not silently backfill or reinterpret old work merely to make it auto-close.
+
+Classify from the acceptance criteria and the agent's actual observation boundary, not from implementation difficulty and not from the mere presence of tests.
+
+Use `reviewer: user` when **any** acceptance criterion needs the user's judgment, observation, or environment. This includes:
+
+- visual, UX, layout, typography, animation, audio, copy, wording, tone, or another user-visible/product-quality surface;
+- behavior that must be confirmed in a user-owned, external, real-device, real-account, deployment, or integration environment the agent cannot inspect directly;
+- an acceptance criterion explicitly assigned to the user or another user-selected approver;
+- a mixed case containing both agent-verifiable and user-only acceptance;
+- any ambiguous case where the agent cannot prove every acceptance criterion itself.
+
+Use `reviewer: agent` only when **all** acceptance criteria are objective, agent-observable, reproducible, and can be verified with concrete evidence such as targeted tests, before/after reproduction, benchmarks, builds, static checks, or deterministic artifacts. Automated tests are evidence, not permission: their existence alone never makes a task agent-reviewed.
+
+During planning, record the reviewer choice and one-sentence rationale in the Decision Log. Before closeout, re-evaluate it against the final acceptance criteria. Once execution has started:
+
+- the agent may conservatively escalate `agent → user` when new user-only, external, mixed, or ambiguous acceptance appears; record why before continuing;
+- the agent must **never** downgrade `user → agent` on its own. That change requires explicit user approval **and** a fresh check that every acceptance criterion is eligible for agent review;
+- adding or materially changing acceptance criteria requires reviewer re-evaluation before completion;
+- `reviewer: agent` never weakens validation, permits unchecked acceptance boxes, or bypasses repository-required checks.
+
+When in doubt, choose `user`.
+
 ## Status State Machine
 
-```
+```text
 planning ──(user approves: "go" / "implement" / etc.)──▶ in-progress
-in-progress ──(agent finishes all steps + validation)──▶ awaiting-review
+in-progress ──(reviewer: agent + all acceptance proven)──▶ done
+in-progress ──(reviewer: user + agent finishes validation)──▶ awaiting-review
 awaiting-review ──(user confirms: "approved" / "looks good")──▶ done
-awaiting-review ──(user reports a problem)──▶ in-progress            ← back-edge
+awaiting-review ──(user reports a problem)──▶ in-progress
 in-progress ──(external blocker)──▶ blocked
 blocked ──(blocker cleared)──▶ in-progress
 {planning, in-progress, awaiting-review, blocked} ──(user cancels)──▶ cancelled
@@ -158,9 +185,9 @@ blocked ──(blocker cleared)──▶ in-progress
 
 - **`planning`**: file is being drafted or awaiting user approval to start. **No code edits allowed.** See "Read-only Locks" below.
 - **`in-progress`**: user has approved; agent may edit code as the plan dictates.
-- **`awaiting-review`**: agent believes the work is done; user has not yet verified. **No code edits allowed.** Agent is parked until user confirms or rejects.
+- **`awaiting-review`**: reserved for `reviewer: user` and legacy tasks with no reviewer. The agent believes implementation and agent-verifiable checks are done, but user acceptance is still outstanding. **No code edits allowed.**
 - **`blocked`**: external dependency missing. State the blocker in the Surprises section.
-- **`done`**: completed AND user-confirmed. Move the entire workspace to `tasks/done/<task-id>/`. Append one line to `.claudart/JOURNAL.md`.
+- **`done`**: final acceptance is complete under the assigned reviewer: user-confirmed for `user`, or evidence-complete for `agent`. Move the entire workspace to `tasks/done/<task-id>/`. Append one line to `.claudart/JOURNAL.md`.
 - **`cancelled`**: abandoned. Move the entire workspace to `tasks/done/<task-id>/` with Outcomes explaining why; follow the same archive safeguards as completion.
 
 ## Read-only Locks (Critical)
@@ -177,11 +204,12 @@ The agent is drafting / awaiting approval to start.
 
 ### Awaiting-Review Lock — `status: awaiting-review`
 
-The agent has reported completion; the user has not yet verified.
+This state is only for `reviewer: user` tasks, including legacy tasks with no `reviewer`. The agent has reported implementation complete; the user has not yet verified the user-owned acceptance surface.
 
 - **Do NOT modify any code file.** The work is under user review; if changes are needed, the user will tell you, and you flip status back to `in-progress` first.
 - **Allowed**: refining the draft Outcomes & Retrospective in `TASK.md` based on user comments before they give the final signal. Preserve the evidence under review; do not silently replace artifacts or rerun implementation while parked.
 - If the user reports a problem or requests a code change, follow the "User reports a problem" flow in the Completion section — do not patch silently while still in awaiting-review.
+- If a task explicitly says `reviewer: agent` but is parked at `awaiting-review`, treat that as inconsistent state rather than asking the user for a meaningless confirmation. On an explicit resume, re-evaluate the reviewer and recorded evidence; return to `in-progress` before any implementation edit.
 
 ### Knowledge-maintenance exception
 
@@ -226,58 +254,81 @@ The plan is a living document. Edits to it are part of the work, not an aftertho
 
 Default discoveries to the task file. Promote one immediately only under the knowledge-maintenance exception; checkpoint can bulk-evaluate the remaining candidates later.
 
-## Completion — Two-Phase Gate
+## Completion — Reviewer-Gated Closeout
 
-Completion is a **two-phase** process: agent reports, user verifies. The agent **NEVER** unilaterally archives a task. This mirrors the planning-approval gate at the other end of the workflow.
+All tasks use the same proof threshold: every Concrete Steps box and every Validation & Acceptance box must be checked truthfully, repository-required checks must pass or be reported as blocked, and the evidence needed to support those checks must be recorded. The `reviewer` field changes **who owns final acceptance**, not how much verification is required.
 
-### Phase 1 — Agent reports complete (`in-progress → awaiting-review`)
+Before either closeout path, re-evaluate the reviewer against the final acceptance criteria. If any criterion is user-visible/product-subjective, user-owned, externally unobservable, mixed, or ambiguous, the task is user-reviewed and must not self-close.
 
-When every Concrete Steps box AND every Validation & Acceptance box is checked:
+### User reviewer — agent reports complete (`in-progress → awaiting-review`)
 
-1. Fill **Outcomes & Retrospective** as a **draft** (what shipped, what's deferred, lessons). The user reads this as part of verification.
+When `reviewer: user` (or the legacy field is missing) and the agent-verifiable work is complete:
+
+1. Fill **Outcomes & Retrospective** as a **draft**: what shipped, what's deferred, lessons, and exactly what the user still needs to verify.
 2. Flip frontmatter `status: in-progress → awaiting-review`.
 3. Bump `updated:`.
-4. Report to the user, explicitly:
-   > "All steps and validation done. Task `<slug>` is `awaiting-review`. Please verify (run the app, manual QA, check the diff) and confirm to close — or tell me what didn't work and I'll flip back to in-progress."
-5. **STOP.** Do NOT move the workspace, do NOT write to JOURNAL, do NOT update `Recently Done` in `index.md`. Honor the Awaiting-Review Lock.
+4. Report the concrete user review surface instead of a generic "please review." Name what remains observable by the user, such as rendered visuals, wording/tone, a real-device flow, an external environment, or product judgment.
+5. **STOP.** Do NOT move the workspace, do NOT write to JOURNAL, and do NOT update Recently Done. Honor the Awaiting-Review Lock.
 
-### Phase 2a — User confirms (`awaiting-review → done`)
+If there is no concrete user review surface, re-check whether the task was classified correctly. Do not manufacture a ceremonial user gate.
 
-When the user gives a completion signal — "approved", "confirmed", "looks good", "close it", "done", "ship", "ok đóng task", "ok merge" — run the archive flow:
+### Agent reviewer — evidence closes the task (`in-progress → done`)
 
-1. Flip frontmatter `status: awaiting-review → done`.
-2. Bump `updated:`.
-3. Move the entire workspace to `.claudart/tasks/done/<task-id>/`, keeping its id and all contents. If the destination already exists (including a symlink), stop and report the collision; never overwrite, merge, or nest the source into it. Verify the move succeeded before updating references or journaling. Preserve workspace-relative attachment links. Do not automatically delete artifacts or rewrite append-only history.
-4. Append one line to `.claudart/JOURNAL.md`:
-   ```
+A task may take this path only when it explicitly has `reviewer: agent` and the final reviewer re-evaluation still passes every eligibility rule above.
+
+1. Finalize **Outcomes & Retrospective** with the delivered result and the concrete evidence that proves each acceptance criterion.
+2. Flip frontmatter `status: in-progress → done`.
+3. Bump `updated:`.
+4. Run the Shared archive flow below immediately.
+5. Report the closure and evidence to the user. Do **not** ask for a redundant confirmation.
+
+If any required evidence is missing, uncertain, stale, or outside the agent's observation boundary, do not mark the task done. Keep it `in-progress`, `blocked`, or escalate the reviewer to `user` as the actual state requires.
+
+### User confirms (`awaiting-review → done`)
+
+When the user gives a completion signal — "approved", "confirmed", "looks good", "close it", "done", "ship", "ok đóng task", "ok merge" — run the closeout:
+
+1. Finalize **Outcomes & Retrospective** using the accepted result and any user feedback.
+2. Flip frontmatter `status: awaiting-review → done`.
+3. Bump `updated:`.
+4. Run the Shared archive flow below.
+
+### User reports a problem (`awaiting-review → in-progress`)
+
+If the user reports something is wrong, do not defend the prior completion claim:
+
+1. Append the user's report to **Surprises & Discoveries**, stamped with the current `(YYYY-MM-DD HH:MMZ)` UTC time, verbatim if useful.
+2. Un-check any Concrete Steps or Validation boxes disproved by the feedback, or add a new step when the gap is novel.
+3. Re-evaluate `reviewer`; user feedback never authorizes an automatic downgrade to `agent`.
+4. Flip frontmatter `status: awaiting-review → in-progress`.
+5. Bump `updated:` and address the issue.
+
+The user-review cycle may repeat. That is expected when the acceptance surface genuinely belongs to the user.
+
+### Shared archive flow
+
+After a valid transition to `done`:
+
+1. Move the entire workspace to `.claudart/tasks/done/<task-id>/`, keeping its id and all contents. If the destination already exists (including a symlink), stop and report the collision; never overwrite, merge, or nest the source into it. Verify the move succeeded before updating references or journaling. Preserve workspace-relative attachment links. Do not automatically delete artifacts or rewrite append-only history.
+2. Append one line to `.claudart/JOURNAL.md`:
+   ```text
    YYYY-MM-DD | completed | <slug> — <one-line outcome>, see tasks/done/<task-id>/TASK.md
    ```
-5. Update `.claudart/tasks/index.md`: remove from Active, add to Recently Done with `done/<task-id>/TASK.md`. Update any live CONTEXT/HANDOFF pointer to the new path; do not copy the task body. Repair every knowledge `sources` entry that points into the moved workspace so it names the archived path; a path repair changes neither `updated` nor `last_verified`. When a repair was made, run the knowledge checker.
-6. If a recurring pattern emerged, propose `$codex-learn` to graduate it into a guideline.
-7. Leave task-local outcomes in the archived task. At this lifecycle boundary, promote only descriptive claims that pass the full knowledge gate; update owner + reachable route atomically and run the checker after a mutation. Keep unresolved claims as candidates in the archive.
-
-### Phase 2b — User reports a problem (`awaiting-review → in-progress`)
-
-If the user reports something is wrong — "step 3 didn't actually work in build", "the style resets to normal at runtime", "you missed X" — do NOT defend. The first completion attempt being wrong is normal; the system is designed to catch this. Run the rollback flow:
-
-1. Append the user's report to **Surprises & Discoveries**, stamped with the current `(YYYY-MM-DD HH:MMZ)` UTC time, verbatim if useful. This is high-signal data for future-self.
-2. Un-check any Concrete Steps or Validation boxes that turned out to be wrong, OR add new steps if the gap is novel.
-3. Flip frontmatter `status: awaiting-review → in-progress`.
-4. Bump `updated:`.
-5. Begin addressing the issue. When done, return to Phase 1.
-
-The cycle Phase 1 ↔ Phase 2b may repeat. That's correct behavior, not a bug.
+3. Update `.claudart/tasks/index.md`: remove from Active, add to Recently Done with `done/<task-id>/TASK.md`. Update any live CONTEXT/HANDOFF pointer to the new path; do not copy the task body. Repair every knowledge `sources` entry that points into the moved workspace so it names the archived path; a path repair changes neither `updated` nor `last_verified`. When a repair was made, run the knowledge checker.
+4. If a recurring pattern emerged, propose `$codex-learn` to graduate it into a guideline.
+5. Leave task-local outcomes in the archived task. At this lifecycle boundary, promote only descriptive claims that pass the full knowledge gate; update owner + reachable route atomically and run the checker after a mutation. Keep unresolved claims as candidates in the archive.
 
 ## Approval Signal Cheat Sheet
 
-| Transition                      | What user says                                                                           |
+| Transition                                | What authorizes it                                                                        |
 | ------------------------------- | ---------------------------------------------------------------------------------------- |
-| `planning → in-progress`        | "go", "approved", "implement", "do it", "ok làm đi", "start"                             |
-| `awaiting-review → done`        | "approved", "confirmed", "looks good", "close it", "done", "ship", "ok đóng", "merge it" |
-| `awaiting-review → in-progress` | Any report of a problem — "didn't work", "broken", "missed X", "step Y is wrong"         |
-| `* → cancelled`                 | "cancel", "abandon", "drop this", "bỏ task"                                              |
+| `planning → in-progress`                 | "go", "approved", "implement", "do it", "ok làm đi", "start"                              |
+| `in-progress → done` (`reviewer: agent`) | The evidence-complete agent closeout contract above; no synthetic user signal              |
+| `awaiting-review → done`                 | "approved", "confirmed", "looks good", "close it", "done", "ship", "ok đóng", "merge it" |
+| `awaiting-review → in-progress`          | Any report of a problem — "didn't work", "broken", "missed X", "step Y is wrong"          |
+| `* → cancelled`                          | "cancel", "abandon", "drop this", "bỏ task"                                               |
 
-The agent must wait for the explicit signal. Enthusiasm ("great!", "nice plan") is NOT approval. Questions are NOT approval. Edits the user makes to the task file are NOT approval.
+Explicit signals remain mandatory for planning approval, user-review completion, and cancellation. Agent-reviewed completion is permitted only by the recorded reviewer classification plus complete evidence. Enthusiasm ("great!", "nice plan"), questions, silence, or edits to the task file never change a user review gate.
 
 Subagent execution is governed by the `delegation:` field and your harness — see `agent-delegation.md`. The signals in this table concern task _status_ (`planning → in-progress → done`), not whether to delegate.
 
@@ -306,7 +357,7 @@ Never assume the file is still accurate without verification. Memory Hints are a
 - [<slug>](done/<YYYY-MM-DD-NNN-slug>/TASK.md) — done <YYYY-MM-DD>
 ```
 
-- Active list shows every top-level workspace whose `TASK.md` status is `planning`, `in-progress`, `awaiting-review`, or `blocked`. Append ` ⏳ awaiting your confirmation` to `awaiting-review` lines so the gate is visible on the dashboard.
+- Active list shows every top-level workspace whose `TASK.md` status is `planning`, `in-progress`, `awaiting-review`, or `blocked`. Append ` ⏳ awaiting your confirmation` to `awaiting-review` lines; this state is user-review only, with a missing legacy `reviewer` treated as `user`.
 - Recently Done shows workspaces in `tasks/done/` whose `TASK.md` `updated:` date is within the last 14 days.
 - Older completed tasks remain on disk in `done/` but drop out of `index.md` to keep it short.
 - If a section has no entries, write `- _(none)_` instead.
