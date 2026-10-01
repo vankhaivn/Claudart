@@ -22,11 +22,11 @@ You cannot judge deviations against rules you haven't re-read. If `.claude/rules
 
 Walk the conversation chronologically, comparing each assistant turn against the rule index from the re-grounding pass.
 
-1. List every moment the human corrected you OR you deviated from a rule. For each one, answer: _"What rationalization did I use to justify the deviation?"_ — do not just say "I missed the rule".
+1. List every moment the user corrected you OR you deviated from a rule. For each one, answer: _"What rationalization did I use to justify the deviation?"_ — do not just say "I missed the rule".
 2. Did any rule fail because it only described the happy path without closing obvious loopholes?
 3. For each identified gap, update the rule using this pattern: `NEVER do X, even when Y seems like a good reason` — explicitly name the rationalization so future runs cannot reuse it.
 4. If rules contradict each other, resolve the contradiction immediately in `.claude/rules/` or `CLAUDE.md`.
-5. Also save quiet _confirmations_: if the human accepted an unusual judgment call without pushback, that's a validated approach — record it so you don't drift away from it next time.
+5. Also save quiet _confirmations_: if the user accepted an unusual judgment call without pushback, that's a validated approach — record it so you don't drift away from it next time.
 
 ## Route What Was Learned
 

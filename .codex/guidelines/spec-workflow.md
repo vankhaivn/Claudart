@@ -7,7 +7,7 @@ tags: [specs, loop-engineering, autonomy, cross-session, missions]
 
 # Spec Workflow (Loop Engineering)
 
-A **spec** is a mission: work too large for one task file — a whole game, a feature system, a client-demo POC. While active, it lives as a dated folder in `.claudart/specs/YYYY-MM-DD-<slug>/` written by `$codex-spec`, then executed to the final-review gate by `$codex-spec-run` **without per-task human approval**. Completed and cancelled missions are archived under `.claudart/specs/done/YYYY-MM-DD-<slug>/`. The folder, not chat memory, is the source of truth across sessions and recovery.
+A **spec** is a mission: work too large for one task file — a whole game, a feature system, a client-demo POC. While active, it lives as a dated folder in `.claudart/specs/YYYY-MM-DD-<slug>/` written by `$codex-spec`, then executed to the final-review gate by `$codex-spec-run` **without per-task user approval**. Completed and cancelled missions are archived under `.claudart/specs/done/YYYY-MM-DD-<slug>/`. The folder, not chat memory, is the source of truth across sessions and recovery.
 
 Missions sit **above** the task layer (`task-management.md`): a spec supersedes `$codex-plan` for its scope, and its executor never creates `.claudart/tasks/` files. Use `$codex-plan` for a bounded feature or fix whose decisions fit one task workspace. Use `$codex-spec` for a defined mission that needs a POC-frozen intent, phased roadmap, standing approval, and multi-session convergence. For a still-undefined project or product needing current documentation, use `$codex-project-docs` if installed; otherwise clarify intent within the current work. Unanswered spec-level details do not by themselves turn a defined mission into project-document work.
 
@@ -167,7 +167,7 @@ The ledger answers _what happened, in order_; NOTES answers _what future executi
 
 NOTES remains the default home for mission-local and uncertain material. A direct knowledge mutation is allowed only when the full capture gate and one of `knowledge-management.md`'s immediate-promotion triggers pass. Scope may be narrow. Read that rule in full, patch the existing owner first, update its reachable route atomically, and run `bash .codex/scripts/knowledge-check.sh --root .`. This exception does not authorize implementation code during a read-only spec state.
 
-## Standing Approval — the one human gate that replaces many
+## Standing Approval — the one user gate that replaces many
 
 The user approves **SPEC + ROADMAP once** ("go" / "approved" / "ok làm đi" → status `ready`). That signal is a _standing approval_ covering every task and phase in the roadmap. **This is an explicit exception to `task-management.md`'s per-task gates**: inside a `running` spec the executor does not ask permission per task or per phase, does not park at `awaiting-review` between phases, and does not create task files.
 
@@ -175,7 +175,7 @@ Approval and execution intent are separate signals. An approval-only message may
 
 Approval also fixes the **spec commit cadence** (`commits:` in SPEC frontmatter): `per-task` is the default and creates a restore point after each task's `verify:` passes and its tick/evidence updates land; `per-phase` commits after successful phase validation; `user` disables automatic commits for this spec. This field may narrow CLAUDART's normal local-commit behavior, but it never overrides a higher-scope Git restriction. Follow `git-workflow.md` for authority, staging scope, message/identity hygiene, and remote/history boundaries.
 
-Planned human interaction points are exactly three:
+Planned user interaction points are exactly three:
 
 1. **Approval** — user reviews POC + SPEC + ROADMAP, says go.
 2. **Rotation offers** — see Session Rotation below (user picks the stopping moment; the work itself never blocks on them).
