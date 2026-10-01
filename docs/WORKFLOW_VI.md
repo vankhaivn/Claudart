@@ -253,6 +253,21 @@ Command tạo `YYYY-MM-DD-NNN-<slug>/TASK.md` dưới `.claudart/tasks/`, dùng 
 
 Đọc `TASK.md` phải đủ để hiểu trạng thái, quyết định và hành động tiếp theo mà không cần cuộc chat ban đầu. Giữ nội dung tương xứng với công việc: phát hiện ngắn ở ngay trong file; section không có gì liên quan có thể ghi `None.`.
 
+### Bản tóm tắt plan dành cho user
+
+`TASK.md` là record bền vững để agent thực thi và resume; nó không phải giao diện mặc định để user duyệt plan. Agent lập kế hoạch có trách nhiệm dịch task thành phần giải thích ngắn, thay vì ném file cho user rồi yêu cầu tự đọc hiểu.
+
+Khi plan đã sẵn sàng, `/plan` hoặc `$codex-plan` trình bày một bản tóm tắt gọn bằng ngôn ngữ của user, gồm:
+
+- **Hiện trạng** — vấn đề hoặc hành vi còn thiếu lúc này.
+- **Kết quả mong muốn** — sau task thì điều gì phải đúng.
+- **Cách làm** — thường 3–5 bước ngắn, dễ hiểu, gom các chi tiết implementation và verification cấp thấp.
+- **Review / phê duyệt** — ai sở hữu nghiệm thu cuối, user thực sự cần xem gì khi hoàn tất (nếu có), và quyết định nào còn cần chốt trước khi bắt đầu.
+
+Bản tóm tắt nên đọc gọn trong một màn hình. Path, timestamp, số checkbox, cú pháp command, frontmatter và bookkeeping dành cho agent không cần xuất hiện trừ khi chúng ảnh hưởng trực tiếp tới quyết định của user. Có thể ghi path task sau phần tóm tắt để tham chiếu, nhưng “mở/đọc/review `TASK.md`” không phải hành động phê duyệt mặc định.
+
+Nếu user chỉ yêu cầu lập plan, hỏi một tín hiệu phê duyệt rõ ràng sau bản tóm tắt. Nếu execution đã được cho phép, trình bày bản tóm tắt rồi tiếp tục, không tạo thêm gate. Bản tóm tắt chỉ là presentation; `TASK.md` vẫn là source of truth.
+
 ### Chỉ tạo file hỗ trợ khi cần
 
 Workspace mặc định đã đầy đủ với:

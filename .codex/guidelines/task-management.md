@@ -138,12 +138,29 @@ tags: [1-5 lowercase kebab-case tags]
 
 ## Plan Altitude
 
-The task file is the interface between the session that plans and the session that executes — often a cheaper model. The economics only work when the file carries the right cargo:
+The task file is the interface between the session that plans and the session that executes — often a cheaper model. It is an **agent-facing durable execution record, not the default user-facing presentation**. The planning agent owns the translation from that record into a short explanation the user can understand without opening the file. The economics only work when the file carries the right cargo:
 
 - **Carry**: decisions (what was chosen, why, what was rejected), non-obvious constraints and pitfalls discovered while exploring, and a `verify:` check per step.
 - **Do not carry**: the solution. No code snippets, pseudo-code, or line-level edit instructions in Concrete Steps. If writing a step required solving the problem first, the plan has overstepped — lift the step back to decision + verify and let the executor derive the how.
 - A step may stay vague about _how_ as long as its `verify:` is sharp about _what success is_. Verification substitutes for detail: it catches executor drift at the step where it happens, at a fraction of the tokens.
 - A well-written step can be handed verbatim to a subagent as the **Goal** of a worker prompt (see `agent-delegation.md`). Self-contained means it carries the decisions, constraints, and verify — not the answer.
+
+### User-facing plan brief
+
+Once the task is coherent enough to present, translate it into a compact brief in the conversation. This brief is a presentation layer only; `TASK.md` remains the source of truth for execution and resumption.
+
+The brief should normally fit on one screen and contain, in the user's language:
+
+- **Current state** — what is wrong, missing, or motivating the task now.
+- **Desired outcome** — what should be true after the task, including a material non-goal when it prevents misunderstanding.
+- **Plan** — usually 3–5 plain-language steps. Group low-level implementation and verification details instead of exposing the full agent plan.
+- **Review / approval** — the assigned completion reviewer, what the user will actually need to inspect at the end (if anything), and any decision still required before starting.
+
+Keep paths, timestamps, checkbox counts, verification command syntax, frontmatter, and other agent bookkeeping out of the brief unless one of them materially affects the user's decision. The task path may appear after the brief as a reference.
+
+**Never tell the user to open, read, or review `TASK.md` as the default approval action.** Plan comprehension is the planning agent's responsibility. The user should be able to understand and approve the work from the brief itself.
+
+For a planning-only request, remain at `planning` and ask for one clear approval signal after the brief. If execution is already authorized, present the brief and continue into `in-progress` without inventing another approval gate.
 
 ## Completion Reviewer
 

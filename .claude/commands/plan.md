@@ -23,9 +23,18 @@ For a new task, allocate `.claudart/tasks/YYYY-MM-DD-NNN-<slug>/TASK.md` under t
 
 While status is `planning`, inspect relevant evidence read-only and maintain only allowed planning state. No implementation code, scaffolding, runnable POCs, or write-scope workers. Locate the affected surface, record decisions and non-obvious constraints, and give every Concrete Step an observable `verify:` check. Keep the plan at decision altitude: it carries chosen outcomes and proof, not snippets or line-level solutions.
 
-Before presenting the plan, read it once with fresh eyes and fix missing context or references. Report its workspace, status, step/check counts, and open questions.
+Before presenting the plan, read `TASK.md` once with fresh eyes and fix missing context, references, reviewer classification, or acceptance gaps.
 
-If the user asked only for planning, stop at `planning` and tell them that a direct "go" or implementation request will start it. If execution is already authorized by the current request or an earlier still-applicable instruction, do not ask again: flip to `in-progress`, bump `updated:`, and execute through the rule's progress and reviewer-gated completion contract. User-reviewed tasks still stop at `awaiting-review`; agent-reviewed tasks may self-close only after every acceptance criterion is proven under the conservative reviewer rules.
+Then present a compact **User Plan Brief** in the user's language. Do not paste the task file and do not tell the user to open or review `TASK.md` as the normal approval step. Summarize:
+
+- **Current state** — the problem or missing behavior now.
+- **Desired outcome** — the result this task is meant to produce.
+- **Plan** — usually 3–5 short, plain-language steps that group the lower-level task details.
+- **Review / approval** — `reviewer: user | agent`, what the user will actually need to verify at completion (if anything), and any unresolved decision that blocks starting.
+
+Keep the brief focused on what the user needs to understand and decide. Do not lead with workspace paths, status metadata, checkbox counts, timestamps, or verification syntax. You may show the task path after the brief as a reference, not as homework.
+
+If the user asked only for planning, remain at `planning` and end with one direct approval prompt after the brief. If execution is already authorized by the current request or an earlier still-applicable instruction, do not ask again: present the brief, flip to `in-progress`, bump `updated:`, and execute through the rule's progress and reviewer-gated completion contract. User-reviewed tasks still stop at `awaiting-review`; agent-reviewed tasks may self-close only after every acceptance criterion is proven under the conservative reviewer rules.
 
 ## Boundaries
 

@@ -253,6 +253,21 @@ The command creates `YYYY-MM-DD-NNN-<slug>/TASK.md` under `.claudart/tasks/`, us
 
 Reading `TASK.md` should explain the current state, decisions, and next action without the original chat. Keep it proportional: short findings stay inline, and sections with nothing relevant can say `None.`.
 
+### User-facing plan brief
+
+`TASK.md` is the durable execution and resumption record for agents; it is not the default approval interface for the user. The planning agent is responsible for translating the task into a short explanation instead of handing the file to the user and asking them to decode it.
+
+When a plan is ready, `/plan` or `$codex-plan` presents a compact brief in the user's language covering:
+
+- **Current state** — the problem or missing behavior now.
+- **Desired outcome** — what should be true after the task.
+- **Plan** — normally 3–5 plain-language steps that group lower-level implementation and verification work.
+- **Review / approval** — who owns final acceptance, what the user will actually need to inspect at completion (if anything), and any unresolved decision needed before starting.
+
+The brief should normally fit on one screen. Paths, timestamps, checkbox counts, command syntax, frontmatter, and other agent bookkeeping stay out unless they materially affect the user's decision. The task path may be shown after the brief as a reference, but “open/read/review `TASK.md`” is not the normal approval action.
+
+For a planning-only request, ask for one clear approval signal after the brief. If execution was already authorized, show the brief and proceed without creating another approval gate. The brief is presentation only; `TASK.md` remains the source of truth.
+
 ### Supporting files only when needed
 
 A complete default workspace is:
