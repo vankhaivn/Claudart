@@ -82,7 +82,7 @@ handoff only if the investigation must continue in a fresh session
   ↓
 checkpoint at a meaningful stopping point
   ↓
-user review and closure
+user review when required, otherwise evidence-backed closure
 ```
 
 ### Start with orientation
@@ -122,7 +122,7 @@ CLAUDART allows verified, coherent **local commits by default** when no higher-s
 
 Commit only owned in-scope changes after their relevant verification passes. Preserve unrelated work and stage explicit paths or hunks rather than broad staging. Commit messages and branch names follow repository conventions; CLAUDART does not add AI/tool co-author or generated-by attribution and does not create agent-branded namespaces such as `codex/*`, `claude/*`, or `agent/*`. Permission to make a local commit never implies permission to push, merge, rewrite history, create tags, or change Git configuration.
 
-Task review remains a product/workflow gate, not a Git-persistence gate: verified task implementation may already have a local restore-point commit when the task reaches `awaiting-review`; the user still confirms `done` and archive separately. Subagents do not create history commits merely because work was delegated; the parent integrates, verifies, and persists their work under the same Git policy.
+Task review remains a product/workflow gate, not a Git-persistence gate. User-reviewed tasks may already have a local restore-point commit when they reach `awaiting-review`; the user still owns final acceptance. Agent-reviewed tasks may close only when every acceptance criterion is objective, agent-observable, and proven with concrete evidence. Neither path grants push, merge, deploy, or other external authority. Subagents do not create history commits merely because work was delegated; the parent integrates, verifies, and persists their work under the same Git policy.
 
 ### End or pause cleanly
 
@@ -246,11 +246,27 @@ The command creates `YYYY-MM-DD-NNN-<slug>/TASK.md` under `.claudart/tasks/`, us
 - relevant code, documents, and knowledge pointers;
 - an ordered plan and one verification checkpoint per step;
 - acceptance criteria;
+- the completion reviewer (`user` or `agent`) and the reason that reviewer can observe the final acceptance surface;
 - important decisions and rejected alternatives;
 - discoveries that changed the plan;
 - the final outcome and retrospective.
 
 Reading `TASK.md` should explain the current state, decisions, and next action without the original chat. Keep it proportional: short findings stay inline, and sections with nothing relevant can say `None.`.
+
+### User-facing plan brief
+
+`TASK.md` is the durable execution and resumption record for agents; it is not the default approval interface for the user. The planning agent is responsible for translating the task into a short explanation instead of handing the file to the user and asking them to decode it.
+
+When a plan is ready, `/plan` or `$codex-plan` presents a compact brief in the user's language covering:
+
+- **Current state** — the problem or missing behavior now.
+- **Desired outcome** — what should be true after the task.
+- **Plan** — normally 3–5 plain-language steps that group lower-level implementation and verification work.
+- **Review / approval** — who owns final acceptance, what the user will actually need to inspect at completion (if anything), and any unresolved decision needed before starting.
+
+The brief should normally fit on one screen. Paths, timestamps, checkbox counts, command syntax, frontmatter, and other agent bookkeeping stay out unless they materially affect the user's decision. The task path may be shown after the brief as a reference, but “open/read/review `TASK.md`” is not the normal approval action.
+
+For a planning-only request, ask for one clear approval signal after the brief. If execution was already authorized, show the brief and proceed without creating another approval gate. The brief is presentation only; `TASK.md` remains the source of truth.
 
 ### Supporting files only when needed
 
@@ -271,11 +287,20 @@ Artifacts follow the downstream project's privacy, storage, and Git policies; sa
 
 The directory format is the only current task contract. Downstream upgrades must adapt existing work deliberately; there is no flat-task compatibility path or automatic migration.
 
+### Completion reviewer
+
+Every new task records `reviewer: user | agent`.
+
+Use `user` whenever any acceptance is user-visible or product-subjective (for example visual/UX, typography, animation, copy or tone), requires a user-owned external/device/account/deployment environment, is explicitly assigned to the user, mixes user and machine acceptance, or is ambiguous. Use `agent` only when every acceptance criterion is objective, reproducible, directly observable by the agent, and supported by concrete evidence such as tests, reproductions, benchmarks, builds, static checks, or deterministic artifacts. Tests alone do not transfer ownership of a user review surface.
+
+The classification is conservative: missing legacy reviewer means `user`; the agent may escalate `agent → user` when new evidence requires it; it may not downgrade `user → agent` after execution starts without explicit user approval and a fresh eligibility check.
+
 ### State machine
 
 ```text
 planning ── user approves ──▶ in-progress
-in-progress ── agent finishes ──▶ awaiting-review
+in-progress ── reviewer: agent + all acceptance proven ──▶ done
+in-progress ── reviewer: user + agent validation complete ──▶ awaiting-review
 awaiting-review ── user confirms ──▶ done
 awaiting-review ── user reports a problem ──▶ in-progress
 in-progress ── blocked ──▶ blocked
@@ -286,21 +311,21 @@ any state ── user cancels ──▶ cancelled
 `planning` and `awaiting-review` are write locks for source code:
 
 - In `planning`, the agent may refine `TASK.md` and retain necessary notes, supplied inputs, or read-only evidence. Implementation is forbidden even inside `artifacts/`.
-- In `awaiting-review`, the agent preserves the reviewed implementation and evidence while waiting for the user's review.
+- In `awaiting-review`, the agent preserves the reviewed implementation and evidence while waiting for the user's concrete review surface. This state is for `reviewer: user` (and legacy tasks with no reviewer).
 - A reported problem reopens the task and returns it to `in-progress`.
 
 ### Approval and completion
 
-Approval is expressed in ordinary language. Clear phrases such as “go,” “implement,” or “approved” can start an approved plan. Clear completion phrases such as “looks good,” “confirmed,” or “close it” allow the task to be archived.
+Approval is expressed in ordinary language. Clear phrases such as “go,” “implement,” or “approved” can start an approved plan. User-reviewed completion still needs a clear signal such as “looks good,” “confirmed,” or “close it.”
 
-Resolve execution intent from the current message first, then from an earlier explicit instruction that is still applicable. A direct request to implement, start, continue, or resume satisfies `planning → in-progress`; the agent changes status before writing implementation and does not ask for the same authorization again. A request to create, explain, revise, or review the plan only keeps the planning lock. This precedence does not widen scope or remove the final human confirmation gate.
+Resolve execution intent from the current message first, then from an earlier explicit instruction that is still applicable. A direct request to implement, start, continue, or resume satisfies `planning → in-progress`; the agent changes status before writing implementation and does not ask for the same authorization again. A request to create, explain, revise, or review the plan only keeps the planning lock.
 
-Praise, questions, or manual edits to the task file are not treated as approval.
+Closeout depends on the recorded reviewer:
 
-Completion has two distinct steps:
+1. **`reviewer: user`:** after all agent-verifiable work passes, status becomes `awaiting-review`. The agent must name the specific user-visible, subjective, external, or user-owned acceptance still outstanding. User confirmation moves the task to `done`.
+2. **`reviewer: agent`:** the agent may move directly from `in-progress` to `done` only when every acceptance criterion is still eligible for agent review and has concrete evidence. Missing, stale, uncertain, external, mixed, or user-owned acceptance prevents self-close and must remain active, become blocked, or escalate to `reviewer: user`.
 
-1. **Agent completion:** implementation and validation finish; status becomes `awaiting-review`.
-2. **User confirmation:** the user reviews the result; the task moves to `done`, the entire directory moves to `tasks/done/<task-id>/`, and the journal receives a compact record. Cancellation also preserves the whole workspace. Never overwrite an archive destination; workspace-relative attachment links survive the move.
+A valid `done` task is archived as the whole directory under `tasks/done/<task-id>/` and the journal receives a compact record. Cancellation also preserves the whole workspace. Never overwrite an archive destination; workspace-relative attachment links survive the move. Praise, questions, silence, or manual task-file edits never remove a user review gate.
 
 ### Resuming later
 

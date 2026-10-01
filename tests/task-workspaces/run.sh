@@ -84,6 +84,13 @@ for layer in claude codex; do
     assert_contains "$file" 'Link existing project files' "$layer avoids duplicated canonical files"
     assert_contains "$file" 'mandatory repository checks' "$layer retains required verification"
     assert_contains "$file" 'forced session rotation' "$layer forbids spec-style ceremony"
+    assert_contains "$file" 'reviewer: user # user | agent' "$layer task schema records the completion reviewer"
+    assert_contains "$file" 'When in doubt, choose `user`.' "$layer defaults ambiguous acceptance to user review"
+    assert_contains "$file" 'must **never** downgrade `user → agent` on its own' "$layer prevents silent reviewer downgrade"
+    assert_contains "$file" 'reviewer: agent + all acceptance proven' "$layer permits evidence-backed agent closeout"
+    assert_contains "$file" 'reviewer: user + agent finishes validation' "$layer preserves the user review gate"
+    assert_contains "$file" 'agent-facing durable execution record, not the default user-facing presentation' "$layer separates agent task storage from user presentation"
+    assert_contains "$file" 'Never tell the user to open, read, or review `TASK.md` as the default approval action.' "$layer owns the user-facing plan translation"
     assert_contains "$file" 'Never automatically extract archives, execute attachments, or load all supporting files.' "$layer does not auto-process attachments"
     assert_not_contains "$file" 'One task per file.' "$layer drops the single-file storage restriction"
     assert_not_contains "$file" 'tasks/*.md' "$layer has no flat task discovery"
@@ -105,16 +112,25 @@ for layer in claude codex; do
   assert_contains "$plan" 'Honor an explicit request for a persistent plan' "$layer honors small explicit plans"
   assert_contains "$plan" 'File count alone is not a reason.' "$layer avoids unnecessary planning"
   assert_contains "$plan" 'resumption or review flow' "$layer resumes without resetting state"
+  assert_contains "$plan" 'Classify the completion reviewer before the plan is ready' "$layer plan classifies reviewer before implementation"
+  assert_contains "$plan" '**User Plan Brief**' "$layer plan presents a compact user-facing brief"
+  assert_contains "$plan" 'Do not paste the task file and do not tell the user to open or review `TASK.md`' "$layer plan does not outsource comprehension to the user"
+  assert_contains "$plan" '**Current state**' "$layer plan brief explains the current state"
+  assert_contains "$plan" '**Desired outcome**' "$layer plan brief explains the desired outcome"
+  assert_contains "$plan" '**Review / approval**' "$layer plan brief explains review responsibility"
   assert_contains "$plan" 'No implementation code, scaffolding, runnable POCs, or write-scope workers' "$layer closes the artifact planning loophole"
 
   assert_contains "$start" 'tasks/*/TASK.md' "$layer startup can recover a missing index"
   assert_contains "$start" 'Read `TASK.md` frontmatter' "$layer startup reads metadata only"
   assert_contains "$start" 'Do not read task bodies or artifact contents' "$layer startup does not slurp workspaces"
+  assert_contains "$start" 'reviewer: agent' "$layer startup recognizes inconsistent agent-review parking"
   assert_contains "$checkpoint" 'tasks/done/*/TASK.md' "$layer checkpoint recognizes directory archives"
   assert_contains "$checkpoint" 'Move the entire workspace' "$layer checkpoint preserves attachments"
   assert_contains "$checkpoint" 'Repair knowledge `sources` that point into the moved workspace' "$layer checkpoint archive keeps knowledge sources resolvable"
   assert_contains "$checkpoint" '**DO NOT archive `awaiting-review` tasks.**' "$layer checkpoint respects review"
+  assert_contains "$checkpoint" 'missing legacy `reviewer` is treated as `user`' "$layer checkpoint keeps legacy tasks user-reviewed"
   assert_contains "$checkpoint" 'checkpoint never creates supporting files' "$layer checkpoint does not manufacture artifacts"
+  assert_contains "$doctor" 'Validate `reviewer` as `user | agent` when present.' "$layer doctor validates reviewer metadata"
   assert_contains "$doctor" 'Missing `artifacts/` or `### Workspace Files` is normal' "$layer doctor accepts the minimal workspace"
   assert_contains "$doctor" 'Do not read artifact bodies' "$layer doctor checks links without processing payloads"
   assert_contains "$doctor" '`None.` is valid' "$layer doctor does not demand filler"
@@ -185,7 +201,7 @@ next_sequence() {
   printf '%03d\n' "$((highest + 1))"
 }
 
-archive_confirmed() {
+archive_terminal() {
   local root=$1 id=$2 source destination status
   valid_id "$id" || return 1
   source="$root/$id"
@@ -201,7 +217,7 @@ archive_confirmed() {
 seed_task() {
   mkdir -p "$1" || exit 2
   printf '%s\n' '---' "slug: $3" "status: $2" 'created: 2026-09-10' \
-    'updated: 2026-09-10' 'agent: codex' 'delegation: none' 'tags: [test]' '---' \
+    'updated: 2026-09-10' 'agent: codex' "reviewer: $4" 'delegation: none' 'tags: [test]' '---' \
     '# Synthetic task' > "$1/TASK.md"
 }
 
@@ -209,9 +225,9 @@ root="$TMP_ROOT/tasks"
 minimal=2026-09-10-001-small-change
 bundle=2026-09-10-002-import-failure
 cancelled=2026-09-10-003-dropped-change
-seed_task "$root/$minimal" planning small-change
-seed_task "$root/$bundle" awaiting-review import-failure
-seed_task "$root/done/$cancelled" cancelled dropped-change
+seed_task "$root/$minimal" planning small-change user
+seed_task "$root/$bundle" awaiting-review import-failure user
+seed_task "$root/done/$cancelled" cancelled dropped-change user
 mkdir -p "$root/$bundle/artifacts/nested" "$root/2026-09-10-008-reserved-work"
 printf '%s\n' 'not a task' > "$root/$bundle/artifacts/nested/TASK.md"
 printf '%s\n' 'not a task' > "$root/done/TASK.md"
@@ -257,7 +273,7 @@ printf 'PK\005\006\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\0
 tar -czf "$root/$bundle/artifacts/input.tgz" -C "$root/$bundle/artifacts" result.json || exit 2
 printf '\n### Workspace Files\n\n- [Result](artifacts/result.json) - retained verification input.\n' >> "$root/$bundle/TASK.md"
 cp -R "$root/$bundle/artifacts" "$TMP_ROOT/expected-artifacts" || exit 2
-if archive_confirmed "$root" "$bundle"; then
+if archive_terminal "$root" "$bundle"; then
   fail "awaiting-review cannot be archived"
 else
   if [ -f "$root/$bundle/TASK.md" ] && [ ! -e "$root/done/$bundle" ]; then
@@ -268,10 +284,10 @@ else
 fi
 sed 's/^status: awaiting-review$/status: done/' "$root/$bundle/TASK.md" > "$TMP_ROOT/confirmed"
 cp "$TMP_ROOT/confirmed" "$root/$bundle/TASK.md" || exit 2
-if archive_confirmed "$root" "$bundle" && [ ! -e "$root/$bundle" ]; then
-  pass "confirmed completion moves the whole workspace"
+if archive_terminal "$root" "$bundle" && [ ! -e "$root/$bundle" ]; then
+  pass "user-reviewed completion moves the whole workspace after confirmation"
 else
-  fail "confirmed completion moves the whole workspace"
+  fail "user-reviewed completion moves the whole workspace after confirmation"
 fi
 for name in result.json reference.png input.zip input.tgz nested/TASK.md; do
   if cmp -s "$TMP_ROOT/expected-artifacts/$name" "$root/done/$bundle/artifacts/$name"; then
@@ -286,10 +302,29 @@ if grep -Fq '(artifacts/result.json)' "$root/done/$bundle/TASK.md" && \
 else
   fail "workspace-relative attachment links survive archival"
 fi
-seed_task "$root/$cancelled" cancelled dropped-change
+
+agentdone=2026-09-10-007-benchmark-fix
+seed_task "$root/$agentdone" done benchmark-fix agent
+if archive_terminal "$root" "$agentdone" && [ -f "$root/done/$agentdone/TASK.md" ]; then
+  pass "agent-reviewed done task archives without user confirmation"
+else
+  fail "agent-reviewed done task archives without user confirmation"
+fi
+
+legacy=2026-09-10-012-legacy-review
+seed_task "$root/$legacy" awaiting-review legacy-review user
+grep -v '^reviewer:' "$root/$legacy/TASK.md" > "$TMP_ROOT/legacy-task"
+cp "$TMP_ROOT/legacy-task" "$root/$legacy/TASK.md" || exit 2
+if archive_terminal "$root" "$legacy"; then
+  fail "legacy awaiting-review task cannot be auto-archived"
+else
+  pass "legacy awaiting-review task remains user-reviewed"
+fi
+
+seed_task "$root/$cancelled" cancelled dropped-change user
 cp "$root/$cancelled/TASK.md" "$TMP_ROOT/collision-source"
 cp "$root/done/$cancelled/TASK.md" "$TMP_ROOT/collision-destination"
-if archive_confirmed "$root" "$cancelled"; then
+if archive_terminal "$root" "$cancelled"; then
   fail "archive destination collisions are refused"
 elif cmp -s "$TMP_ROOT/collision-source" "$root/$cancelled/TASK.md" && \
      cmp -s "$TMP_ROOT/collision-destination" "$root/done/$cancelled/TASK.md"; then
@@ -298,15 +333,15 @@ else
   fail "archive destination collisions preserve both workspaces"
 fi
 standalone=2026-09-10-006-cancelled-work
-seed_task "$root/$standalone" cancelled cancelled-work
+seed_task "$root/$standalone" cancelled cancelled-work user
 ln -s missing-target "$root/done/$standalone" || exit 2
-if archive_confirmed "$root" "$standalone"; then
+if archive_terminal "$root" "$standalone"; then
   fail "dangling archive symlinks are collisions"
 else
   pass "dangling archive symlinks are collisions"
 fi
 rm -- "$root/done/$standalone"
-if archive_confirmed "$root" "$standalone" && [ -f "$root/done/$standalone/TASK.md" ] && \
+if archive_terminal "$root" "$standalone" && [ -f "$root/done/$standalone/TASK.md" ] && \
    [ ! -e "$root/done/$standalone/artifacts" ]; then
   pass "cancellation archives a TASK.md-only workspace without manufacturing artifacts"
 else
