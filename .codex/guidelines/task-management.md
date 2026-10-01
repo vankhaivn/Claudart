@@ -320,13 +320,13 @@ After a valid transition to `done`:
 
 ## Approval Signal Cheat Sheet
 
-| Transition                                | What authorizes it                                                                        |
-| ------------------------------- | ---------------------------------------------------------------------------------------- |
-| `planning → in-progress`                 | "go", "approved", "implement", "do it", "ok làm đi", "start"                              |
-| `in-progress → done` (`reviewer: agent`) | The evidence-complete agent closeout contract above; no synthetic user signal              |
+| Transition                               | What authorizes it                                                                       |
+| ---------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `planning → in-progress`                 | "go", "approved", "implement", "do it", "ok làm đi", "start"                             |
+| `in-progress → done` (`reviewer: agent`) | The evidence-complete agent closeout contract above; no synthetic user signal            |
 | `awaiting-review → done`                 | "approved", "confirmed", "looks good", "close it", "done", "ship", "ok đóng", "merge it" |
-| `awaiting-review → in-progress`          | Any report of a problem — "didn't work", "broken", "missed X", "step Y is wrong"          |
-| `* → cancelled`                          | "cancel", "abandon", "drop this", "bỏ task"                                               |
+| `awaiting-review → in-progress`          | Any report of a problem — "didn't work", "broken", "missed X", "step Y is wrong"         |
+| `* → cancelled`                          | "cancel", "abandon", "drop this", "bỏ task"                                              |
 
 Explicit signals remain mandatory for planning approval, user-review completion, and cancellation. Agent-reviewed completion is permitted only by the recorded reviewer classification plus complete evidence. Enthusiasm ("great!", "nice plan"), questions, silence, or edits to the task file never change a user review gate.
 
