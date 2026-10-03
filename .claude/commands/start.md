@@ -90,6 +90,7 @@ Pick the most recently updated one. The exact prompt depends on its status and r
   > "Task `<slug>` is blocked (updated <date>). Has the blocker cleared? If yes, I'll flip to in-progress and resume. If no, tell me what to work on instead."
 
 Do not infer resumption or completion from an orientation-only request. When the current request already selects or resumes the task, that is explicit direction: **warm the session** by reading `TASK.md`, then only the next action's relevant code and linked supporting files (cap ~5 most relevant references), and follow the Resumption protocol in `.claude/rules/task-management.md` without asking again. The same direct instruction satisfies `planning → in-progress` when the selected task is still planning. Reuse applicable evidence, verify relevant drift or gaps, and never replay all completed checks merely because this is a new session.
+
 ### Case B — No active task, but CONTEXT.md carries a handoff: `## Next Session Should Start By` is set, or an active `(no task)` micro-handoff sits under `## In Progress`
 
 Surface the Next-Session line (or the micro-handoff's label and its `Next:` step) and ask:
