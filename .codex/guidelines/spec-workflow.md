@@ -1,38 +1,37 @@
 ---
 paths: ["**/*"]
-description: Dated mission-scale spec workspaces in `.claudart/specs/` with `done/` archives — a POC-frozen SPEC plus a decision-complete ROADMAP that any later session (often a cheaper model) executes autonomously until final review, with self-QA, circuit breakers, and session rotation.
+description: Dated mission-scale specs with standing approval, scoped context loading, owned execution state and evidence-driven verification through final user review.
 when_to_use: Whenever the user invokes `$codex-spec` or `$codex-spec-run`, when a spec folder under `.claudart/specs/` is open or referenced, or when resuming mission-scale work that spans many sessions.
 tags: [specs, loop-engineering, autonomy, cross-session, missions]
 ---
 
 # Spec Workflow (Loop Engineering)
 
-A **spec** is a mission: work too large for one task file — a whole game, a feature system, a client-demo POC. While active, it lives as a dated folder in `.claudart/specs/YYYY-MM-DD-<slug>/` written by `$codex-spec`, then executed to the final-review gate by `$codex-spec-run` **without per-task user approval**. Completed and cancelled missions are archived under `.claudart/specs/done/YYYY-MM-DD-<slug>/`. The folder, not chat memory, is the source of truth across sessions and recovery.
+A **spec** is a mission that needs a frozen intent, a phased plan, standing approval and recovery across sessions. Use `$codex-plan` for bounded work whose decisions fit one task workspace; use `$codex-project-docs`, when installed, for an undefined project needing current documentation. A spec replaces the task layer for its scope: its executor never creates matching `.claudart/tasks/` work.
 
-Missions sit **above** the task layer (`task-management.md`): a spec supersedes `$codex-plan` for its scope, and its executor never creates `.claudart/tasks/` files. Use `$codex-plan` for a bounded feature or fix whose decisions fit one task workspace. Use `$codex-spec` for a defined mission that needs a POC-frozen intent, phased roadmap, standing approval, and multi-session convergence. For a still-undefined project or product needing current documentation, use `$codex-project-docs` if installed; otherwise clarify intent within the current work. Unanswered spec-level details do not by themselves turn a defined mission into project-document work.
+Both runtimes use the same dated workspace under `.claudart/specs/`. Resume the same workspace regardless of its `agent` metadata; it records provenance, not ownership or permission. Changing runtimes preserves scope, approval, execution evidence and review gates. Serialize writes and re-read their owners before updating them.
 
-`.claudart/` is shared by both runtimes. Resume the same workspace regardless of its `agent` metadata; that field records provenance, not ownership, permission or a discovery filter. Changing runtimes preserves scope, approval, execution evidence and review gates. Serialize writes to the same work record and shared indexes; re-read current files before updating them.
+## File Layout and Ownership
 
-## File Layout
-
-```
+```text
 .claudart/specs/
-├── INDEX.md                    # Registry: one line per spec
-├── done/                       # Archive for done/cancelled spec folders
-│   └── YYYY-MM-DD-<slug>/
+├── INDEX.md                    # Derived registry; SPEC metadata owns lifecycle.
+├── done/                       # Archived done/cancelled missions.
 └── YYYY-MM-DD-<slug>/
-    ├── SPEC.md                 # What "done" means. Frozen at approval; only the user changes it.
-    ├── ROADMAP.md              # Phases → checkbox tasks with explicit dispositions.
-    ├── NOTES.md                # Working memory: orientation, pitfalls, decisions. Curated and loaded as needed.
-    ├── LEDGER.md               # Append-only evidence & history. Never rewritten.
-    └── artifacts/              # POC HTML, mockups, generated references
+    ├── SPEC.md                 # Approved contract and mission metadata.
+    ├── ROADMAP.md              # Current task dispositions, dependencies and acceptance gaps.
+    ├── LEDGER.md               # Append-only observations and evidence.
+    ├── NOTES.md                # Unresolved reasoning, pitfalls and source pointers.
+    └── artifacts/              # Only concrete references or evidence the mission needs.
 ```
 
-- **Naming**: folder id is `YYYY-MM-DD-<slug>`, using the spec creation date and a slug of 2-5 lowercase kebab-case words. `SPEC.md` frontmatter keeps the short `slug: <slug>`; the folder name must equal `<created>-<slug>`. One folder per mission; never nest specs except the single archive folder `done/`.
-- **Resolving a spec**: `$codex-spec-run <arg>` accepts either a full folder id (`YYYY-MM-DD-<slug>`) or the short slug. Match active top-level folders first; if a short slug matches more than one active folder, ask the user to choose the dated folder. If the match exists only under `done/`, report its archived status and do not run it.
-- **`SPEC.md` holds mission intent, `ROADMAP.md` holds the plan, `NOTES.md` holds mission working knowledge/candidates, `LEDGER.md` holds the proof.** Current project facts live with their authoritative owner; `.claudart/knowledge/` owns only eligible facts without another owner and otherwise routes to that source.
+- The folder name is `<created>-<slug>`; use a creation date and a short slug of 2–5 lowercase kebab-case words. Never nest active specs.
+- `$codex-spec-run` resolves either the dated folder id or its SPEC `slug`. An omitted argument selects the only active ready/running/blocked/review mission; ask only if several match. Report archived matches without executing them.
+- **One editable owner per fact.** SPEC defines behavior; ROADMAP owns current execution state and the verification plan; LEDGER owns results/history; NOTES keeps useful reasoning that has no other current owner. Link to an existing architecture document or runbook instead of restating its contracts or procedures.
+- SPEC scenarios have stable IDs, not mutable completion checkboxes. Optional acceptance/release reports are derived views with source references, never another authority. INDEX is a cache and CONTEXT may contain one pointer.
+- Update SPEC `updated:` when its contract or lifecycle metadata changes, not after every task. Current execution activity is in ROADMAP/LEDGER. These ownership rules replace duplicate updates; they do not require generated reports, a new state engine or per-task compliance documents.
 
-## SPEC.md
+## SPEC.md — approved intent
 
 ```markdown
 ---
@@ -41,268 +40,223 @@ status: drafting # drafting | poc-review | ready | running | blocked | awaiting-
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
 agent: codex # claude | codex | both
-commits: per-task # per-task | per-phase | user — spec commit cadence; git-workflow.md owns authority and remote/history limits
+commits: per-task # per-task | per-phase | user
 ---
 
 # <Mission Title>
 
 ## Mission
 
-<Write 2-3 self-contained sentences in project/documentation language that state the mission's end state, intended actors or use, observable behavior/demo, and material preserved boundaries or non-goals. Normalize the owner's intent; do not quote or preserve raw owner/agent conversational wording, interview chatter, or session meta-instructions. If conversational wording carries a real requirement, rewrite it as that requirement. A later executor must understand the mission without interview or chat history.>
+<2–3 self-contained sentences: end state, actors/public entrypoints, preserved boundaries.
+Normalize confirmed intent; do not paste interview conversation.>
 
 ## Acceptance Scenarios
 
-<Defined at spec time, each one binary. A scenario names the exact action and the exact observable —
-"open artifacts/poc.html → wave counter advances and enemies spawn within 3s", not "game works".
-The first final gate establishes fresh evidence for every scenario. Later review back-edges may carry
-forward baseline evidence only for scenarios proven outside the changed surface. Keep scenarios
-non-redundant; when a composite check covers several scenarios, name that coverage explicitly.>
-
-- [ ] S1 — <literal action / command> → <binary observable>
-- [ ] S2 — ...
+- S1 — <initial conditions; literal action/command> → <observable result>
+- S2 — ...
 
 ## Must-NOT-Have
 
-<Scope fence. Options the user rejected, features deferred, gold-plating to refuse. The executor treats
-this as hard as the acceptance list.>
+<Rejected/deferred scope and global constraints.>
 
 ## POC Artifacts
 
-- `artifacts/<file>` — <what it locks in; e.g. "approved UI reference — layout, palette, HUD placement">
+- `artifacts/<file>` — <observable aspects this approved reference locks in>
+
+## Contract References
+
+<Only when needed: link to additional contract sections and state their scope.
+Existing headings and scenario IDs form the inventory; do not duplicate their bodies.>
 
 ## Definition of Done
 
-Every ROADMAP task completed or explicitly superseded, no unresolved blocked task remains, AND every Acceptance Scenario has valid PASS evidence: fresh evidence at the first full final gate, then fresh evidence for the impacted closure plus explicitly retained baseline evidence after any scoped review back-edge.
+All ROADMAP work completed or explicitly superseded, no unresolved blocker,
+and every scenario supported by valid final-gate evidence. The user confirms done.
 ```
 
-POC artifacts are not decoration: they are the **frozen references for intent**, at whatever fidelity the user chose during drafting — often several narrow artifacts, each locking one aspect (core interaction with primitive placeholders, a visual-style reference, a flow demo) rather than one high-fidelity build. UI and UX tasks verify against them (side-by-side comparison, or feeding one to an art-generation skill), which is what lets a cheaper executor make presentation-quality calls without re-interviewing the user.
+Each scenario must be observable by an executor without interview history. Split independently failing obligations into sub-IDs where necessary; do not turn every assertion into a task or a separate command. Identify checks that need a released artifact or live environment so they cannot block their own prerequisites.
 
-## ROADMAP.md — the decision-complete bar
+**Initial-state coverage belongs in existing acceptance.** For each materially different first-use path, trace the minimum supported state to the first useful result through the real entrypoint. Essential pre-populated fixture resources must have a supported creation path or an explicit external prerequisite. Cover first-use behavior when it differs from later use; include controlled rejection, cancellation or recovery when material. An empty input need not succeed. Do not add out-of-scope features, a Cartesian state matrix or a separate checklist report.
 
-The roadmap is the interface between the session that interviewed the user and a session that has **zero interview context**. It must be _decision-complete_: exact paths, chosen approaches (and rejected alternatives where a future session might re-litigate), per-task `verify:`, and phase-level validation commands. If executing a task would require asking "what did the user mean?", the roadmap is defective — fix the roadmap, don't guess.
+POC artifacts freeze only the aspects the user chose: interaction, appearance, protocol/output behavior or another observable. Select the smallest useful artifact for the actual interface and confirm how it can be inspected before relying on it for acceptance. Avoid building a second full implementation. Drafting may produce runnable POC artifacts within its workspace, not production implementation or scaffolding.
 
-Plan Altitude from `task-management.md` still applies: decisions and verification, **never code**. A task may be vague about _how_ as long as its `verify:` is sharp about _what success is_.
+## ROADMAP.md — plan and current execution state
+
+A later executor must understand the work without interview context. Record boundaries, dependencies, relevant contract/scenario references, chosen approaches where they matter, and a sharp `verify:`. Exact file paths are useful when known or contractual; do not pre-solve internal implementation. Plan Altitude from `task-management.md` still applies.
 
 ```markdown
 # ROADMAP — <Mission Title>
 
-<1-2 paragraphs: build order and why. Note which phases/tasks are parallelizable (waves) for fan-out.>
+<Build order and important dependencies; optional parallel waves under the active harness.>
 
 ## Phase 1 — <name>
 
-Goal: <one line — what is demoable when this phase closes>
+Goal: <observable milestone>
 
-- [ ] P1.1 <action, target files, decisions it carries> (verify: <observable check>)
-- [ ] P1.2 ... (verify: ...)
+- [ ] P1.1 <action and ownership boundary> (contracts: <S#/section refs>; verify: <observable>)
+- [ ] P1.2 <action> (depends: P1.1; contracts: <refs>; verify: <observable>)
 
-**Phase validation**: <commands/scenarios proving the phase goal on a real surface — which SPEC scenarios it advances and any composite coverage it provides>
+**Phase validation:** <due scenarios → concrete verifiers/cases, fixtures and prerequisites;
+name composite coverage and the smallest non-redundant final verification set>
 
-## Phase 2 — ...
+## Current Acceptance Delta
+
+- None.
+<!-- Or: <S# or named gate>: <unresolved gap>; owner: <task-id>;
+evidence: <LEDGER entry>; baseline: <gate ref, when applicable>;
+impact: <affected scenarios/checks>; next: <action or NOTES hypothesis ref>. -->
 ```
 
-- Top-level checkbox state is mechanical:
-  - `- [ ] <task>` is pending work; it is runnable only when its dependencies are satisfied and it carries no `⚠ blocked` marker.
-  - `- [x] <task>` is completed work backed by a `task-completed` evidence entry.
-  - `- [x] ~~<task>~~ — superseded by <task-id or reason>` is terminal superseded work backed by a `replanned` entry.
-  - `- [ ] <task> — ⚠ blocked: <condition>; unlock: <required input/change>` is unresolved and **not runnable**. It stays unticked, is skipped by selection, and prevents the final gate.
-  - `- [ ] ~~<task>~~` is an invalid legacy state, never runnable. Reconcile it from LEDGER/NOTES into one of the valid forms above before selection; if its disposition is ambiguous, mark it blocked with the exact evidence or user decision needed to unlock it.
-- Continue while a runnable pending task exists. A blocked task does not make later work runnable by itself; normal phase dependencies still apply.
-- Size each task to fit comfortably in one iteration of one context window.
-- Verification plans prove acceptance with the **smallest non-redundant command set**. A composite check may provide fresh evidence for every scenario whose action and observable it actually exercises with failure propagation; do not rerun covered leaf checks for bookkeeping. A literal user-facing action still runs directly when transitive invocation would not prove that entrypoint.
-- The executor may **append** genuinely missing implementation work discovered mid-flight (log the addition in LEDGER), but never appends a separate fix task plus replay/verification task for the same defect — verification stays with the implementation task. Supersede dead work only with the checked + struck form above; never rewrite phase goals or delete history. Scope changes belong to the user alone; the executor may record only an explicit bounded review patch under the Completion flow, exactly within the user's stated delta.
-- Reopening responsible work means un-ticking only the current non-superseded owner whose completion evidence was invalidated. If none exists, append one genuine implementation task under the rule above. Never un-tick a superseded row.
+Task dispositions:
 
-## LEDGER.md — append-only
+- `- [ ] <task>`: pending, runnable only when its dependencies are satisfied and it is not blocked.
+- `- [x] <task>`: completed, backed by a `task-completed` evidence entry.
+- `- [x] ~~<task>~~ — superseded by <task-id or reason>`: terminal, backed by `replanned`.
+- `- [ ] <task> — ⚠ blocked: <condition>; unlock: <required input/change>`: unresolved, skipped by selection and prevents final completion.
+- Unchecked struck rows are invalid. Reconcile from evidence; ambiguous disposition becomes a blocker, never an assumed completion.
 
-The roadmap holds _what_; the ledger holds _evidence and learnings_. Ticking never destroys history — a fresh session reads the ledger tail to learn what actually happened, in what order, and what to avoid.
+Size a task around a coherent observable and its proof, small enough for an iteration. A phase should yield useful observable progress early. Dependencies must be acyclic; later numbering does not make work runnable. For release work, order software verification → applicable rehearsal/readiness → separately authorized release/cutover → post-release observations. Omit stages outside the approved scope. A software gate must not require future live evidence, and release must not wait for a gate that already includes post-release checks.
+
+**Current Acceptance Delta lives only here.** Keep current contradicted/unproven obligations or approved review changes, keyed by scenario/gate rather than task. Reference LEDGER for the last attempt/result and NOTES only for unresolved reasoning; do not copy them. A review back-edge records the latest successful final-gate baseline and provisional impact, recomputed from the actual changed surface before verification. Clear a gap only with valid evidence; changing its task/owner never resolves it.
+
+The executor may append genuinely missing implementation work and log it, within approved scope. Supersede dead work explicitly; preserve history and phase intent. Reopen only the current non-superseded task whose evidence was invalidated. Keep a fix and its verification in that task; never append mechanical fix/replay task pairs. Scope changes follow the review/amendment rules below.
+
+## LEDGER.md — append-only evidence
 
 ```markdown
 ### YYYY-MM-DD HH:MMZ — <event> <task-id or scope>
 
-- Evidence: <command run → observed result; file:line touched>
-- Surprise/Decision: <optional — what diverged from the roadmap and why>
+- Evidence: <command/case or observation → result; scenario refs; state/environment proved>
+- Decision: <optional change and why; link to its current owner>
 ```
 
-Events: `run-started`, `task-started`, `task-completed`, `validation-failed`, `phase-validated`, `task-blocked`, `replanned`, `delegated`, `circuit-breaker`, `rotation-checkpoint`, `scope-change` (user-initiated only), `final-gate`. Never edit or delete prior entries.
+Events include `run-started`, `task-started`, `task-completed`, `validation-failed`, `phase-validated`, `task-blocked`, `replanned`, `delegated`, `circuit-breaker`, `rotation-checkpoint`, `scope-change` (user-initiated only), and `final-gate`. Never rewrite or delete historical entries. Store large outputs in appropriate artifacts and reference them.
 
-Every `final-gate` entry records `mode: full-baseline | scoped-review`. A full baseline names why it ran (`initial`, `material-amendment`, or conservative fallback), the fresh scenario evidence, and the revision or worktree state proved. A scoped review names the latest successful `final-gate` evidence state it extends, the actual changed surface, `executed` checks, scenarios `covered` by those checks, evidence `reused` from that state, and why each reused scenario is outside the impact closure. Every successful gate also records the resulting revision or bounded worktree fingerprint it proved, then becomes the cumulative baseline for the next review change; the chain must remain rooted in an identifiable full baseline. For a dirty worktree, the fingerprint is the base revision plus mission-relevant changed paths and content digests; exclude secrets, ignored live state, and unrelated user files. This record, not chat memory, makes repeated evidence reuse auditable.
+Each successful gate records its **resulting revision or bounded worktree fingerprint**, actual environment/artifact, observed scenario coverage, and `executed`, `covered` and any `reused` evidence. For a dirty tree, identify the base revision and relevant changed-path/content digests; exclude secrets and unrelated user files. Record relevant verifier, fixture/configuration and dependency state, using existing build/test identifiers where available rather than maintaining a per-file cache.
 
-An unmatched `task-started` or `delegated` (no later `task-completed`, `validation-failed`, `task-blocked`, supersession, or consumed delegated result) is the crash-recovery marker: it tells a resuming session exactly what was in flight when the previous one died or compacted.
+A `final-gate` records `mode: full-baseline | scoped-review`. Full baseline records its reason (`initial`, `material-amendment` or `conservative-fallback`). Scoped review names the latest successful `final-gate` cumulative evidence state, the actual changed surface, newly observed coverage and the reason retained evidence still applies. Its cumulative chain must reach an identifiable full baseline.
 
-## NOTES.md — the mission's working memory
+An unmatched `task-started` or `delegated` marks interrupted work. Locate unresolved events from their headers/IDs and inspect the relevant bodies, including failures since the baseline; a fixed tail length is not proof that no work remains. A result written before its ROADMAP update can be reconciled from evidence without automatically repeating the operation.
 
-The ledger answers _what happened, in order_; NOTES answers _what future execution and recovery must know_. It is the spec-layer equivalent of a task file's Memory Hints + Decision Log — declarative and curated, loaded in full at initial/recovery boundaries and by relevant section during uninterrupted execution, while the ledger's tail scrolls away.
+## NOTES.md — unresolved working memory
 
 ```markdown
 # NOTES — <Mission Title>
 
 ## Orientation
 
-- `path/to/...` — role in this mission (key files, helpers to reuse, where things live)
+- <source/section> — <why the next task may need it>
 
-## Constraints & Pitfalls
+## Pitfalls / Open Reasoning
 
-- <non-obvious constraint or trap discovered, and how to avoid it>
+- <task/scenario ref>: <unresolved hypothesis or unique execution trap; next distinguishing check>
 
-## Current Acceptance Delta
+## Candidates
 
-- None. <!-- Or: <S# or named review/final-gate check>: <observed failure or user-approved bounded delta>; baseline: <latest successful final-gate>; provisional impact: <S#/checks>; owner: <task-id>; last attempt: <material change> → <result>; next: <materially different hypothesis/check, or blocked> -->
-
-## Decisions
-
-- (YYYY-MM-DD HH:MMZ) <what was chosen> — <why; what was rejected>
-
-## Open Questions / Deferred
-
-- <question awaiting the user, or work deliberately pushed past this mission>
+- <uncertain or mission-local fact; source ref; optional graduation flag>
 ```
 
-- **Seeded by `$codex-spec`** from planning-time exploration; **grown by the executor** whenever a finding or mid-flight decision matters to this mission. Route by kind: evidence → LEDGER; WIP, proposals, mission state, and uncertain discoveries → NOTES.
-- **Scope-check as you write**: a candidate that may outlive the mission gets flagged in place — `→ graduate: knowledge/` for descriptive facts, `→ graduate: $codex-learn` for recurring behavior. Checkpoint bulk-evaluates flags at rotations and close.
-- **Curated, not append-only**: rewrite or drop entries that stopped being true. Hard ceiling 150 lines — past it, distill rather than moving unverified material into another tier.
-- **Current Acceptance Delta is not a score or a second roadmap.** Keep only currently contradicted/unproven acceptance surfaces, keyed by stable SPEC scenario id or named phase/final-gate check. For a review back-edge, also keep the latest successful `final-gate` baseline and provisional impact set so a rotated session cannot silently broaden or shrink verification; recompute that set from the actual changed surface before the scoped gate. Record the responsible task as `owner`, never as the key, so replanning cannot erase failure history. Keep the last material attempt and result plus the next materially different attempt; reset to `None` only when every scenario again has valid evidence. A new task, owner, or tick alone does not shrink the delta.
-- Decisions that change _approach_ belong here; decisions that change _scope_ belong to the user in SPEC.md — never blur the two.
+Keep notes declarative and curated. Remove resolved reasoning or route the established fact to its owner, leaving a pointer when helpful. Approved scope belongs in SPEC, implementation decisions in their design/plan owner, past attempts in LEDGER, and acceptance gaps in ROADMAP. Do not copy those into NOTES.
 
-### Knowledge-maintenance exception
+The existing 150-line ceiling is a backstop, not a context budget: do not pack paragraphs to satisfy it or automatically read the entire file. Load relevant notes only. Flag durable descriptive candidates `→ graduate: knowledge/` and recurring behavior `→ graduate: $codex-learn`; a local scope does not disqualify a fact. Uncertainty stays here, not in canonical knowledge.
 
-NOTES remains the default home for mission-local and uncertain material. A direct knowledge mutation is allowed only when the full capture gate and one of `knowledge-management.md`'s immediate-promotion triggers pass. Scope may be narrow. Read that rule in full, patch the existing owner first, update its reachable route atomically, and run `bash .codex/scripts/knowledge-check.sh --root .`. This exception does not authorize implementation code during a read-only spec state.
+For a direct knowledge mutation, read `knowledge-management.md` and its maintenance reference; require the full capture gate and an immediate-promotion trigger. Update the existing owner and reachable map atomically, then run `bash .codex/scripts/knowledge-check.sh --root .`. Checkpoint bulk-maintains remaining flags. This exception does not authorize production implementation during drafting.
 
-## Standing Approval — the one user gate that replaces many
+## Standing Approval and Authority
 
-The user approves **SPEC + ROADMAP once** ("go" / "approved" / "ok làm đi" → status `ready`). That signal is a _standing approval_ covering every task and phase in the roadmap. **This is an explicit exception to `task-management.md`'s per-task gates**: inside a `running` spec the executor does not ask permission per task or per phase, does not park at `awaiting-review` between phases, and does not create task files.
+The user approves SPEC + ROADMAP once. That standing approval replaces task/phase approval requests inside a running spec; do not create task-layer work or stop at intermediate user review. Approval and execution intent remain separate: approval alone leaves `ready`; an applicable instruction to execute permits the same session to enter `running`. A material scope change still needs amendment and renewed approval.
 
-Approval and execution intent are separate signals. An approval-only message may end with the spec at `ready`. If the current message, or an earlier still-applicable instruction, explicitly says to implement, execute, start, continue, or resume after approval, `$codex-spec` hands control directly to `$codex-spec-run` in the same session: the runner flips `ready → running` and begins. A fresh session is available when useful, never a prerequisite. Material changes outside the approved SPEC still require amendment and renewed approval.
+`commits:` sets local cadence: `per-task` is the default and creates a verified task restore point, `per-phase` waits for phase validation, and `user` disables automatic commits. Follow `git-workflow.md` and higher-scope restrictions; this setting never grants push, history rewrite, deployment or production authority.
 
-Approval also fixes the **spec commit cadence** (`commits:` in SPEC frontmatter): `per-task` is the default and creates a restore point after each task's `verify:` passes and its tick/evidence updates land; `per-phase` commits after successful phase validation; `user` disables automatic commits for this spec. This field may narrow CLAUDART's normal local-commit behavior, but it never overrides a higher-scope Git restriction. Follow `git-workflow.md` for authority, staging scope, message/identity hygiene, and remote/history boundaries.
+Normal interactions are initial approval, optional rotation offers, and final user acceptance. Ask for missing consequential decisions or external authority only where needed; reuse existing authorization within its scope. Prepare a concrete reviewable release before requesting any remaining release permission. A blocked task stops the whole loop only when no independent runnable work remains.
 
-Planned user interaction points are exactly three:
+## Load Context by Scope
 
-1. **Approval** — user reviews POC + SPEC + ROADMAP, says go.
-2. **Rotation offers** — see Session Rotation below (user picks the stopping moment; the work itself never blocks on them).
-3. **Final gate** — `awaiting-final-review` at mission end; the user, not the agent, confirms `done`.
+At initial entry or recovery, read SPEC metadata, Mission, global constraints/Must-NOT-Have (including globally applicable linked contracts), and the contract inventory (headings, scenario IDs and additional contract links). Inspect ROADMAP task dispositions/dependencies and Current Acceptance Delta; locate the latest gate and unresolved LEDGER events. Then load the selected task, its dependency outputs and relevant contract/evidence/NOTES sections. During uninterrupted work, read changes since the previous selection.
 
-Everything else stays autonomous. A task blocker stops that task; it stops the whole loop with a report only when no independent runnable work remains. Treat scope questions and SPEC-acceptance ambiguity as blockers on the affected work: record the missing decision and exact unlock condition in its ROADMAP row and Current Acceptance Delta, continue independent runnable work, and take the canonical `blocked` transition below when none remains. The executor never resolves scope by guessing.
+References are starting points, not proof of completeness. Check that they resolve and compare their declared scope with actual interfaces, shared components and changed files before editing and whenever scope expands. A structural reference check cannot discover every omitted semantic dependency. Read additional relevant contracts for newly affected boundaries; global constraints remain mandatory.
 
-## The Loop (per iteration)
+Compaction alone does not require reloading every full document. Missing/broken references, unclear contract scope, mismatched state or an interrupted write require broader inspection, up to complete files when necessary. Do not guess at an unread boundary to save context.
 
-1. **Load the state needed for this boundary.** On the initial run, a new session, recovery after interruption/compaction, an unmatched in-flight LEDGER event, or suspected drift, read `SPEC.md`, `ROADMAP.md`, and `NOTES.md` in full plus the relevant LEDGER tail (start with ~30 lines and expand through any open incident). During uninterrupted execution, re-read only the selected ROADMAP task and dependencies, its applicable SPEC scenarios and Must-NOT-Have constraints, Current Acceptance Delta, and LEDGER entries since the previous selection. The complete files remain canonical; selective reads only avoid reloading unchanged context.
-2. **Pick** the first runnable pending task whose dependencies are satisfied. Skip tasks marked `⚠ blocked` and invalid legacy struck-unticked rows; they are not runnable and keep their phase incomplete. Independent tasks in the same wave may fan out in parallel.
-3. **Execute.** Append `task-started` to the LEDGER before touching code — a mid-task compaction must be able to see what was in flight. Work solo, or delegate under the active harness policy and `agent-delegation.md`; roadmap wave markings carry a prepared strategy, not a separate permission gate. Record each spawn as a `delegated` LEDGER entry (unit, expected output) so a compaction never orphans a running worker — the LEDGER plays the role the active task file plays for `$codex-plan` work. Make worker prompts self-contained with the goal, boundary, scope/non-overlap, constraints, expected output, roadmap task text, and relevant SPEC lines so they remain correct regardless of optional inherited context.
-4. **Verify on a real surface.** Run the task's `verify:`. Tests alone never prove user-facing behavior — drive the app, open the page, compare UI against the POC artifact. A worker's "done" is a claim to check, not a result to record.
-5. **Tick and log.** Flip `- [ ]` → `- [x]`, re-read to confirm the intended task changed state, append a `task-completed` LEDGER entry with evidence, bump `updated:` in SPEC frontmatter. Clear any Current Acceptance Delta this evidence actually resolves. Route mission-local constraints, pitfalls, decisions, and knowledge candidates into `NOTES.md`; promote an eligible fact immediately only under the knowledge-maintenance exception.
-   - After the task implementation, task-level verification, ROADMAP tick, LEDGER evidence, SPEC `updated:` change, and required in-scope state updates are complete, inspect the resulting diff. If `commits: per-task`, follow `git-workflow.md` and commit that verified coherent task restore point with message `spec(<slug>): <task-id> <summary>` unless repository conventions require another format. If higher-scope policy blocks the commit, keep the worktree intact, record/report the pending persistence, and continue the approved mission unless the Git condition itself makes further work unsafe. `per-phase` and `user` do not commit at this task boundary.
+**Legacy recovery:** existing workspaces may keep acceptance checkboxes in SPEC or Current Acceptance Delta in NOTES. Read those sections and LEDGER evidence before relying on them; old ticks alone never establish PASS. On the next authorized state update, reconcile unresolved gaps into ROADMAP and replace the old NOTES delta with a pointer, preserving baseline/impact/history. Do not rewrite approved scenario text or drop unresolved work. At a read-only lock, inspect/report inconsistencies without migrating them. A flat legacy document may need a full read until its relevant contracts can be identified.
 
-6. **Phase boundary**: run the phase validation. On PASS, tick the SPEC scenarios it proves, clear the resolved delta, append `phase-validated`, then make a rotation offer. On FAIL, do not close the phase: append `validation-failed`, update Current Acceptance Delta, and reopen responsible work under the ROADMAP rule above. Never create a separate replay/verification task. Then continue under the convergence rules below.
-   - After a PASS has updated scenario evidence and appended `phase-validated`, if `commits: per-phase`, follow `git-workflow.md` and commit the verified phase restore point with message `spec(<slug>): phase <n> <summary>` unless repository conventions require another format. Do not add a duplicate phase commit under `per-task`; those task commits already own the implementation cadence. `user` remains no-auto-commit for the spec.
+## Select Verification Before Expensive Work
 
-## Convergence & Circuit Breakers
+Use the existing task `verify:` and phase/final coverage plan. Before the first expensive batch, or after its scope/verifiers/prerequisites change, reconcile the scenarios due at that boundary with concrete commands/cases, fixtures, expected observables and execution prerequisites. Use discovery/listing or focused inspection when needed; a test filename or count alone does not demonstrate coverage. Future live/manual observations remain pending with explicit owners rather than blocking their software prerequisites.
 
-- **Progress means an acceptance surface cleared, or its remaining failure/diagnosis narrowed enough to change the next action.** Appending a task, ticking a checkbox, renaming/replacing its owner, or gathering more evidence that only confirms the same gap does not count.
-- **A retry must be materially different.** Before retrying a failed acceptance, record in Current Acceptance Delta what changes in the hypothesis, implementation, or verification. If there is no evidence-backed difference to try, do not repeat the attempt: mark the responsible roadmap task `⚠ blocked` with its condition and unlock requirement, append `task-blocked` plus the diagnosis, and move to the next independent runnable task.
-- **Stronger contradictory evidence invalidates a green check.** "Stronger" means it exercises the SPEC's exact action and observable more directly or under more representative conditions; disagreement alone is not evidence. Un-tick the affected scenario, reopen responsible work under the ROADMAP rule, append `validation-failed`, and treat the old verifier as insufficient. Do not use that same check as the sole proof again until its coverage is repaired or replaced.
-- **Evidence follows semantic impact, its verifier, and its dependency surface.** Changing a verifier invalidates the evidence it produced. A change that can alter a shared runtime, public interface, dependency/lockfile, migration/schema, authentication/security boundary, global build/test behavior, or another cross-cutting contract expands the impact set accordingly; merely touching a broadly named path does not. If the executor cannot defend the boundary from the actual semantic change, it falls back to the full baseline gate.
-- **Two exploration passes with no new facts** → stop researching and act on what is known; if no defensible action remains, block as above.
-- **No runnable task remains while a blocker is unresolved** → append `circuit-breaker`, set SPEC status to `blocked`, sync INDEX, and stop with the diagnosis and exact unlock condition.
+Repair missing coverage before launching that batch; continue independent ready work. This is part of selecting tests, not another approval, permanent report, mandatory tool or checklist after every command. It checks the plan, not whether the product passes. A composite check covers leaf checks only if they actually run and their failures propagate; retain a direct check for a distinct public entrypoint.
 
-A tripped breaker is a stop-and-report, never a silent retry loop and never a reason to weaken a `verify:`. An explicit user- or runtime-level budget remains authoritative, but this workflow does not invent mandatory resource estimates or a separate attempt-accounting system.
+Match proof to the interface: CLI/API/library execution, browser interaction or another literal observable. Compare POC-locked aspects where relevant. Mock/DOM checks do not establish rendered behavior or an external integration they never exercise. Required project checks and reliability repetitions remain required.
 
-**Unblocking is `$codex-spec-run` again — typically from a stronger session.** The executor is model-agnostic: run the loop on a cheap model for routine work; when a task defeats it, the escalation is the _same command_ in a stronger session, not a side-channel. That session's `blocked` gate enters unblock mode: read the `task-blocked`/`circuit-breaker` diagnosis and Current Acceptance Delta, then investigate. If it has a materially different path, clear the task's `⚠ blocked` marker, keep it unticked, flip back to `running`, sync INDEX, and execute it under the standing approval. If the old task is no longer the right approach, mark it `- [x] ~~...~~ — superseded by <replacement/reason>`, append only the decision-complete replacement work actually needed, record the decision and why in NOTES, log `replanned`, flip back to `running`, and sync INDEX. Then offer: continue here, or rotate so a cheaper session resumes. Never hand the fix over as a pasted prompt or chat instructions: the amendment travels through ROADMAP/NOTES/LEDGER like everything else, and the next `$codex-spec-run` picks it up from disk.
+**Reuse conservatively.** A hash identifies inputs; it does not establish that the recorded dependency boundary is complete. Reuse only when applicability is directly supported by the recorded candidate/inputs, verifier, fixtures, configuration, dependencies and environment. A change within that input boundary invalidates the old evidence for the new state. A changed commit alone does not invalidate unchanged inputs; a small edit alone does not prove independence. Shared-contract changes or uncertainty expand verification, up to a full baseline. Live/environment-sensitive evidence must match its actual target and observation requirements.
 
-## Session Rotation
+The existing final verification plan must exercise the candidate's relevant component interactions; separate task passes cannot substitute for interactions never exercised together. This is part of final verification, not a second suite afterward. Do not add a fine-grained cache or dependency-tracking engine. No workflow speedup is established merely by these rules.
 
-Long sessions can benefit from rotation, but rotation never gates authorized work:
+## The Loop
 
-- **Offer rotation** at a phase boundary or after compaction/context degradation, once the in-flight task is safe. Report the current phase, task inventory (`n/m`), and Current Acceptance Delta with the option to checkpoint and rotate.
-- **On yes**: append a `rotation-checkpoint` LEDGER entry (one-line state + exact next task), bump `updated:`, then run the `$codex-checkpoint` flow — it syncs the specs INDEX, refreshes CONTEXT's spec pointer, and collects NOTES' `→ graduate:` flags — and tell the user: open a fresh session, orient with `$codex-start`, and run `$codex-spec-run <slug>`.
-- **On no, or when no reply is available**: continue the already authorized loop. Do not stop merely to wait on the offer.
-- Do **not** write `.claudart/HANDOFF.md` for spec work — SPEC + ROADMAP + NOTES + LEDGER already carry the recoverable state.
+1. **Orient and select.** Apply scoped loading and reconcile interrupted state. Pick a pending task only when dependencies are satisfied and it is not blocked. Prepared waves permit parallelism only under the active harness and `agent-delegation.md`.
+2. **Implement.** Append `task-started` before edits. Record any authorized delegation with unit, owner, profile when relevant and expected output. Give self-contained goals, boundaries, constraints and references; a worker's completion is a claim to verify.
+3. **Verify.** Use focused checks while implementing. Before an expensive batch, perform the coverage reconciliation above; run the smallest non-redundant set proving the due observables on the actual candidate.
+4. **Record, then mark complete.** Append observed evidence/`task-completed` before ticking ROADMAP. Re-read the updated disposition and clear only the delta this evidence resolves. On failure append `validation-failed`, update the ROADMAP delta and reopen its responsible work. NOTES changes only for useful new reasoning; SPEC changes only for contract/lifecycle metadata.
+5. **Persist the verified unit.** Inspect the owned diff. Under `per-task`, follow `git-workflow.md` for a coherent local commit (`spec(<slug>): <task-id> <summary>` unless repository conventions differ). If policy blocks persistence, keep the worktree, report the restriction and continue authorized work unless it makes continuation unsafe.
+6. **At a phase boundary, evaluate its evidence.** Execute missing/invalid checks and distinct integration observables; do not rerun qualifying composite/leaf evidence just because a boundary was reached. Append `phase-validated` only on PASS. Under `per-phase`, commit the verified phase; `per-task` adds no duplicate phase commit and `user` adds none. Offer rotation without pausing for silence.
 
-## Pausing & Interrupting
+## Convergence and Circuit Breakers
 
-**Stopping anytime is safe by design.** A user interrupt is indistinguishable from a crash: the loop's re-orientation rebuilds state from disk, and an unmatched `task-started`/`delegated` entry marks the in-flight work to verify before redoing. No need to wait for a rotation offer — a tick boundary is cleanest, but mid-task is recoverable.
+- Progress means an acceptance gap clears or its diagnosis narrows enough to change the next action. More tasks, ticks or repeated confirmation of the same failure are not progress.
+- Retry only with a materially different hypothesis, implementation or verifier. Keep the next action in ROADMAP or reference NOTES reasoning; LEDGER owns attempts/results. Otherwise mark the responsible task blocked with its condition/unlock and continue independent work.
+- Stronger contradictory evidence invalidates a green result when it exercises the required action/observable more directly or representatively. Append the failure, update the delta and reopen responsible work; do not erase history or reuse the insufficient verifier as sole proof.
+- Evidence follows semantic impact, its verifier and its dependency surface. Shared runtime, public interface, dependency resolution, persistent data/schema, security boundaries and build/test behavior can expand the affected scope. Do not infer impact from a task label or broad path alone.
+- After two exploration passes with no new facts, act on available evidence or block the affected work. Explicit user/runtime budgets remain authoritative; do not invent resource estimates, attempt-accounting systems or model/rotation thresholds.
+- If no independent runnable task remains with unresolved blockers, append `circuit-breaker`, set `status: blocked`, sync INDEX and report the exact unlock condition. Never weaken acceptance or silently loop.
 
-## Completion — Final Gate
+Resume a blocked mission with the same `$codex-spec-run`. Read the diagnosis/delta; continue when a materially different evidence-backed path exists. Clear only the affected block, or supersede dead work with the smallest approved-scope replacement and log `replanned`. Scope ambiguity remains blocked on the missing decision. Keep the amendment in the workspace, not in a pasted handoff prompt.
 
-When every roadmap task is completed or explicitly superseded and no unresolved blocked task remains:
+## Rotation and Interruption
 
-1. Choose the gate mode:
-   - **Full baseline** — when the mission has no successful full-baseline `final-gate`, or a material amendment received renewed approval. Establish fresh evidence for **every** Acceptance Scenario, but use the smallest non-redundant command set: one composite check may cover several scenarios when it actually exercises their actions and observables with failure propagation.
-   - **Scoped review** — only after returning from `awaiting-final-review` for an anchored defect or an explicit bounded review patch. Start from the latest successful `final-gate` cumulative evidence state, verify that its chain still reaches an identifiable full baseline, recompute the impact closure from the actual changed files, interfaces, configuration, dependencies, and verifiers, then run fresh only the affected scenarios plus the smallest relevant consumer/integration checks. Carry forward evidence for unaffected scenarios only with an explicit exclusion rationale. If the cumulative baseline is not identifiable or the boundary is uncertain, use the full baseline mode.
-2. Append `final-gate` with its mode, resulting revision or bounded worktree fingerprint, and the required baseline/executed/covered/reused evidence. Reset Current Acceptance Delta to `None` only when every scenario has valid PASS evidence. If any required fresh check fails or retained evidence is invalidated, follow the failure path below.
-3. Flip status → `awaiting-final-review`, sync INDEX, and report: how to demo (exact steps), scenario results split into fresh/covered/reused evidence, and anything deferred.
-4. **STOP.** `awaiting-final-review` is a read-only lock (as `awaiting-review` in `task-management.md`) until the user confirms completion or explicitly requests a review change.
-5. User confirms → `done`: flip `status: done`, append one line to `.claudart/JOURNAL.md` (`YYYY-MM-DD | completed | spec <slug> — <one-line outcome>, see specs/done/YYYY-MM-DD-<slug>/SPEC.md`), and sweep `NOTES.md` before shelving — evaluate remaining `→ graduate: knowledge/` candidates against the full capture gate, write eligible facts under the atomic owner/map contract, and leave uncertainty in NOTES; propose `$codex-learn` for behavioral lessons. Then move the entire folder from `.claudart/specs/YYYY-MM-DD-<slug>/` to `.claudart/specs/done/YYYY-MM-DD-<slug>/` and sync INDEX. Repair every knowledge `sources` entry that points into the moved folder so it names the archived path; a path repair changes neither `updated` nor `last_verified`. Run the knowledge checker after the move if any knowledge file changed.
+Offer rotation at useful phase boundaries or after context degradation once in-flight work is safe. Report progress and unresolved delta; a decline or no reply means continue authorized work.
 
-If the user reports a problem or requests a change at `awaiting-final-review`, classify it before unlocking:
+On an affirmative request, append `rotation-checkpoint` with the next task and references, then use `$codex-checkpoint` to sync INDEX/CONTEXT pointers and evaluate eligible NOTES candidates. Do not bump SPEC just for a rotation or create `.claudart/HANDOFF.md` for spec work. The next session uses `$codex-start` and `$codex-spec-run`.
 
-- **Anchored defect** — the observed result contradicts an exact approved SPEC scenario, Must-NOT-Have clause, or POC observable. Return to `running`, record the latest successful `final-gate` baseline plus provisional impact set in Current Acceptance Delta, un-tick only affected scenarios, reopen responsible work, append `validation-failed`, sync INDEX, and later run one scoped review gate.
-- **Bounded review patch** — the user explicitly requests a concrete, decision-complete delta that fits one narrow implementation unit, conflicts with no POC or Must-NOT-Have, introduces no unresolved product/design choice, and has effects that remain inside a defensible local boundary. The request itself approves only that delta: record it verbatim as a `scope-change`, update SPEC with its exact binary observable, append the smallest necessary ROADMAP work, record the baseline and provisional impact set in Current Acceptance Delta, flip to `running`, and sync INDEX. Implement only the direct dependency closure and proof required by the request; do not add adjacent hardening, documentation, refactors, or quality gates merely because they seem beneficial.
-- **Material or ambiguous amendment** — anything that cannot satisfy the bounded-patch test remains under the read-only lock. Surface the scope delta and ask whether to amend the SPEC. On explicit yes, flip to `drafting`, sync INDEX, and return control to `$codex-spec` for amendment and renewed approval.
+An interrupt is recoverable like a crash. Verify unmatched work and any evidence/disposition mismatch before repeating it; do not require the user to wait for a clean boundary.
 
-Never infer a defect from broad language such as "quality", "production-ready", or Definition of Done alone: quote the exact approved anchor. Never append mechanical fix/replay task pairs.
+## Completion and Final Review
 
-If any required evidence fails, the mission is **not** complete: append `validation-failed`, update Current Acceptance Delta, and reopen responsible work under the ROADMAP rule. Never add validation bookkeeping as a task. Keep looping under the convergence rules. Never present a failing scenario as "done with caveats".
+When all ROADMAP work is completed or explicitly superseded and no blocker remains, establish the applicable final gate using the already reconciled coverage plan:
 
-## Status State Machine
+- **Full baseline** is required when the mission has no successful full-baseline gate, after an approved material amendment, or when the evidence boundary is uncertain. Every scenario needs fresh observed evidence for the candidate or applicable released target. Fresh means applicable to that state, not mechanically rerunning an unchanged candidate's already observed checks. Include the planned candidate integration and project-required checks.
+- **Scoped review** follows an anchored defect or explicit bounded review patch after final review. Start from the latest successful `final-gate` cumulative evidence state, confirm its full-baseline root, and determine impact from the actual changed surface. Run affected scenarios and necessary consumer/integration checks; retain other evidence only under the conservative reuse rule. If the chain or boundary is uncertain, use a full baseline.
+- Record the successful gate with the resulting revision or bounded worktree fingerprint, executed/covered/reused evidence and any reuse rationale. Clear the delta only when all required observations are proven. Software and later release evidence may be gathered in their prerequisite order; a full final gate still requires both when both are in scope.
+- On any failure, append `validation-failed`, keep the gap and reopen its responsible task. Do not add bookkeeping-only replay tasks or report completion with failing criteria.
+- On complete PASS, set `awaiting-final-review`, sync INDEX, present exact demo steps and evidence, then **STOP**. This is a read-only lock; the user confirms completion.
 
-```
-drafting ──(POC + SPEC + ROADMAP written, presented)──▶ poc-review
-poc-review ──(user requests changes)──▶ drafting
-poc-review ──(user approves: standing "go")──▶ ready
-ready ──($codex-spec-run picks it up, in this or a later session)──▶ running
-running ──(all tasks completed/superseded; no blocker; full-baseline/scoped-review PASS)──▶ awaiting-final-review
-awaiting-final-review ──(user confirms)──▶ done
-awaiting-final-review ──(anchored defect or explicit bounded review patch)──▶ running
-awaiting-final-review ──(user approves a material scope amendment)──▶ drafting
-running ──(blocker; nothing independent left)──▶ blocked ──(cleared)──▶ running
-{any active} ──(user cancels)──▶ cancelled
+Classify feedback before unlocking:
+
+- **Anchored defect:** contradicts an exact approved scenario, Must-NOT-Have clause or POC observable. Record the baseline/provisional impact in ROADMAP, append the failure, reopen responsible work and return to `running`.
+- **Explicit bounded review patch:** one concrete user-requested delta, with no conflict with frozen intent, unresolved design choice or effects that escape a defensible local boundary. Record the request as `scope-change`, amend SPEC with its observable, add only necessary work, record baseline/impact and return to `running`. Implement only the stated observable, direct dependency closure and proof; no adjacent hardening, documentation, refactors or extra gates.
+- **Material or ambiguous amendment:** keep the lock, explain the scope delta and request amendment approval. On explicit approval return to `drafting` and `$codex-spec` for renewed standing approval.
+
+Broad requests such as “quality” or “production-ready” alone are not defect anchors. Completion confirmation closes the mission, never the executor's own PASS:
+
+1. Set `status: done` and append one completion line to `.claudart/JOURNAL.md`, pointing to the archived SPEC.
+2. Evaluate NOTES graduation candidates under the knowledge contract; preserve uncertainty and propose `$codex-learn` for behavioral lessons.
+3. Move the whole folder to `.claudart/specs/done/YYYY-MM-DD-<slug>/` and sync INDEX. Repair every knowledge `sources` entry that points into the moved folder to its archived path; path repair changes neither `updated` nor `last_verified`. Run the knowledge checker after the move if any knowledge file changed.
+
+## Status and Index
+
+```text
+drafting → poc-review → ready → running → awaiting-final-review → done
+poc-review → drafting                     # requested changes
+running ↔ blocked                        # no independent runnable work / valid unlock
+awaiting-final-review → running           # anchored defect or bounded requested patch
+awaiting-final-review → drafting          # approved material amendment
+any active → cancelled                    # user cancellation
 ```
 
-- `drafting` / `poc-review`: `$codex-spec` owns these; **no implementation code may be written** — only spec-folder files and artifacts.
-- `ready`: approved, not yet started. `running`: the loop is live. Both belong to `$codex-spec-run`.
-- `awaiting-final-review`: read-only lock; waiting on the user's demo verification. Only completion confirmation, an anchored defect, an explicit bounded review patch, or an approved return to drafting changes state.
+`drafting`/`poc-review` belong to the author and permit no production implementation. `ready`/`running` belong to the runner. Approval alone does not imply execution, and changing runtimes never changes authority.
 
-## INDEX.md
+INDEX is derived from SPEC metadata, with Active links to non-terminal top-level folders and Done links to archived `done`/`cancelled` folders. Mark `poc-review` and `awaiting-final-review` as awaiting user review. A top-level terminal folder is stale archive state: archive it when syncing, never delete it. Checkpoint does not tick tasks or advance status. For execution staleness, inspect current ROADMAP/LEDGER activity rather than treating an unchanged contract date as inactivity.
 
-```markdown
-<!-- .claudart/specs/INDEX.md — registry of spec missions. Maintained by $codex-spec, $codex-spec-run, $codex-checkpoint. -->
+## Relationship to CLAUDART
 
-## Active
-
-- [<slug>](YYYY-MM-DD-<slug>/SPEC.md) — <status> — updated <YYYY-MM-DD> — <goal one-liner>
-
-## Done
-
-- [<slug>](done/YYYY-MM-DD-<slug>/SPEC.md) — <done|cancelled> <YYYY-MM-DD>
-```
-
-SPEC frontmatter is the source of truth; INDEX is a cache. Active lists status ∈ {drafting, poc-review, ready, running, blocked, awaiting-final-review} from top-level dated folders — append ` ⏳ awaiting your review` to `poc-review` and `awaiting-final-review` lines. Done lists status ∈ {done, cancelled} from `.claudart/specs/done/`. A top-level folder whose SPEC status is `done` or `cancelled` is stale and must be archived before INDEX is rewritten. Spec folders are never deleted.
-
-## Relationship to the Rest of CLAUDART
-
-- **Tasks**: a spec replaces `$codex-plan` for its scope. Never mirror roadmap tasks into `.claudart/tasks/`; never run both layers over the same work.
-- **CONTEXT.md**: may carry one pointer line (`Running spec \`<slug>\` (see .claudart/specs/YYYY-MM-DD-<slug>/SPEC.md)`); never absorbs spec content.
-- **`$codex-start`**: surfaces Active specs from INDEX and directs the user to `$codex-spec`, `$codex-spec-run`, or final verification according to status.
-- **`$codex-checkpoint`**: syncs INDEX from SPEC frontmatter, same as it syncs `tasks/index.md`.
-- **knowledge/**: read at `$codex-spec` planning time using map-first bounded routing. Mid-run discoveries default to NOTES candidates. The executor may write an eligible fact directly only under the knowledge-maintenance exception; otherwise checkpoint bulk-evaluates flags at rotation and close.
-- **guidelines/**: the executor obeys them but never edits them mid-loop. A recurring behavioral lesson (the same correction needed twice) gets a NOTES flag `→ graduate: $codex-learn`, proposed at rotation or mission close — guideline changes stay user-gated.
-
-## Anti-Patterns
-
-- **Persisting chat as Mission.** Do not copy owner or agent conversation into `Mission`; normalize the durable end state, intended behavior, and material boundaries into self-contained documentation language.
-- Asking permission per task or per phase while `running` — the standing approval exists precisely so the loop never blocks on the user.
-- Treating a rotation offer or lack of a reply as a reason to pause authorized work.
-- A roadmap that needs interview context ("as discussed", "the style we agreed on") — decision-complete or defective.
-- Code snippets in the roadmap (see Plan Altitude), or an executor "improving" SPEC acceptance criteria.
-- Ticking a box without running its `verify:`, or trusting a subagent's "done" without re-verifying.
-- Rewriting or deleting LEDGER history; rewriting phase goals instead of appending/striking tasks.
-- Burying durable knowledge in the LEDGER tail instead of NOTES.md — the ledger scrolls away; NOTES is the curated recovery surface.
-- Writing `HANDOFF.md` for spec work, or mirroring spec state into `tasks/index.md`.
-- Counting appended tasks or fresh ticks as progress while the same acceptance failure remains.
-- Retrying a failed acceptance without a materially different hypothesis, implementation, or verification.
-- Reusing a green check as sole proof after stronger evidence contradicted it.
-- Replaying unrelated scenarios after a bounded change, re-running leaf checks already proved by a qualifying composite check, or carrying evidence forward without an identifiable full baseline and impact rationale.
-- Expanding a bounded user request into adjacent hardening, documentation, refactors, or extra quality gates that its observable and direct dependency closure do not require.
-- Appending fix/replay task pairs instead of keeping verification with the responsible implementation task.
-- Continuing past a tripped circuit breaker or selecting a task marked `⚠ blocked`.
-- Marking the mission done (or presenting the demo) while any Acceptance Scenario is unproven.
+Keep one CONTEXT pointer to the active spec; never copy its plan there or into task indexes. Start reads the registry, checkpoint maintains it and eligible candidates, and the selected author/runner owns transitions. Knowledge follows its existing owner/map and validation contract. Recurring behavior may be flagged for `$codex-learn`; the executor does not rewrite framework guidelines mid-mission.

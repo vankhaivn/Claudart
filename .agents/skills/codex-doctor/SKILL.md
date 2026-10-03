@@ -63,7 +63,7 @@ For `.claudart/specs/`, follow `.codex/guidelines/spec-workflow.md` for metadata
 - Verify INDEX ↔ folder agreement in both directions; each active/archived folder has `SPEC.md`, `ROADMAP.md`, `NOTES.md`, and `LEDGER.md`. Missing core files are Medium. `NOTES.md` stays at most 150 lines; spot-check the last 15 LEDGER lines for `### YYYY-MM-DD HH:MMZ — <event>` headings.
 - Require `SPEC.md` keys `slug`, `status`, `created`, `updated`, and `agent`; validate the dated folder name and valid spec status. At `poc-review` or later, every path under `## POC Artifacts` must exist.
 - Review ROADMAP dispositions: unchecked struck rows, struck terminal rows without `superseded by`, blocked rows without condition and `unlock:`, and status that contradicts runnable, blocked, or terminal rows are Medium. A top-level terminal spec should be archived; an archived non-terminal spec is Medium.
-- Apply the canonical staleness thresholds from `.codex/guidelines/task-management.md`; do not redefine them.
+- Apply the canonical staleness thresholds from `.codex/guidelines/task-management.md`; do not redefine them. For execution activity, use the latest recorded ROADMAP/LEDGER activity as the spec rule defines; SPEC `updated:` tracks contract/lifecycle changes. Report missing activity evidence rather than assuming an unchanged contract is stalled.
 
 ## Reporting
 

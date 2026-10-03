@@ -93,7 +93,7 @@ assert_contains "$CODEX_RULE" \
   "when the mission has no successful full-baseline" \
   "Codex first mission gate establishes a full baseline"
 assert_contains "$CLAUDE_RULE" \
-  "required for the mission's first final gate" \
+  "when the mission has no successful full-baseline" \
   "Claude first mission gate establishes a full baseline"
 assert_contains "$CODEX_RULE" \
   'latest successful `final-gate` cumulative evidence state' \
@@ -102,7 +102,7 @@ assert_contains "$CLAUDE_RULE" \
   'latest successful `final-gate` cumulative evidence state' \
   "Claude chains repeated scoped reviews from the latest gate"
 assert_contains "$CODEX_RULE" \
-  "effects that remain inside a defensible local boundary" \
+  "effects that escape a defensible local boundary" \
   "Codex bounded patches require a defensible impact boundary"
 assert_contains "$CLAUDE_RULE" \
   "effects that escape a defensible local boundary" \
@@ -135,6 +135,12 @@ for author in "$CODEX_AUTHOR" "$CLAUDE_AUTHOR"; do
   assert_contains "$author" "composite" \
     "spec authoring records composite coverage"
 done
+
+if node "$TEST_DIR/parity.mjs"; then
+  pass "shared spec contracts match across runtime adapters"
+else
+  fail "shared spec contracts match across runtime adapters"
+fi
 
 printf '1..%s\n' $((PASS_COUNT + FAIL_COUNT))
 if [ "$FAIL_COUNT" -ne 0 ]; then

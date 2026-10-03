@@ -102,7 +102,9 @@ Cả hai adapter đọc và ghi cùng một `.claudart/`. Đổi runtime giữ n
 
 Shared state hỗ trợ bàn giao tuần tự, không tự đồng bộ nhiều writer. Cần điều phối việc ghi summary, index và handoff; checkpoint giữ công việc chưa giải quyết của phiên khác và không âm thầm thay một handoff chưa tiếp nhận. Các checkout riêng vẫn tuân theo Git và quy trình cộng tác của dự án.
 
-Rule workflow chỉ nạp khi cần. Template loader Claude nằm ở `.claude/CLAUDE.md` trong source, còn dự án đã cài dùng `CLAUDE.md` ở root và resolve import qua `.claude/`; chi tiết bảo trì knowledge nằm trong `references/`. Module Project Docs tùy chọn dùng cho lifecycle request hoặc khi thay đổi tác động đến tài liệu hiện hành mà nó sở hữu; nó không chạy full audit ở start, checkpoint hoặc sau thay đổi nhỏ thông thường. Tra cứu không phải nạp schema ghi knowledge; các vòng spec liên tục chỉ đọc trạng thái liên quan thay vì nạp lại toàn bộ tài liệu mission.
+Rule workflow chỉ nạp khi cần. Template loader Claude nằm ở `.claude/CLAUDE.md` trong source, còn dự án đã cài dùng `CLAUDE.md` ở root và resolve import qua `.claude/`; chi tiết bảo trì knowledge nằm trong `references/`. Module Project Docs tùy chọn dùng cho lifecycle request hoặc khi thay đổi tác động đến tài liệu hiện hành mà nó sở hữu; nó không chạy full audit ở start, checkpoint hoặc sau thay đổi nhỏ thông thường. Tra cứu không phải nạp schema ghi knowledge.
+
+Spec giữ ý định đã duyệt trong SPEC, trạng thái thực thi và acceptance còn thiếu trong ROADMAP, bằng chứng quan sát trong LEDGER, và suy luận chưa giải quyết trong NOTES. Khi tiếp tục, agent đọc ràng buộc toàn cục và danh mục hợp đồng rồi đến task, bằng chứng liên quan; reference thiếu hoặc cấu trúc cũ cần được kiểm tra rộng hơn. Khâu soạn spec xét luồng sử dụng đầu tiên được hỗ trợ; runner rà coverage đến hạn trước test nặng ngay trong kế hoạch kiểm chứng hiện có. Các quy tắc này thay thế công việc trùng, không thêm báo cáo bắt buộc, vòng xin duyệt hoặc cache bằng chứng chi tiết, và không khẳng định mức tăng tốc đã được đo.
 
 ## Agent chuyên biệt
 

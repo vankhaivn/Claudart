@@ -1,83 +1,49 @@
 ---
-description: Create or amend a dated mission-scale spec workspace in .claudart/specs/, freeze intent in reviewable POC artifacts, and hand an approved mission to /spec-run when execution is requested.
+description: Create or amend a dated mission spec, prove intent in reviewable artifacts and prepare scoped, non-redundant execution under standing approval.
 ---
 
-You are the spec author. Preserve confirmed intent and execution-critical decisions in the spec folder so execution remains correct across sessions, compaction, and handoff to `/spec-run`.
+You are the spec author. Capture confirmed intent in the mission workspace so a later executor needs no interview history.
 
-Before doing anything, read `.claude/rules/spec-workflow.md` and `.claude/rules/knowledge-management.md`. These rules define mission state and knowledge routing; this command does not duplicate them.
+Before acting, read `.claude/rules/spec-workflow.md`. It is the canonical contract for ownership, acceptance, recovery, verification, approval and review; this command orchestrates drafting rather than duplicating that contract.
 
-## Inputs
+## Resolve the mission and authority
 
-- The user's request after `/spec` is the mission description. If empty, ask: "What's the mission?"
-- Route a bounded feature or fix to `/plan`. Route an undefined project/product idea needing current project documentation to `/project-docs` when installed; otherwise clarify intent within the current work. Keep a defined, demoable mission in `/spec` even when the interview still needs to settle mission-level details.
-- Track execution intent separately from approval. An explicit request to implement, execute, start, continue, or resume after approval remains applicable unless the user withdraws it; a request to author or approve the spec alone does not imply immediate execution.
+The argument is the mission. If empty, ask what the mission is. Route bounded work to `/plan`; route an undefined project needing current documentation to `/project-docs` when installed. A defined mission may stay here while its requirements are clarified.
 
-## Procedure
+Read `.claudart/CONTEXT.md`, `.claudart/specs/INDEX.md`, the root knowledge map, relevant project documentation and recent Git history. Additional knowledge retrieval follows `knowledge-management.md`. Proposed behavior is not implemented project reality.
 
-### Step 1 — Read project context
+Honor an explicit current selection; otherwise reuse a matching draft and ask only if matches are ambiguous. Follow the canonical lifecycle for other statuses. New work uses `.claudart/specs/YYYY-MM-DD-<slug>/`, a minimal drafting SPEC and an INDEX entry. Terminal top-level folders are stale archive state, not active collisions.
 
-In parallel: `.claudart/CONTEXT.md`, `.claudart/specs/INDEX.md`, the root knowledge router plus only relevant routed detail under the knowledge rule's bounds, relevant current project documents under the repository's convention, and `git log -5 --oneline`. If an active spec already covers the mission, honor an explicit current selection or continue/resume instruction without asking again; ask only when multiple plausible matches remain ambiguous. Reuse an existing `drafting` spec — including an approved final-review scope amendment returned by `/spec-run` — and route other statuses under the canonical state machine; never create a duplicate mission folder.
+Keep execution intent separate from approval. An applicable request to execute after approval remains valid until withdrawn. The drafting lock permits spec-folder documents and POC artifacts, not production implementation or scaffolding. The guideline's narrow knowledge-maintenance exception remains subject to its full capture gate.
 
-Ensure `.claudart/specs/done/` exists. Before deciding whether an existing spec is active, check its `SPEC.md` frontmatter status; a top-level spec folder with `status: done` or `status: cancelled` is stale archive state, not an active collision, and should be moved to `.claudart/specs/done/` when syncing INDEX.
+## Interview and establish acceptance
 
-For a new mission, create `.claudart/specs/YYYY-MM-DD-<slug>/` using today's date and the slug rules from the rule file, write a minimal `SPEC.md` with `slug: <slug>` and `status: drafting`, and register it in `INDEX.md` with the dated folder link. For a resumed draft, keep its existing dated id and history. From here on, the folder is where everything lands — not chat.
+Ask the highest-leverage unresolved question, using existing evidence before asking the user. Capture confirmed decisions in their current owner as they settle; keep confirmed, rejected and open scope distinguishable. Move rejected/deferred features into Must-NOT-Have.
 
-**Drafting lock**: while `status` is `drafting` or `poc-review`, write no implementation code and normally write only the spec folder and its INDEX. The sole exception is an eligible knowledge mutation when the full capture gate and an immediate-promotion trigger in `knowledge-management.md` pass; update owner + reachable map atomically and run the checker.
+While drafting existing acceptance scenarios, apply the guideline's initial-state coverage rule: identify the minimum supported state, the first useful result and how fixture prerequisites are created or supplied. Cover materially different first-use behavior without adding a separate matrix or expanding scope. Use the actual public interface, whether UI, CLI, API or another surface.
 
-### Step 2 — Interview, capture-as-you-go
+Give scenarios stable IDs, explicit initial conditions, actions and observables. Split independently failing obligations when useful. Record additional contract links with their scope instead of copying bodies. Keep mission-wide constraints visible independently of task references.
 
-Interview with one highest-leverage question at a time and options with trade-offs. Aim every question at one target: **what must a POC prove for the user to say "yes, that's it"?**
+## Build only the useful POC
 
-**Write every confirmed decision into `SPEC.md` as it lands** — after every few answers, not at the end. The chat does not survive compaction; the spec folder does. Keep the draft's working split visible: confirmed / rejected (→ Must-NOT-Have) / open. By the time you start the POC, the core intent is already on disk.
+Choose the smallest artifact set that resolves the remaining questions and let the user choose fidelity. For UI work, a self-contained HTML may be suitable; other interfaces need appropriate reviewable outputs or interaction examples. Establish how the user and executor can inspect the reference before making it an acceptance requirement.
 
-### Step 3 — POC loop, at the fidelity the user picks
+Revise the artifact and its owning contract together. Freeze only the approved aspects and identify them in SPEC. Do not build a second full implementation or force multiple artifacts when one answers the questions. Continue until the user confirms the intended behavior; that confirmation is distinct from standing implementation approval.
 
-A POC exists so the user can _judge intent_ — it is a reference the executor will later compare against, not an early build of the product. Before building anything, propose the smallest artifact set that proves the riskiest aspects of the mission, and let the user choose its shape:
+## Prepare the execution plan
 
-- Default: one self-contained artifact in `artifacts/` — HTML with inline CSS/JS, no external requests, openable by double-click.
-- For complex missions, prefer **several narrow artifacts over one high-fidelity build** — each freezing a single aspect: one proving the core interaction/feel with primitive placeholders (shapes, boxes, dummy data — no polish), a separate visual-style reference, an annotated flow demo. Wiring every aspect into one polished artifact is drafting-stage overengineering; do it only if the user explicitly opts in.
-- Present, collect reactions, revise. Each iteration converts an open question into a confirmed decision or a Must-NOT-Have, and updates **SPEC.md and the artifact together** — a decision that lives only in the POC, or only in chat, is a defect.
-- Loop until the user says the set matches their intent. The approved artifacts are then **frozen as references** the executor verifies against — name each one and what it locks in under `SPEC.md → POC Artifacts`.
+Explore existing implementation patterns read-only. Use delegation only under the active harness and `agent-delegation.md`; no exploration result authorizes implementation.
 
-### Step 4 — Finalize SPEC.md
+Write ROADMAP tasks with ownership boundaries, dependencies, relevant scenario/contract references and observable `verify:` checks. Use concrete paths where known or contractual without pre-solving internal code. Arrange useful early milestones and non-cyclic dependencies, including software verification before any authorized release and post-release observations afterward where applicable.
 
-The skeleton is already half-full from Steps 2-3; finish it. The hard part is **Acceptance Scenarios**: each one a literal action plus a binary observable, executable by someone who never saw this conversation. Keep scenarios independently traceable without manufacturing duplicate commands: one concrete verifier may cover several scenarios when its output proves each observable, while a scenario whose literal user action matters keeps that action as direct evidence. Push every rejected option and deferred feature into **Must-NOT-Have** — that section is what stops a cheaper executor from gold-plating or wandering.
+Map due scenarios to concrete verifiers/cases, necessary fixtures and prerequisites in the existing phase/final plan. Name composite coverage and the smallest non-redundant verification set; do not schedule included leaf checks again without a distinct observable. Planned verifiers may be implemented by their owning tasks, but their coverage must be reconciled before an expensive batch runs.
 
-### Step 5 — Write ROADMAP.md (decision-complete)
+For a new mission, initialize LEDGER and concise NOTES containing only useful pointers, pitfalls and unresolved reasoning. Put Current Acceptance Delta in ROADMAP. On amendment, preserve evidence and completed/superseded work; add only the approved change. Follow legacy recovery rather than silently discarding existing notes or acceptance gaps.
 
-Explore the codebase read-only first (existing patterns, constraints, files each phase will touch) — de-risk decisions, don't pre-solve implementation. Fan out read-only `Explore` subagents if the survey is broad.
+## Check and present
 
-Then write phases per the rule file. Hold the decision-complete bar: exact paths, chosen approaches with the _why_, per-task `verify:`, phase validation commands, parallelizable waves marked for fan-out. Make final verification coverage legible enough that a future executor can select the smallest non-redundant set: identify which checks prove which scenarios and when a composite check already includes leaf checks. Do not require a second direct run of an included leaf unless the leaf is itself a scenario action or serves a distinct observable. Phase 1 should reach something demoable early — the mission must produce visible progress every phase, not a big-bang integration at the end.
+Read the global contract and inspect the plan as an executor without interview context. Check the supported first-use path, resolvable references, missing scenario ownership, dependency order, observable acceptance and feasible verification. Reference validity alone does not prove completeness: compare the task scope with the contract inventory. Fix gaps in the existing documents rather than creating another readiness report or approval gate.
 
-For a new mission, seed `LEDGER.md` with its header and no entries, and `NOTES.md` with what exploration surfaced: how to run, build, and verify the project (dev server, test commands), key files and helpers, non-obvious constraints, pitfalls, planning-time decisions with their rejected alternatives. Include `## Current Acceptance Delta` with `- None.`; it stays compact during execution and is never a second roadmap. For a resumed scope amendment, preserve LEDGER history and existing NOTES, then amend ROADMAP using its disposition rules rather than erasing completed or superseded work. NOTES is the executor's Memory Hints — a roadmap without it forces the executor to re-discover everything you just learned.
+Set `poc-review`, sync INDEX and present the folder, reference/demo, scope, open decisions and task/phase outline. Report **Commit cadence**: `commits: per-task` (default), or the selected `per-phase`/`user` setting. Explain that approving SPEC + ROADMAP grants standing implementation approval within existing authority; it does not itself request execution or authorize external actions.
 
-### Step 6 — Fresh-eyes check, then present for review
-
-Re-read SPEC.md and ROADMAP.md as if this conversation never happened, pretending you are the cheaper executor. Any task that needs interview context, any scenario that isn't binary, any duplicated leaf/composite verification with no distinct observable, any ambiguous coverage, or any "as discussed" — fix it in the file now. Flip `status: drafting → poc-review`, sync INDEX, and report:
-
-```
-## Spec Ready for Review
-
-**Folder**: `.claudart/specs/YYYY-MM-DD-<slug>/`
-**POC**: `artifacts/<file>` — open it and check it still matches your intent
-**Scenarios**: <n> acceptance scenarios | **Roadmap**: <m> phases, <k> tasks
-**Commit cadence**: `commits: per-task` (default) — verified ROADMAP tasks become local restore points when higher-scope Git policy allows; choose `per-phase` for larger integration commits or `user` to disable automatic spec commits
-**Open questions**: <list, or "none">
-
-Review SPEC.md (especially Must-NOT-Have) and ROADMAP.md. When you approve, that is a STANDING
-approval: /spec-run will execute the whole roadmap without asking again until the final review.
-Say "go" to approve. Add "and run it" to begin /spec-run in this session; you can also run it later in a fresh session if you prefer.
-```
-
-The author protocol never writes implementation code. On approval, flip `status → ready` and sync INDEX. If approval is the only instruction, stop at `ready`. If the current message or an earlier still-applicable instruction explicitly requests execution after approval, hand control directly to `/spec-run` in this session; the runner owns `ready → running` and all implementation. A fresh session is optional.
-
-## Anti-Patterns
-
-- Writing implementation code during `drafting`/`poc-review` — POC artifacts are the only runnable things this command produces.
-- Batching spec-writing to the end of the interview — confirmed decisions land in SPEC.md immediately; a compaction must never erase what the user already settled.
-- Presenting a spec for approval that no POC ever proved — prose alone drifts; the artifact is how intent gets frozen.
-- One monolithic high-fidelity POC when narrow artifacts would answer the same questions — fidelity is the user's call, never the default.
-- Acceptance scenarios that need judgment ("looks polished") instead of observation ("HUD matches artifacts/poc.html layout").
-- Duplicating acceptance commands merely to give every scenario a separate verifier, or listing composite and included leaf checks as mandatory final-gate replays without distinct coverage.
-- Leaving decisions in chat instead of the spec folder. The folder is the plan.
-- Treating enthusiasm ("great POC!") as the standing approval — wait for an explicit go signal.
+On approval, set `ready` and sync INDEX. Approval alone stops there. If execution was also requested, hand directly to `/spec-run` in this session; the runner owns `ready → running`. A new session is optional. Enthusiasm about the POC is not an explicit approval.
