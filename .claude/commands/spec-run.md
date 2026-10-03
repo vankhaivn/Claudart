@@ -1,33 +1,32 @@
 ---
-description: Execute an approved dated spec mission from .claudart/specs/ under its standing approval until the canonical final-review gate or a real blocker.
+description: Execute an approved dated spec with scoped context and evidence-driven verification until final user review or a real blocker.
 ---
 
-Execute an approved mission. Before acting, read `.claude/rules/spec-workflow.md`; it is the canonical contract for state, roadmap dispositions, evidence, verification gates, circuit breakers, rotation, and closeout. Read `.claude/rules/agent-delegation.md` before delegation. This command supplies only runner routing.
+Execute an approved mission. Read `.claude/rules/spec-workflow.md` first; it is the canonical contract for ownership, scoped loading, verification, recovery and review. This command supplies runner routing.
 
-## Resolve the mission
+## Resolve and load
 
-The argument is a short slug or dated folder id. Resolve it from active `.claudart/specs/*/SPEC.md` frontmatter under the rule's rules, excluding `done/`. If omitted, select the only active `ready`, `running`, `blocked`, or `awaiting-final-review` mission. Ask only when several candidates remain ambiguous. Report an archived match without running it; route `drafting` or `poc-review` to `/spec`.
+Resolve the argument as a dated folder id or SPEC slug under `.claudart/specs/`, excluding `done/`. With no argument, select the only active ready/running/blocked/review mission; ask only if ambiguous. Report archived matches without running them.
 
-## Load state at the right boundary
-
-On the initial run, a new session, recovery after interruption/compaction, an unmatched in-flight LEDGER event, or suspected drift, read `SPEC.md`, `ROADMAP.md`, and `NOTES.md` in full plus enough of the LEDGER tail to cover the open incident. During uninterrupted execution, load the selected ROADMAP task and dependencies, applicable SPEC scenarios and Must-NOT-Have constraints, Current Acceptance Delta, and LEDGER entries since the previous selection. Expand to full files whenever those scoped reads reveal ambiguity or drift.
+Apply **Load Context by Scope** from the guideline: always read mission metadata, global constraints and the contract inventory, then the selected task/dependencies, ROADMAP delta and relevant evidence/notes. Compare references with actual scope and expand reads for missing contracts, interrupted writes or legacy layouts. Compaction alone does not require full-file reloads. Reconcile observed evidence before repeating an interrupted operation.
 
 ## Route by status
 
-- `ready`: flip to `running`, sync INDEX, append `run-started`, and enter the canonical loop.
-- `running`: recover unmatched work and validate relevant drift as the rule requires, then continue the canonical loop under the standing approval.
-- `blocked`: apply the canonical unblock test. Continue with a materially different evidence-backed path when available; stop only for the recorded external unlock condition or when no independent runnable work remains.
-- `awaiting-final-review`: apply the canonical closeout or review-back-edge classification from the user's current message. Completion confirmation closes; an anchored defect or approved bounded review patch resumes; a material or ambiguous amendment stays locked for user approval.
-- `done` / `cancelled`: report the terminal state and stop.
+- `drafting` / `poc-review`: return to `/spec`; no production implementation.
+- `ready`: set `running`, sync INDEX, append `run-started` and enter the canonical loop.
+- `running`: recover interrupted work, validate relevant drift and continue.
+- `blocked`: apply the canonical unblock test; continue with a materially different evidence-backed path or independent ready work.
+- `awaiting-final-review`: remain read-only unless the user confirms completion, reports an anchored defect, explicitly requests a bounded review patch or approves a material amendment.
+- `done` / `cancelled`: report terminal state and stop.
 
-The current request controls routing. A direct request to run, implement, continue, or resume an approved mission needs no additional confirmation. Approval-only may leave the mission at `ready` until `/spec-run` is invoked.
+A current or still-applicable request to execute authorizes the run under the approved scope. Approval alone may leave it ready. Existing authority is neither expanded nor forgotten.
 
 ## Execute and finish
 
-Run the rule's loop until its final-review gate or a circuit breaker. Preserve the SPEC and Must-NOT-Have fences, ROADMAP disposition forms, Current Acceptance Delta, append-only LEDGER evidence, and smallest non-redundant verification rules. Derive impact from the actual changed surface when selecting `full-baseline` or `scoped-review`; every successful gate records the resulting revision or bounded worktree fingerprint and its `executed`, `covered`, and `reused` evidence.
+Follow the canonical order: orient/select → implement → reconcile coverage before expensive verification → observe results → append evidence → update ROADMAP → persist under `commits:`. Keep the Current Acceptance Delta in ROADMAP; NOTES holds reasoning, and SPEC changes only for contract/lifecycle metadata.
 
-Honor `commits:` as the spec cadence under the applicable `git-workflow.md`: `per-task` (default), `per-phase`, or `user` (no automatic spec commits). The field never overrides higher-scope Git restrictions and never authorizes push or history rewrite. Honor explicit user/runtime budgets, but do not invent estimates, attempt limits, model tiers, or rotation thresholds.
+Use the existing smallest non-redundant phase/final verification plan. Do not add per-task compliance reports or another final suite. Determine `full-baseline` or `scoped-review` from the actual changed surface; keep candidate integration and conservative invalidation. Every successful gate records the resulting revision or bounded worktree fingerprint and executed/covered/reused evidence. A fingerprint alone cannot establish a complete dependency boundary.
 
-At a useful rotation boundary, surface phase progress and Current Acceptance Delta with an option to checkpoint and rotate. Continue authorized work when the user declines or gives no reply; the offer is never a pause gate. On affirmative rotation, follow the rule's checkpoint flow. A fresh session is optional.
+Honor `git-workflow.md`, the active harness and explicit resource budgets. Read `agent-delegation.md` before authorized delegation. Do not invent extra approval rounds, resource estimates, attempt-accounting systems or model/rotation thresholds.
 
-Stop at `awaiting-final-review` after the applicable gate passes. The user confirms `done`; the runner never treats its own successful evidence as that confirmation.
+Offer useful rotation without pausing on silence. Stop at `awaiting-final-review` only after the applicable gate passes; the user's completion confirmation is required for `done`.
