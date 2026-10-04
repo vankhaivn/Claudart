@@ -38,15 +38,15 @@ Checkpoint is a bulk-maintenance boundary, not the only way to write knowledge. 
 
 For each item currently in `.claudart/CONTEXT.md`, decide one of using current evidence; retain unresolved work outside this session:
 
-| Status                                                                                              | Action                                                                                                                            |
-| --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| Still true right now                                                                                | Keep it, refreshing wording if needed. Preserve any existing `<!-- since: YYYY-MM-DD -->` comment.                                |
-| Done / resolved / merged                                                                            | Drop it from `.claudart/CONTEXT.md`. Candidate for JOURNAL if it was a real decision, completion, or pivot.                       |
-| Superseded by newer state                                                                           | Drop the old item and write the new current state.                                                                                |
-| An owner correction, standing preference, or approval                                               | Record it in `.claudart/OWNER.md` under `.codex/guidelines/ai-behavior.md` if it is missing, then drop it from CONTEXT.           |
-| Broad recurring code-area or workflow behavior relevant to future work                              | Propose moving it into `.codex/guidelines/` via `$codex-learn`, then drop it from CONTEXT.                                        |
-| Descriptive, durable-beyond-current-work, current, and evidenced project fact (scope may be narrow) | Flag for **Step 6c**, then drop it from CONTEXT after its owner or knowledge route is updated and the relevant validation passes. |
-| WIP, proposed future state, task/acceptance state, or an uncertain/conflicting observation          | Keep it in the task/spec/CONTEXT candidate surface; never promote it as an active fact.                                           |
+| Status                                                                                              | Action                                                                                                                                                           |
+| --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Still true right now                                                                                | Keep it, refreshing wording if needed. Preserve any existing `<!-- since: YYYY-MM-DD -->` comment.                                                               |
+| Done / resolved / merged                                                                            | Drop it from `.claudart/CONTEXT.md`. Candidate for JOURNAL if it was a real decision, completion, or pivot.                                                      |
+| Superseded by newer state                                                                           | Drop the old item and write the new current state.                                                                                                               |
+| A standing owner preference or approval, in the owner's words                                       | Record it in `.claudart/OWNER.md` under `.codex/guidelines/ai-behavior.md` if it is missing, then drop it from CONTEXT; a one-time approval stays with its work. |
+| Broad recurring code-area or workflow behavior relevant to future work                              | Propose moving it into `.codex/guidelines/` via `$codex-learn`, then drop it from CONTEXT.                                                                       |
+| Descriptive, durable-beyond-current-work, current, and evidenced project fact (scope may be narrow) | Flag for **Step 6c**, then drop it from CONTEXT after its owner or knowledge route is updated and the relevant validation passes.                                |
+| WIP, proposed future state, task/acceptance state, or an uncertain/conflicting observation          | Keep it in the task/spec/CONTEXT candidate surface; never promote it as an active fact.                                                                          |
 
 Pure tactical noise is dropped silently.
 
@@ -63,7 +63,7 @@ Add to `.claudart/CONTEXT.md` only what is true now:
 
 A fact that passes the full knowledge capture gate does not belong in CONTEXT — flag it for **Step 6c**. Proposed, uncertain, conflicting, or current-work-only observations remain in their working artifact until verified; CONTEXT holds transient state, not canonical reference knowledge.
 
-An owner correction, standing preference, or approval belongs in `.claudart/OWNER.md`, not CONTEXT. Record any from this session that the profile does not hold yet, following `.codex/guidelines/ai-behavior.md`.
+A standing owner correction, preference, or approval belongs in `.claudart/OWNER.md`, not CONTEXT. Record any from this session that the profile does not hold yet, following `.codex/guidelines/ai-behavior.md`.
 
 Be terse: task references, decisions, and blockers are one short sentence each. Only _active_ `(no task)` work earns the 3-line micro-handoff, and only while it is live — the moment it ships or is abandoned, drop it this same checkpoint (JOURNAL it if it was a real decision/completion). That triage is what keeps CONTEXT under the ceiling.
 

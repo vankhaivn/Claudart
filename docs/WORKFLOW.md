@@ -159,7 +159,7 @@ CLAUDART separates information by purpose and lifetime.
 
 `OWNER.md` is the working agreement with the project owner. It records the owner and the people around the project, how to communicate with them, standing approvals and pacing, and mistakes to avoid.
 
-An agent adds an entry as soon as the owner corrects how it works, states a standing preference or approval, or confirms a non-obvious way of working. Each entry is one line with its scope or exception and a date, and it holds only what the owner said or confirmed. Checkpoint records entries a session missed, and learn consolidates them. The file stays under 60 lines and never holds secrets or account identifiers.
+An agent adds an entry as soon as the owner corrects how it works, states a standing preference or approval, or confirms a non-obvious way of working. Each entry is one line with its scope or exception and a date, and it holds only what the owner said or confirmed. The owner's statement is itself the request to record it, so an agent records it during review or planning work too, unless the owner, the repository, or the runtime forbids writes. A one-time approval never becomes a standing approval. Checkpoint records entries a session missed, and learn consolidates them. The file stays at 60 lines or fewer and never contains secrets or account identifiers.
 
 The current instruction outranks the profile. An approval recorded there never widens a higher-scope, repository, or tool restriction.
 

@@ -708,6 +708,16 @@ try {
         .sort(),
       seeds,
     );
+    const ownerSeed = read(join(root, ".claudart/OWNER.md"));
+    assert.deepEqual(
+      [...ownerSeed.matchAll(/^## (.+)$/gm)].map((match) => match[1]),
+      ["Owner and People", "Communication", "Approvals and Pacing", "Avoid"],
+    );
+    assert.deepEqual(
+      ownerSeed.split("\n").filter((line) => line.startsWith("- ")),
+      Array(4).fill("- _(none)_"),
+      "The owner profile seed ships without entries",
+    );
     for (const adapter of [".claude", ".codex"])
       for (const name of [
         "CONTEXT.md",
@@ -780,6 +790,8 @@ try {
           behavior,
           /never widens a higher-scope, repository, or tool restriction/,
         );
+        assert.match(behavior, /never becomes a standing approval/);
+        assert.match(behavior, /say that it was not saved/);
         assert.match(
           checkpoint,
           /belongs in `\.claudart\/OWNER\.md`, not CONTEXT/,

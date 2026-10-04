@@ -32,15 +32,15 @@ You are about to write a session checkpoint. The output is **not a log of what h
 
 For each item currently in `.claudart/CONTEXT.md`, decide one of using current evidence; retain unresolved work outside this session:
 
-| Status                                                | Action                                                                                                                                                                             |
-| ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Still true right now                                  | Keep it (refresh wording if needed). Preserve any existing `<!-- since: YYYY-MM-DD -->` comment.                                                                                   |
-| Done / resolved / merged                              | **Drop from .claudart/CONTEXT.md.** Candidate for JOURNAL if it was a real decision, completion, or pivot. Pure tactical noise (e.g., "tried X, didn't work") is dropped silently. |
-| Superseded by a newer state                           | Drop the old, write the new                                                                                                                                                        |
-| An owner correction, standing preference, or approval | Record it in `.claudart/OWNER.md` under `.claude/rules/ai-behavior.md` if it is missing, then drop it from CONTEXT                                                                 |
-| A durable code-area or workflow convention            | This has graduated beyond CONTEXT — propose `.claude/rules/` via `/learn`, then drop from CONTEXT                                                                                  |
-| A fact that may pass the knowledge capture gates      | Flag for **Step 6c**; it may be local in scope but must be descriptive, durable beyond this work, current, and evidenced                                                           |
-| Uncertain, conflicting, WIP, or proposed state        | Keep it as a candidate in the owning task/spec/CONTEXT surface; do not promote it as canonical knowledge                                                                           |
+| Status                                                        | Action                                                                                                                                                                             |
+| ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Still true right now                                          | Keep it (refresh wording if needed). Preserve any existing `<!-- since: YYYY-MM-DD -->` comment.                                                                                   |
+| Done / resolved / merged                                      | **Drop from .claudart/CONTEXT.md.** Candidate for JOURNAL if it was a real decision, completion, or pivot. Pure tactical noise (e.g., "tried X, didn't work") is dropped silently. |
+| Superseded by a newer state                                   | Drop the old, write the new                                                                                                                                                        |
+| A standing owner preference or approval, in the owner's words | Record it in `.claudart/OWNER.md` under `.claude/rules/ai-behavior.md` if it is missing, then drop it from CONTEXT; a one-time approval stays with its work                        |
+| A durable code-area or workflow convention                    | This has graduated beyond CONTEXT — propose `.claude/rules/` via `/learn`, then drop from CONTEXT                                                                                  |
+| A fact that may pass the knowledge capture gates              | Flag for **Step 6c**; it may be local in scope but must be descriptive, durable beyond this work, current, and evidenced                                                           |
+| Uncertain, conflicting, WIP, or proposed state                | Keep it as a candidate in the owning task/spec/CONTEXT surface; do not promote it as canonical knowledge                                                                           |
 
 ### Step 3 — Add new state from this session
 
@@ -55,7 +55,7 @@ Add to `.claudart/CONTEXT.md` only what's true _now_:
 
 A descriptive fact that passes `.claude/rules/knowledge-management.md` does not belong in CONTEXT merely because this session discovered it — flag it for **Step 6c**. Scope may be local. WIP, proposed, uncertain, or conflicting claims stay in the owning work surface.
 
-An owner correction, standing preference, or approval belongs in `.claudart/OWNER.md`, not CONTEXT. Record any from this session that the profile does not hold yet, following `.claude/rules/ai-behavior.md`.
+A standing owner correction, preference, or approval belongs in `.claudart/OWNER.md`, not CONTEXT. Record any from this session that the profile does not hold yet, following `.claude/rules/ai-behavior.md`.
 
 Be terse: task references, decisions, and blockers are one short sentence each. Only _active_ `(no task)` work earns the 3-line micro-handoff, and only while it is live — the moment it ships or is abandoned, drop it this same checkpoint (JOURNAL it if it was a real decision/completion). That triage is what keeps CONTEXT under the ceiling.
 

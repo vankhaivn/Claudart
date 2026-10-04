@@ -159,7 +159,7 @@ CLAUDART tách thông tin theo mục đích và thời gian tồn tại.
 
 `OWNER.md` là thỏa thuận làm việc với chủ dự án. File này ghi chủ dự án và những người liên quan, cách giao tiếp với họ, các phê duyệt lâu dài và nhịp làm việc, cùng những lỗi cần tránh.
 
-Agent thêm một mục ngay khi chủ dự án sửa cách agent làm việc, nêu một ưu tiên hoặc phê duyệt lâu dài, hoặc xác nhận một cách làm không hiển nhiên. Mỗi mục là một dòng, kèm phạm vi hoặc ngoại lệ và ngày ghi, và chỉ chứa điều chủ dự án đã nói hoặc xác nhận. Checkpoint ghi bổ sung những mục phiên làm việc bỏ sót, còn learn gộp lại các mục. File giữ dưới 60 dòng và không bao giờ chứa bí mật hay định danh tài khoản.
+Agent thêm một mục ngay khi chủ dự án sửa cách agent làm việc, nêu một ưu tiên hoặc phê duyệt lâu dài, hoặc xác nhận một cách làm không hiển nhiên. Mỗi mục là một dòng, kèm phạm vi hoặc ngoại lệ và ngày ghi, và chỉ chứa điều chủ dự án đã nói hoặc xác nhận. Lời của chủ dự án chính là yêu cầu ghi, nên agent ghi cả trong lúc review hay lên kế hoạch, trừ khi chủ dự án, repository hoặc runtime cấm ghi. Một phê duyệt dùng một lần không bao giờ trở thành phê duyệt lâu dài. Checkpoint ghi bổ sung những mục phiên làm việc bỏ sót, còn learn gộp lại các mục. File giữ tối đa 60 dòng và không bao giờ chứa bí mật hay định danh tài khoản.
 
 Chỉ dẫn hiện tại được ưu tiên hơn profile. Một phê duyệt ghi trong profile không bao giờ nới rộng giới hạn ở cấp cao hơn, của repository hoặc của công cụ.
 

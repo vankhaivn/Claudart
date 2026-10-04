@@ -406,6 +406,22 @@ try {
     assertCode(result, "D116");
   });
 
+  check("owner profile size boundary and missing seed signals", () => {
+    const limit = fixture("owner-at-limit");
+    write(join(limit, ".claudart/OWNER.md"), `${"owner\n".repeat(60)}`);
+    assertNoCode(run(limit, "codex"), "D116");
+    const over = fixture("owner-over-limit");
+    write(join(over, ".claudart/OWNER.md"), `${"owner\n".repeat(61)}`);
+    const overResult = run(over, "codex");
+    assert.equal(overResult.status, 0, overResult.out);
+    assert.match(overResult.out, /^WARNING\|D116\|\.claudart\/OWNER\.md:1\|/m);
+    const missing = fixture("owner-missing");
+    rmSync(join(missing, ".claudart/OWNER.md"));
+    const missingResult = run(missing, "codex");
+    assert.equal(missingResult.status, 0, missingResult.out);
+    assert.match(missingResult.out, /^INFO\|D101\|\.claudart\/OWNER\.md:1\|/m);
+  });
+
   check(
     "relative, root, space, percent-encoded, angle, parenthesized, and reference links resolve",
     () => {
