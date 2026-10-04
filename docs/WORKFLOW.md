@@ -101,6 +101,8 @@ The start command reads:
 
 It does not run the knowledge checker. Start is intended to be lightweight.
 
+Every session also loads the owner working agreement in `OWNER.md`: Claude imports it from `CLAUDE.md`, and Codex reads it through `AGENTS.md` and at start.
+
 The current request remains authoritative during startup. If it already names a task or specification to continue, or explicitly says to resume the unambiguous current focus, `start` completes the lightweight inventory and then enters that workflow without asking the user to select it again.
 
 ### Choose the right work mode
@@ -136,21 +138,30 @@ Use `/handoff` or `$codex-handoff` only when a difficult investigation must cont
 
 CLAUDART separates information by purpose and lifetime.
 
-| Store                     | Contains                                              | Does not contain                                  |
-| ------------------------- | ----------------------------------------------------- | ------------------------------------------------- |
-| `CONTEXT.md`              | Current facts needed to resume work now               | Long history or stable reference material         |
-| `JOURNAL.md`              | Compact history of retired state                      | Instructions that should load every session       |
-| `rules/` or `guidelines/` | Prescriptive behavior: how the agent should work      | Descriptive project facts                         |
-| `knowledge/`              | Durable, evidenced facts about the project            | Temporary plans, proposals, or unverified guesses |
-| `tasks/`                  | State and decisions for one implementation task       | General project documentation                     |
-| `specs/`                  | Approved intent and execution evidence for large work | Unrelated tasks                                   |
-| `HANDOFF.md`              | Reasoning needed by the next session                  | Permanent history                                 |
+| Store                     | Contains                                                                                 | Does not contain                                  |
+| ------------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| `CONTEXT.md`              | Current facts needed to resume work now                                                  | Long history or stable reference material         |
+| `OWNER.md`                | How the project owner wants to work: people, communication, approvals, mistakes to avoid | Code conventions, project facts, or secrets       |
+| `JOURNAL.md`              | Compact history of retired state                                                         | Instructions that should load every session       |
+| `rules/` or `guidelines/` | Prescriptive behavior: how the agent should work                                         | Descriptive project facts                         |
+| `knowledge/`              | Durable, evidenced facts about the project                                               | Temporary plans, proposals, or unverified guesses |
+| `tasks/`                  | State and decisions for one implementation task                                          | General project documentation                     |
+| `specs/`                  | Approved intent and execution evidence for large work                                    | Unrelated tasks                                   |
+| `HANDOFF.md`              | Reasoning needed by the next session                                                     | Permanent history                                 |
 
 ### Current state
 
 `CONTEXT.md` is declarative: it describes what is true now. Checkpoint rewrites it rather than appending forever. The shipped rules keep it at no more than 150 lines.
 
 `JOURNAL.md` is append-only and is not loaded automatically. It exists for audits and historical lookup without consuming normal session context.
+
+### Owner profile
+
+`OWNER.md` is the working agreement with the project owner. It records the owner and the people around the project, how to communicate with them, standing approvals and pacing, and mistakes to avoid.
+
+An agent adds an entry as soon as the owner corrects how it works, states a standing preference or approval, or confirms a non-obvious way of working. Each entry is one line with its scope or exception and a date, and it holds only what the owner said or confirmed. The owner's statement is itself the request to record it, so an agent records it during review or planning work too, unless the owner, the repository, or the runtime forbids writes. A one-time approval never becomes a standing approval. Checkpoint records entries a session missed, and learn consolidates them. The file stays at 60 lines or fewer and never contains secrets or account identifiers.
+
+The current instruction outranks the profile. An approval recorded there never widens a higher-scope, repository, or tool restriction.
 
 ### Durable knowledge
 
@@ -445,6 +456,7 @@ A Claude installation centers on:
 .claudart/
 ├── CONTEXT.md
 ├── JOURNAL.md
+├── OWNER.md
 ├── HANDOFF.md                  # Only when a handoff exists
 ├── knowledge/
 │   └── INDEX.md

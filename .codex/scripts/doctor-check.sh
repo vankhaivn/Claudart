@@ -219,6 +219,7 @@ require_dir "$STATE_DIR" ERROR "restore shared project state"
 require_file "$LOADER" ERROR "restore the $LAYER loader"
 require_file "$STATE_DIR/CONTEXT.md" WARNING "run the checkpoint workflow"
 require_file "$STATE_DIR/JOURNAL.md" WARNING "run the checkpoint workflow"
+require_file "$STATE_DIR/OWNER.md" INFO "restore the owner profile seed"
 require_dir "$STATE_DIR/knowledge" WARNING "run the refactor-memory workflow"
 require_file "$STATE_DIR/knowledge/INDEX.md" WARNING "run the refactor-memory workflow"
 require_dir "$STATE_DIR/tasks" WARNING "run the plan workflow"
@@ -246,6 +247,7 @@ line_count_signal() {
 
 line_count_signal "$LOADER" 100 D110 WARNING
 line_count_signal "$STATE_DIR/CONTEXT.md" 150 D111 WARNING
+line_count_signal "$STATE_DIR/OWNER.md" 60 D116 WARNING
 if [ -f "$ROOT/$STATE_DIR/HANDOFF.md" ] && ! has_symlink "$STATE_DIR/HANDOFF.md"; then
   add INFO D112 "$STATE_DIR/HANDOFF.md" 1 "unconsumed handoff baton present"
   line_count_signal "$STATE_DIR/HANDOFF.md" 150 D113 ERROR

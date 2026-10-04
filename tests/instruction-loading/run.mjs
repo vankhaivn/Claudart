@@ -191,10 +191,11 @@ try {
         assert(!existsSync(join(dest, ".claude/CLAUDE.md")));
         const graph = importGraph(join(dest, "CLAUDE.md"));
         assert(graph.has(join(dest, ".claude/rules/ai-behavior.md")));
+        assert(graph.has(join(dest, ".claudart/OWNER.md")));
         assert.equal(
           graph.size,
-          2,
-          "Only the universal behavior rule is auto-imported",
+          3,
+          "Only universal behavior and the owner profile are auto-imported",
         );
       });
     }
@@ -401,7 +402,7 @@ try {
           if (mode !== "codex") {
             assert.equal(
               importGraph(join(dest, "CLAUDE.md")).size,
-              2,
+              3,
               "The optional module must not expand unconditional imports",
             );
           }
@@ -676,6 +677,7 @@ try {
   const seeds = [
     "CONTEXT.md",
     "JOURNAL.md",
+    "OWNER.md",
     "knowledge/INDEX.md",
     "tasks/index.md",
     "tasks/done/.gitkeep",
@@ -699,12 +701,22 @@ try {
     execFileSync("tar", ["-czf", tar, "-C", dirname(dir), "claudart"]);
     return tar;
   }
-  check("source distributes only the seven empty shared-state seeds", () => {
+  check("source distributes only the eight empty shared-state seeds", () => {
     assert.deepEqual(
       files(join(root, ".claudart"))
         .map((f) => f.slice(join(root, ".claudart").length + 1))
         .sort(),
       seeds,
+    );
+    const ownerSeed = read(join(root, ".claudart/OWNER.md"));
+    assert.deepEqual(
+      [...ownerSeed.matchAll(/^## (.+)$/gm)].map((match) => match[1]),
+      ["Owner and People", "Communication", "Approvals and Pacing", "Avoid"],
+    );
+    assert.deepEqual(
+      ownerSeed.split("\n").filter((line) => line.startsWith("- ")),
+      Array(4).fill("- _(none)_"),
+      "The owner profile seed ships without entries",
     );
     for (const adapter of [".claude", ".codex"])
       for (const name of [
@@ -769,6 +781,34 @@ try {
           read(join(root, `${commands}start${suffix}`)),
           /confirm it is the same content/,
         );
+        const behavior = read(join(root, rules, "ai-behavior.md"));
+        assert.match(
+          behavior,
+          /`\.claudart\/OWNER\.md` is the shared working agreement with the project owner/,
+        );
+        assert.match(
+          behavior,
+          /never widens a higher-scope, repository, or tool restriction/,
+        );
+        assert.match(behavior, /never becomes a standing approval/);
+        assert.match(behavior, /say that it was not saved/);
+        assert.match(
+          checkpoint,
+          /belongs in `\.claudart\/OWNER\.md`, not CONTEXT/,
+        );
+        assert.match(
+          read(join(root, `${commands}learn${suffix}`)),
+          /owner working preference/i,
+        );
+        assert.match(
+          read(join(root, `${commands}start${suffix}`)),
+          /`\.claudart\/OWNER\.md`/,
+        );
+        if (adapter === ".codex")
+          assert.match(
+            read(join(root, ".codex/AGENTS.md")),
+            /Read `\.claudart\/OWNER\.md` before meaningful work/,
+          );
         assert.doesNotMatch(
           read(join(root, adapter, "scripts/doctor-check.sh")),
           /\$LAYER_DIR\/(?:knowledge|tasks|specs|CONTEXT|JOURNAL|HANDOFF)/,
@@ -807,6 +847,8 @@ try {
             "# Current work\n\nUnresolved work from another session.\n",
           "JOURNAL.md":
             "# History\n2026-09-20 | decision | Preserve the approved scope.\n",
+          "OWNER.md":
+            "## Communication\n\n- Explain trade-offs before changing scope. (2026-09-20)\n",
           "HANDOFF.md": `---\ncreated: 2026-09-20 09:00Z\nagent: ${first}\ntask: review-contract\n---\n# Unconsumed handoff\n`,
           "tasks/index.md":
             "## Active\n\n- [Review contract](2026-09-20-001-review-contract/TASK.md)\n",

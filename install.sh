@@ -106,7 +106,7 @@ fi
 # Shared state has a fixed, empty seed payload. Never copy live work, handoffs,
 # or arbitrary files from the upstream state tree into a project.
 STATE_SEEDS=(
-  CONTEXT.md JOURNAL.md knowledge/INDEX.md tasks/index.md
+  CONTEXT.md JOURNAL.md OWNER.md knowledge/INDEX.md tasks/index.md
   tasks/done/.gitkeep specs/INDEX.md specs/done/.gitkeep
 )
 

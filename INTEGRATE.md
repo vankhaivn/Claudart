@@ -64,7 +64,7 @@ This map is orientation only; the current source tree and its references are aut
 
 **Shared project state** (`.claudart/`, required in every installation):
 
-- `CONTEXT.md`, append-only `JOURNAL.md`, and the optional single-use `HANDOFF.md`;
+- `OWNER.md`, `CONTEXT.md`, append-only `JOURNAL.md`, and the optional single-use `HANDOFF.md`;
 - `knowledge/INDEX.md` plus project-owned maps and topics;
 - `tasks/` and `specs/`, with indexes, complete workspaces, archives and artifacts.
 
@@ -97,7 +97,7 @@ Before proposing writes, distinguish:
 
 - **template-owned protocol:** commands, skills, rules, guidelines, agents, scripts, config, and other files intended to track current upstream;
 - **merge-owned indexes:** loaders and indexes whose project routes and ordering must be preserved;
-- **live state:** shared `.claudart/CONTEXT.md`, `.claudart/JOURNAL.md`, handoffs, task workspaces and attachments, spec bodies and mission folders, knowledge topics/maps, and equivalent project-owned state;
+- **live state:** shared `.claudart/OWNER.md`, `.claudart/CONTEXT.md`, `.claudart/JOURNAL.md`, handoffs, task workspaces and attachments, spec bodies and mission folders, knowledge topics/maps, and equivalent project-owned state;
 - **project-owned custom content:** instructions or workflows authored specifically for this project.
 
 Treat an optional module as a selected dependency closure, separate from the core layer. Classify existing discovery commands and references using the stale-vs-custom test below. List any proposed retirement in the reconciliation plan, identifying its replacement or the chosen core-only outcome. Generated discovery output, `docs/project/`, and other project documentation are live project-owned content; retiring a template command does not authorize deleting its output.
@@ -178,7 +178,7 @@ Wait for explicit approval before writing. Approval for this plan does not pre-a
 - Keep template-owned files verbatim unless an explicit merge was approved.
 - Prefer relocating project-specific additions to project-owned rules, guidelines, knowledge, or loader sections so core protocol files can track upstream cleanly.
 - Splice loaders and indexes; never wholesale-replace project routing or ordering.
-- Never overwrite existing `CONTEXT.md` or `JOURNAL.md`; never import, overwrite, or create `HANDOFF.md`; never replace task workspaces or attachments, spec mission folders, knowledge topics, or maps with template content.
+- Never overwrite existing `OWNER.md`, `CONTEXT.md`, or `JOURNAL.md`; never import, overwrite, or create `HANDOFF.md`; never replace task workspaces or attachments, spec mission folders, knowledge topics, or maps with template content.
 - Create only missing seeds, indexes, or placeholders that were listed and approved.
 - Do not touch `.env`, secrets, ignored private files, or unrelated project files.
 - If an unplanned conflict or required write appears, stop before that write and present an amended path-level plan.

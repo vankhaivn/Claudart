@@ -89,6 +89,7 @@ Khi đã được yêu cầu triển khai hoặc tiếp tục, agent chuyển t�
 | Vị trí                      | Mục đích                                         | Cách nạp                                                             |
 | --------------------------- | ------------------------------------------------ | -------------------------------------------------------------------- |
 | `.claudart/CONTEXT.md`      | Trạng thái hiện tại của dự án và công việc       | Đọc khi bắt đầu phiên; được checkpoint viết lại                      |
+| `.claudart/OWNER.md`        | Cách làm việc với chủ dự án                      | Nạp ở mọi phiên; cập nhật khi chủ dự án sửa hoặc đặt một ưu tiên     |
 | `.claudart/JOURNAL.md`      | Lịch sử đã kết thúc                              | Chỉ nối thêm; không tự động nạp                                      |
 | `rules/` hoặc `guidelines/` | Chỉ dẫn mang tính quy định cho hành vi của agent | Nạp khi phù hợp                                                      |
 | `.claudart/knowledge/`      | Các sự thật bền vững mô tả dự án                 | Định tuyến qua `INDEX.md`; chỉ đọc chi tiết khi cần                  |
@@ -96,7 +97,7 @@ Khi đã được yêu cầu triển khai hoặc tiếp tục, agent chuyển t�
 | `.claudart/specs/`          | Đặc tả công việc lớn và lịch sử thực thi         | Đọc khi đặc tả đang hoạt động                                        |
 | `.claudart/HANDOFF.md`      | Bàn giao suy luận cho một phiên kế tiếp          | Phiên `/start` kế tiếp tiếp nhận rồi xóa                             |
 
-Ranh giới quan trọng nhất: **quy tắc nói agent nên làm việc như thế nào; knowledge giữ fact chưa có owner hiện hành phù hợp; task và spec ghi công việc đang được thực hiện.** Khi source, schema, generated reference hoặc tài liệu dự án đã sở hữu một fact, knowledge chỉ giữ route ngắn thay vì tạo bản kể lại cạnh tranh.
+Ranh giới quan trọng nhất: **quy tắc nói agent nên làm việc như thế nào; owner profile nói chủ dự án muốn agent làm việc với mình ra sao; knowledge giữ fact chưa có owner hiện hành phù hợp; task và spec ghi công việc đang được thực hiện.** Khi source, schema, generated reference hoặc tài liệu dự án đã sở hữu một fact, knowledge chỉ giữ route ngắn thay vì tạo bản kể lại cạnh tranh.
 
 Cả hai adapter đọc và ghi cùng một `.claudart/`. Đổi runtime giữ nguyên phạm vi task/spec, phê duyệt, bằng chứng và cổng review cuối; metadata `agent` ghi nguồn gốc, không chọn store hay cấp quyền. Công cụ và chỉ dẫn thực thi theo khả năng của host hiện tại.
 

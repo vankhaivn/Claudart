@@ -9,6 +9,7 @@ The target shape is:
 - a concise `CLAUDE.md` as the Claude instruction index and entrypoint;
 - durable prescriptive behavior in scoped files under `.claude/rules/`;
 - eligible durable descriptive facts without another owner under `.claudart/knowledge/`, with compact routes or minimal unique agent context for externally owned facts;
+- the bounded working agreement with the project owner in `.claudart/OWNER.md`;
 - current live state in `.claudart/CONTEXT.md`;
 - append-only history in `.claudart/JOURNAL.md`;
 - self-contained skills in `.agents/skills/` or `.claude/commands/`;
@@ -44,7 +45,7 @@ Use `.claude/rules/*.md` for durable semantic guidance with YAML frontmatter.
 
 Group detailed coding rules, boundaries, and validation requirements from `CLAUDE.md`, deprecated memory files, and repeated workflow decisions into a small set of logical rule files under `.claude/rules/`.
 
-**Route by type and owner first.** Split the candidate content: **prescriptive** material (an enforceable `MUST`/`NEVER`/should-avoid invariant — how to behave) becomes a rule; an eligible **descriptive** fact goes to its current authoritative source, or to `.claudart/knowledge/` when no other source owns it (Step 10). Knowledge may hold a compact route or minimal unique agent context for another owner. Do not file a fact as a rule and rely on Step 5 to re-route it later.
+**Route by type and owner first.** Split the candidate content: **prescriptive** material (an enforceable `MUST`/`NEVER`/should-avoid invariant — how to behave) becomes a rule, except guidance about working with the project owner, which goes to `.claudart/OWNER.md`; an eligible **descriptive** fact goes to its current authoritative source, or to `.claudart/knowledge/` when no other source owns it (Step 10). Knowledge may hold a compact route or minimal unique agent context for another owner. Do not file a fact as a rule and rely on Step 5 to re-route it later.
 
 Common examples:
 
@@ -130,7 +131,7 @@ It should contain only:
 - core CLI commands and skill selection;
 - a project map or pointers to primary docs;
 - security and repository-wide constraints;
-- a `## Domain Rules` section linking `.claudart/CONTEXT.md` and `.claude/rules/*.md`;
+- a `## Domain Rules` section linking `.claudart/OWNER.md`, `.claudart/CONTEXT.md`, and `.claude/rules/*.md`;
 - a clear rule that `.claudart/JOURNAL.md` is not auto-loaded;
 - the `## Agent Self-Evolution & Context Maintenance` section.
 
@@ -146,6 +147,7 @@ Resolve actual imports relative to the file containing them, including nested im
 
 ```markdown
 See @.claude/rules/ai-behavior.md for universal AI behavior guidelines.
+Follow the owner working agreement in @.claudart/OWNER.md.
 Before meaningful work, read `.claudart/CONTEXT.md` and relevant shared indexes.
 Read `.claude/rules/code-health.md` when implementing or reviewing code.
 Read `.claude/rules/task-management.md` for persistent task work.

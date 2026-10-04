@@ -5,4 +5,5 @@ This file applies only when working on the **CLAUDART source repository itself**
 - For Git/GitHub operations in this repository — issues, branches, commits, pull requests, merge strategy, and post-merge cleanup — read and follow `CONTRIBUTING.md`.
 - Downstream repositories own their own Git workflow. Do not encode CLAUDART's repository contribution policy inside `.claude/`, `.codex/`, `.agents/`, `install.sh`, or the downstream integration payload.
 - For Codex-specific CLAUDART operating-layer guidance, also follow `.codex/AGENTS.md` and the relevant files it routes to.
+- In this source repository, `.claudart/` holds only the empty seeds that ship to downstream projects. Never record maintainer preferences, state, or knowledge there, including `.claudart/OWNER.md`.
 - Keep repository contribution changes scoped and preserve parity only where the underlying CLAUDART product concept is actually mirrored across Claude and Codex.

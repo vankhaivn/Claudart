@@ -32,14 +32,15 @@ You are about to write a session checkpoint. The output is **not a log of what h
 
 For each item currently in `.claudart/CONTEXT.md`, decide one of using current evidence; retain unresolved work outside this session:
 
-| Status                                                  | Action                                                                                                                                                                             |
-| ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Still true right now                                    | Keep it (refresh wording if needed). Preserve any existing `<!-- since: YYYY-MM-DD -->` comment.                                                                                   |
-| Done / resolved / merged                                | **Drop from .claudart/CONTEXT.md.** Candidate for JOURNAL if it was a real decision, completion, or pivot. Pure tactical noise (e.g., "tried X, didn't work") is dropped silently. |
-| Superseded by a newer state                             | Drop the old, write the new                                                                                                                                                        |
-| A durable behavioral convention or recurring correction | This has graduated beyond CONTEXT — propose `.claude/rules/` via `/learn`, then drop from CONTEXT                                                                                  |
-| A fact that may pass the knowledge capture gates        | Flag for **Step 6c**; it may be local in scope but must be descriptive, durable beyond this work, current, and evidenced                                                           |
-| Uncertain, conflicting, WIP, or proposed state          | Keep it as a candidate in the owning task/spec/CONTEXT surface; do not promote it as canonical knowledge                                                                           |
+| Status                                                        | Action                                                                                                                                                                             |
+| ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Still true right now                                          | Keep it (refresh wording if needed). Preserve any existing `<!-- since: YYYY-MM-DD -->` comment.                                                                                   |
+| Done / resolved / merged                                      | **Drop from .claudart/CONTEXT.md.** Candidate for JOURNAL if it was a real decision, completion, or pivot. Pure tactical noise (e.g., "tried X, didn't work") is dropped silently. |
+| Superseded by a newer state                                   | Drop the old, write the new                                                                                                                                                        |
+| A standing owner preference or approval, in the owner's words | Record it in `.claudart/OWNER.md` under `.claude/rules/ai-behavior.md` if it is missing, then drop it from CONTEXT; a one-time approval stays with its work                        |
+| A durable code-area or workflow convention                    | This has graduated beyond CONTEXT — propose `.claude/rules/` via `/learn`, then drop from CONTEXT                                                                                  |
+| A fact that may pass the knowledge capture gates              | Flag for **Step 6c**; it may be local in scope but must be descriptive, durable beyond this work, current, and evidenced                                                           |
+| Uncertain, conflicting, WIP, or proposed state                | Keep it as a candidate in the owning task/spec/CONTEXT surface; do not promote it as canonical knowledge                                                                           |
 
 ### Step 3 — Add new state from this session
 
@@ -53,6 +54,8 @@ Add to `.claudart/CONTEXT.md` only what's true _now_:
 - The single most useful thing the next session should do first
 
 A descriptive fact that passes `.claude/rules/knowledge-management.md` does not belong in CONTEXT merely because this session discovered it — flag it for **Step 6c**. Scope may be local. WIP, proposed, uncertain, or conflicting claims stay in the owning work surface.
+
+A standing owner correction, preference, or approval belongs in `.claudart/OWNER.md`, not CONTEXT. Record any from this session that the profile does not hold yet, following `.claude/rules/ai-behavior.md`.
 
 Be terse: task references, decisions, and blockers are one short sentence each. Only _active_ `(no task)` work earns the 3-line micro-handoff, and only while it is live — the moment it ships or is abandoned, drop it this same checkpoint (JOURNAL it if it was a real decision/completion). That triage is what keeps CONTEXT under the ceiling.
 
@@ -181,7 +184,7 @@ Checkpoint performs these writes autonomously as bulk maintenance; direct mid-se
 A checkpoint is durable in Git only when its in-scope delta is committed. For Git persistence, read `.claude/rules/git-workflow.md`; that shared contract owns higher-scope/runtime, repository, user, staging, identity, and remote/history rules.
 
 1. Inspect the final `git status --short` and relevant diffs after all checkpoint writes.
-2. Determine the checkpoint-owned delta: verified in-scope session work that is still uncommitted plus the CONTEXT/JOURNAL/index/archive/knowledge maintenance produced by this checkpoint. Preserve unrelated or pre-existing work.
+2. Determine the checkpoint-owned delta: verified in-scope session work that is still uncommitted plus the CONTEXT/JOURNAL/index/archive/owner-profile/knowledge maintenance produced by this checkpoint. Preserve unrelated or pre-existing work.
 3. If the shared Git workflow authorizes a local commit at this boundary, stage only the owned paths/hunks and commit the coherent checkpoint delta using the repository's message convention. Do nothing when the owned delta is already fully persisted.
 4. Respect workflow-local narrowing. In particular, a spec with `commits: user` remains no-auto-commit for its spec-owned changes; checkpoint must not use its maintenance role to bypass that choice.
 5. If higher-scope policy blocks the commit, staging cannot be isolated safely, or the commit fails, leave the worktree intact and report `CHECKPOINT NOT PERSISTED IN GIT: commit required` plus the concise reason. Never describe an uncommitted checkpoint as durable.
@@ -194,7 +197,7 @@ Output a 6-line summary:
 2. Items kept / dropped / added (counts)
 3. JOURNAL entries appended (or "none")
 4. Tasks synced: active=<n>, archived this run=<n>, stalled=<n>; specs synced: active=<n>, archived this run=<n>, stalled=<n>
-5. Knowledge entries written/updated this run (list slugs, or "none"); plus anything proposed for `/learn` (recurring behavior → rules)
+5. Knowledge entries written/updated this run (list slugs, or "none"); owner-profile entries added or updated (or "none"); plus anything proposed for `/learn` (recurring behavior → rules)
 6. Git persistence: the new commit SHA and summary when committed, otherwise `CHECKPOINT NOT PERSISTED IN GIT: commit required` plus the reason. Do not diagnose unrelated uncommitted work in this summary.
 
 ## When to Run This Command

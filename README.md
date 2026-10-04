@@ -86,17 +86,18 @@ An explicit instruction to implement or resume carries through planning without 
 
 ## How state is organized
 
-| Location                  | Purpose                                         | Loading behavior                                                 |
-| ------------------------- | ----------------------------------------------- | ---------------------------------------------------------------- |
-| `.claudart/CONTEXT.md`    | Current project and work state                  | Read at session start; rewritten by checkpoint                   |
-| `.claudart/JOURNAL.md`    | Retired history                                 | Append-only; not loaded automatically                            |
-| `rules/` or `guidelines/` | Prescriptive instructions for agent behavior    | Loaded when applicable                                           |
-| `.claudart/knowledge/`    | Durable descriptive facts about the project     | Routed through `INDEX.md`; details loaded on demand              |
-| `.claudart/tasks/`        | Persistent implementation plans                 | Metadata at start; selected `TASK.md` and needed files on resume |
-| `.claudart/specs/`        | Large-work specifications and execution records | Read when a specification is active                              |
-| `.claudart/HANDOFF.md`    | One-session reasoning handoff                   | Consumed by the next start, then removed                         |
+| Location                  | Purpose                                         | Loading behavior                                                           |
+| ------------------------- | ----------------------------------------------- | -------------------------------------------------------------------------- |
+| `.claudart/CONTEXT.md`    | Current project and work state                  | Read at session start; rewritten by checkpoint                             |
+| `.claudart/OWNER.md`      | How to work with the project owner              | Loaded every session; updated when the owner corrects or sets a preference |
+| `.claudart/JOURNAL.md`    | Retired history                                 | Append-only; not loaded automatically                                      |
+| `rules/` or `guidelines/` | Prescriptive instructions for agent behavior    | Loaded when applicable                                                     |
+| `.claudart/knowledge/`    | Durable descriptive facts about the project     | Routed through `INDEX.md`; details loaded on demand                        |
+| `.claudart/tasks/`        | Persistent implementation plans                 | Metadata at start; selected `TASK.md` and needed files on resume           |
+| `.claudart/specs/`        | Large-work specifications and execution records | Read when a specification is active                                        |
+| `.claudart/HANDOFF.md`    | One-session reasoning handoff                   | Consumed by the next start, then removed                                   |
 
-The important boundary is simple: **rules say how the agent should work; knowledge records facts with no better current owner; tasks and specifications record work in progress.** When source, schema, generated reference, or a project document already owns a fact, knowledge keeps a concise route instead of a competing copy.
+The important boundary is simple: **rules say how the agent should work; the owner profile says how this project's owner wants to work with it; knowledge records facts with no better current owner; tasks and specifications record work in progress.** When source, schema, generated reference, or a project document already owns a fact, knowledge keeps a concise route instead of a competing copy.
 
 Both adapters read and write the same `.claudart/` state. Switching runtimes preserves task/spec scope, approvals, evidence and final-review gates; `agent` metadata records provenance rather than selecting a store or granting permission. Use the actual host's tools and adapter instructions.
 

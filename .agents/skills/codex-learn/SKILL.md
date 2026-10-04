@@ -11,7 +11,7 @@ Turn corrections and repeated lessons from completed work into durable behavior.
 
 1. Read `AGENTS.md` in full.
 2. Read the guideline, skill, and agent files that governed this session. Use frontmatter and targeted `rg` to find relevant owners; do not read every guideline blindly.
-3. Read `.claudart/CONTEXT.md` for current shared state.
+3. Read `.claudart/CONTEXT.md` for current shared state and `.claudart/OWNER.md` for the current owner working agreement.
 4. If the retrospective may retrieve or mutate project knowledge, read `.codex/guidelines/knowledge-management.md` in full. Otherwise do not load it.
 5. For recurrence evidence, tail at most ~200 lines of `.claudart/JOURNAL.md`, then use targeted `rg` for matching decisions or pivots. Never full-read JOURNAL by default.
 6. Build a compact rule index: owner → core constraint → known loophole. Include every agent/skill instruction that materially governed the session.
@@ -39,6 +39,7 @@ For each validated behavior:
 4. Use an existing guideline only when the semantic match is at least 80%. Create a focused owner instead of polluting a weak match; add canonical frontmatter and reference it from `AGENTS.md` when globally relevant.
 5. Put delegation behavior in `.codex/guidelines/agent-delegation.md`.
 6. Put a repository-wide Codex standard in `AGENTS.md`.
+7. Put an owner working preference (communication, pacing, approvals, the people around the project, or a mistake to avoid) in `.claudart/OWNER.md` under `.codex/guidelines/ai-behavior.md`. Record missing entries, merge near-duplicates, and sharpen scope or exceptions instead of creating a guideline.
 
 Guideline frontmatter uses `paths:`, `description:`, `when_to_use:`, and `tags:`. Keep `paths:` and `tags:` as compact flow sequences. Keep bodies prescriptive and concise; cite stable source paths instead of pasting code.
 

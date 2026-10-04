@@ -13,7 +13,7 @@ Before any retrospective:
 1. Read `CLAUDE.md` in full.
 2. Read every file in `.claude/rules/*.md` in full (use Glob first if you don't already know what exists).
 3. Read every file in `.claude/agents/*.md` whose tools you used during this session.
-4. Read `.claudart/CONTEXT.md` to know what state the work was in when this session started.
+4. Read `.claudart/CONTEXT.md` to know what state the work was in when this session started, and `.claudart/OWNER.md` for the current owner working agreement.
 5. Build a short mental index: rule name → core constraint → loophole keyword (if any).
 
 You cannot judge deviations against rules you haven't re-read. If `.claude/rules/` is empty or missing, note that and continue with `CLAUDE.md` only.
@@ -44,11 +44,12 @@ Walk the conversation chronologically, comparing each assistant turn against the
      - Existing domain (perfect match) → Update the exact file in `.claude/rules/`.
      - New domain (no strong match) → Create a new `.md` file in `.claude/rules/` with complete YAML frontmatter and add a conditional route to `CLAUDE.md`. Reserve automatic `@` imports for universal guidance and resolve them relative to the importing file.
      - Global standard (applies universally) → Update `CLAUDE.md` (or `.claude/rules/ai-behavior.md` if it's a behavioral rather than structural rule).
+     - Owner working preference (communication, pacing, approvals, the people around the project, or a mistake to avoid) → `.claudart/OWNER.md` under `.claude/rules/ai-behavior.md`. Record missing entries, merge near-duplicates, and sharpen scope or exceptions instead of creating a rule.
      - Descriptive fact → apply `.claude/rules/knowledge-management.md`. Promote it directly only if it is durable beyond the current work, current, evidenced, and correctly scoped. Find the authoritative owner first; knowledge owns the fact only when no other current source does. Keep any knowledge copy to a route or minimal unique context and update its reachable map atomically; leave WIP/proposals in the task/spec/CONTEXT surface and uncertainty/conflict as a candidate or `review-needed`.
 
 4. If knowledge changed, run `bash .claude/scripts/knowledge-check.sh`. Report checker failures and never claim the mutation healthy while they remain.
 
-**Boundary**: `/learn` updates **rules, `.claudart/knowledge/`, and `CLAUDE.md` only**. Do NOT modify `.claudart/CONTEXT.md` (that's `/checkpoint`'s job) and do NOT rewrite `.claudart/JOURNAL.md` entries (it's append-only). You may read both as evidence. `/checkpoint` bulk-maintains remaining candidates but is not the sole knowledge write gate.
+**Boundary**: `/learn` updates **rules, `.claudart/OWNER.md`, `.claudart/knowledge/`, and `CLAUDE.md` only**. Do NOT modify `.claudart/CONTEXT.md` (that's `/checkpoint`'s job) and do NOT rewrite `.claudart/JOURNAL.md` entries (it's append-only). You may read both as evidence. `/checkpoint` bulk-maintains remaining candidates but is not the sole knowledge write gate.
 
 ## Output Standard
 

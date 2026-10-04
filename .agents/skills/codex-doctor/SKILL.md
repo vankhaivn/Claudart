@@ -19,7 +19,7 @@ For explicit upstream CLAUDART source-template work, use `--layout source` and i
 
 For nondefault options or coverage boundaries, read `.codex/references/doctor-check.md`.
 
-The helper owns its default selected-layer structural/readability checks, declared metadata subset and supported types, clear Markdown-resource/local-link checks, real Claude imports, loader/CONTEXT/HANDOFF size checks, and its single nested knowledge-check invocation. It does not claim full YAML/TOML validation or semantic health. Optional Project Docs may be absent. Use `--include` only for an explicitly requested extra Markdown source tree or file; do not turn doctor into a documentation-wide scan.
+The helper owns its default selected-layer structural/readability checks, declared metadata subset and supported types, clear Markdown-resource/local-link checks, real Claude imports, loader/OWNER/CONTEXT/HANDOFF size checks, and its single nested knowledge-check invocation. It does not claim full YAML/TOML validation or semantic health. Optional Project Docs may be absent. Use `--include` only for an explicitly requested extra Markdown source tree or file; do not turn doctor into a documentation-wide scan.
 
 Preserve the helper output and exit status:
 
@@ -33,13 +33,14 @@ Only if the helper was unavailable and never started, the legacy `bash .codex/sc
 
 The baseline cannot decide whether prose is accurate or well-owned. Use bounded inspection and retain these reviews:
 
-- Confirm the selected loader routes to CONTEXT and universal behavior guidance, selectively routes other relevant guidance, and does not blindly auto-load guidelines, JOURNAL, or HANDOFF. A missing universal behavior or code-health route is **High**.
+- Confirm the selected loader routes to the owner profile, CONTEXT, and universal behavior guidance, selectively routes other relevant guidance, and does not blindly auto-load guidelines, JOURNAL, or HANDOFF. A missing universal behavior or code-health route is **High**.
 - Confirm code-health and delegation guidance are usable for their stated triggers. Review delegation limits and whether delegation instructions preserve ownership, validation, parallel-edit safety, and the active harness policy.
 - For knowledge, read `.codex/guidelines/knowledge-management.md` and `.codex/references/knowledge-maintenance.md`; review sampled claims for capture quality, tier separation, ownership, authority, evidence, and bounded routing. Preserve intentional external routes and curated hooks. An ambiguous unindexed file or heuristic duplicate is a review item, not proof of an error. Confirm start loads only the knowledge root router, never runs a checker, and does not globally load topic bodies; Claude must not auto-import knowledge. Do not run a repository-wide documentation audit.
 - Confirm review-only/explorer agents use a read-only sandbox; write-capable agents need an implementation purpose, bounded ownership, protection of unrelated work, and validation. Review unsupported metadata with its native format contract; a parser review warning does not prove it malformed.
 - Check guideline tags follow the compact contract of 1–5 lowercase kebab-case tags. Review tag meaning, path coverage, agent descriptions, and overlap only as signals. A zero glob, matching tags, a short snippet, or prose wording alone is not a defect without contextual evidence.
 - Review operational path mentions excluded by the parser when they declare required inputs or routes; confirm those targets exist. Examples and bare path mentions alone do not make a file mandatory.
 - Keep JOURNAL checks to a header/head, line count, and tail spot-check. Review old CONTEXT `since:` decisions as graduation candidates; do not full-read state merely to count it.
+- Review `.claudart/OWNER.md` against the owner-profile section of `.codex/guidelines/ai-behavior.md`: flag entries that belong in a rule, knowledge, or CONTEXT, near-duplicates, entries without a date, and anything resembling a secret or account identifier. Report findings; do not rewrite the profile.
 - Report stale metadata, long inlined snippets, hardcoded shell lists, vague skills, or descriptive-only guidelines as candidates for review after considering purpose and scope.
 
 ### Task Workspace Health (`.claudart/tasks/`)
