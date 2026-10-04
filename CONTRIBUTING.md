@@ -34,7 +34,7 @@ Search existing Issues and pull requests first. For a new enhancement, open an I
 
 We welcome new AI commands and highly specialized agents. If you add a durable Claude-side rule, command, or agent, maintain the Codex-native equivalent too when the concept applies to both tools.
 
-Use the repository Git and GitHub workflow below for CLAUDART source changes. Add or modify files within the relevant AI layer: `.claude/` for Claude Code, `.codex/` plus `.agents/skills/` for Codex. Project state lives in `.claudart/`, shared by both adapters. Distribute only empty CONTEXT/JOURNAL and knowledge/task/spec seeds; never commit live maintainer work into the installable state payload.
+Use the repository Git and GitHub workflow below for CLAUDART source changes. Add or modify files within the relevant AI layer: `.claude/` for Claude Code, `.codex/` plus `.agents/skills/` for Codex. Project state lives in `.claudart/`, shared by both adapters. Distribute only empty OWNER/CONTEXT/JOURNAL and knowledge/task/spec seeds; never commit live maintainer work into the installable state payload.
 
 If you've changed APIs, commands, or the knowledge contract, update both English and Vietnamese documentation where a mirrored page exists.
 

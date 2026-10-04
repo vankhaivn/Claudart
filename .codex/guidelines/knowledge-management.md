@@ -44,7 +44,8 @@ Passing these tests makes a claim eligible for knowledge routing, not necessaril
 Route everything else by kind:
 
 - WIP, proposals, task status, acceptance state, and discoveries local to current work stay in the active task, spec, or `CONTEXT.md`.
-- Recurring behavior, conventions, behavioral corrections, and reusable procedures go to the owning guideline, normally through `$codex-learn`.
+- How to work with the project owner, including the people around the project and the owner's corrections, preferences, and standing approvals, goes to `.claudart/OWNER.md`.
+- Other recurring behavior, conventions, behavioral corrections, and reusable procedures go to the owning guideline, normally through `$codex-learn`.
 - Uncertain or conflicting observations remain candidates in the working artifact. Existing knowledge they call into question is not current authority until verified.
 - An observation of runtime or environment state that repository evidence cannot confirm is not an authoritative claim. When it is worth keeping, it goes in the owning topic's `## Point-in-time observations` section under the maintenance reference.
 

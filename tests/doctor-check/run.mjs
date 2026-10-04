@@ -51,6 +51,7 @@ function fixture(name, layer = "codex", layout = "installed") {
   for (const file of [
     "CONTEXT.md",
     "JOURNAL.md",
+    "OWNER.md",
     "knowledge/INDEX.md",
     "tasks/index.md",
     "specs/INDEX.md",
@@ -389,8 +390,9 @@ try {
     assertCode(result, "D325");
   });
 
-  check("oversized CONTEXT and HANDOFF report their distinct limits", () => {
+  check("oversized OWNER, CONTEXT and HANDOFF report their distinct limits", () => {
     const dir = fixture("size-limits");
+    write(join(dir, ".claudart/OWNER.md"), `${"owner\n".repeat(61)}`);
     write(join(dir, ".claudart/CONTEXT.md"), `${"context\n".repeat(151)}`);
     write(
       join(dir, ".claudart/HANDOFF.md"),
@@ -401,6 +403,7 @@ try {
     assertCode(result, "D111");
     assertCode(result, "D112");
     assertCode(result, "D113");
+    assertCode(result, "D116");
   });
 
   check(

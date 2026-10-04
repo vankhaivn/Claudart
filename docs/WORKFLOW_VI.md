@@ -101,6 +101,8 @@ Command start đọc:
 
 Start không chạy knowledge checker. Mục tiêu của nó là khởi động nhẹ và nhanh.
 
+Mọi phiên cũng nạp thỏa thuận làm việc với chủ dự án trong `OWNER.md`: Claude import file này từ `CLAUDE.md`, còn Codex đọc nó theo `AGENTS.md` và khi start.
+
 Request hiện tại vẫn là nguồn chỉ đạo trong lúc startup. Nếu request đã chỉ rõ task hoặc spec cần tiếp tục, hoặc yêu cầu resume focus hiện tại không mơ hồ, `start` hoàn tất phần inventory nhẹ rồi đi vào workflow đó mà không hỏi user chọn lại.
 
 ### Chọn đúng chế độ làm việc
@@ -136,21 +138,30 @@ Chỉ dùng `/handoff` hoặc `$codex-handoff` khi một phần điều tra khó
 
 CLAUDART tách thông tin theo mục đích và thời gian tồn tại.
 
-| Nơi lưu                     | Chứa                                                     | Không chứa                                               |
-| --------------------------- | -------------------------------------------------------- | -------------------------------------------------------- |
-| `CONTEXT.md`                | Các fact hiện tại cần để tiếp tục công việc ngay         | Lịch sử dài hoặc tài liệu tham chiếu ổn định             |
-| `JOURNAL.md`                | Lịch sử ngắn gọn của trạng thái đã kết thúc              | Chỉ dẫn cần nạp ở mọi phiên                              |
-| `rules/` hoặc `guidelines/` | Hành vi mang tính quy định: agent nên làm việc thế nào   | Fact mô tả dự án                                         |
-| `knowledge/`                | Fact bền vững, có bằng chứng về dự án                    | Kế hoạch tạm thời, đề xuất hoặc phỏng đoán chưa xác minh |
-| `tasks/`                    | Trạng thái và quyết định của một task triển khai         | Tài liệu chung của dự án                                 |
-| `specs/`                    | Ý định đã duyệt và bằng chứng thực thi của công việc lớn | Task không liên quan                                     |
-| `HANDOFF.md`                | Suy luận cần thiết cho phiên kế tiếp                     | Lịch sử lâu dài                                          |
+| Nơi lưu                     | Chứa                                                                         | Không chứa                                               |
+| --------------------------- | ---------------------------------------------------------------------------- | -------------------------------------------------------- |
+| `CONTEXT.md`                | Các fact hiện tại cần để tiếp tục công việc ngay                             | Lịch sử dài hoặc tài liệu tham chiếu ổn định             |
+| `OWNER.md`                  | Cách chủ dự án muốn làm việc: con người, giao tiếp, phê duyệt, lỗi cần tránh | Quy ước code, fact dự án hoặc bí mật                     |
+| `JOURNAL.md`                | Lịch sử ngắn gọn của trạng thái đã kết thúc                                  | Chỉ dẫn cần nạp ở mọi phiên                              |
+| `rules/` hoặc `guidelines/` | Hành vi mang tính quy định: agent nên làm việc thế nào                       | Fact mô tả dự án                                         |
+| `knowledge/`                | Fact bền vững, có bằng chứng về dự án                                        | Kế hoạch tạm thời, đề xuất hoặc phỏng đoán chưa xác minh |
+| `tasks/`                    | Trạng thái và quyết định của một task triển khai                             | Tài liệu chung của dự án                                 |
+| `specs/`                    | Ý định đã duyệt và bằng chứng thực thi của công việc lớn                     | Task không liên quan                                     |
+| `HANDOFF.md`                | Suy luận cần thiết cho phiên kế tiếp                                         | Lịch sử lâu dài                                          |
 
 ### Trạng thái hiện tại
 
 `CONTEXT.md` mang tính khai báo: nó mô tả điều đang đúng lúc này. Checkpoint viết lại file thay vì nối thêm mãi. Quy tắc đi kèm giới hạn file ở tối đa 150 dòng.
 
 `JOURNAL.md` chỉ được nối thêm và không tự động nạp. File này phục vụ audit hoặc tra cứu lịch sử mà không làm tốn context của phiên thông thường.
+
+### Owner profile
+
+`OWNER.md` là thỏa thuận làm việc với chủ dự án. File này ghi chủ dự án và những người liên quan, cách giao tiếp với họ, các phê duyệt lâu dài và nhịp làm việc, cùng những lỗi cần tránh.
+
+Agent thêm một mục ngay khi chủ dự án sửa cách agent làm việc, nêu một ưu tiên hoặc phê duyệt lâu dài, hoặc xác nhận một cách làm không hiển nhiên. Mỗi mục là một dòng, kèm phạm vi hoặc ngoại lệ và ngày ghi, và chỉ chứa điều chủ dự án đã nói hoặc xác nhận. Checkpoint ghi bổ sung những mục phiên làm việc bỏ sót, còn learn gộp lại các mục. File giữ dưới 60 dòng và không bao giờ chứa bí mật hay định danh tài khoản.
+
+Chỉ dẫn hiện tại được ưu tiên hơn profile. Một phê duyệt ghi trong profile không bao giờ nới rộng giới hạn ở cấp cao hơn, của repository hoặc của công cụ.
 
 ### Knowledge bền vững
 
@@ -445,6 +456,7 @@ Một bản cài Claude tập trung trong:
 .claudart/
 ├── CONTEXT.md
 ├── JOURNAL.md
+├── OWNER.md
 ├── HANDOFF.md                  # Chỉ tồn tại khi có bàn giao
 ├── knowledge/
 │   └── INDEX.md

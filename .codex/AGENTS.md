@@ -4,8 +4,9 @@ This repository contains CLAUDART, a markdown-based operating layer for AI codin
 
 ## Context Loading
 
-- `.claudart/` is the single project-state authority for Claude and Codex, including CONTEXT, JOURNAL, HANDOFF, knowledge, tasks and specs. Runtime choice changes execution tools and adapter instructions, not state ownership.
+- `.claudart/` is the single project-state authority for Claude and Codex, including OWNER, CONTEXT, JOURNAL, HANDOFF, knowledge, tasks and specs. Runtime choice changes execution tools and adapter instructions, not state ownership.
 - Read `.claudart/CONTEXT.md` and relevant indexes before meaningful work; current user instructions take precedence over saved state. Use repository-root paths even from a nested working directory.
+- Read `.claudart/OWNER.md` before meaningful work and follow it as the working agreement with the project owner; keep it current under `.codex/guidelines/ai-behavior.md`.
 - Keep scope, standing approvals, evidence and final-review gates when changing runtimes. The `agent` field records provenance; it neither selects a state store nor grants permission. Use the actual host's available tools and capabilities.
 - Shared files support sequential handoff, not automatic concurrent synchronization. Serialize writes to shared summaries, indexes and the handoff slot; preserve unrelated unresolved work. Do not create another state store or use a fallback store.
 - Read `.claudart/tasks/index.md` (if it exists) for active implementation plans.
@@ -49,7 +50,7 @@ When the optional Project Docs skill is present, use it for project-document own
 ## Knowledge Contract
 
 - Map first: stay within 2 maps, 3 direct topics, and 2 one-hop related topics; inspect frontmatter, outline, and the smallest relevant section before a full body. Use bounded `rg`/Git evidence search only when routed context is insufficient; reading never writes.
-- Capture only facts that are descriptive, durable beyond current work, current, and evidenced; scope may be narrow. WIP/proposals/state stay in task/spec/CONTEXT, behavior goes through `$codex-learn`, and uncertainty remains a candidate or `review-needed`.
+- Capture only facts that are descriptive, durable beyond current work, current, and evidenced; scope may be narrow. WIP/proposals/state stay in task/spec/CONTEXT, owner working preferences go to `.claudart/OWNER.md`, other behavior goes through `$codex-learn`, and uncertainty remains a candidate or `review-needed`.
 - Find the owner of each fact first. Knowledge owns it only when no other authoritative source does; otherwise keep a pointer or minimal unique context. For a knowledge mutation, update the topic plus its reachable map atomically. Never auto-delete or auto-promote ambiguous unindexed files.
 - After every knowledge mutation, run `bash .codex/scripts/knowledge-check.sh --root .`. `$codex-start` never runs it.
 
@@ -57,6 +58,7 @@ When the optional Project Docs skill is present, use it for project-document own
 
 - "Do not assume a human will document your code patterns. If you build it, document it."
 - Existing Codex guidelines change → update the relevant file in `.codex/guidelines/`.
+- Owner corrections, standing preferences, and approvals → record them in `.claudart/OWNER.md` when they happen, as `.codex/guidelines/ai-behavior.md` defines.
 - New domains/layers → create a new guideline file with flow-style `paths: [...]`, `description:`, `when_to_use:`, and inline `tags: [...]` frontmatter, then ensure `AGENTS.md` points to it when globally relevant.
 - Durable project facts → follow the four-invariant Knowledge Contract and its conditional maintenance reference; a natural-language mid-session update is sufficient when the capture gate passes. Keep one owner per fact across project docs, source references, and knowledge.
 - Live state → update `.claudart/CONTEXT.md` through `$codex-checkpoint`.
