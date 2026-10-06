@@ -300,15 +300,13 @@ The directory format is the only current task contract. Downstream upgrades must
 
 ### Completion reviewer
 
-Every new task records `reviewer: user | agent`.
+Every task records `reviewer: user | agent`.
 
 Choose from the required decision or observation, not whether the result is visible. Use `user` for subjective judgment, a required environment the agent cannot inspect through authorized tools, an explicit human approval gate, or mixed human/machine acceptance. Clarify ambiguous ownership and retain `user` until resolved. Use `agent` when every criterion is objective, reproducible, directly observable, and verifiable with concrete evidence, with no human gate. For example, proving that a failed request releases a submit button can be agent-reviewed; deciding whether new copy feels reassuring belongs to the user.
 
 Record the reviewer's basis and source. Do not add a generic "user confirms it works" criterion or ask the user to repeat evidenced QA. Missing objective checks remain agent work and keep the task active or blocked. Tests do not waive subjective acceptance or explicit approval.
 
-Re-evaluate before closeout and when acceptance changes. Escalate to `user` for a real user-only criterion. An agent-assigned `user` may be corrected to `agent` only when its recorded basis was visibility alone or an agent-invented confirmation, no explicit user/repository/approver gate applies, and every substantive criterion remains in scope with current objective evidence. Record the original basis, correction reason, and evidence in the Decision Log before changing the reviewer, and report the correction with the result. Missing or uncertain basis stays `user`; legacy tasks with no reviewer are not eligible. Any other reassignment requires explicit user approval and a fresh eligibility check, subject to higher-scope gates.
-
-For a parked task, correction requires explicit resume and a return to `in-progress` before closeout or implementation edits. Startup orientation, checkpoint, and doctor do not reclassify or close tasks.
+Before closeout and when acceptance changes, verify that the reviewer matches the required acceptance and record changes with their source. Only the authority that owns an explicit human approval requirement may change it. Orientation, checkpoint, and doctor report task state without changing acceptance ownership.
 
 ### State machine
 
@@ -317,7 +315,7 @@ planning ── user approves ──▶ in-progress
 in-progress ── reviewer: agent + all acceptance proven ──▶ done
 in-progress ── reviewer: user + agent validation complete ──▶ awaiting-review
 awaiting-review ── user confirms ──▶ done
-awaiting-review ── reported problem / eligible correction on resume ──▶ in-progress
+awaiting-review ── user reports a problem ──▶ in-progress
 in-progress ── blocked ──▶ blocked
 blocked ── blocker cleared ──▶ in-progress
 any state ── user cancels ──▶ cancelled
@@ -326,8 +324,8 @@ any state ── user cancels ──▶ cancelled
 `planning` and `awaiting-review` are write locks for source code:
 
 - In `planning`, the agent may refine `TASK.md` and retain necessary notes, supplied inputs, or read-only evidence. Implementation is forbidden even inside `artifacts/`.
-- In `awaiting-review`, the agent preserves the reviewed implementation and evidence while waiting for the user's concrete review surface. This state is for `reviewer: user` (and legacy tasks with no reviewer).
-- A reported problem reopens the task and returns it to `in-progress`. An eligible reviewer correction on explicit resume also follows that transition; a real user gate stays locked.
+- In `awaiting-review`, the agent preserves the reviewed implementation and evidence while waiting for the user's concrete review surface. This state is for `reviewer: user`.
+- A reported problem reopens the task and returns it to `in-progress`.
 
 ### Approval and completion
 

@@ -300,15 +300,13 @@ Artifact tuân theo chính sách riêng tư, lưu trữ và Git của dự án d
 
 ### Reviewer khi hoàn tất
 
-Mỗi task mới ghi `reviewer: user | agent`.
+Mỗi task ghi `reviewer: user | agent`.
 
 Phân loại theo quyết định hoặc quan sát cần có, không dựa vào việc kết quả có hiển thị cho user hay không. Dùng `user` khi cần đánh giá chủ quan, môi trường bắt buộc mà agent không thể kiểm tra qua công cụ được phép, quyền phê duyệt được giao rõ cho con người, hoặc trộn nghiệm thu của user với máy. Nếu quyền nghiệm thu chưa rõ, giữ `user` và làm rõ phần còn thiếu. Dùng `agent` khi mọi tiêu chí đều khách quan, tái lập được, quan sát trực tiếp được và có thể kiểm chứng bằng bằng chứng cụ thể, đồng thời không có cổng phê duyệt của con người. Ví dụ, chứng minh nút submit được mở lại sau request lỗi có thể do agent nghiệm thu; quyết định câu chữ mới có tạo cảm giác yên tâm hay không thuộc user.
 
 Ghi lý do và nguồn của việc chọn reviewer. Không thêm tiêu chí chung chung "user xác nhận chạy đúng" hoặc yêu cầu user lặp lại QA đã có bằng chứng. Kiểm tra khách quan chưa hoàn tất vẫn là việc của agent và giữ task active hoặc blocked. Test không thay thế đánh giá chủ quan hay quyền phê duyệt rõ ràng.
 
-Đánh giá lại trước khi đóng và khi tiêu chí thay đổi. Chuyển sang `user` khi xuất hiện tiêu chí thực sự cần user. Chỉ được sửa `user` do agent tự gán thành `agent` khi lý do đã ghi chỉ là kết quả hiển thị hoặc bước xác nhận do agent tự thêm, không có cổng phê duyệt rõ ràng từ user/repository/người duyệt, và mọi tiêu chí thực chất vẫn giữ nguyên phạm vi với bằng chứng khách quan hiện hành. Trước khi đổi reviewer, ghi lý do ban đầu, lý do sửa và bằng chứng vào Decision Log; báo việc sửa cùng kết quả. Thiếu hoặc không rõ lý do thì giữ `user`; task cũ không có reviewer không thuộc trường hợp được sửa này. Các trường hợp đổi reviewer khác cần user phê duyệt rõ ràng và kiểm tra lại điều kiện, đồng thời tuân thủ cổng phê duyệt cấp cao hơn.
-
-Với task đang chờ review, chỉ sửa phân loại khi có yêu cầu resume rõ ràng và phải đưa về `in-progress` trước khi đóng hoặc sửa implementation. Startup chỉ định hướng, checkpoint và doctor không tự phân loại lại hay đóng task.
+Trước khi đóng và khi tiêu chí thay đổi, đối chiếu reviewer với yêu cầu nghiệm thu; ghi thay đổi cùng nguồn yêu cầu. Chỉ bên sở hữu quyền phê duyệt rõ ràng mới được thay đổi yêu cầu đó. Startup chỉ định hướng, checkpoint và doctor báo trạng thái task mà không đổi quyền nghiệm thu.
 
 ### State machine
 
@@ -317,7 +315,7 @@ planning ── user phê duyệt ──▶ in-progress
 in-progress ── reviewer: agent + mọi tiêu chí đã được chứng minh ──▶ done
 in-progress ── reviewer: user + validation của agent hoàn tất ──▶ awaiting-review
 awaiting-review ── user xác nhận ──▶ done
-awaiting-review ── báo lỗi / sửa reviewer hợp lệ khi resume ──▶ in-progress
+awaiting-review ── user báo lỗi ──▶ in-progress
 in-progress ── gặp blocker ──▶ blocked
 blocked ── blocker được gỡ ──▶ in-progress
 bất kỳ trạng thái nào ── user hủy ──▶ cancelled
@@ -326,8 +324,8 @@ bất kỳ trạng thái nào ── user hủy ──▶ cancelled
 `planning` và `awaiting-review` là hai trạng thái khóa việc sửa source:
 
 - Ở `planning`, agent có thể chỉnh `TASK.md` và giữ ghi chú, input được cung cấp hoặc bằng chứng chỉ đọc cần thiết. Không được triển khai, kể cả bên trong `artifacts/`.
-- Ở `awaiting-review`, agent giữ nguyên implementation và bằng chứng trong lúc chờ bề mặt review cụ thể của user. Trạng thái này chỉ dành cho `reviewer: user` (và task cũ chưa có reviewer).
-- Khi user báo vấn đề, task được mở lại và quay về `in-progress`. Việc sửa reviewer hợp lệ khi có yêu cầu resume rõ ràng cũng đi qua bước này; cổng nghiệm thu thực sự của user vẫn giữ khóa.
+- Ở `awaiting-review`, agent giữ nguyên implementation và bằng chứng trong lúc chờ bề mặt review cụ thể của user. Trạng thái này chỉ dành cho `reviewer: user`.
+- Khi user báo vấn đề, task được mở lại và quay về `in-progress`.
 
 ### Phê duyệt và hoàn tất
 

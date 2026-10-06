@@ -85,19 +85,12 @@ for layer in claude codex; do
     assert_contains "$file" 'mandatory repository checks' "$layer retains required verification"
     assert_contains "$file" 'forced session rotation' "$layer forbids spec-style ceremony"
     assert_contains "$file" 'reviewer: user # user | agent' "$layer task schema records the completion reviewer"
+    assert_contains "$file" 'Every task records `reviewer: user | agent` before implementation starts.' "$layer requires explicit review ownership"
+    assert_contains "$file" 'An explicit human approval requirement can be changed only by the authority that owns it.' "$layer protects approval ownership"
     assert_contains "$file" 'User-visible output alone does not require user review.' "$layer classifies acceptance rather than visibility"
     assert_contains "$file" 'Missing objective verification alone is unfinished agent work' "$layer keeps objective verification with the agent"
     assert_contains "$file" 'keep `user` until it is resolved' "$layer protects ambiguous acceptance ownership"
     assert_contains "$file" 'they never waive subjective acceptance or an explicit approval requirement' "$layer protects human gates from test-only closeout"
-    assert_contains "$file" 'only if all of these hold' "$layer makes reviewer correction conditional"
-    assert_contains "$file" 'The recorded basis was a classification mistake' "$layer limits correction to mistaken agent assignments"
-    assert_contains "$file" 'No user instruction, repository policy, or designated approver reserved final approval' "$layer correction preserves explicit approval ownership"
-    assert_contains "$file" 'it must not erase a real acceptance requirement' "$layer correction preserves substantive acceptance"
-    assert_contains "$file" 'Record the original classification basis, the correction reason, and the evidence for every criterion' "$layer requires evidence and an auditable correction"
-    assert_contains "$file" 'If the basis is missing or uncertain, retain `user`' "$layer prevents speculative reviewer correction"
-    assert_contains "$file" 'Legacy tasks with no reviewer are not eligible for this correction.' "$layer preserves legacy user review"
-    assert_contains "$file" 'Orientation, checkpoint, and doctor do not perform this correction or change task state.' "$layer restricts correction to task execution or explicit resume"
-    assert_contains "$file" 'return to `in-progress` before applying the agent closeout path or making implementation edits' "$layer correction respects the review lock"
     assert_contains "$file" 'Present the actual reviewable result and how to access it' "$layer requires a concrete review handoff"
     assert_contains "$file" 'Do not transfer unfinished agent verification to the user.' "$layer keeps agent checks out of user acceptance"
     assert_contains "$file" 'User-reviewed tasks stop at `awaiting-review` until their genuine user gate is satisfied; agent-reviewed tasks may close only under the evidence-complete closeout contract.' "$layer anti-patterns agree with both closeout paths"
@@ -128,7 +121,6 @@ for layer in claude codex; do
   assert_contains "$plan" 'resumption or review flow' "$layer resumes without resetting state"
   assert_contains "$plan" 'Classify the completion reviewer before the plan is ready' "$layer plan classifies reviewer before implementation"
   assert_contains "$plan" 'Visibility alone is not a user review requirement.' "$layer plan uses criterion-based review ownership"
-  assert_contains "$plan" 'apply the canonical reviewer correction contract when eligible' "$layer plan routes correction to the canonical contract"
   assert_contains "$plan" '**User Plan Brief**' "$layer plan presents a compact user-facing brief"
   assert_contains "$plan" 'Do not paste the task file and do not tell the user to open or review `TASK.md`' "$layer plan does not outsource comprehension to the user"
   assert_contains "$plan" '**Current state**' "$layer plan brief explains the current state"
@@ -138,18 +130,17 @@ for layer in claude codex; do
 
   assert_contains "$start" 'tasks/*/TASK.md' "$layer startup can recover a missing index"
   assert_contains "$start" 'Read `TASK.md` frontmatter' "$layer startup reads metadata only"
+  assert_contains "$start" 'report a missing or invalid `reviewer` as incomplete metadata without guessing ownership' "$layer startup reports incomplete reviewer metadata"
   assert_contains "$start" 'Do not read task bodies or artifact contents' "$layer startup does not slurp workspaces"
-  assert_contains "$start" 'reviewer: agent' "$layer startup recognizes inconsistent agent-review parking"
-  assert_contains "$start" 'report the recorded status without claiming metadata proves a user-only requirement' "$layer startup does not infer acceptance from a label"
   assert_contains "$start" 'present the reviewable result plus the specific outstanding acceptance' "$layer startup owns the resumed review handoff"
   assert_contains "$checkpoint" 'tasks/done/*/TASK.md' "$layer checkpoint recognizes directory archives"
   assert_contains "$checkpoint" 'Move the entire workspace' "$layer checkpoint preserves attachments"
   assert_contains "$checkpoint" 'Repair knowledge `sources` that point into the moved workspace' "$layer checkpoint archive keeps knowledge sources resolvable"
   assert_contains "$checkpoint" '**DO NOT archive `awaiting-review` tasks.**' "$layer checkpoint respects review"
-  assert_contains "$checkpoint" 'missing legacy `reviewer` is treated as `user`' "$layer checkpoint keeps legacy tasks user-reviewed"
+  assert_contains "$checkpoint" 'Require a valid `reviewer: user | agent` before archiving' "$layer checkpoint requires explicit review ownership"
   assert_contains "$checkpoint" 'checkpoint never creates supporting files' "$layer checkpoint does not manufacture artifacts"
-  assert_contains "$doctor" 'Validate `reviewer` as `user | agent` when present.' "$layer doctor validates reviewer metadata"
-  assert_contains "$doctor" 'any reviewer correction belongs to explicit task resumption under task-management, not doctor' "$layer doctor leaves reviewer changes to task resumption"
+  assert_contains "$doctor" 'Validate `reviewer` as `user | agent`.' "$layer doctor validates reviewer metadata"
+  assert_contains "$doctor" 'Report missing or invalid reviewer metadata as Medium; do not infer acceptance ownership.' "$layer doctor reports incomplete metadata without guessing"
   assert_contains "$doctor" 'Missing `artifacts/` or `### Workspace Files` is normal' "$layer doctor accepts the minimal workspace"
   assert_contains "$doctor" 'Do not read artifact bodies' "$layer doctor checks links without processing payloads"
   assert_contains "$doctor" '`None.` is valid' "$layer doctor does not demand filler"
@@ -251,13 +242,15 @@ next_sequence() {
 }
 
 archive_terminal() {
-  local root=$1 id=$2 source destination status
+  local root=$1 id=$2 source destination status reviewer
   valid_id "$id" || return 1
   source="$root/$id"
   destination="$root/done/$id"
   [ -d "$source" ] && [ ! -L "$source" ] && [ ! -L "$source/TASK.md" ] || return 1
   status=$(awk '/^---$/{n++; next} n==1 && /^status: /{print $2; exit}' "$source/TASK.md") || return 1
   case "$status" in done|cancelled) ;; *) return 1 ;; esac
+  reviewer=$(awk '/^---$/{n++; next} n==1 && /^reviewer: /{print $2; exit}' "$source/TASK.md") || return 1
+  case "$reviewer" in user|agent) ;; *) return 1 ;; esac
   [ ! -e "$destination" ] && [ ! -L "$destination" ] || return 1
   mkdir -p "$root/done" || return 1
   mv -- "$source" "$destination"
@@ -360,14 +353,16 @@ else
   fail "agent-reviewed done task archives without user confirmation"
 fi
 
-legacy=2026-09-10-012-legacy-review
-seed_task "$root/$legacy" awaiting-review legacy-review user
-grep -v '^reviewer:' "$root/$legacy/TASK.md" > "$TMP_ROOT/legacy-task"
-cp "$TMP_ROOT/legacy-task" "$root/$legacy/TASK.md" || exit 2
-if archive_terminal "$root" "$legacy"; then
-  fail "legacy awaiting-review task cannot be auto-archived"
+incomplete=2026-09-10-012-incomplete-review
+seed_task "$root/$incomplete" done incomplete-review user
+grep -v '^reviewer:' "$root/$incomplete/TASK.md" > "$TMP_ROOT/incomplete-task"
+cp "$TMP_ROOT/incomplete-task" "$root/$incomplete/TASK.md" || exit 2
+if archive_terminal "$root" "$incomplete"; then
+  fail "task with incomplete reviewer metadata cannot be archived"
+elif cmp -s "$TMP_ROOT/incomplete-task" "$root/$incomplete/TASK.md"; then
+  pass "incomplete reviewer metadata is preserved without guessing ownership"
 else
-  pass "legacy awaiting-review task remains user-reviewed"
+  fail "incomplete reviewer metadata is preserved without guessing ownership"
 fi
 
 seed_task "$root/$cancelled" cancelled dropped-change user
