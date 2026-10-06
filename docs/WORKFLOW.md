@@ -300,11 +300,13 @@ The directory format is the only current task contract. Downstream upgrades must
 
 ### Completion reviewer
 
-Every new task records `reviewer: user | agent`.
+Every task records `reviewer: user | agent`.
 
-Use `user` whenever any acceptance is user-visible or product-subjective (for example visual/UX, typography, animation, copy or tone), requires a user-owned external/device/account/deployment environment, is explicitly assigned to the user, mixes user and machine acceptance, or is ambiguous. Use `agent` only when every acceptance criterion is objective, reproducible, directly observable by the agent, and supported by concrete evidence such as tests, reproductions, benchmarks, builds, static checks, or deterministic artifacts. Tests alone do not transfer ownership of a user review surface.
+Choose from the required decision or observation, not whether the result is visible. Use `user` for subjective judgment, a required environment the agent cannot inspect through authorized tools, an explicit human approval gate, or mixed human/machine acceptance. Clarify ambiguous ownership and retain `user` until resolved. Use `agent` when every criterion is objective, reproducible, directly observable, and verifiable with concrete evidence, with no human gate. For example, proving that a failed request releases a submit button can be agent-reviewed; deciding whether new copy feels reassuring belongs to the user.
 
-The classification is conservative: missing legacy reviewer means `user`; the agent may escalate `agent → user` when new evidence requires it; it may not downgrade `user → agent` after execution starts without explicit user approval and a fresh eligibility check.
+Record the reviewer's basis and source. Do not add a generic "user confirms it works" criterion or ask the user to repeat evidenced QA. Missing objective checks remain agent work and keep the task active or blocked. Tests do not waive subjective acceptance or explicit approval.
+
+Before closeout and when acceptance changes, verify that the reviewer matches the required acceptance and record changes with their source. Only the authority that owns an explicit human approval requirement may change it. Orientation, checkpoint, and doctor report task state without changing acceptance ownership.
 
 ### State machine
 
@@ -322,7 +324,7 @@ any state ── user cancels ──▶ cancelled
 `planning` and `awaiting-review` are write locks for source code:
 
 - In `planning`, the agent may refine `TASK.md` and retain necessary notes, supplied inputs, or read-only evidence. Implementation is forbidden even inside `artifacts/`.
-- In `awaiting-review`, the agent preserves the reviewed implementation and evidence while waiting for the user's concrete review surface. This state is for `reviewer: user` (and legacy tasks with no reviewer).
+- In `awaiting-review`, the agent preserves the reviewed implementation and evidence while waiting for the user's concrete review surface. This state is for `reviewer: user`.
 - A reported problem reopens the task and returns it to `in-progress`.
 
 ### Approval and completion
@@ -333,8 +335,8 @@ Resolve execution intent from the current message first, then from an earlier ex
 
 Closeout depends on the recorded reviewer:
 
-1. **`reviewer: user`:** after all agent-verifiable work passes, status becomes `awaiting-review`. The agent must name the specific user-visible, subjective, external, or user-owned acceptance still outstanding. User confirmation moves the task to `done`.
-2. **`reviewer: agent`:** the agent may move directly from `in-progress` to `done` only when every acceptance criterion is still eligible for agent review and has concrete evidence. Missing, stale, uncertain, external, mixed, or user-owned acceptance prevents self-close and must remain active, become blocked, or escalate to `reviewer: user`.
+1. **`reviewer: user`:** finish all agent-verifiable work, including relevant failure cases, then move to `awaiting-review` with only genuine user acceptance unchecked. Present the actual reviewable result and access instructions, summarize completed checks and their limits, and ask for the precise outstanding judgment, unavailable observation, or reserved approval. For an environment only the user can access, provide the prepared result and targeted check steps. A chat summary or task-file link alone is not a handoff. User confirmation satisfies the remaining gate.
+2. **`reviewer: agent`:** move directly from `in-progress` to `done` only when every criterion is still eligible and has current concrete evidence. Required checks must pass. Missing or stale objective proof keeps work active or blocked; a real user-only requirement changes the reviewer. Report the result and evidence without redundant confirmation.
 
 A valid `done` task is archived as the whole directory under `tasks/done/<task-id>/` and the journal receives a compact record. Cancellation also preserves the whole workspace. Never overwrite an archive destination; workspace-relative attachment links survive the move. Praise, questions, silence, or manual task-file edits never remove a user review gate.
 

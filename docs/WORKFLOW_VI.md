@@ -300,11 +300,13 @@ Artifact tuân theo chính sách riêng tư, lưu trữ và Git của dự án d
 
 ### Reviewer khi hoàn tất
 
-Mỗi task mới ghi `reviewer: user | agent`.
+Mỗi task ghi `reviewer: user | agent`.
 
-Dùng `user` khi bất kỳ tiêu chí nào là user-visible hoặc mang tính product/chủ quan (ví dụ visual/UX, typography, animation, copy hoặc tone), cần môi trường external/device/account/deployment do user sở hữu, được giao rõ cho user, trộn nghiệm thu của user với máy, hoặc còn mơ hồ. Chỉ dùng `agent` khi toàn bộ tiêu chí đều khách quan, tái lập được, agent quan sát trực tiếp được và có bằng chứng cụ thể như test, reproduction, benchmark, build, static check hoặc artifact xác định. Có test không tự chuyển quyền review từ user sang agent.
+Phân loại theo quyết định hoặc quan sát cần có, không dựa vào việc kết quả có hiển thị cho user hay không. Dùng `user` khi cần đánh giá chủ quan, môi trường bắt buộc mà agent không thể kiểm tra qua công cụ được phép, quyền phê duyệt được giao rõ cho con người, hoặc trộn nghiệm thu của user với máy. Nếu quyền nghiệm thu chưa rõ, giữ `user` và làm rõ phần còn thiếu. Dùng `agent` khi mọi tiêu chí đều khách quan, tái lập được, quan sát trực tiếp được và có thể kiểm chứng bằng bằng chứng cụ thể, đồng thời không có cổng phê duyệt của con người. Ví dụ, chứng minh nút submit được mở lại sau request lỗi có thể do agent nghiệm thu; quyết định câu chữ mới có tạo cảm giác yên tâm hay không thuộc user.
 
-Phân loại theo hướng bảo thủ: task cũ thiếu reviewer được xem là `user`; agent được phép nâng `agent → user` khi xuất hiện tiêu chí mới; sau khi đã bắt đầu execution, agent không được tự hạ `user → agent` nếu chưa có user phê duyệt rõ ràng và kiểm lại toàn bộ điều kiện.
+Ghi lý do và nguồn của việc chọn reviewer. Không thêm tiêu chí chung chung "user xác nhận chạy đúng" hoặc yêu cầu user lặp lại QA đã có bằng chứng. Kiểm tra khách quan chưa hoàn tất vẫn là việc của agent và giữ task active hoặc blocked. Test không thay thế đánh giá chủ quan hay quyền phê duyệt rõ ràng.
+
+Trước khi đóng và khi tiêu chí thay đổi, đối chiếu reviewer với yêu cầu nghiệm thu; ghi thay đổi cùng nguồn yêu cầu. Chỉ bên sở hữu quyền phê duyệt rõ ràng mới được thay đổi yêu cầu đó. Startup chỉ định hướng, checkpoint và doctor báo trạng thái task mà không đổi quyền nghiệm thu.
 
 ### State machine
 
@@ -322,7 +324,7 @@ bất kỳ trạng thái nào ── user hủy ──▶ cancelled
 `planning` và `awaiting-review` là hai trạng thái khóa việc sửa source:
 
 - Ở `planning`, agent có thể chỉnh `TASK.md` và giữ ghi chú, input được cung cấp hoặc bằng chứng chỉ đọc cần thiết. Không được triển khai, kể cả bên trong `artifacts/`.
-- Ở `awaiting-review`, agent giữ nguyên implementation và bằng chứng trong lúc chờ bề mặt review cụ thể của user. Trạng thái này chỉ dành cho `reviewer: user` (và task cũ chưa có reviewer).
+- Ở `awaiting-review`, agent giữ nguyên implementation và bằng chứng trong lúc chờ bề mặt review cụ thể của user. Trạng thái này chỉ dành cho `reviewer: user`.
 - Khi user báo vấn đề, task được mở lại và quay về `in-progress`.
 
 ### Phê duyệt và hoàn tất
@@ -333,8 +335,8 @@ Xác định ý định thực thi từ message hiện tại trước, rồi m�
 
 Đóng task phụ thuộc vào reviewer đã ghi:
 
-1. **`reviewer: user`:** sau khi toàn bộ phần agent tự kiểm được đã pass, status chuyển thành `awaiting-review`. Agent phải nêu chính xác bề mặt user-visible, chủ quan, external hoặc thuộc user vẫn cần nghiệm thu. User xác nhận thì task mới sang `done`.
-2. **`reviewer: agent`:** agent chỉ được chuyển thẳng `in-progress → done` khi mọi tiêu chí vẫn đủ điều kiện agent review và đều có bằng chứng cụ thể. Nếu bằng chứng thiếu, cũ, chưa chắc chắn, nằm ngoài khả năng quan sát, trộn với nghiệm thu user hoặc thuộc quyền user thì không được tự đóng; task phải tiếp tục active, chuyển blocked hoặc nâng thành `reviewer: user`.
+1. **`reviewer: user`:** hoàn tất mọi phần agent kiểm được, kể cả tình huống lỗi liên quan, rồi chuyển sang `awaiting-review`; chỉ để chưa đánh dấu những tiêu chí thực sự thuộc user. Đưa ra kết quả có thể review cùng cách truy cập, tóm tắt kiểm tra đã làm và giới hạn, rồi chỉ hỏi quyết định chủ quan, quan sát chưa thể thực hiện hoặc phê duyệt còn thiếu. Nếu chỉ user truy cập được môi trường cần thiết, cung cấp kết quả đã chuẩn bị và các bước kiểm tra cụ thể. Chỉ có tóm tắt chat hay đường dẫn task file thì chưa đủ bàn giao. User xác nhận sẽ đáp ứng cổng nghiệm thu còn lại.
+2. **`reviewer: agent`:** chỉ chuyển thẳng `in-progress → done` khi mọi tiêu chí vẫn đủ điều kiện và có bằng chứng cụ thể hiện hành. Các check bắt buộc phải pass. Thiếu hoặc cũ bằng chứng khách quan thì tiếp tục active hoặc blocked; tiêu chí thực sự cần user mới làm thay đổi reviewer. Báo kết quả và bằng chứng, không yêu cầu xác nhận dư thừa.
 
 Task `done` hợp lệ được archive nguyên thư mục vào `tasks/done/<task-id>/` và journal nhận một dòng lịch sử ngắn. Hủy task cũng giữ nguyên cả workspace. Không ghi đè đích archive; liên kết tương đối tới artifact vẫn hoạt động sau khi di chuyển. Lời khen, câu hỏi, im lặng hoặc việc user tự sửa task file không được coi là lý do bỏ cổng review của user.
 
