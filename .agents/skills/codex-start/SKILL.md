@@ -83,8 +83,8 @@ Do not infer execution from an orientation-only request. When the current reques
 
 Pick the most recently updated one. The exact prompt depends on its status and reviewer:
 
-- `awaiting-review` with `reviewer: user` or no legacy reviewer: a previous session finished the agent-verifiable work and is waiting for concrete user acceptance. Say:
-  > "Task `<slug>` is `awaiting-review` — it still has a user-owned review surface. Open `.claudart/tasks/<task-id>/TASK.md` to see exactly what remains to verify. Confirm to close, or tell me what didn't work and I'll flip it back to `in-progress`."
+- `awaiting-review` with `reviewer: user` or no legacy reviewer: report the recorded status without claiming metadata proves a user-only requirement. On explicit resume, read the task and present the reviewable result plus the specific outstanding acceptance under the completion contract. Apply its reviewer correction rules only when eligible; preserve legacy defaults and explicit gates. Do not ask the user to read `TASK.md` or repeat evidenced QA. For orientation only, say:
+  > "Task `<slug>` is recorded as awaiting user review. On resume, I'll check its acceptance record and show the result with any specific decision still needed."
 - `awaiting-review` with `reviewer: agent`: this is inconsistent state, not user approval debt. Say:
   > "Task `<slug>` is marked `reviewer: agent` but is parked at `awaiting-review`. That state should be reconciled from its recorded acceptance evidence rather than waiting for your sign-off. Tell me to resume it and I'll apply the reviewer-gated closeout contract."
 - `in-progress`: say:

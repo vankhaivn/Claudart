@@ -166,26 +166,45 @@ For a planning-only request, remain at `planning` and ask for one clear approval
 
 Every newly created task records `reviewer: user | agent` before implementation starts. This field names who owns **final acceptance**, not who implements the task. A legacy task with no `reviewer` is treated as `user`; readers must not silently backfill or reinterpret old work merely to make it auto-close.
 
-Classify from the acceptance criteria and the agent's actual observation boundary, not from implementation difficulty and not from the mere presence of tests.
+Classify from the required acceptance decision and the agent's actual observation boundary. User-visible output alone does not require user review. Objective UI behavior can be agent-reviewed under the same evidence threshold as other work.
 
-Use `reviewer: user` when **any** acceptance criterion needs the user's judgment, observation, or environment. This includes:
+Use `reviewer: user` when **any** acceptance criterion requires:
 
-- visual, UX, layout, typography, animation, audio, copy, wording, tone, or another user-visible/product-quality surface;
-- behavior that must be confirmed in a user-owned, external, real-device, real-account, deployment, or integration environment the agent cannot inspect directly;
-- an acceptance criterion explicitly assigned to the user or another user-selected approver;
-- a mixed case containing both agent-verifiable and user-only acceptance;
-- any ambiguous case where the agent cannot prove every acceptance criterion itself.
+- subjective judgment, such as whether a visual design, interaction, wording, tone, or product experience meets the user's preference;
+- an observation in a required external, real-device, real-account, deployment, or integration environment the agent cannot inspect through authorized tools;
+- approval explicitly reserved by the user, repository policy, or another applicable instruction for the user or a designated approver.
 
-Use `reviewer: agent` only when **all** acceptance criteria are objective, agent-observable, reproducible, and can be verified with concrete evidence such as targeted tests, before/after reproduction, benchmarks, builds, static checks, or deterministic artifacts. Automated tests are evidence, not permission: their existence alone never makes a task agent-reviewed.
+Mixed acceptance remains user-reviewed. If acceptance ownership is ambiguous, clarify the specific decision or observation needed; keep `user` until it is resolved. Missing objective verification alone is unfinished agent work: keep the task active or blocked, complete the checks available to the agent, and report any inaccessible requirement precisely.
 
-During planning, record the reviewer choice and one-sentence rationale in the Decision Log. Before closeout, re-evaluate it against the final acceptance criteria. Once execution has started:
+Use `reviewer: agent` only when **all** acceptance criteria are objective, agent-observable, reproducible, and can be verified with concrete evidence such as targeted tests, before/after reproduction, benchmarks, builds, static checks, or deterministic artifacts, with no explicit human approval gate. Automated tests are evidence, not permission: they never waive subjective acceptance or an explicit approval requirement.
 
-- the agent may conservatively escalate `agent → user` when new user-only, external, mixed, or ambiguous acceptance appears; record why before continuing;
-- the agent must **never** downgrade `user → agent` on its own. That change requires explicit user approval **and** a fresh check that every acceptance criterion is eligible for agent review;
-- adding or materially changing acceptance criteria requires reviewer re-evaluation before completion;
-- `reviewer: agent` never weakens validation, permits unchecked acceptance boxes, or bypasses repository-required checks.
+During planning, record the reviewer choice and its source in the Decision Log. For `user`, name the exact judgment, unavailable observation, or explicit approval requirement and where it comes from. Do not add a generic "user confirms it works" criterion or ask the user to repeat completed checks merely because the result is visible. Preserve the requested outcome and all substantive acceptance criteria.
 
-When in doubt, choose `user`.
+### Classification examples
+
+| Required acceptance                                                                          | Reviewer | Basis                                           |
+| -------------------------------------------------------------------------------------------- | -------- | ----------------------------------------------- |
+| A failed request releases the submit button and retry succeeds; the agent can reproduce both | `agent`  | Objective UI behavior with observable evidence  |
+| A heading matches supplied text exactly                                                      | `agent`  | Deterministic wording check                     |
+| The user must decide whether new copy feels reassuring                                       | `user`   | Subjective tone judgment                        |
+| Behavior must be confirmed on a device or account unavailable to the agent                   | `user`   | Required observation outside the agent's access |
+| The user explicitly requests final sign-off on an otherwise deterministic fix                | `user`   | Explicit approval ownership                     |
+| Tests pass, but the task also requires the user to choose the preferred layout               | `user`   | Mixed objective and subjective acceptance       |
+
+### Reviewer re-evaluation and correction
+
+Re-evaluate the reviewer before closeout and whenever acceptance materially changes. Escalate `agent → user` when a real user-only criterion appears and record its source. `reviewer: agent` never weakens validation, permits unchecked acceptance boxes, or bypasses repository-required checks.
+
+An agent-assigned `user` may be corrected to `agent` without another approval request **only if all of these hold**:
+
+- The recorded basis was a classification mistake: visibility alone or a generic confirmation invented by the agent, rather than a substantive user-only criterion.
+- No user instruction, repository policy, or designated approver reserved final approval. Passing tests, plan approval, and user silence do not cancel an explicit gate.
+- Every substantive acceptance criterion remains in scope, is eligible for agent review, and has current concrete evidence. An agent-invented confirmation checkbox may be replaced with its underlying objective check; it must not erase a real acceptance requirement.
+- Record the original classification basis, the correction reason, and the evidence for every criterion in the Decision Log before changing `reviewer`. Report the correction with the result; do not silently rewrite history.
+
+If the basis is missing or uncertain, retain `user` and clarify it. Legacy tasks with no reviewer are not eligible for this correction. Outside this correction, changing `user → agent` requires explicit user approval and a fresh eligibility check; any higher-scope gate still applies.
+
+Apply a correction while executing the task, or on an explicit resume of a parked task. For `awaiting-review`, record the correction and return to `in-progress` before applying the agent closeout path or making implementation edits. Orientation, checkpoint, and doctor do not perform this correction or change task state.
 
 ## Status State Machine
 
@@ -194,7 +213,7 @@ planning ──(user approves: "go" / "implement" / etc.)──▶ in-progress
 in-progress ──(reviewer: agent + all acceptance proven)──▶ done
 in-progress ──(reviewer: user + agent finishes validation)──▶ awaiting-review
 awaiting-review ──(user confirms: "approved" / "looks good")──▶ done
-awaiting-review ──(user reports a problem)──▶ in-progress
+awaiting-review ──(user reports a problem / eligible reviewer correction on resume)──▶ in-progress
 in-progress ──(external blocker)──▶ blocked
 blocked ──(blocker cleared)──▶ in-progress
 {planning, in-progress, awaiting-review, blocked} ──(user cancels)──▶ cancelled
@@ -224,9 +243,9 @@ The agent is drafting / awaiting approval to start.
 This state is only for `reviewer: user` tasks, including legacy tasks with no `reviewer`. The agent has reported implementation complete; the user has not yet verified the user-owned acceptance surface.
 
 - **Do NOT modify any code file.** The work is under user review; if changes are needed, the user will tell you, and you flip status back to `in-progress` first.
-- **Allowed**: refining the draft Outcomes & Retrospective in `TASK.md` based on user comments before they give the final signal. Preserve the evidence under review; do not silently replace artifacts or rerun implementation while parked.
+- **Allowed**: refining the draft Outcomes & Retrospective in `TASK.md` based on user comments, and recording an eligible reviewer correction on explicit resume under "Reviewer re-evaluation and correction." Preserve the evidence under review; do not silently replace artifacts or rerun implementation while parked.
 - If the user reports a problem or requests a code change, follow the "User reports a problem" flow in the Completion section — do not patch silently while still in awaiting-review.
-- If a task explicitly says `reviewer: agent` but is parked at `awaiting-review`, treat that as inconsistent state rather than asking the user for a meaningless confirmation. On an explicit resume, re-evaluate the reviewer and recorded evidence; return to `in-progress` before any implementation edit.
+- On an explicit resume, re-evaluate the reviewer and recorded evidence. Apply only an eligible correction under "Reviewer re-evaluation and correction"; a real user gate remains locked. An explicit `reviewer: agent` parked at `awaiting-review` is inconsistent state: reconcile it from the same eligibility and evidence checks, then return to `in-progress` before closeout or implementation edits.
 
 ### Knowledge-maintenance exception
 
@@ -273,21 +292,21 @@ Default discoveries to the task file. Promote one immediately only under the kno
 
 ## Completion — Reviewer-Gated Closeout
 
-All tasks use the same proof threshold: every Concrete Steps box and every Validation & Acceptance box must be checked truthfully, repository-required checks must pass or be reported as blocked, and the evidence needed to support those checks must be recorded. The `reviewer` field changes **who owns final acceptance**, not how much verification is required.
+All tasks use the same proof threshold for `done`: every Concrete Steps box and every Validation & Acceptance box must be checked truthfully, repository-required checks must pass, and the evidence needed to support those checks must be recorded. Required checks that cannot run keep the task active or blocked. At `awaiting-review`, only genuine user-owned acceptance remains unchecked. The `reviewer` field changes **who owns final acceptance**, not how much verification is required.
 
-Before either closeout path, re-evaluate the reviewer against the final acceptance criteria. If any criterion is user-visible/product-subjective, user-owned, externally unobservable, mixed, or ambiguous, the task is user-reviewed and must not self-close.
+Before either closeout path, apply "Completion Reviewer" to the final criteria and current evidence, including its narrowly defined correction path. Complete all agent-verifiable work, including relevant failure cases, before requesting user acceptance. Do not transfer unfinished agent verification to the user.
 
 ### User reviewer — agent reports complete (`in-progress → awaiting-review`)
 
 When `reviewer: user` (or the legacy field is missing) and the agent-verifiable work is complete:
 
-1. Fill **Outcomes & Retrospective** as a **draft**: what shipped, what's deferred, lessons, and exactly what the user still needs to verify.
+1. Fill **Outcomes & Retrospective** as a **draft**: what was delivered, what's deferred, the completed verification and its limits, and exactly what user-owned acceptance remains.
 2. Flip frontmatter `status: in-progress → awaiting-review`.
 3. Bump `updated:`.
-4. Report the concrete user review surface instead of a generic "please review." Name what remains observable by the user, such as rendered visuals, wording/tone, a real-device flow, an external environment, or product judgment.
+4. Present the actual reviewable result and how to access it (for example a preview, rendered artifact, document, or relevant change), summarize the checks already completed, and ask only for the specific unresolved judgment, observation, or reserved approval. If only the user can access the required environment, provide the prepared result and precise steps for that unavailable check. A chat summary or `TASK.md` link alone is not a review handoff; do not ask the user to repeat evidenced QA.
 5. **STOP.** Do NOT move the workspace, do NOT write to JOURNAL, and do NOT update Recently Done. Honor the Awaiting-Review Lock.
 
-If there is no concrete user review surface, re-check whether the task was classified correctly. Do not manufacture a ceremonial user gate.
+If there is no concrete user-owned acceptance, apply the reviewer correction rules before parking the task. Do not manufacture a ceremonial user gate.
 
 ### Agent reviewer — evidence closes the task (`in-progress → done`)
 
@@ -316,7 +335,7 @@ If the user reports something is wrong, do not defend the prior completion claim
 
 1. Append the user's report to **Surprises & Discoveries**, stamped with the current `(YYYY-MM-DD HH:MMZ)` UTC time, verbatim if useful.
 2. Un-check any Concrete Steps or Validation boxes disproved by the feedback, or add a new step when the gap is novel.
-3. Re-evaluate `reviewer`; user feedback never authorizes an automatic downgrade to `agent`.
+3. Re-evaluate `reviewer` against the reported problem. Feedback alone does not waive user acceptance; any correction must satisfy "Reviewer re-evaluation and correction."
 4. Flip frontmatter `status: awaiting-review → in-progress`.
 5. Bump `updated:` and address the issue.
 
@@ -337,13 +356,13 @@ After a valid transition to `done`:
 
 ## Approval Signal Cheat Sheet
 
-| Transition                               | What authorizes it                                                                       |
-| ---------------------------------------- | ---------------------------------------------------------------------------------------- |
-| `planning → in-progress`                 | "go", "approved", "implement", "do it", "ok làm đi", "start"                             |
-| `in-progress → done` (`reviewer: agent`) | The evidence-complete agent closeout contract above; no synthetic user signal            |
-| `awaiting-review → done`                 | "approved", "confirmed", "looks good", "close it", "done", "ship", "ok đóng", "merge it" |
-| `awaiting-review → in-progress`          | Any report of a problem — "didn't work", "broken", "missed X", "step Y is wrong"         |
-| `* → cancelled`                          | "cancel", "abandon", "drop this", "bỏ task"                                              |
+| Transition                               | What authorizes it                                                                                   |
+| ---------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `planning → in-progress`                 | "go", "approved", "implement", "do it", "ok làm đi", "start"                                         |
+| `in-progress → done` (`reviewer: agent`) | The evidence-complete agent closeout contract above; no synthetic user signal                        |
+| `awaiting-review → done`                 | "approved", "confirmed", "looks good", "close it", "done", "ship", "ok đóng", "merge it"             |
+| `awaiting-review → in-progress`          | A reported problem, or explicit resume plus an eligible reviewer correction under the contract above |
+| `* → cancelled`                          | "cancel", "abandon", "drop this", "bỏ task"                                                          |
 
 Explicit signals remain mandatory for planning approval, user-review completion, and cancellation. Agent-reviewed completion is permitted only by the recorded reviewer classification plus complete evidence. Enthusiasm ("great!", "nice plan"), questions, silence, or edits to the task file never change a user review gate.
 
@@ -403,7 +422,8 @@ So: a task's existence is signalled in CONTEXT by a pointer line. The task's con
 ## Anti-Patterns
 
 - **Persisting chat as Purpose.** Do not copy owner or agent conversation into `Purpose`; normalize the durable outcome and material constraints into self-contained documentation language.
-- **Agent auto-completing.** Flipping `status` directly from `in-progress` to `done`, moving the workspace to `done/`, writing to JOURNAL, or updating Recently Done in `index.md` without a user completion signal. The agent's job is to reach `awaiting-review` and stop.
+- **Closing without the required acceptance.** User-reviewed tasks stop at `awaiting-review` until their genuine user gate is satisfied; agent-reviewed tasks may close only under the evidence-complete closeout contract. Archive and journal only after a valid terminal transition.
+- **Inventing user acceptance.** Visibility, an agent-written confirmation checkbox, or unfinished agent checks do not establish a user-owned review requirement. Keep real approval gates and correct a mistaken reviewer only under the documented correction contract.
 - Editing code while `status: planning` or `status: awaiting-review`. Both states are read-only locks.
 - **Spawning write-scope subagents from a planning-locked task.** The lock forbids code edits, so any worker that writes must wait for `in-progress`; read-only exploration subagents are fine.
 - Treating user enthusiasm or silence as approval. The signals listed in the cheat sheet are explicit and required.

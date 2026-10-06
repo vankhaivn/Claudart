@@ -85,8 +85,22 @@ for layer in claude codex; do
     assert_contains "$file" 'mandatory repository checks' "$layer retains required verification"
     assert_contains "$file" 'forced session rotation' "$layer forbids spec-style ceremony"
     assert_contains "$file" 'reviewer: user # user | agent' "$layer task schema records the completion reviewer"
-    assert_contains "$file" 'When in doubt, choose `user`.' "$layer defaults ambiguous acceptance to user review"
-    assert_contains "$file" 'must **never** downgrade `user → agent` on its own' "$layer prevents silent reviewer downgrade"
+    assert_contains "$file" 'User-visible output alone does not require user review.' "$layer classifies acceptance rather than visibility"
+    assert_contains "$file" 'Missing objective verification alone is unfinished agent work' "$layer keeps objective verification with the agent"
+    assert_contains "$file" 'keep `user` until it is resolved' "$layer protects ambiguous acceptance ownership"
+    assert_contains "$file" 'they never waive subjective acceptance or an explicit approval requirement' "$layer protects human gates from test-only closeout"
+    assert_contains "$file" 'only if all of these hold' "$layer makes reviewer correction conditional"
+    assert_contains "$file" 'The recorded basis was a classification mistake' "$layer limits correction to mistaken agent assignments"
+    assert_contains "$file" 'No user instruction, repository policy, or designated approver reserved final approval' "$layer correction preserves explicit approval ownership"
+    assert_contains "$file" 'it must not erase a real acceptance requirement' "$layer correction preserves substantive acceptance"
+    assert_contains "$file" 'Record the original classification basis, the correction reason, and the evidence for every criterion' "$layer requires evidence and an auditable correction"
+    assert_contains "$file" 'If the basis is missing or uncertain, retain `user`' "$layer prevents speculative reviewer correction"
+    assert_contains "$file" 'Legacy tasks with no reviewer are not eligible for this correction.' "$layer preserves legacy user review"
+    assert_contains "$file" 'Orientation, checkpoint, and doctor do not perform this correction or change task state.' "$layer restricts correction to task execution or explicit resume"
+    assert_contains "$file" 'return to `in-progress` before applying the agent closeout path or making implementation edits' "$layer correction respects the review lock"
+    assert_contains "$file" 'Present the actual reviewable result and how to access it' "$layer requires a concrete review handoff"
+    assert_contains "$file" 'Do not transfer unfinished agent verification to the user.' "$layer keeps agent checks out of user acceptance"
+    assert_contains "$file" 'User-reviewed tasks stop at `awaiting-review` until their genuine user gate is satisfied; agent-reviewed tasks may close only under the evidence-complete closeout contract.' "$layer anti-patterns agree with both closeout paths"
     assert_contains "$file" 'reviewer: agent + all acceptance proven' "$layer permits evidence-backed agent closeout"
     assert_contains "$file" 'reviewer: user + agent finishes validation' "$layer preserves the user review gate"
     assert_contains "$file" 'agent-facing durable execution record, not the default user-facing presentation' "$layer separates agent task storage from user presentation"
@@ -113,6 +127,8 @@ for layer in claude codex; do
   assert_contains "$plan" 'File count alone is not a reason.' "$layer avoids unnecessary planning"
   assert_contains "$plan" 'resumption or review flow' "$layer resumes without resetting state"
   assert_contains "$plan" 'Classify the completion reviewer before the plan is ready' "$layer plan classifies reviewer before implementation"
+  assert_contains "$plan" 'Visibility alone is not a user review requirement.' "$layer plan uses criterion-based review ownership"
+  assert_contains "$plan" 'apply the canonical reviewer correction contract when eligible' "$layer plan routes correction to the canonical contract"
   assert_contains "$plan" '**User Plan Brief**' "$layer plan presents a compact user-facing brief"
   assert_contains "$plan" 'Do not paste the task file and do not tell the user to open or review `TASK.md`' "$layer plan does not outsource comprehension to the user"
   assert_contains "$plan" '**Current state**' "$layer plan brief explains the current state"
@@ -124,6 +140,8 @@ for layer in claude codex; do
   assert_contains "$start" 'Read `TASK.md` frontmatter' "$layer startup reads metadata only"
   assert_contains "$start" 'Do not read task bodies or artifact contents' "$layer startup does not slurp workspaces"
   assert_contains "$start" 'reviewer: agent' "$layer startup recognizes inconsistent agent-review parking"
+  assert_contains "$start" 'report the recorded status without claiming metadata proves a user-only requirement' "$layer startup does not infer acceptance from a label"
+  assert_contains "$start" 'present the reviewable result plus the specific outstanding acceptance' "$layer startup owns the resumed review handoff"
   assert_contains "$checkpoint" 'tasks/done/*/TASK.md' "$layer checkpoint recognizes directory archives"
   assert_contains "$checkpoint" 'Move the entire workspace' "$layer checkpoint preserves attachments"
   assert_contains "$checkpoint" 'Repair knowledge `sources` that point into the moved workspace' "$layer checkpoint archive keeps knowledge sources resolvable"
@@ -131,6 +149,7 @@ for layer in claude codex; do
   assert_contains "$checkpoint" 'missing legacy `reviewer` is treated as `user`' "$layer checkpoint keeps legacy tasks user-reviewed"
   assert_contains "$checkpoint" 'checkpoint never creates supporting files' "$layer checkpoint does not manufacture artifacts"
   assert_contains "$doctor" 'Validate `reviewer` as `user | agent` when present.' "$layer doctor validates reviewer metadata"
+  assert_contains "$doctor" 'any reviewer correction belongs to explicit task resumption under task-management, not doctor' "$layer doctor leaves reviewer changes to task resumption"
   assert_contains "$doctor" 'Missing `artifacts/` or `### Workspace Files` is normal' "$layer doctor accepts the minimal workspace"
   assert_contains "$doctor" 'Do not read artifact bodies' "$layer doctor checks links without processing payloads"
   assert_contains "$doctor" '`None.` is valid' "$layer doctor does not demand filler"
@@ -146,23 +165,53 @@ for layer in claude codex; do
   assert_not_contains "$seed" '](' "$layer ships no live task in its dashboard"
 done
 
-# Both mirrors must retain the same semantic artifact contract. This section is
-# intentionally runtime-neutral; harness-specific policy remains elsewhere.
+# These runtime-neutral sections must agree in both installed adapters.
+for section in 'Artifact Discipline' 'Completion Reviewer' 'Status State Machine'; do
+  for layer in claude codex; do
+    if [ "$layer" = claude ]; then
+      rule="$REPO_ROOT/.claude/rules/task-management.md"
+    else
+      rule="$REPO_ROOT/.codex/guidelines/task-management.md"
+    fi
+    awk -v heading="## $section" '$0==heading{capture=1; next} capture && /^## /{exit} capture{print}' \
+      "$rule" > "$TMP_ROOT/$layer-contract"
+  done
+  if [ -s "$TMP_ROOT/claude-contract" ] && \
+     cmp -s "$TMP_ROOT/claude-contract" "$TMP_ROOT/codex-contract"; then
+    pass "Claude and Codex agree on $section"
+  else
+    fail "Claude and Codex agree on $section"
+  fi
+done
+
+# Check the documented decision examples, not a test-only classifier or agent.
+# Expected owners cover objective UI/text, subjective, inaccessible, explicit,
+# and mixed acceptance; table whitespace is only Markdown formatting.
 for layer in claude codex; do
   if [ "$layer" = claude ]; then
     rule="$REPO_ROOT/.claude/rules/task-management.md"
   else
     rule="$REPO_ROOT/.codex/guidelines/task-management.md"
   fi
-  awk '/^## Artifact Discipline$/{capture=1; next} capture && /^## /{exit} capture{print}' \
-    "$rule" > "$TMP_ROOT/$layer-artifact-contract"
+  while IFS='|' read -r criterion reviewer; do
+    if awk -F '|' -v criterion="$criterion" -v reviewer="\`$reviewer\`" '
+      { for (i=2; i<=3; i++) { gsub(/^[[:space:]]+|[[:space:]]+$/, "", $i) } }
+      $2==criterion && $3==reviewer { found++ }
+      END { exit found != 1 }
+    ' "$rule"; then
+      pass "$layer documents $reviewer review for: $criterion"
+    else
+      fail "$layer documents $reviewer review for: $criterion"
+    fi
+  done <<'CASES'
+A failed request releases the submit button and retry succeeds; the agent can reproduce both|agent
+A heading matches supplied text exactly|agent
+The user must decide whether new copy feels reassuring|user
+Behavior must be confirmed on a device or account unavailable to the agent|user
+The user explicitly requests final sign-off on an otherwise deterministic fix|user
+Tests pass, but the task also requires the user to choose the preferred layout|user
+CASES
 done
-if [ -s "$TMP_ROOT/claude-artifact-contract" ] && \
-   cmp -s "$TMP_ROOT/claude-artifact-contract" "$TMP_ROOT/codex-artifact-contract"; then
-  pass "Claude and Codex artifact contracts agree"
-else
-  fail "Claude and Codex artifact contracts agree"
-fi
 
 assert_contains "$REPO_ROOT/package.json" 'npm run test:task-workspaces' "repository check invokes this suite"
 for file in "$REPO_ROOT/README.md" "$REPO_ROOT/README_VI.md" \
