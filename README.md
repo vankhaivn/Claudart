@@ -2,146 +2,83 @@
 
 [Tiếng Việt](README_VI.md) · [Workflow guide](docs/WORKFLOW.md)
 
-CLAUDART is a repository-local workflow for Claude Code and Codex. It keeps session state, implementation plans, project knowledge, and agent instructions in versioned Markdown files alongside the code.
+CLAUDART gives Claude Code and Codex a memory that lives in your repository. Current state, plans, project knowledge, and agent instructions are plain Markdown files, versioned with your code. A new session picks up where the last one stopped.
 
-Claude Code and Codex have separate runtime adapters and share one project-state directory, `.claudart/`. Install either adapter or both. CLAUDART does not require a database, daemon, or hosted service.
+It works with Claude Code, Codex, or both. Both tools share one state folder, `.claudart/`. There is no database, daemon, or hosted service.
 
-## What it adds
+## What you get
 
-- **Session orientation:** start a new session from current state, active work, project knowledge, and recent Git history.
-- **Persistent plans:** keep a resumable `TASK.md` in a lightweight task workspace, with supporting files only when needed.
-- **Large-work specifications:** define and execute work that spans several tasks or sessions under one approved specification.
-- **Project knowledge:** store durable facts separately from behavioral rules and temporary work state.
-- **Session handoff:** preserve an unfinished investigation when the context window is nearly full.
-- **Maintenance tools:** check and normalize the memory structure without introducing a separate service.
-- **On-demand specialists:** use focused agents for code health, security review, and visual review only when requested.
+- **Session start:** `/start` gives the agent the current state, open work, and recent Git history.
+- **Plans that survive:** a task keeps its plan and decisions in one `TASK.md`, so work can resume tomorrow.
+- **Specs for big work:** approve a multi-phase mission once, then let the agent run it to final review.
+- **Project knowledge:** durable facts about the project, kept apart from rules and from temporary work.
+- **Owner profile:** how you like to work, recorded when you correct the agent.
+- **Health checks:** a read-only checker for the memory structure.
 
-## Installation
+## Install
 
-### New project
-
-The default installation adds the Claude Code layer:
+New project, Claude Code layer (default):
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash
 ```
 
-Choose a layer explicitly when needed:
+Add a flag after `bash -s --` to choose what to install:
+
+| Flag             | Installs                                                       |
+| ---------------- | -------------------------------------------------------------- |
+| `--claude`       | Claude Code layer (default)                                    |
+| `--codex`        | Codex layer                                                    |
+| `--both`         | Both layers                                                    |
+| `--project-docs` | Optional [Project Docs](modules/project-docs/README.md) module |
 
 ```bash
-# Claude Code
-curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --claude
-
-# Codex
-curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --codex
-
-# Both
 curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --both
-
-# Add the optional Project Docs module to the selected layer or layers
-curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --claude --project-docs
 ```
 
-Every installation seeds `.claudart/` once and installs the selected adapters. The installer copies missing files and preserves existing project state. The default installation contains only the core layer; `--project-docs` adds the optional documentation-lifecycle command or skill and its references. It never creates or migrates your project documentation. `--force` refreshes adapter payload only; existing shared state and the Codex root loader remain untouched. Reconcile customized instructions with `INTEGRATE.md`.
+The installer only adds missing files and never touches existing project state.
 
-Project Docs includes [output templates and filled examples](modules/project-docs/README.md#output-templates-and-examples) for product scope, behavior, architecture, development, and operations, linked by a small documentation router. Use only the responsibilities that need an owner; existing docs and knowledge can retain theirs. Templates adapt to local use, `main` latest, continuous deployment, or formal team releases; they preserve actual requirements without imposing a production-readiness process.
-
-A clean Codex installation adds `.claudart/`, `.codex/`, `.agents/skills/`, and a root `AGENTS.md`. The source template is stored at `.codex/AGENTS.md` in this repository.
-
-### Existing project or existing CLAUDART installation
-
-Do not use the installer as a merge tool. It can copy or overwrite files, but it does not reconcile custom instructions, live state, tasks, specifications, or project knowledge.
-
-Ask your coding agent to follow the integration protocol instead:
+**Already have CLAUDART or custom agent instructions?** Don't run the installer over them. Ask your agent instead:
 
 > Read https://raw.githubusercontent.com/vankhaivn/Claudart/main/INTEGRATE.md and follow it to integrate or update CLAUDART in this project. Preserve project-specific content and show me the proposed changes before writing them.
 
-The protocol compares the current project with the current `main` branch and separates stale CLAUDART files from project-authored customizations. It also identifies relevant optional modules and explains recommendations in the proposed plan. You do not need to know their names in advance; a module is installed only if you include it in the approved plan. Installing Project Docs does not automatically reorganize existing docs or knowledge.
+The agent shows you a plan and waits for your approval before writing anything.
 
-### First run
+## Daily use
 
-Begin a normal session with `/start` or `$codex-start`. Integration follows the bounded verification in [INTEGRATE.md](INTEGRATE.md); a full doctor or memory refactor is conditional on findings or your request.
+| You want to                        | Claude Code        | Codex                    |
+| ---------------------------------- | ------------------ | ------------------------ |
+| Start a session                    | `/start`           | `$codex-start`           |
+| Plan work that should survive      | `/plan <task>`     | `$codex-plan <task>`     |
+| Define a large, multi-session job  | `/spec <mission>`  | `$codex-spec <mission>`  |
+| Run an approved spec               | `/spec-run <slug>` | `$codex-spec-run <slug>` |
+| Save state at a stopping point     | `/checkpoint`      | `$codex-checkpoint`      |
+| Pause a hard investigation mid-way | `/handoff`         | `$codex-handoff`         |
+| Turn a repeated lesson into a rule | `/learn`           | `$codex-learn`           |
+| Check the installation             | `/doctor`          | `$codex-doctor`          |
 
-For a health audit, `/doctor` or `$codex-doctor` runs `doctor-check.sh` once, then reviews meaning and workflow consistency. The helper checks structure, metadata, explicit local references and size limits, and includes the existing knowledge checker. Link targets may be code or docs anywhere in the repository; additional Markdown sources are opt-in. See the [checker usage and limits](.codex/references/doctor-check.md). It is read-only and requires Bash 3.2 plus standard utilities, with no package installation.
+Small, clear edits need no command at all; just ask. See the [workflow guide](docs/WORKFLOW.md) for when to use a task or a spec.
 
-## Daily workflow
+## Where things live
 
-| Purpose                                           | Claude Code        | Codex                    |
-| ------------------------------------------------- | ------------------ | ------------------------ |
-| Orient a session                                  | `/start`           | `$codex-start`           |
-| Create a persistent implementation plan           | `/plan <task>`     | `$codex-plan <task>`     |
-| Define large, multi-session work                  | `/spec <mission>`  | `$codex-spec <mission>`  |
-| Execute an approved specification                 | `/spec-run <slug>` | `$codex-spec-run <slug>` |
-| Preserve an unfinished investigation              | `/handoff`         | `$codex-handoff`         |
-| Rebuild current state at a natural stopping point | `/checkpoint`      | `$codex-checkpoint`      |
-| Turn recurring behavior into a rule               | `/learn`           | `$codex-learn`           |
-| Check the installation                            | `/doctor`          | `$codex-doctor`          |
-| Maintain current project documentation (optional) | `/project-docs`    | `$codex-project-docs`    |
+| File or folder         | Holds                                   |
+| ---------------------- | --------------------------------------- |
+| `.claudart/CONTEXT.md` | What is true right now                  |
+| `.claudart/OWNER.md`   | How you want the agent to work with you |
+| `.claudart/knowledge/` | Durable facts about the project         |
+| `.claudart/tasks/`     | Task plans                              |
+| `.claudart/specs/`     | Large-work specifications               |
+| `.claude/`, `.codex/`  | Agent rules, commands, and scripts      |
 
-Use a task plan when meaningful decisions, coordination, interruption, or review need persistence, or when explicitly requested. Small, clear edits do not require a workspace; file count alone is not a trigger. Use a specification for mission-scale scope with shared approved intent and a multi-phase roadmap—not merely because a task needs an image, JSON, or an archive.
-
-A task starts as `.claudart/tasks/YYYY-MM-DD-NNN-<slug>/TASK.md`, shared by both runtimes. `TASK.md` is the only required file. Create `artifacts/` only for a concrete native-format input/output, necessary retained evidence, or substantial task-local research; short findings stay inline. There is no mandatory POC, ledger, repeated review loop, or session rotation. Each task records `reviewer: user | agent`. User-reviewed work stops at `awaiting-review` for subjective judgment, required observations unavailable to the agent, or explicit human approval; agent-reviewed work, including objective UI fixes, may close from complete evidence. Visibility alone does not require user review. Ambiguous or mixed ownership stays user-reviewed. A human-review handoff includes the actual result and the specific decision still needed. On valid closure, archive the whole directory. Task discovery uses this workspace layout only. When a plan is ready, the agent summarizes the current state, desired outcome, plain-language steps, and review responsibility in the conversation; `TASK.md` remains the agent-facing execution reference rather than homework for the user.
-
-An explicit instruction to implement or resume carries through planning without a second approval prompt. Planning-only requests remain read-only. User-reviewed final closure still needs user confirmation; agent-reviewed closure requires every acceptance criterion to be objectively proven and never substitutes tests for a user-owned review surface. An approved spec can transfer to its runner in the same session when execution was requested; session rotation is optional.
-
-## How state is organized
-
-| Location                  | Purpose                                         | Loading behavior                                                           |
-| ------------------------- | ----------------------------------------------- | -------------------------------------------------------------------------- |
-| `.claudart/CONTEXT.md`    | Current project and work state                  | Read at session start; rewritten by checkpoint                             |
-| `.claudart/OWNER.md`      | How to work with the project owner              | Loaded every session; updated when the owner corrects or sets a preference |
-| `.claudart/JOURNAL.md`    | Retired history                                 | Append-only; not loaded automatically                                      |
-| `rules/` or `guidelines/` | Prescriptive instructions for agent behavior    | Loaded when applicable                                                     |
-| `.claudart/knowledge/`    | Durable descriptive facts about the project     | Routed through `INDEX.md`; details loaded on demand                        |
-| `.claudart/tasks/`        | Persistent implementation plans                 | Metadata at start; selected `TASK.md` and needed files on resume           |
-| `.claudart/specs/`        | Large-work specifications and execution records | Read when a specification is active                                        |
-| `.claudart/HANDOFF.md`    | One-session reasoning handoff                   | Consumed by the next start, then removed                                   |
-
-The important boundary is simple: **rules say how the agent should work; the owner profile says how this project's owner wants to work with it; knowledge records facts with no better current owner; tasks and specifications record work in progress.** When source, schema, generated reference, or a project document already owns a fact, knowledge keeps a concise route instead of a competing copy.
-
-Both adapters read and write the same `.claudart/` state. Switching runtimes preserves task/spec scope, approvals, evidence and final-review gates; `agent` metadata records provenance rather than selecting a store or granting permission. Use the actual host's tools and adapter instructions.
-
-Shared files support sequential handoff, not automatic multi-writer synchronization. Coordinate writes to summaries, indexes and the handoff slot; checkpoint preserves unrelated unresolved work and an unconsumed handoff is never silently replaced. Separate checkouts still follow the project's Git and collaboration policy.
-
-Workflow rules load when needed. Claude's source template lives at `.claude/CLAUDE.md`, while installed projects use root `CLAUDE.md` and resolve adapter imports through `.claude/`; knowledge-maintenance detail lives in `references/`. The optional Project Docs module is used for lifecycle requests or when a change affects current documentation it owns; it does not run a full audit at start, checkpoint, or after an ordinary minor edit. Retrieval does not load mutation schemas.
-
-Specs keep approved intent in SPEC, execution state and acceptance gaps in ROADMAP, observed evidence in LEDGER, and unresolved reasoning in NOTES. Resume reads global constraints and the contract inventory, then the relevant task and evidence; missing references or legacy layouts require broader inspection. Drafting covers the supported first-use path, and runners reconcile due coverage before expensive tests using the existing verification plan. These rules replace duplicate work; they add no mandatory reports, approval rounds or fine-grained evidence cache, and do not claim a measured speedup.
-
-## Specialized agents
-
-These agents never run automatically.
-
-| Agent               | Role                                                                                                                    |
-| ------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| Clean-code reviewer | Makes a scoped, behavior-preserving code-health improvement and validates it. A review-only request keeps it read-only. |
-| Security auditor    | Performs a read-only, evidence-based security audit and writes a report.                                                |
-| UI visual critic    | Reviews rendered UI or visual output on explicit request.                                                               |
-
-The parent agent remains responsible for scope, integration, and validation of delegated work.
-
-## Developing CLAUDART
-
-This repository uses Prettier for Markdown and Bash-based checks for the installer, knowledge contract, task workspaces, and specification workflow.
+## Contributing
 
 ```bash
 npm ci
 npm run check
 ```
 
-To use the repository's pre-commit hook:
-
-```bash
-npm run hooks:install
-```
-
-## Documentation
-
-- [Workflow guide](docs/WORKFLOW.md)
-- [Vietnamese workflow guide](docs/WORKFLOW_VI.md)
-- [Project Docs module](modules/project-docs/README.md)
-- [Integration and upgrade protocol](INTEGRATE.md)
-- [Contributing](CONTRIBUTING.md)
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
-CLAUDART is available under the [MIT License](LICENSE).
+[MIT](LICENSE)
