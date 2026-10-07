@@ -598,6 +598,45 @@ try {
       /gpt-\d+(?:\.\d+)?-(?:luna|sol|astra)/i,
     );
   });
+  check("ordinary delegation dispatch and reuse contracts stay aligned", () => {
+    const dispatchContracts = [];
+    for (const directory of [".claude/rules", ".codex/guidelines"]) {
+      const delegation = read(join(root, directory, "agent-delegation.md"));
+      assert.match(
+        delegation,
+        /Before each ordinary spawn, and before a resume or follow-up introduces a new or materially changed unit/,
+      );
+      const dispatch = /^## Dispatch and reuse\n([\s\S]*?)(?=^## )/m.exec(
+        delegation,
+      );
+      assert(dispatch, `Missing dispatch contract: ${directory}`);
+      dispatchContracts.push(dispatch[1].trim());
+      assert.match(
+        dispatch[1],
+        /unit → difficulty class → selected model and reasoning effort where supported → reason/,
+      );
+      assert.match(dispatch[1], /Omitting them selects inheritance/);
+      assert.match(dispatch[1], /If the tool cannot change the profile/);
+      assert.match(
+        dispatch[1],
+        /Status checks, clarification and continuation of the unchanged unit reuse its decision/,
+      );
+      assert.match(
+        dispatch[1],
+        /no new planning file or user approval round-trip is required/,
+      );
+      assert.match(
+        delegation,
+        /before dispatch[\s\S]*?routing decision, worker, expected output, and integration location/,
+      );
+      const workflow = read(join(root, directory, "spec-workflow.md"));
+      assert.match(
+        workflow,
+        /Before authorized delegation, record the routing decision required by `agent-delegation\.md`/,
+      );
+    }
+    assert.equal(dispatchContracts[0], dispatchContracts[1]);
+  });
   check("Git workflow defaults to scoped local commits under higher policy", () => {
     const claudeGit = read(join(root, ".claude/rules/git-workflow.md"));
     const codexGit = read(join(root, ".codex/guidelines/git-workflow.md"));

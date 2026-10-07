@@ -15,7 +15,7 @@ The routing policy below applies to ordinary general-purpose delegates. Named pr
 
 Role selection and execution-profile selection are separate decisions. `explorer`, `worker`, and `default` describe **what** the delegate does; the delegated unit's difficulty determines **which model and reasoning effort** should do it. This section applies only to ordinary built-in delegation. Named project specialists under `.codex/agents/` keep their existing model/reasoning policy and must not be silently down-routed by this guideline.
 
-Before each ordinary spawn, classify the delegated unit by its ambiguity, breadth, consequence of a wrong answer, and difficulty of verification. Choose the lowest class that is likely to complete the unit reliably:
+Before each ordinary spawn, and before a resume or follow-up introduces a new or materially changed unit, classify the delegated unit by its ambiguity, breadth, consequence of a wrong answer, and difficulty of verification. Choose the lowest class that is likely to complete the unit reliably:
 
 | Class      | Typical delegated unit                                                                                                    | Ideal Codex profile |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------- |
@@ -43,6 +43,14 @@ The **parent session's selected model and reasoning effort are hard ceilings for
 - Do not rewrite the project's intentional custom-agent model definitions to implement this policy.
 
 The classes are routing options, not a mandatory retry ladder. Choose the appropriate class upfront. Before retrying a wrong or partial result, distinguish missing context, unclear scope, or tooling failure from a capability limit. Allow at most one delegated retry per unit across agents and profiles, with a corrected prompt or changed hypothesis; evidence of a capability limit may justify skipping classes **within the same model and reasoning ceilings**. A retry is optional: the parent may take over immediately and must take over after a failed retry, reporting blockers it cannot resolve.
+
+## Dispatch and reuse
+
+Before dispatching an ordinary delegated unit, record one concise routing decision: **unit → difficulty class → selected model and reasoning effort where supported → reason**. Name the concrete profile, including an inherited profile, and apply the current parent ceilings. Keep this decision in the existing work record or session/tool state as described under Recovery and knowledge; no new planning file or user approval round-trip is required.
+
+- **Explicit selection:** populate the supported profile arguments from the routing decision. Omitting them selects inheritance; verify that the inherited profile matches the decision and explain why it fits this unit. Missing or uncertain profile information is a reason to work locally or use a known suitable profile within the ceilings, not to accept an unchecked default.
+- **New work for an existing agent:** reassess its profile before a resume or follow-up changes the unit. Existing context alone does not justify retaining a stronger profile. If the tool cannot change the profile, give a bounded handoff to a suitable new delegate or handle the unit locally. Retain a stronger profile only for a concrete benefit to this unit within the current ceilings, recorded in the routing decision. Status checks, clarification and continuation of the unchanged unit reuse its decision.
+- **Observed profile:** when the runtime exposes the resolved profile, compare it with the decision. Resolve a mismatch before sending further work; stop an active delegate whose profile exceeds the authorized ceilings. When the resolved profile is unavailable, record only the requested or documented inherited profile, without claiming runtime verification.
 
 ## Decomposition and ownership
 
@@ -86,7 +94,7 @@ Provide the smallest context that preserves the relevant contracts and evidence;
 
 ## Recovery and knowledge
 
-For long-running work with an authorized task/spec workspace, record outstanding delegations at spawn time in its existing recovery surface (task notes or spec LEDGER): unit, worker, selected profile when relevant, expected output, and integration location. Mark results consumed. For a read-only or one-off task without authorized persistent state, retain that information in session/tool state and report it if handing off; delegation alone does not permit writing CONTEXT or canonical knowledge.
+For long-running work with an authorized task/spec workspace, record outstanding delegations before dispatch in its existing recovery surface (task notes or spec LEDGER): routing decision, worker, expected output, and integration location. Update the decision when the unit or profile changes; mark results consumed. For a read-only or one-off task without authorized persistent state, retain that information in session/tool state and report it if handing off; delegation alone does not permit writing CONTEXT or canonical knowledge.
 
 For retrospectives, record significant coordination incidents, such as costly rework or a capability-driven escalation/takeover, in the existing authorized work surface or handoff: affected unit/profile, evidence, and corrective action. Do not require a retrospective report for every spawn. Use repeated evidence of capability limits to route similar units higher within the ceilings; do not turn an isolated failure into a global judgment about a model.
 
