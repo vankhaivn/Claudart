@@ -21,10 +21,12 @@ This rule is the root contract for retrieval and classification. Routine `/start
 
 1. Read `.claudart/knowledge/INDEX.md`.
 2. Follow at most 2 relevant `_maps/*.md` routes.
-3. Select at most 3 direct topics using exact slug/name/alias first, then typed scope, triggers, description/type, and source match.
+3. Select at most 3 direct topics using exact slug/name/alias first, then typed scope, triggers, description/type, and source match. Match aliases and triggers with one bounded search across all topic frontmatter, not only the topics the followed maps list.
 4. For each topic, inspect frontmatter and the heading outline, then read the smallest relevant section. Read the full body only when the task needs the whole invariant or the smaller view is insufficient.
 5. Expand at most 2 one-hop `related` topics. Do not recurse through the graph.
 6. Treat `review-needed`, conflicting, superseded, or retired material as context to verify, not current authority. Treat entries under a topic's `## Point-in-time observations` heading the same way, whatever the topic status.
+
+A request with independent parts routes each part; these budgets apply per part.
 
 If routed context is insufficient, search actual repository evidence with bounded `rg` and Git queries across canonical sources, knowledge, task/spec archives, and targeted JOURNAL lines. Return file/section evidence and distinguish source text from inference. There is no recall command.
 
