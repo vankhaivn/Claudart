@@ -102,7 +102,7 @@ Surface the Next-Session line (or the micro-handoff's label and its `Next:` step
 
 Ask plainly:
 
-> "No active task or session handoff found. What would you like to tackle? If it's non-trivial or multi-session, I can run `$cda-plan <description>` to create a lightweight task workspace with TASK.md only unless supporting material is actually needed."
+> "No active task or session handoff found. What would you like to tackle? If it's non-trivial or multi-session, I can run `$cda-task <description>` to create a lightweight task workspace with TASK.md only unless supporting material is actually needed."
 
 ## Notes
 

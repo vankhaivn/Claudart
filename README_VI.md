@@ -44,14 +44,14 @@ Installer chỉ thêm file còn thiếu và không bao giờ đụng vào trạn
 
 Agent sẽ đưa bạn xem kế hoạch và chờ bạn duyệt rồi mới ghi file.
 
-Các workflow CLAUDART dùng chung tên `cda-` trên cả hai công cụ: gọi `/cda-plan` trong Claude Code hoặc `$cda-plan` trong Codex. Ký tự đầu là cú pháp riêng của runtime, không phải phần tên workflow.
+Các workflow CLAUDART dùng chung tên `cda-` trên cả hai công cụ: gọi `/cda-task` trong Claude Code hoặc `$cda-task` trong Codex. Ký tự đầu là cú pháp riêng của runtime, không phải phần tên workflow.
 
 ## Dùng hằng ngày
 
 | Bạn muốn                         | Claude Code            | Codex                  |
 | -------------------------------- | ---------------------- | ---------------------- |
 | Bắt đầu phiên                    | `/cda-start`           | `$cda-start`           |
-| Lập kế hoạch cần giữ lại         | `/cda-plan <task>`     | `$cda-plan <task>`     |
+| Lập kế hoạch cần giữ lại         | `/cda-task <task>`     | `$cda-task <task>`     |
 | Định nghĩa việc lớn, nhiều phiên | `/cda-spec <mission>`  | `$cda-spec <mission>`  |
 | Chạy spec đã duyệt               | `/cda-spec-run <slug>` | `$cda-spec-run <slug>` |
 | Lưu trạng thái khi tới điểm dừng | `/cda-checkpoint`      | `$cda-checkpoint`      |

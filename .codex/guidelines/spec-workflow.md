@@ -7,7 +7,7 @@ tags: [specs, loop-engineering, autonomy, cross-session, missions]
 
 # Spec Workflow (Loop Engineering)
 
-A **spec** is a mission that needs a frozen intent, a phased plan, standing approval and recovery across sessions. Use `$cda-plan` for bounded work whose decisions fit one task workspace; use `$cda-project-docs`, when installed, for an undefined project needing current documentation. A spec replaces the task layer for its scope: its executor never creates matching `.claudart/tasks/` work.
+A **spec** is a mission that needs a frozen intent, a phased plan, standing approval and recovery across sessions. Use `$cda-task` for bounded work whose decisions fit one task workspace; use `$cda-project-docs`, when installed, for an undefined project needing current documentation. A spec replaces the task layer for its scope: its executor never creates matching `.claudart/tasks/` work.
 
 Both runtimes use the same dated workspace under `.claudart/specs/`. Resume the same workspace regardless of its `agent` metadata; it records provenance, not ownership or permission. Changing runtimes preserves scope, approval, execution evidence and review gates. Serialize writes and re-read their owners before updating them.
 

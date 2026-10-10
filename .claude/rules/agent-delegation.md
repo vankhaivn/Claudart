@@ -61,7 +61,7 @@ Use the runtime's read-only exploration role for specific codebase questions and
 
 ## The task-file `delegation:` field records strategy, not permission
 
-The `/cda-plan` task-file field carries a plan into execution; it does not authorize execution or override runtime restrictions:
+The `/cda-task` task-file field carries a plan into execution; it does not authorize execution or override runtime restrictions:
 
 - **`none`** — no strategy recorded; use harness judgment when execution is authorized. It does not prohibit delegation.
 - **`strategy-only`** — use the recorded decomposition where it fits; no extra delegation approval round-trip.

@@ -154,7 +154,7 @@ try {
 
   check("both adapters expose the same cda- workflow names", () => {
     const actions = [
-      "start", "plan", "spec", "spec-run", "checkpoint", "handoff",
+      "start", "task", "spec", "spec-run", "checkpoint", "handoff",
       "learn", "doctor", "refactor-memory",
     ];
     for (const action of actions) {
