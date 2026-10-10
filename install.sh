@@ -50,6 +50,7 @@ OPTIONS
 
 SHARED PROJECT STATE
   .claudart/              Seeded once in every mode; existing state is preserved
+  .claudart/VERSION       Upstream commit of each fully written layer
 
 ADAPTERS
   Claude Code (default)   .claude/  +  CLAUDE.md at project root
@@ -84,14 +85,21 @@ trap 'rm -rf "$TMPDIR"' EXIT
 
 printf '\n%s  Downloading CLAUDART from %s …\n' "$(bold "→")" "$REPO"
 
+ARCHIVE="$TMPDIR/claudart.tar.gz"
 if command -v curl &>/dev/null; then
-  curl -fsSL "$TARBALL_URL" | tar -xz -C "$TMPDIR" --strip-components=1
+  curl -fsSL "$TARBALL_URL" > "$ARCHIVE"
 elif command -v wget &>/dev/null; then
-  wget -qO- "$TARBALL_URL" | tar -xz -C "$TMPDIR" --strip-components=1
+  wget -qO- "$TARBALL_URL" > "$ARCHIVE"
 else
   printf '%s curl or wget is required.\n' "$(red "error")" >&2
   exit 1
 fi
+tar -xzf "$ARCHIVE" -C "$TMPDIR" --strip-components=1
+
+# GitHub archives carry their source commit in the leading pax header.
+UPSTREAM_COMMIT="$(gzip -dc "$ARCHIVE" 2>/dev/null | head -c 1024 |
+  LC_ALL=C grep -ao 'comment=[0-9a-f]\{40\}' | head -n 1 | cut -d= -f2)" || true
+[[ -n "$UPSTREAM_COMMIT" ]] || UPSTREAM_COMMIT=unknown
 
 # Check the selected module before copying any files.
 if [[ "$INSTALL_PROJECT_DOCS" == true ]]; then
@@ -133,6 +141,12 @@ for seed in "${STATE_SEEDS[@]}"; do
     exit 1
   fi
 done
+
+VERSION_REL=".claudart/VERSION"
+if [[ -L "$DEST/$VERSION_REL" || ( -e "$DEST/$VERSION_REL" && ! -f "$DEST/$VERSION_REL" ) ]]; then
+  printf '%s Installed version path must be a regular file: %s\n' "$(red "error")" "$DEST/$VERSION_REL" >&2
+  exit 1
+fi
 
 # ── copy helpers ──────────────────────────────────────────────────────────────
 
@@ -176,6 +190,38 @@ copy_tree() {
   done < <(find "$src_root" -type f | sort)
 }
 
+# A layer's base commit is recorded only when its whole payload was written,
+# so a skipped older file is never attributed to the new commit.
+RECORDED=()
+record_if_complete() {
+  if [[ "$SKIPPED" -eq "$2" ]]; then
+    RECORDED+=("$1")
+  fi
+}
+
+# Replace the recorded layers' lines and keep every other line.
+write_version() {
+  local file="$DEST/$VERSION_REL" line key layer keep
+  {
+    if [[ -f "$file" ]]; then
+      while IFS= read -r line || [[ -n "$line" ]]; do
+        [[ -n "$line" ]] || continue
+        key="${line%%:*}"
+        keep=true
+        for layer in "${RECORDED[@]}"; do
+          if [[ "$key" == "$layer" ]]; then keep=false; fi
+        done
+        if [[ "$keep" == true ]]; then printf '%s\n' "$line"; fi
+      done < "$file"
+    fi
+    for layer in "${RECORDED[@]}"; do
+      printf '%s: %s\n' "$layer" "$UPSTREAM_COMMIT"
+    done
+  } | LC_ALL=C sort > "$file.tmp"
+  mv "$file.tmp" "$file"
+  printf '\n%s  %s (%s: %s)\n' "$(green "record")" "$VERSION_REL" "${RECORDED[*]}" "$UPSTREAM_COMMIT"
+}
+
 # ── install ───────────────────────────────────────────────────────────────────
 
 printf '\n%s  Installing into %s\n' "$(bold "→")" "$DEST"
@@ -192,7 +238,9 @@ done
 
 if [[ "$INSTALL_CLAUDE" == true ]]; then
   printf '\n%s\n' "$(bold "Claude Code layer")"
+  before=$SKIPPED
   copy_tree ".claude"
+  record_if_complete claude "$before"
 
   # Loaders contain project-authored routes. Existing root content is reconciled
   # by the integration protocol, not replaced by a forced payload refresh.
@@ -207,8 +255,10 @@ fi
 if [[ "$INSTALL_CODEX" == true ]]; then
   printf '\n%s\n' "$(bold "Codex layer")"
 
+  before=$SKIPPED
   copy_tree ".codex"
   copy_tree ".agents"
+  record_if_complete codex "$before"
 
   # Loaders contain project-authored routes. Existing root content is reconciled
   # by the integration protocol, not replaced by a forced payload refresh.
@@ -223,11 +273,19 @@ fi
 if [[ "$INSTALL_PROJECT_DOCS" == true ]]; then
   printf '\n%s\n' "$(bold "Project Docs module (selected layers)")"
   if [[ "$INSTALL_CLAUDE" == true ]]; then
+    before=$SKIPPED
     copy_tree ".claude" "modules/project-docs/"
+    record_if_complete project-docs/claude "$before"
   fi
   if [[ "$INSTALL_CODEX" == true ]]; then
+    before=$SKIPPED
     copy_tree ".agents" "modules/project-docs/"
+    record_if_complete project-docs/codex "$before"
   fi
+fi
+
+if [[ "${#RECORDED[@]}" -gt 0 ]]; then
+  write_version
 fi
 
 # ── summary ───────────────────────────────────────────────────────────────────

@@ -63,14 +63,15 @@ Sửa nhỏ và rõ ràng thì không cần lệnh nào, cứ nhờ thẳng. Xem
 
 ## Thứ gì nằm ở đâu
 
-| File hoặc thư mục      | Chứa                                 |
-| ---------------------- | ------------------------------------ |
-| `.claudart/CONTEXT.md` | Những gì đang đúng ở thời điểm này   |
-| `.claudart/OWNER.md`   | Cách bạn muốn agent làm việc với bạn |
-| `.claudart/knowledge/` | Sự thật lâu dài về dự án             |
-| `.claudart/tasks/`     | Kế hoạch task                        |
-| `.claudart/specs/`     | Spec cho việc lớn                    |
-| `.claude/`, `.codex/`  | Rule, lệnh và script của agent       |
+| File hoặc thư mục      | Chứa                                  |
+| ---------------------- | ------------------------------------- |
+| `.claudart/CONTEXT.md` | Những gì đang đúng ở thời điểm này    |
+| `.claudart/OWNER.md`   | Cách bạn muốn agent làm việc với bạn  |
+| `.claudart/knowledge/` | Sự thật lâu dài về dự án              |
+| `.claudart/tasks/`     | Kế hoạch task                         |
+| `.claudart/specs/`     | Spec cho việc lớn                     |
+| `.claudart/VERSION`    | Commit upstream của từng layer đã cài |
+| `.claude/`, `.codex/`  | Rule, lệnh và script của agent        |
 
 ## Đóng góp
 
