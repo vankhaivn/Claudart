@@ -717,9 +717,11 @@ try {
     "specs/INDEX.md",
     "specs/done/.gitkeep",
   ].sort();
+  // VERSION is install metadata with its own checks below.
   function stateSnapshot(dest) {
     const state = join(dest, ".claudart");
     return files(state)
+      .filter((file) => file !== join(state, "VERSION"))
       .sort()
       .map((file) => [
         file.slice(state.length + 1),
@@ -959,6 +961,74 @@ try {
       );
     },
   );
+  check("installer records the commit of each fully written layer", () => {
+    const repo = join(scratch, "versioned-source");
+    for (const layer of [
+      ".claudart",
+      ".claude",
+      ".codex",
+      ".agents",
+      "modules/project-docs",
+    ])
+      cpSync(join(root, layer), join(repo, layer), { recursive: true });
+    const git = (...args) =>
+      execFileSync(
+        "git",
+        [
+          "-C",
+          repo,
+          "-c",
+          "user.name=CLAUDART test",
+          "-c",
+          "user.email=test@example.invalid",
+          "-c",
+          "commit.gpgsign=false",
+          "-c",
+          "core.hooksPath=/dev/null",
+          ...args,
+        ],
+        { encoding: "utf8" },
+      );
+    git("init", "-q");
+    git("add", "-A");
+    git("commit", "-qm", "fixture");
+    const commit = git("rev-parse", "HEAD").trim();
+    const versioned = join(scratch, "versioned.tar.gz");
+    git("archive", "--format=tar.gz", "--prefix=claudart/", "-o", versioned, "HEAD");
+    const dest = join(scratch, "recorded version");
+    const version = () => read(join(dest, ".claudart/VERSION"));
+    install(dest, ["--claude"], versioned);
+    assert.equal(version(), `claude: ${commit}\n`);
+    install(dest, ["--codex"], versioned);
+    assert.equal(version(), `claude: ${commit}\ncodex: ${commit}\n`);
+    writeFileSync(join(dest, ".claudart/VERSION"), "claude: old\nnote: kept\n");
+    install(dest, ["--claude"], versioned);
+    assert.equal(version(), "claude: old\nnote: kept\n");
+    install(dest, ["--both", "--force", "--project-docs"], versioned);
+    assert.equal(
+      version(),
+      [
+        `claude: ${commit}`,
+        `codex: ${commit}`,
+        "note: kept",
+        `project-docs/claude: ${commit}`,
+        `project-docs/codex: ${commit}`,
+        "",
+      ].join("\n"),
+    );
+  });
+  check("an archive without a commit records the layer as unknown", () => {
+    const dest = join(scratch, "unknown version");
+    install(dest, ["--codex"]);
+    assert.equal(read(join(dest, ".claudart/VERSION")), "codex: unknown\n");
+  });
+  check("a non-regular version path fails before any write", () => {
+    const dest = join(scratch, "linked version");
+    mkdirSync(join(dest, ".claudart"), { recursive: true });
+    symlinkSync(join(scratch, "elsewhere"), join(dest, ".claudart/VERSION"));
+    assert.throws(() => install(dest, ["--claude"]), /must be a regular file/);
+    assert.deepEqual(readdirSync(dest), [".claudart"]);
+  });
   check("missing shared seed fails before a partial installation", () => {
     const tar = variantArchive("missing-state", (dir) =>
       rmSync(join(dir, ".claudart/specs/INDEX.md")),

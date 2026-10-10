@@ -10,7 +10,7 @@ This file is a **protocol, not an installer**. Follow it top to bottom. It exist
 >
 > **Golden rule — read freely, write only what is approved.** NEVER overwrite, delete, or relocate user-authored content without showing the proposed change and receiving explicit approval. Default to preserving the user's work.
 >
-> **"Customized" means user-authored content, not every local difference.** A CLAUDART-shipped file whose local copy merely matches an older upstream state is stale, not custom. Upgrade stale template content; preserve and deliberately re-apply real project-specific additions.
+> **"Customized" means user-authored content, not every local difference.** A CLAUDART-shipped file whose local copy merely matches an older upstream state is stale, not custom. Upgrade stale template content; preserve and deliberately re-apply real project-specific additions. Never keep an older upstream value, such as a narrower permission or default, as a presumed customization or for safety; a difference is custom only when evidence shows the project authored it.
 >
 > **Mechanical verification first; semantic maintenance only when justified.** Every integration gets a bounded, read-only verification pass. Do not run `doctor → refactor-memory → doctor` merely because files were installed or upgraded. Doctor is conditional and diagnostic; refactor-memory is write-capable and requires a concrete finding plus explicit approval.
 >
@@ -32,7 +32,8 @@ This file is a **protocol, not an installer**. Follow it top to bottom. It exist
    - **A — Clean adopt:** no meaningful AI operating layer exists yet; a bare loader file is allowed.
    - **B — Merge into an existing workflow:** the project already has its own agents, commands, rules, memory, or work conventions.
    - **C — Upgrade an existing CLAUDART install:** recognizable CLAUDART files are already present.
-5. Get current upstream into `/tmp/claudart-src`:
+5. Read `.claudart/VERSION` when present. Each line names the upstream commit its layer was installed or last reconciled from; a missing line or `unknown` means that layer has no recorded base.
+6. Get current upstream into `/tmp/claudart-src`:
 
    ```bash
    rm -rf /tmp/claudart-src
@@ -44,7 +45,7 @@ This file is a **protocol, not an installer**. Follow it top to bottom. It exist
    git clone --depth 1 --branch main https://github.com/vankhaivn/Claudart /tmp/claudart-src
    ```
 
-   For Scenario C, clone full history. For Scenario B, deepen only when a real collision needs stale-vs-custom evidence:
+   For Scenario C, or whenever a recorded base exists, clone full history. For Scenario B, deepen only when a real collision needs stale-vs-custom evidence:
 
    ```bash
    git clone --branch main https://github.com/vankhaivn/Claudart /tmp/claudart-src
@@ -54,9 +55,9 @@ This file is a **protocol, not an installer**. Follow it top to bottom. It exist
 
    If cloning is unavailable, fetch current raw files on demand from `https://raw.githubusercontent.com/vankhaivn/Claudart/main/<path>`. Without history, preserve ambiguous differences and show the exact uncertainty instead of guessing.
 
-6. Inspect the current `modules/` inventory and brief module descriptions. Recommend a module when the request or observed project gives it a concrete purpose; for example, existing discovery material or competing documentation owners can make Project Docs relevant. Respect an explicit core-only scope or module exclusion. This does not require a full docs audit or loading every module's detailed references.
-7. Enumerate the actual selected core-layer and proposed optional-module payload from current upstream. Read `install.sh` as a payload and relocation reference, plus the loaders and every file in the proposed dependency closure. README, workflow, and contributing docs are orientation only; read them only when a real ambiguity requires them.
-8. Treat `install.sh` as a payload reference, not a merge tool. Do not execute it during Scenario B or C, do not use `--force`, and do not run any write-capable maintenance workflow before approval.
+7. Inspect the current `modules/` inventory and brief module descriptions. Recommend a module when the request or observed project gives it a concrete purpose; for example, existing discovery material or competing documentation owners can make Project Docs relevant. Respect an explicit core-only scope or module exclusion. This does not require a full docs audit or loading every module's detailed references.
+8. Enumerate the actual selected core-layer and proposed optional-module payload from current upstream. Read `install.sh` as a payload and relocation reference, plus the loaders and every file in the proposed dependency closure. README, workflow, and contributing docs are orientation only; read them only when a real ambiguity requires them.
+9. Treat `install.sh` as a payload reference, not a merge tool. Do not execute it during Scenario B or C, do not use `--force`, and do not run any write-capable maintenance workflow before approval.
 
 ## What CLAUDART contains
 
@@ -66,7 +67,8 @@ This map is orientation only; the current source tree and its references are aut
 
 - `OWNER.md`, `CONTEXT.md`, append-only `JOURNAL.md`, and the optional single-use `HANDOFF.md`;
 - `knowledge/INDEX.md` plus project-owned maps and topics;
-- `tasks/` and `specs/`, with indexes, complete workspaces, archives and artifacts.
+- `tasks/` and `specs/`, with indexes, complete workspaces, archives and artifacts;
+- `VERSION`, install metadata with one `<layer>: <commit>` line per installed payload (`claude`, `codex`, `project-docs/claude`, `project-docs/codex`). Only the installer and this protocol write it.
 
 Only empty seeds are distributed. Existing state is project-owned and preserved even during a forced adapter refresh. Never install a handoff or upstream work record. The state directory is not auto-imported; startup reads bounded indexes and metadata, with details on demand.
 
@@ -131,7 +133,13 @@ Diff the actual installed state against current upstream; do not assume all loca
 - **Downstream-only** → preserve project-authored paths; for former template paths, propose an explicit relocation or retirement and identify the current owner.
 - **Live state** → preserve its body; reconcile only its current contract or routing through the workflow that owns it.
 
-Apply the stale-vs-custom test narrowly:
+When the layer has a recorded base, compare three versions of each template-owned path: the base (`git -C /tmp/claudart-src show <base>:<source-path>`), the local file, and current upstream. Map each installed path to its upstream source, for example root `CLAUDE.md` to `.claude/CLAUDE.md` and Project Docs files to `modules/project-docs/<path>`.
+
+- Local equals base → stale; propose current upstream verbatim.
+- Local differs from base → only that difference is project content; carry it onto current upstream (for example with `git merge-file`) and show any conflict.
+- For every path upstream changed, cite the reason from `git -C /tmp/claudart-src log --format='%h %s%n%b' <base>..HEAD -- <source-path>` in the plan.
+
+Without a recorded base, apply the stale-vs-custom test narrowly:
 
 1. Never call a file custom merely because it differs from current upstream.
 2. Point to the exact local lines believed to be user-authored.
@@ -143,7 +151,7 @@ Apply the stale-vs-custom test narrowly:
    ```
 
 4. If local content matches a past upstream state and contains no project-specific addition, it is stale.
-5. If evidence remains ambiguous, show the specific lines and ask about those lines, not the entire file.
+5. If evidence remains ambiguous, show the specific lines with the upstream commit that introduced the current value and ask about those lines, not the entire file. Never resolve the ambiguity by keeping the older value.
 
 Produce a reconciliation report covering unchanged, upstream-only, stale replacements, genuine custom merges, moves or consolidations, retirement candidates, preserved downstream-only paths, untouched live state, and review-needed ambiguities. Preserve every live knowledge topic, map, project-specific route, and unselected module. Do not retire customized legacy discovery or `docs/project/` content merely because current upstream no longer ships it; inspect it only when that retirement is in scope and identify its replacement owner.
 
@@ -180,6 +188,7 @@ Wait for explicit approval before writing. Approval for this plan does not pre-a
 - Splice loaders and indexes; never wholesale-replace project routing or ordering.
 - Never overwrite existing `OWNER.md`, `CONTEXT.md`, or `JOURNAL.md`; never import, overwrite, or create `HANDOFF.md`; never replace task workspaces or attachments, spec mission folders, knowledge topics, or maps with template content.
 - Create only missing seeds, indexes, or placeholders that were listed and approved.
+- Set `.claudart/VERSION` to the upstream commit used (`git -C /tmp/claudart-src rev-parse HEAD`) for each layer fully reconciled to current upstream, keeping every other line. Leave a partially reconciled layer's line unchanged. List this write in the plan.
 - Do not touch `.env`, secrets, ignored private files, or unrelated project files.
 - If an unplanned conflict or required write appears, stop before that write and present an amended path-level plan.
 - Do not commit, push, or merge.

@@ -70,6 +70,7 @@ Small, clear edits need no command at all; just ask. See the [workflow guide](do
 | `.claudart/knowledge/` | Durable facts about the project         |
 | `.claudart/tasks/`     | Task plans                              |
 | `.claudart/specs/`     | Large-work specifications               |
+| `.claudart/VERSION`    | Upstream commit each layer came from    |
 | `.claude/`, `.codex/`  | Agent rules, commands, and scripts      |
 
 ## Contributing

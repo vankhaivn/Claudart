@@ -1,6 +1,6 @@
 # Instruction loading fixtures
 
-Run `npm run test:instruction-loading` (also included in `npm run check`). Node's standard library and the installer's existing Bash/tar prerequisites are sufficient; this adds no downstream runtime dependency.
+Run `npm run test:instruction-loading` (also included in `npm run check`). Node's standard library, Git, and the installer's existing Bash/tar prerequisites are sufficient; this adds no downstream runtime dependency.
 
 The test checks that the Claude and Codex entrypoints share the `cda-` namespace. It then stages the core runtime directories and Project Docs module in a temporary archive, substitutes an offline `curl` fixture, and runs the actual installer in Claude, Codex, and combined modes. It checks loader placement, relative import resolution, conditional reference copies and links, and the absence of universal path globs on conditional Claude workflows. A negative fixture demonstrates that repeating the `.claude/` prefix breaks a relative import.
 
@@ -13,5 +13,7 @@ Every installed module resource must be reachable through Markdown links from it
 These checks validate the shipped files and installer output. They do not run a model, emulate the full Claude Markdown parser, measure token usage, or establish model behavior or quality improvements. Lifecycle decisions such as identifying the right owner, distinguishing approved intent from implementation, or choosing what to retire require semantic source review; the preservation fixture does not simulate those decisions.
 
 Shared-state checks cover the exact empty `.claudart/` seed set in every mode, adapter addition in both directions, reinstall and forced payload refresh with byte-preserved state and binary artifacts, preservation of project-owned loaders, missing seeds, symlinks and type collisions, and exclusion of upstream handoffs or live work. Both installed checkers run from a nested directory against the same knowledge store, including typed relations to either adapter. A missing or symlinked shared root is rejected rather than replaced by another store.
+
+Version checks build a Git archive to confirm that `.claudart/VERSION` records the commit of each fully written layer, keeps the lines of skipped or unselected layers, records `unknown` for an archive without a commit, and refuses a non-regular version path before any write.
 
 Static contract assertions cover shared task/spec paths, provenance versus authorization, checkpoint preservation and handoff consumption. These assertions and filesystem fixtures do not simulate native Claude/Codex sessions, concurrent writes or user review decisions.
