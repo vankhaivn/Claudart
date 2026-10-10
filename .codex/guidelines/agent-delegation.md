@@ -1,7 +1,7 @@
 ---
 paths: ["**/*"]
-description: Codex subagent delegation protocol — how to decompose work, write self-contained worker prompts, avoid shadow-running delegates, and integrate results from the built-in explorer/worker agents.
-when_to_use: When work may parallelize across subagents, when planning a task that records a delegation strategy, or when consuming results returned by delegated agents.
+description: Codex subagent delegation protocol — when delegation pays off, how to decompose work, write self-contained worker prompts, avoid shadow-running delegates, and integrate results from the built-in explorer/worker agents.
+when_to_use: When multi-step work may split into parallel, context-heavy, or independently assessable units, when planning a task that records a delegation strategy, or when consuming results returned by delegated agents.
 tags: [subagents, delegation, parallelism, orchestration]
 ---
 
@@ -54,7 +54,13 @@ Before dispatching an ordinary delegated unit, record one concise routing decisi
 
 ## Decomposition and ownership
 
-Decide whether to delegate separately from which model a unit needs. Delegate a concrete bounded unit for useful parallel work or a justified independent assessment. Size alone warrants neither more agents nor stronger models; difficulty alone does not justify another agent. Identify each delegate's scope and how outputs will be consumed, plus the parent's independent work when parallelizing. Keep blocking work local unless an independent assessment adds value or the user explicitly requested delegation; then wait and consume the result.
+Decide whether to delegate separately from which model a unit needs. Delegate a concrete bounded unit when it brings at least one of these benefits:
+
+- **Parallelism:** independent units can run at the same time.
+- **Context protection:** a broad, read-heavy investigation (codebase sweep, multi-source research, large log or diff triage) would fill the parent's context when only its conclusion is needed, or a long task has a self-contained step whose details the parent does not need for integration and verification.
+- **Independent assessment:** a fresh review or second opinion adds value.
+
+The parent's own capability does not settle this: a parent that could do the unit itself still delegates when one of these benefits applies. Keep a unit local when briefing a delegate would cost about as much as doing it, such as a small edit or a lookup in a known file. Difficulty alone justifies neither another agent nor a stronger model. Identify each delegate's scope and how outputs will be consumed, plus the parent's independent work when parallelizing. When a delegated unit blocks the next step, wait for and consume its result.
 
 When the parent is already Astra and has sufficient context, prefer handling Astra-level work locally. An Astra delegate needs both Astra-level difficulty and a concrete benefit from independent parallel work or an independent assessment. Parallelism or a second opinion alone does not require Astra. For a fresh assessment, provide requirements, artifacts, and evaluation criteria without presenting the parent's preferred conclusion as the expected answer; use a context mode that supports that independence.
 

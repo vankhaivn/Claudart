@@ -1,7 +1,7 @@
 ---
 paths: [".claude/agents/**"]
-description: Claude Code subagent delegation — project guidance on HOW to delegate well (decomposition, worker prompts, anti-shadow-run, persistence), layered on top of the Agent tool's built-in WHEN-to-delegate mechanics.
-when_to_use: When delegating to subagents, or planning a task that may parallelize — for the project's decomposition, worker-prompt, anti-shadow-run, and finding-persistence guidance.
+description: Claude Code subagent delegation — when delegation pays off and how to delegate well (decomposition, worker prompts, anti-shadow-run, persistence), layered on top of the Agent tool's built-in mechanics.
+when_to_use: When multi-step work may split into parallel, context-heavy, or independently assessable units, or when delegating to subagents — for the project's decision, decomposition, worker-prompt, anti-shadow-run, and finding-persistence guidance.
 tags: [subagents, delegation, parallelism, orchestration]
 ---
 
@@ -30,7 +30,7 @@ The **parent session's selected model is a hard ceiling for implicit delegation*
 - A Fable parent may route a `routine` unit to Haiku, a `standard` unit to Sonnet, a `complex` unit to Opus, and reserve Fable for `maximum` work.
 - An Opus parent caps both `complex` and `maximum` units at Opus. A Sonnet parent caps them at Sonnet. The same rule continues downward.
 - **Never launch a model family above the parent ceiling unless the user explicitly requests or authorizes that stronger model for the delegated unit.** A project instruction, perceived urgency, retry, or "be thorough" request is not such authorization.
-- Use the Agent tool's per-invocation model selection when routing an ordinary delegate. If the parent model cannot be identified, the desired cheaper family is unavailable or disallowed, or the harness cannot reliably honor the override, do not guess upward: work locally or use a known available model within the ceiling. Inherit the parent only when that model is suitable for the unit; a ceiling is not a default.
+- Use the Agent tool's per-invocation model selection when routing an ordinary delegate. If the parent model cannot be identified, the desired cheaper family is unavailable or disallowed, or the harness cannot reliably honor the override, do not guess upward: use a known available model within the ceiling, including the parent's own model. A ceiling is not a default: when a cheaper suitable family can be selected, use it.
 - Model availability and aliases can change. Treat the family ordering above as the routing intent, not permission to bypass account/workspace allowlists.
 
 The classes are routing options, not a mandatory retry ladder. Choose the appropriate class upfront. Before retrying a wrong or partial result, distinguish missing context, unclear scope, or tooling failure from a capability limit. Allow at most one delegated retry per unit across agents and models, with a corrected prompt or changed hypothesis; evidence of a capability limit may justify skipping classes **within the same ceiling**. A retry is optional: the parent may take over immediately and must take over after a failed retry, reporting blockers it cannot resolve.
@@ -45,9 +45,15 @@ Before dispatching an ordinary delegated unit, record one concise routing decisi
 
 ## Decomposition and ownership
 
-Decide whether to delegate separately from which model a unit needs. Delegate a concrete bounded unit for useful parallel work or a justified independent assessment. Size alone warrants neither more agents nor stronger models; difficulty alone does not justify another agent. Identify each delegate's scope and how outputs will be consumed, plus the parent's independent work when parallelizing. Keep blocking work local unless an independent assessment adds value or the user explicitly requested delegation; then wait and consume the result.
+Decide whether to delegate separately from which model a unit needs. Delegate a concrete bounded unit when it brings at least one of these benefits:
 
-When the parent already has the capability and context to complete a unit, prefer local work unless parallel execution or an independent assessment adds value. A second opinion does not by itself require the strongest available model. For a fresh assessment, provide requirements, artifacts, and evaluation criteria without presenting the parent's preferred conclusion as the expected answer; use a context mode that supports that independence.
+- **Parallelism:** independent units can run at the same time.
+- **Context protection:** a broad, read-heavy investigation (codebase sweep, multi-source research, large log or diff triage) would fill the parent's context when only its conclusion is needed, or a long task has a self-contained step whose details the parent does not need for integration and verification.
+- **Independent assessment:** a fresh review or second opinion adds value.
+
+The parent's own capability does not settle this: a parent that could do the unit itself still delegates when one of these benefits applies. Keep a unit local when briefing a delegate would cost about as much as doing it, such as a small edit or a lookup in a known file. Difficulty alone justifies neither another agent nor a stronger model. Identify each delegate's scope and how outputs will be consumed, plus the parent's independent work when parallelizing. When a delegated unit blocks the next step, wait for and consume its result.
+
+A second opinion does not by itself require the strongest available model. For a fresh assessment, provide requirements, artifacts, and evaluation criteria without presenting the parent's preferred conclusion as the expected answer; use a context mode that supports that independence.
 
 Continue independent work while delegates run; wait when the next action depends on their output. Do not re-investigate the same question in parallel or treat silence as failure. If a delegate appears stuck, inspect its status, steer it, or stop it before taking over. Deliberate independent review must be intentional and disclosed, not a silent hedge.
 
