@@ -104,10 +104,10 @@ tags: [1-5 lowercase kebab-case tags]
 
 ### Memory Hints
 
-<Free-form notes from this session to the next. Things the future agent must not "forget":
+<Free-form notes from this session to the next, specific to this task. Link owner preferences, standing approvals, project-wide baselines, and environment rules where they live instead of copying them. Things the future agent must not "forget":
 
 - Non-obvious constraints discovered while exploring
-- Libraries/tools the project uses (e.g., "uses Zod, not Joi")
+- Libraries/tools that matter for this task (e.g., "uses Zod, not Joi")
 - Pitfalls already encountered
 - Delegation strategy when relevant: subagent roles, ownership boundaries, validation responsibilities (mirror the `delegation:` field)
 - Knowledge candidates not yet eligible for promotion, labeled with their evidence gap or conflict
@@ -259,6 +259,8 @@ Treat these as NOT approval (still in planning):
 - Requests whose stated outcome is only a plan, explanation, or review
 
 On approval: flip frontmatter `status: planning → in-progress`, bump `updated:` to today, update Current State, then begin executing the first unchecked step. The `delegation:` field carries any recorded delegation strategy into execution — see "Delegation strategy" below; its values and gating semantics live in `agent-delegation.md`.
+
+Record an authorization that applies only to this task once, as a Decision Log entry with its scope and source. Standing approvals and preferences belong to `.claudart/OWNER.md`; reference them instead of copying them into the task. Purpose states the requested outcome, not the approval history.
 
 ## Delegation strategy (the `delegation:` field)
 
@@ -418,6 +420,7 @@ So: a task's existence is signalled in CONTEXT by a pointer line. The task's con
 
 - **Persisting chat as Purpose.** Do not copy owner or agent conversation into `Purpose`; normalize the durable outcome and material constraints into self-contained documentation language.
 - **Using the task as a journal.** Stacked status notes, sections appended after the skeleton, pasted command output, and repeated check totals bury the current state. Rewrite Current State, keep the logs to decisions and divergences, and start follow-up work in a new task.
+- **Copying shared guidance into tasks.** Owner preferences, standing approvals, and project-wide baselines repeated across tasks go stale in many places at once; link their owner instead.
 - **Closing without the required acceptance.** User-reviewed tasks stop at `awaiting-review` until their genuine user gate is satisfied; agent-reviewed tasks may close only under the evidence-complete closeout contract. Archive and journal only after a valid terminal transition.
 - **Inventing user acceptance.** Visibility, an agent-written confirmation checkbox, or unfinished agent checks do not establish a user-owned review requirement. Base the reviewer on the requested acceptance criteria and preserve explicit human approval requirements.
 - Editing code while `status: planning` or `status: awaiting-review`. Both states are read-only locks.
