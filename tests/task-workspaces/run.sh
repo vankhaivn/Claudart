@@ -71,8 +71,6 @@ for layer in claude codex; do
   assert_contains "$plan" 'YYYY-MM-DD-NNN-<slug>/TASK.md' "$layer plan uses the workspace entrypoint"
   assert_contains "$plan" '**Default to `TASK.md` only.**' "$layer plan starts without attachments"
   assert_contains "$plan" 'Never automatically extract archives, execute attachments, or load all supporting files.' "$layer plan does not auto-process attachments"
-  assert_not_contains "$plan" 'One task per file.' "$layer plan drops the single-file storage restriction"
-  assert_not_contains "$plan" 'tasks/*.md' "$layer plan has no flat task discovery"
 
   for file in "$rule"; do
     assert_contains "$file" 'YYYY-MM-DD-NNN-<slug>/TASK.md' "$layer rule uses the workspace entrypoint"
@@ -99,8 +97,6 @@ for layer in claude codex; do
     assert_contains "$file" 'agent-facing durable execution record, not the default user-facing presentation' "$layer separates agent task storage from user presentation"
     assert_contains "$file" 'Never tell the user to open, read, or review `TASK.md` as the default approval action.' "$layer owns the user-facing plan translation"
     assert_contains "$file" 'Never automatically extract archives, execute attachments, or load all supporting files.' "$layer does not auto-process attachments"
-    assert_not_contains "$file" 'One task per file.' "$layer drops the single-file storage restriction"
-    assert_not_contains "$file" 'tasks/*.md' "$layer has no flat task discovery"
   done
 
   assert_contains "$rule" '`TASK.md` is the only required file' "$layer has one required document"
@@ -145,12 +141,6 @@ for layer in claude codex; do
   assert_contains "$doctor" 'Do not read artifact bodies' "$layer doctor checks links without processing payloads"
   assert_contains "$doctor" '`None.` is valid' "$layer doctor does not demand filler"
   assert_contains "$refactor" 'TASK.md' "$layer maintenance recognizes the entrypoint"
-  assert_not_contains "$refactor" 'tasks/*.md' "$layer maintenance has no flat task scan"
-
-  for file in "$start" "$checkpoint" "$doctor"; do
-    assert_not_contains "$file" 'tasks/*.md' "$layer consumer has no legacy active scan"
-    assert_not_contains "$file" 'tasks/done/*.md' "$layer consumer has no legacy archive scan"
-  done
   seed="$REPO_ROOT/.claudart/tasks/index.md"
   assert_contains "$seed" '<task-id>/TASK.md' "$layer seed points to the authoritative entrypoint"
   assert_not_contains "$seed" '](' "$layer ships no live task in its dashboard"

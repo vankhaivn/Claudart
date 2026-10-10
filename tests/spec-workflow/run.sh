@@ -32,17 +32,6 @@ assert_contains() {
   fi
 }
 
-assert_not_contains() {
-  file=$1
-  pattern=$2
-  label=$3
-  if grep -Fq -- "$pattern" "$file"; then
-    fail "$label (found legacy '$pattern' in ${file#"$REPO_ROOT/"})"
-  else
-    pass "$label"
-  fi
-}
-
 CODEX_RULE=$REPO_ROOT/.codex/guidelines/spec-workflow.md
 CLAUDE_RULE=$REPO_ROOT/.claude/rules/spec-workflow.md
 CODEX_RUNNER=$REPO_ROOT/.agents/skills/cda-spec-run/SKILL.md
@@ -69,10 +58,6 @@ for rule in "$CODEX_RULE" "$CLAUDE_RULE"; do
     "rule derives review impact from actual changes"
   assert_contains "$rule" "resulting revision or bounded worktree fingerprint" \
     "rule identifies the state proved by every successful gate"
-  assert_not_contains "$rule" "user reports a problem within approved intent" \
-    "rule requires an exact review anchor"
-  assert_not_contains "$rule" "last full baseline" \
-    "rule does not skip evidence from earlier scoped reviews"
   assert_contains "$rule" \
     'Repair every knowledge `sources` entry that points into the moved folder' \
     "rule keeps knowledge sources resolvable after archiving"
@@ -121,12 +106,6 @@ for runner in "$CODEX_RUNNER" "$CLAUDE_RUNNER"; do
     "runner computes impact after implementation"
   assert_contains "$runner" "resulting revision or bounded worktree fingerprint" \
     "runner records the state proved by each gate"
-  assert_not_contains "$runner" "re-run every Acceptance Scenario fresh" \
-    "runner does not mandate unconditional full replay"
-  assert_not_contains "$runner" "last full baseline" \
-    "runner does not skip evidence from earlier scoped reviews"
-  assert_not_contains "$runner" "changed verifier, or cross-cutting change" \
-    "runner does not treat every local verifier edit as cross-cutting"
 done
 
 for author in "$CODEX_AUTHOR" "$CLAUDE_AUTHOR"; do

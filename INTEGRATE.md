@@ -89,7 +89,7 @@ When integrating both adapters, preserve intent parity without forcing byte iden
 
 Task workspaces use `.claudart/tasks/YYYY-MM-DD-NNN-<slug>/TASK.md` and `.claudart/tasks/done/<task-id>/TASK.md`. `TASK.md` is the only required file; `artifacts/` is created only for a concrete task need. Install only empty task seeds, never live upstream tasks or test fixtures. Preserve downstream workspace contents and storage/Git policies; do not bulk-read, extract, or normalize attachments during integration.
 
-The current upstream format is the standard: Claude uses root `CLAUDE.md` downstream, with `.claude/CLAUDE.md` retained only as the upstream source template. A legacy downstream `.claude/CLAUDE.md` must be reconciled deliberately under the same move/merge rules as any other loader relocation. No flat-task compatibility layer or general migration framework is installed. Downstream projects must adapt existing work deliberately before using the new task workflow. Report format mismatches and preserve the original files; any requested relocation still requires the explicit, path-specific approval below. Merely upgrading commands does not authorize moving or deleting task history.
+The current upstream format is the standard: Claude uses root `CLAUDE.md` downstream, with `.claude/CLAUDE.md` retained only as the upstream source template. No compatibility layer or migration framework is installed; downstream projects adapt existing work to the current format deliberately. Report format mismatches and preserve the original files; any requested relocation still requires the explicit, path-specific approval below. Merely upgrading commands does not authorize moving or deleting task history.
 
 ## Step 1 — Derive the current delta
 

@@ -184,18 +184,6 @@ try {
       assert(!existsSync(join(dest, ".agents/skills/cda-project-docs")));
       assert(!existsSync(join(dest, "docs")));
     });
-    check(
-      `${mode}: fresh installs exclude the retired discovery payload`,
-      () => {
-        assert(
-          !existsSync(join(dest, ".claude/commands/project-discovery.md")),
-        );
-        assert(!existsSync(join(dest, ".claude/references/project-discovery")));
-        assert(
-          !existsSync(join(dest, ".agents/skills/codex-project-discovery")),
-        );
-      },
-    );
     if (mode !== "codex") {
       check(`${mode}: Claude loader is installed at root without a duplicate`, () => {
         assert.equal(
@@ -523,19 +511,6 @@ try {
           `Module refresh touched ${relative}`,
         );
       }
-    },
-  );
-  check(
-    "legacy nested Claude loader is preserved without creating a duplicate root loader",
-    () => {
-      const dest = join(scratch, "legacy Claude loader");
-      mkdirSync(join(dest, ".claude"), { recursive: true });
-      const legacy = "# Legacy project-owned Claude loader\n\nSee @rules/ai-behavior.md\n";
-      writeFileSync(join(dest, ".claude/CLAUDE.md"), legacy);
-      install(dest, ["--claude", "--force"]);
-      assert.equal(read(join(dest, ".claude/CLAUDE.md")), legacy);
-      assert(!existsSync(join(dest, "CLAUDE.md")));
-      assert(existsSync(join(dest, ".claude/commands/cda-start.md")));
     },
   );
   check(

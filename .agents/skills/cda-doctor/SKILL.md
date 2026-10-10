@@ -27,7 +27,7 @@ Preserve the helper output and exit status:
 - Exit `1`: report its findings at the stated severity and continue semantic review.
 - Exit `2`, a missing/unreadable helper, or another helper runtime failure: report **High** and mark the mechanical health check incomplete; this installation cannot be declared healthy. Do not reproduce helper checks with ad hoc parsing.
 
-Only if the helper was unavailable and never started, the legacy `bash .codex/scripts/knowledge-check.sh --root .` may run once as a limited fallback. Label that result as incomplete mechanical health. If the helper ran, never rerun the knowledge checker.
+If the helper ran, never rerun the knowledge checker.
 
 ## Semantic and Remaining Structural Review
 

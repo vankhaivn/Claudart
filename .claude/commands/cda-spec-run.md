@@ -8,7 +8,7 @@ Execute an approved mission. Read `.claude/rules/spec-workflow.md` first; it is 
 
 Resolve the argument as a dated folder id or SPEC slug under `.claudart/specs/`, excluding `done/`. With no argument, select the only active ready/running/blocked/review mission; ask only if ambiguous. Report archived matches without running them.
 
-Apply **Load Context by Scope** from the guideline: always read mission metadata, global constraints and the contract inventory, then the selected task/dependencies, ROADMAP delta and relevant evidence/notes. Compare references with actual scope and expand reads for missing contracts, interrupted writes or legacy layouts. Compaction alone does not require full-file reloads. Reconcile observed evidence before repeating an interrupted operation.
+Apply **Load Context by Scope** from the guideline: always read mission metadata, global constraints and the contract inventory, then the selected task/dependencies, ROADMAP delta and relevant evidence/notes. Compare references with actual scope and expand reads for missing contracts or interrupted writes. Compaction alone does not require full-file reloads. Reconcile observed evidence before repeating an interrupted operation.
 
 ## Route by status
 
