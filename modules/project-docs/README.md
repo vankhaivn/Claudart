@@ -10,7 +10,7 @@ Add `--project-docs` to the installer:
 curl -fsSL https://raw.githubusercontent.com/vankhaivn/Claudart/main/install.sh | bash -s -- --claude --project-docs
 ```
 
-Use `--codex` or `--both` for the other layers. This adds `/project-docs` (Claude Code) or `$codex-project-docs` (Codex). Installing it creates no documents and moves nothing.
+Use `--codex` or `--both` for the other layers. This adds `/cda-project-docs` (Claude Code) or `$cda-project-docs` (Codex). Installing it creates no documents and moves nothing.
 
 ## Modes
 
@@ -43,8 +43,8 @@ docs/
 It is a suggestion, not a required tree. Create only the pages you need: a new idea may need just `product.md` and a short router. An app used straight from `main` does not need release notes or an operations page.
 
 - [Claude template guide](.claude/references/project-docs/templates.md)
-- [Codex template guide](.agents/skills/codex-project-docs/references/templates.md)
-- Examples: [new project](.agents/skills/codex-project-docs/references/examples/new-project.md), [app used from `main`](.agents/skills/codex-project-docs/references/examples/main-latest.md), [adopted project](.agents/skills/codex-project-docs/references/examples/adopted-project.md)
+- [Codex template guide](.agents/skills/cda-project-docs/references/templates.md)
+- Examples: [new project](.agents/skills/cda-project-docs/references/examples/new-project.md), [app used from `main`](.agents/skills/cda-project-docs/references/examples/main-latest.md), [adopted project](.agents/skills/cda-project-docs/references/examples/adopted-project.md)
 
 ## How it decides
 

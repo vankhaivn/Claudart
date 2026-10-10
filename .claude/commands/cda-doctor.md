@@ -2,7 +2,7 @@
 description: Run a read-only Claude CLAUDART health check with a mechanical baseline and bounded semantic audits.
 ---
 
-Run a health check of the selected Claude CLAUDART layer. This command is diagnostic only: do not auto-fix files. Report findings for the user to address with `/refactor-memory` or a deliberate manual edit.
+Run a health check of the selected Claude CLAUDART layer. This command is diagnostic only: do not auto-fix files. Report findings for the user to address with `/cda-refactor-memory` or a deliberate manual edit.
 
 ## Mechanical Baseline
 
@@ -43,10 +43,10 @@ The baseline cannot decide whether prose is accurate or well-owned. Use bounded 
 
 Skip this section if `.claudart/tasks/` does not exist. Follow `.claude/rules/task-management.md`; this audit does not create or repair task content.
 
-- Confirm `.claudart/tasks/index.md` exists. Missing -> Medium; suggest `/checkpoint` to regenerate it. Count lines with `wc -l`: the 100-line ceiling and trim ladder remain unchanged.
+- Confirm `.claudart/tasks/index.md` exists. Missing -> Medium; suggest `/cda-checkpoint` to regenerate it. Count lines with `wc -l`: the 100-line ceiling and trim ladder remain unchanged.
 - Inspect only `.claudart/tasks/*/TASK.md` and `.claudart/tasks/done/*/TASK.md` in directly contained `YYYY-MM-DD-NNN-<slug>` directories. Exclude `done/` itself; never follow workspace or `TASK.md` symlinks or recursively parse attachments as tasks. Flat task files are outside the current contract, not a second discovery format.
 - Flag a dated directory missing `TASK.md`, or an invalid directory name, as Medium; preserve it for explicit repair. Require `slug`, `status`, `created`, `updated`, `agent`, `reviewer`, `delegation`, and `tags`; validate task status, agent, delegation, dated `<created>-<NNN>-<slug>` naming, and inline lowercase tags. Validate `reviewer` as `user | agent`. Report missing or invalid reviewer metadata as Medium; do not infer acceptance ownership. Do not invent metadata, migrate flat files, or remove unknown content.
-- Flag a top-level `done`/`cancelled` workspace for whole-directory archival by `/checkpoint`; flag archive collisions or archived non-terminal tasks as Medium. `awaiting-review` requires `reviewer: user` and stays active for user acceptance. Report inconsistent reviewer/status metadata as Medium without changing it. Cross-check index paths and status, including `done/<task-id>/TASK.md` under Recently Done.
+- Flag a top-level `done`/`cancelled` workspace for whole-directory archival by `/cda-checkpoint`; flag archive collisions or archived non-terminal tasks as Medium. `awaiting-review` requires `reviewer: user` and stays active for user acceptance. Report inconsistent reviewer/status metadata as Medium without changing it. Cross-check index paths and status, including `done/<task-id>/TASK.md` under Recently Done.
 - Require `## Purpose`, `## Context & Orientation`, `## Plan of Work`, `## Concrete Steps`, `## Validation & Acceptance`, `## Decision Log`, `## Surprises & Discoveries`, and `## Outcomes & Retrospective`.
 - A `TASK.md`-only workspace is complete. Missing `artifacts/` or `### Workspace Files` is normal and must never produce a warning. `### Memory Hints` must exist; `None.` is valid. Do not require NOTES, ROADMAP, LEDGER, manifests, or placeholder reports.
 - When `### Workspace Files` exists, check only its explicit local references for existence and a concrete purpose. Flag missing required input/evidence or unexplained local-only dependencies; a documented external/reproducible reference is not a broken local link. Do not read artifact bodies, fetch external inputs, extract archives, execute files, generate replacements, or create directories as part of doctor.
@@ -64,4 +64,4 @@ For `.claudart/specs/`, follow `.claude/rules/spec-workflow.md` for metadata, st
 
 ## Reporting
 
-Use passing, warnings, errors, and one recommended next step. State whether the mechanical baseline ran and its result. Only declare the installation healthy when all mandatory mechanical checks ran and passed and the semantic and remaining structural checks also pass. Doctor is read-only and does not require a `/doctor` → `/refactor-memory` → `/doctor` chain.
+Use passing, warnings, errors, and one recommended next step. State whether the mechanical baseline ran and its result. Only declare the installation healthy when all mandatory mechanical checks ran and passed and the semantic and remaining structural checks also pass. Doctor is read-only and does not require a `/cda-doctor` → `/cda-refactor-memory` → `/cda-doctor` chain.

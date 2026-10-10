@@ -1,5 +1,5 @@
 ---
-name: codex-plan
+name: cda-plan
 description: Create or resume a lightweight persistent task workspace in .claudart/tasks/ when work benefits from a durable plan; execute it too when the user has already asked to implement.
 ---
 
@@ -9,9 +9,9 @@ Create or resume a persistent task workspace whose `TASK.md` is the authoritativ
 
 ## Inputs and routing
 
-- The text after `$codex-plan` is the task request. If it is empty, ask one short question: "What's the task?"
+- The text after `$cda-plan` is the task request. If it is empty, ask one short question: "What's the task?"
 - Honor an explicit request for a persistent plan even for small work. Otherwise use a task when decisions, coordination, interruption, or review benefit from durable state. File count alone is not a reason.
-- Use `$codex-spec` instead when the requested outcome is a defined mission needing POC-frozen intent, phases, standing approval, and multi-session convergence. When the project or product itself needs documentation before an implementation mission, use `$codex-project-docs` if installed; otherwise clarify intent within the current work and follow the repository's documentation convention.
+- Use `$cda-spec` instead when the requested outcome is a defined mission needing POC-frozen intent, phases, standing approval, and multi-session convergence. When the project or product itself needs documentation before an implementation mission, use `$cda-project-docs` if installed; otherwise clarify intent within the current work and follow the repository's documentation convention.
 - The user's current message has precedence for execution intent. A request to plan, explain, or review only keeps the planning lock. A direct request to implement, start, continue, or resume satisfies `planning → in-progress`, including when it appeared earlier and remains applicable.
 
 ## Create or select the workspace

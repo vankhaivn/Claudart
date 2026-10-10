@@ -8,7 +8,7 @@ Dùng được với Claude Code, Codex hoặc cả hai. Hai công cụ dùng ch
 
 ## Bạn có gì
 
-- **Bắt đầu phiên:** `/start` đưa cho agent trạng thái hiện tại, việc đang mở và lịch sử Git gần đây.
+- **Bắt đầu phiên:** `/cda-start` đưa cho agent trạng thái hiện tại, việc đang mở và lịch sử Git gần đây.
 - **Kế hoạch không bị mất:** mỗi task giữ kế hoạch và quyết định trong một file `TASK.md`, mai làm tiếp được.
 - **Spec cho việc lớn:** duyệt một lần cho cả nhiệm vụ nhiều giai đoạn, rồi để agent chạy tới bước review cuối.
 - **Kiến thức dự án:** các sự thật lâu dài về dự án, tách khỏi rule và khỏi việc tạm thời.
@@ -44,18 +44,20 @@ Installer chỉ thêm file còn thiếu và không bao giờ đụng vào trạn
 
 Agent sẽ đưa bạn xem kế hoạch và chờ bạn duyệt rồi mới ghi file.
 
+Các workflow CLAUDART dùng chung tên `cda-` trên cả hai công cụ: gọi `/cda-plan` trong Claude Code hoặc `$cda-plan` trong Codex. Ký tự đầu là cú pháp riêng của runtime, không phải phần tên workflow.
+
 ## Dùng hằng ngày
 
-| Bạn muốn                         | Claude Code        | Codex                    |
-| -------------------------------- | ------------------ | ------------------------ |
-| Bắt đầu phiên                    | `/start`           | `$codex-start`           |
-| Lập kế hoạch cần giữ lại         | `/plan <task>`     | `$codex-plan <task>`     |
-| Định nghĩa việc lớn, nhiều phiên | `/spec <mission>`  | `$codex-spec <mission>`  |
-| Chạy spec đã duyệt               | `/spec-run <slug>` | `$codex-spec-run <slug>` |
-| Lưu trạng thái khi tới điểm dừng | `/checkpoint`      | `$codex-checkpoint`      |
-| Tạm dừng một cuộc điều tra khó   | `/handoff`         | `$codex-handoff`         |
-| Biến bài học lặp lại thành rule  | `/learn`           | `$codex-learn`           |
-| Kiểm tra bản cài                 | `/doctor`          | `$codex-doctor`          |
+| Bạn muốn                         | Claude Code            | Codex                  |
+| -------------------------------- | ---------------------- | ---------------------- |
+| Bắt đầu phiên                    | `/cda-start`           | `$cda-start`           |
+| Lập kế hoạch cần giữ lại         | `/cda-plan <task>`     | `$cda-plan <task>`     |
+| Định nghĩa việc lớn, nhiều phiên | `/cda-spec <mission>`  | `$cda-spec <mission>`  |
+| Chạy spec đã duyệt               | `/cda-spec-run <slug>` | `$cda-spec-run <slug>` |
+| Lưu trạng thái khi tới điểm dừng | `/cda-checkpoint`      | `$cda-checkpoint`      |
+| Tạm dừng một cuộc điều tra khó   | `/cda-handoff`         | `$cda-handoff`         |
+| Biến bài học lặp lại thành rule  | `/cda-learn`           | `$cda-learn`           |
+| Kiểm tra bản cài                 | `/cda-doctor`          | `$cda-doctor`          |
 
 Sửa nhỏ và rõ ràng thì không cần lệnh nào, cứ nhờ thẳng. Xem [hướng dẫn quy trình](docs/WORKFLOW_VI.md) để biết khi nào dùng task, khi nào dùng spec.
 

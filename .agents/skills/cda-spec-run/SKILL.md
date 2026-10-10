@@ -1,8 +1,11 @@
 ---
+name: cda-spec-run
 description: Execute an approved dated spec with scoped context and evidence-driven verification until final user review or a real blocker.
 ---
 
-Execute an approved mission. Read `.claude/rules/spec-workflow.md` first; it is the canonical contract for ownership, scoped loading, verification, recovery and review. This command supplies runner routing.
+# Codex Spec Run
+
+Execute an approved mission. Read `.codex/guidelines/spec-workflow.md` first; it is the canonical contract for ownership, scoped loading, verification, recovery and review. This skill supplies runner routing.
 
 ## Resolve and load
 
@@ -12,7 +15,7 @@ Apply **Load Context by Scope** from the guideline: always read mission metadata
 
 ## Route by status
 
-- `drafting` / `poc-review`: return to `/spec`; no production implementation.
+- `drafting` / `poc-review`: return to `$cda-spec`; no production implementation.
 - `ready`: set `running`, sync INDEX, append `run-started` and enter the canonical loop.
 - `running`: recover interrupted work, validate relevant drift and continue.
 - `blocked`: apply the canonical unblock test; continue with a materially different evidence-backed path or independent ready work.

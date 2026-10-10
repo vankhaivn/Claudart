@@ -1,5 +1,5 @@
 ---
-name: codex-learn
+name: cda-learn
 description: Run a behavior-first Codex retrospective, strengthen relevant guidelines, and route any durable descriptive facts to the canonical knowledge workflow.
 ---
 
@@ -50,7 +50,7 @@ Guideline frontmatter uses `paths:`, `description:`, `when_to_use:`, and `tags:`
 - Uncertain or conflicting observation → keep it as a candidate, or mark a contradicted canonical owner `review-needed` with evidence and `status_note`.
 - Retired chronology → leave it in JOURNAL; do not rewrite JOURNAL.
 
-`$codex-learn` may write an eligible fact immediately. `$codex-checkpoint` performs bulk maintenance but is not an exclusive knowledge write gate.
+`$cda-learn` may write an eligible fact immediately. `$cda-checkpoint` performs bulk maintenance but is not an exclusive knowledge write gate.
 
 ## 5. Output Standard
 

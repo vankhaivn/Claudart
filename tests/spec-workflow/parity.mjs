@@ -9,7 +9,7 @@ function body(source) {
   return source
     .replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n+/, "")
     .replace(/^# Codex Spec(?: Run)?\r?\n+/, "")
-    .replaceAll("$codex-", "/")
+    .replaceAll("$cda-", "/cda-")
     .replaceAll(".codex/guidelines/", ".claude/rules/")
     .replaceAll(".codex/scripts/", ".claude/scripts/")
     .replaceAll("agent: codex #", "agent: claude #")
@@ -20,8 +20,8 @@ function body(source) {
 
 const pairs = [
   [".codex/guidelines/spec-workflow.md", ".claude/rules/spec-workflow.md"],
-  [".agents/skills/codex-spec/SKILL.md", ".claude/commands/spec.md"],
-  [".agents/skills/codex-spec-run/SKILL.md", ".claude/commands/spec-run.md"],
+  [".agents/skills/cda-spec/SKILL.md", ".claude/commands/cda-spec.md"],
+  [".agents/skills/cda-spec-run/SKILL.md", ".claude/commands/cda-spec-run.md"],
 ];
 
 // Runtime paths, command names, provenance and entrypoint headings differ;

@@ -8,7 +8,7 @@ It works with Claude Code, Codex, or both. Both tools share one state folder, `.
 
 ## What you get
 
-- **Session start:** `/start` gives the agent the current state, open work, and recent Git history.
+- **Session start:** `/cda-start` gives the agent the current state, open work, and recent Git history.
 - **Plans that survive:** a task keeps its plan and decisions in one `TASK.md`, so work can resume tomorrow.
 - **Specs for big work:** approve a multi-phase mission once, then let the agent run it to final review.
 - **Project knowledge:** durable facts about the project, kept apart from rules and from temporary work.
@@ -44,18 +44,20 @@ The installer only adds missing files and never touches existing project state.
 
 The agent shows you a plan and waits for your approval before writing anything.
 
+All CLAUDART workflows use the same `cda-` name on both hosts: type `/cda-plan` in Claude Code or `$cda-plan` in Codex. The leading character is the host's invocation syntax, not part of the workflow name.
+
 ## Daily use
 
-| You want to                        | Claude Code        | Codex                    |
-| ---------------------------------- | ------------------ | ------------------------ |
-| Start a session                    | `/start`           | `$codex-start`           |
-| Plan work that should survive      | `/plan <task>`     | `$codex-plan <task>`     |
-| Define a large, multi-session job  | `/spec <mission>`  | `$codex-spec <mission>`  |
-| Run an approved spec               | `/spec-run <slug>` | `$codex-spec-run <slug>` |
-| Save state at a stopping point     | `/checkpoint`      | `$codex-checkpoint`      |
-| Pause a hard investigation mid-way | `/handoff`         | `$codex-handoff`         |
-| Turn a repeated lesson into a rule | `/learn`           | `$codex-learn`           |
-| Check the installation             | `/doctor`          | `$codex-doctor`          |
+| You want to                        | Claude Code            | Codex                  |
+| ---------------------------------- | ---------------------- | ---------------------- |
+| Start a session                    | `/cda-start`           | `$cda-start`           |
+| Plan work that should survive      | `/cda-plan <task>`     | `$cda-plan <task>`     |
+| Define a large, multi-session job  | `/cda-spec <mission>`  | `$cda-spec <mission>`  |
+| Run an approved spec               | `/cda-spec-run <slug>` | `$cda-spec-run <slug>` |
+| Save state at a stopping point     | `/cda-checkpoint`      | `$cda-checkpoint`      |
+| Pause a hard investigation mid-way | `/cda-handoff`         | `$cda-handoff`         |
+| Turn a repeated lesson into a rule | `/cda-learn`           | `$cda-learn`           |
+| Check the installation             | `/cda-doctor`          | `$cda-doctor`          |
 
 Small, clear edits need no command at all; just ask. See the [workflow guide](docs/WORKFLOW.md) for when to use a task or a spec.
 

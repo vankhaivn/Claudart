@@ -157,7 +157,7 @@ Preserve `.claudart/` as the single shared state authority. Keep Claude instruct
 
 Never add automatic JOURNAL, HANDOFF, task-body, spec-body, or knowledge-body imports. Inspect resolved targets rather than matching one literal path spelling; remove actual prohibited auto-load edges and report the repair. Plain conditional paths and quoted examples are valid.
 
-Keep a plain root-router pointer, such as `.claudart/knowledge/INDEX.md (surfaced by /start; route entries on demand)`. Route retrieval to `knowledge-management.md` and knowledge mutations/audits/refactors to `.claude/references/knowledge-maintenance.md`. Verify support files exist; preserve project-specific routing.
+Keep a plain root-router pointer, such as `.claudart/knowledge/INDEX.md (surfaced by /cda-start; route entries on demand)`. Route retrieval to `knowledge-management.md` and knowledge mutations/audits/refactors to `.claude/references/knowledge-maintenance.md`. Verify support files exist; preserve project-specific routing.
 
 ## 8. Wire Up AI Behavior Guidelines
 
@@ -218,16 +218,16 @@ For `.claudart/JOURNAL.md`:
 
 For `.claudart/tasks/`:
 
-- If the folder does not exist but `/plan` is documented in `.claude/commands/`, create only the canonical seed `index.md` and `done/.gitkeep`.
+- If the folder does not exist but `/cda-plan` is documented in `.claude/commands/`, create only the canonical seed `index.md` and `done/.gitkeep`.
 - Inventory only `.claudart/tasks/*/TASK.md` and `.claudart/tasks/done/*/TASK.md` at the depths defined in `.claude/rules/task-management.md`. Do not recursively read attachments or follow workspace/`TASK.md` symlinks.
 - If `.claudart/tasks/done/.gitkeep` exists beside a real archived `<task-id>/TASK.md`, remove only that redundant placeholder and report the removal.
-- Preserve task workspaces and their supporting files. Do not modify, move, close, or normalize `TASK.md` or attachments; `/plan` and `/checkpoint` own task state and archival. Do not create `artifacts/`, extract archives, rewrite evidence, migrate flat tasks, or treat missing optional files as repair targets.
+- Preserve task workspaces and their supporting files. Do not modify, move, close, or normalize `TASK.md` or attachments; `/cda-plan` and `/cda-checkpoint` own task state and archival. Do not create `artifacts/`, extract archives, rewrite evidence, migrate flat tasks, or treat missing optional files as repair targets.
 
 For `.claudart/specs/`:
 
-- If the folder does not exist but `/spec` is documented in `.claude/commands/`, create it with a seed `INDEX.md` (canonical header plus empty `## Active` and `## Done` sections) and a `done/.gitkeep`.
+- If the folder does not exist but `/cda-spec` is documented in `.claude/commands/`, create it with a seed `INDEX.md` (canonical header plus empty `## Active` and `## Done` sections) and a `done/.gitkeep`.
 - If `.claudart/specs/` exists but `.claudart/specs/done/` is missing, create `.claudart/specs/done/.gitkeep`.
-- Do not modify or move any spec folder content. Spec folders are mission documents owned by `/spec`, `/spec-run`, and `/checkpoint`; refactor-memory only touches the archive placeholder and (if missing) the seed `INDEX.md`.
+- Do not modify or move any spec folder content. Spec folders are mission documents owned by `/cda-spec`, `/cda-spec-run`, and `/cda-checkpoint`; refactor-memory only touches the archive placeholder and (if missing) the seed `INDEX.md`.
 
 For `.claudart/knowledge/`:
 
@@ -241,7 +241,7 @@ For `.claudart/knowledge/`:
 - Budget warnings — `K116` size, `K117` section structure, `K135` source count — need a reviewed body or ownership change that this pass does not make. Preserve the topic and report each as a candidate for a reviewed split or reduction to a route.
 - Detect overlap and lifecycle tension, including facts already maintained in current project docs, source, schemas, or generated references. Preserve bodies during this normalization pass; route substantive deduplication through an authorized semantic cleanup. Never auto-merge, auto-retire, auto-supersede, or delete based on age or an ambiguous route.
 - Do not add a recall command, write-on-read behavior, telemetry, database, or daemon.
-- Make the result idempotent: running `/refactor-memory` again against unchanged sources must produce no knowledge diff.
+- Make the result idempotent: running `/cda-refactor-memory` again against unchanged sources must produce no knowledge diff.
 - After all mutations, run `bash .claude/scripts/knowledge-check.sh --fail-on warning`. Exit `2` is a checker failure and blocks completion. Exit `1` means findings remain: normalization is complete only when every remaining finding is a budget warning, and the report lists those.
 
 ## 11. Base Template Notes
@@ -264,7 +264,7 @@ Include these rules:
 - New domains/layers → CREATE a new rule file in `.claude/rules/` (with flow-style `paths: [...]`, `description:`, `when_to_use:`, and inline `tags: [...]` frontmatter) and add a conditional Domain Rules route. Reserve automatic imports for universal guidance, using paths relative to the importing file.
 - Durable descriptive facts that pass `.claude/rules/knowledge-management.md` → find the authoritative owner; knowledge owns only facts without another owner and otherwise keeps compact routes or minimal unique context. For a knowledge mutation, patch the topic and reachable map atomically, then run the checker. Scope may be local; task/spec state stays local.
 - Global changes → update `CLAUDE.md` directly.
-- Shared live state → update `.claudart/CONTEXT.md` through `/checkpoint`, not through refactor-memory.
+- Shared live state → update `.claudart/CONTEXT.md` through `/cda-checkpoint`, not through refactor-memory.
 
 ## 13. Verification
 
@@ -298,4 +298,4 @@ Output a concise summary covering:
 
 Confirm completion only after every relevant step has been completed or explicitly marked not applicable.
 
-For an existing installation, preserve the upgrade sequence: `/doctor` → `/refactor-memory` → `/doctor`.
+For an existing installation, preserve the upgrade sequence: `/cda-doctor` → `/cda-refactor-memory` → `/cda-doctor`.

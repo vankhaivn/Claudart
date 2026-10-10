@@ -1,5 +1,5 @@
 ---
-name: codex-spec
+name: cda-spec
 description: Create or amend a dated mission spec, prove intent in reviewable artifacts and prepare scoped, non-redundant execution under standing approval.
 ---
 
@@ -11,7 +11,7 @@ Before acting, read `.codex/guidelines/spec-workflow.md`. It is the canonical co
 
 ## Resolve the mission and authority
 
-The argument is the mission. If empty, ask what the mission is. Route bounded work to `$codex-plan`; route an undefined project needing current documentation to `$codex-project-docs` when installed. A defined mission may stay here while its requirements are clarified.
+The argument is the mission. If empty, ask what the mission is. Route bounded work to `$cda-plan`; route an undefined project needing current documentation to `$cda-project-docs` when installed. A defined mission may stay here while its requirements are clarified.
 
 Read `.claudart/CONTEXT.md`, `.claudart/specs/INDEX.md`, the root knowledge map, relevant project documentation and recent Git history. Additional knowledge retrieval follows `knowledge-management.md`. Proposed behavior is not implemented project reality.
 
@@ -49,4 +49,4 @@ Read the global contract and inspect the plan as an executor without interview c
 
 Set `poc-review`, sync INDEX and present the folder, reference/demo, scope, open decisions and task/phase outline. Report **Commit cadence**: `commits: per-task` (default), or the selected `per-phase`/`user` setting. Explain that approving SPEC + ROADMAP grants standing implementation approval within existing authority; it does not itself request execution or authorize external actions.
 
-On approval, set `ready` and sync INDEX. Approval alone stops there. If execution was also requested, hand directly to `$codex-spec-run` in this session; the runner owns `ready → running`. A new session is optional. Enthusiasm about the POC is not an explicit approval.
+On approval, set `ready` and sync INDEX. Approval alone stops there. If execution was also requested, hand directly to `$cda-spec-run` in this session; the runner owns `ready → running`. A new session is optional. Enthusiasm about the POC is not an explicit approval.

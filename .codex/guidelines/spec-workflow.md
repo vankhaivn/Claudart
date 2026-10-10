@@ -1,13 +1,13 @@
 ---
 paths: ["**/*"]
 description: Dated mission-scale specs with standing approval, scoped context loading, owned execution state and evidence-driven verification through final user review.
-when_to_use: Whenever the user invokes `$codex-spec` or `$codex-spec-run`, when a spec folder under `.claudart/specs/` is open or referenced, or when resuming mission-scale work that spans many sessions.
+when_to_use: Whenever the user invokes `$cda-spec` or `$cda-spec-run`, when a spec folder under `.claudart/specs/` is open or referenced, or when resuming mission-scale work that spans many sessions.
 tags: [specs, loop-engineering, autonomy, cross-session, missions]
 ---
 
 # Spec Workflow (Loop Engineering)
 
-A **spec** is a mission that needs a frozen intent, a phased plan, standing approval and recovery across sessions. Use `$codex-plan` for bounded work whose decisions fit one task workspace; use `$codex-project-docs`, when installed, for an undefined project needing current documentation. A spec replaces the task layer for its scope: its executor never creates matching `.claudart/tasks/` work.
+A **spec** is a mission that needs a frozen intent, a phased plan, standing approval and recovery across sessions. Use `$cda-plan` for bounded work whose decisions fit one task workspace; use `$cda-project-docs`, when installed, for an undefined project needing current documentation. A spec replaces the task layer for its scope: its executor never creates matching `.claudart/tasks/` work.
 
 Both runtimes use the same dated workspace under `.claudart/specs/`. Resume the same workspace regardless of its `agent` metadata; it records provenance, not ownership or permission. Changing runtimes preserves scope, approval, execution evidence and review gates. Serialize writes and re-read their owners before updating them.
 
@@ -26,7 +26,7 @@ Both runtimes use the same dated workspace under `.claudart/specs/`. Resume the 
 ```
 
 - The folder name is `<created>-<slug>`; use a creation date and a short slug of 2–5 lowercase kebab-case words. Never nest active specs.
-- `$codex-spec-run` resolves either the dated folder id or its SPEC `slug`. An omitted argument selects the only active ready/running/blocked/review mission; ask only if several match. Report archived matches without executing them.
+- `$cda-spec-run` resolves either the dated folder id or its SPEC `slug`. An omitted argument selects the only active ready/running/blocked/review mission; ask only if several match. Report archived matches without executing them.
 - **One editable owner per fact.** SPEC defines behavior; ROADMAP owns current execution state and the verification plan; LEDGER owns results/history; NOTES keeps useful reasoning that has no other current owner. Link to an existing architecture document or runbook instead of restating its contracts or procedures.
 - SPEC scenarios have stable IDs, not mutable completion checkboxes. Optional acceptance/release reports are derived views with source references, never another authority. INDEX is a cache and CONTEXT may contain one pointer.
 - Update SPEC `updated:` when its contract or lifecycle metadata changes, not after every task. Current execution activity is in ROADMAP/LEDGER. These ownership rules replace duplicate updates; they do not require generated reports, a new state engine or per-task compliance documents.
@@ -158,7 +158,7 @@ An unmatched `task-started` or `delegated` marks interrupted work. Locate unreso
 
 Keep notes declarative and curated. Remove resolved reasoning or route the established fact to its owner, leaving a pointer when helpful. Approved scope belongs in SPEC, implementation decisions in their design/plan owner, past attempts in LEDGER, and acceptance gaps in ROADMAP. Do not copy those into NOTES.
 
-The existing 150-line ceiling is a backstop, not a context budget: do not pack paragraphs to satisfy it or automatically read the entire file. Load relevant notes only. Flag durable descriptive candidates `→ graduate: knowledge/` and recurring behavior `→ graduate: $codex-learn`; a local scope does not disqualify a fact. Uncertainty stays here, not in canonical knowledge.
+The existing 150-line ceiling is a backstop, not a context budget: do not pack paragraphs to satisfy it or automatically read the entire file. Load relevant notes only. Flag durable descriptive candidates `→ graduate: knowledge/` and recurring behavior `→ graduate: $cda-learn`; a local scope does not disqualify a fact. Uncertainty stays here, not in canonical knowledge.
 
 For a direct knowledge mutation, read `knowledge-management.md` and its maintenance reference; require the full capture gate and an immediate-promotion trigger. Update the existing owner and reachable map atomically, then run `bash .codex/scripts/knowledge-check.sh --root .`. Checkpoint bulk-maintains remaining flags. This exception does not authorize production implementation during drafting.
 
@@ -210,13 +210,13 @@ The existing final verification plan must exercise the candidate's relevant comp
 - After two exploration passes with no new facts, act on available evidence or block the affected work. Explicit user/runtime budgets remain authoritative; do not invent resource estimates, attempt-accounting systems or model/rotation thresholds.
 - If no independent runnable task remains with unresolved blockers, append `circuit-breaker`, set `status: blocked`, sync INDEX and report the exact unlock condition. Never weaken acceptance or silently loop.
 
-Resume a blocked mission with the same `$codex-spec-run`. Read the diagnosis/delta; continue when a materially different evidence-backed path exists. Clear only the affected block, or supersede dead work with the smallest approved-scope replacement and log `replanned`. Scope ambiguity remains blocked on the missing decision. Keep the amendment in the workspace, not in a pasted handoff prompt.
+Resume a blocked mission with the same `$cda-spec-run`. Read the diagnosis/delta; continue when a materially different evidence-backed path exists. Clear only the affected block, or supersede dead work with the smallest approved-scope replacement and log `replanned`. Scope ambiguity remains blocked on the missing decision. Keep the amendment in the workspace, not in a pasted handoff prompt.
 
 ## Rotation and Interruption
 
 Offer rotation at useful phase boundaries or after context degradation once in-flight work is safe. Report progress and unresolved delta; a decline or no reply means continue authorized work.
 
-On an affirmative request, append `rotation-checkpoint` with the next task and references, then use `$codex-checkpoint` to sync INDEX/CONTEXT pointers and evaluate eligible NOTES candidates. Do not bump SPEC just for a rotation or create `.claudart/HANDOFF.md` for spec work. The next session uses `$codex-start` and `$codex-spec-run`.
+On an affirmative request, append `rotation-checkpoint` with the next task and references, then use `$cda-checkpoint` to sync INDEX/CONTEXT pointers and evaluate eligible NOTES candidates. Do not bump SPEC just for a rotation or create `.claudart/HANDOFF.md` for spec work. The next session uses `$cda-start` and `$cda-spec-run`.
 
 An interrupt is recoverable like a crash. Verify unmatched work and any evidence/disposition mismatch before repeating it; do not require the user to wait for a clean boundary.
 
@@ -234,12 +234,12 @@ Classify feedback before unlocking:
 
 - **Anchored defect:** contradicts an exact approved scenario, Must-NOT-Have clause or POC observable. Record the baseline/provisional impact in ROADMAP, append the failure, reopen responsible work and return to `running`.
 - **Explicit bounded review patch:** one concrete user-requested delta, with no conflict with frozen intent, unresolved design choice or effects that escape a defensible local boundary. Record the request as `scope-change`, amend SPEC with its observable, add only necessary work, record baseline/impact and return to `running`. Implement only the stated observable, direct dependency closure and proof; no adjacent hardening, documentation, refactors or extra gates.
-- **Material or ambiguous amendment:** keep the lock, explain the scope delta and request amendment approval. On explicit approval return to `drafting` and `$codex-spec` for renewed standing approval.
+- **Material or ambiguous amendment:** keep the lock, explain the scope delta and request amendment approval. On explicit approval return to `drafting` and `$cda-spec` for renewed standing approval.
 
 Broad requests such as “quality” or “production-ready” alone are not defect anchors. Completion confirmation closes the mission, never the executor's own PASS:
 
 1. Set `status: done` and append one completion line to `.claudart/JOURNAL.md`, pointing to the archived SPEC.
-2. Evaluate NOTES graduation candidates under the knowledge contract; preserve uncertainty and propose `$codex-learn` for behavioral lessons.
+2. Evaluate NOTES graduation candidates under the knowledge contract; preserve uncertainty and propose `$cda-learn` for behavioral lessons.
 3. Move the whole folder to `.claudart/specs/done/YYYY-MM-DD-<slug>/` and sync INDEX. Repair every knowledge `sources` entry that points into the moved folder to its archived path; path repair changes neither `updated` nor `last_verified`. Run the knowledge checker after the move if any knowledge file changed.
 
 ## Status and Index
@@ -259,4 +259,4 @@ INDEX is derived from SPEC metadata, with Active links to non-terminal top-level
 
 ## Relationship to CLAUDART
 
-Keep one CONTEXT pointer to the active spec; never copy its plan there or into task indexes. Start reads the registry, checkpoint maintains it and eligible candidates, and the selected author/runner owns transitions. Knowledge follows its existing owner/map and validation contract. Recurring behavior may be flagged for `$codex-learn`; the executor does not rewrite framework guidelines mid-mission.
+Keep one CONTEXT pointer to the active spec; never copy its plan there or into task indexes. Start reads the registry, checkpoint maintains it and eligible candidates, and the selected author/runner owns transitions. Knowledge follows its existing owner/map and validation contract. Recurring behavior may be flagged for `$cda-learn`; the executor does not rewrite framework guidelines mid-mission.

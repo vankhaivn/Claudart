@@ -64,7 +64,7 @@ Use the runtime's read-only exploration role for specific codebase questions and
 
 ## The task-file `delegation:` field records strategy, not permission
 
-The `$codex-plan` task-file field carries a plan into execution; it does not authorize execution or override runtime restrictions:
+The `$cda-plan` task-file field carries a plan into execution; it does not authorize execution or override runtime restrictions:
 
 - **`none`** — no strategy recorded; use harness judgment when execution is authorized. It does not prohibit delegation.
 - **`strategy-only`** — use the recorded decomposition where it fits; no extra delegation approval round-trip.
@@ -98,7 +98,7 @@ For long-running work with an authorized task/spec workspace, record outstanding
 
 For retrospectives, record significant coordination incidents, such as costly rework or a capability-driven escalation/takeover, in the existing authorized work surface or handoff: affected unit/profile, evidence, and corrective action. Do not require a retrospective report for every spawn. Use repeated evidence of capability limits to route similar units higher within the ceilings; do not turn an isolated failure into a global judgment about a model.
 
-Treat returned knowledge as evidence to verify. WIP, proposals, and uncertainty remain candidates in an authorized work surface; recurring behavior goes through `$codex-learn`. Before a durable fact promotion or assigned knowledge mutation, follow `knowledge-management.md` and its maintenance reference, including capture triggers, owner + reachable-map atomicity, and checker validation. A knowledge-writing worker must own both topic and map; after integration verify the checker result covers the resulting state. Do not rely on worker thread history as durable project memory.
+Treat returned knowledge as evidence to verify. WIP, proposals, and uncertainty remain candidates in an authorized work surface; recurring behavior goes through `$cda-learn`. Before a durable fact promotion or assigned knowledge mutation, follow `knowledge-management.md` and its maintenance reference, including capture triggers, owner + reachable-map atomicity, and checker validation. A knowledge-writing worker must own both topic and map; after integration verify the checker result covers the resulting state. Do not rely on worker thread history as durable project memory.
 
 ## Cost and recursion
 

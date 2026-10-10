@@ -152,6 +152,20 @@ try {
     }
   }
 
+  check("both adapters expose the same cda- workflow names", () => {
+    const actions = [
+      "start", "plan", "spec", "spec-run", "checkpoint", "handoff",
+      "learn", "doctor", "refactor-memory",
+    ];
+    for (const action of actions) {
+      const claude = join(root, `.claude/commands/cda-${action}.md`);
+      const codex = join(root, `.agents/skills/cda-${action}/SKILL.md`);
+      assert(existsSync(claude), claude);
+      assert(existsSync(codex), codex);
+      assert.match(read(codex), new RegExp(`^name: cda-${action}$`, "m"));
+    }
+  });
+
   for (const mode of ["claude", "codex", "both"]) {
     const dest = join(scratch, `install ${mode}`);
     install(dest, [`--${mode}`]);
@@ -166,8 +180,8 @@ try {
       assert(!existsSync(join(dest, ".codex/AGENTS.md")));
     });
     check(`${mode}: core install leaves optional Project Docs absent`, () => {
-      assert(!existsSync(join(dest, ".claude/commands/project-docs.md")));
-      assert(!existsSync(join(dest, ".agents/skills/codex-project-docs")));
+      assert(!existsSync(join(dest, ".claude/commands/cda-project-docs.md")));
+      assert(!existsSync(join(dest, ".agents/skills/cda-project-docs")));
       assert(!existsSync(join(dest, "docs")));
     });
     check(
@@ -272,9 +286,14 @@ try {
   }
   const moduleSource = join(root, "modules/project-docs");
   const moduleEntries = [
-    ".claude/commands/project-docs.md",
-    ".agents/skills/codex-project-docs/SKILL.md",
+    ".claude/commands/cda-project-docs.md",
+    ".agents/skills/cda-project-docs/SKILL.md",
   ];
+  check("optional module exposes cda-project-docs in both adapters", () => {
+    for (const entry of moduleEntries) assert(existsSync(join(moduleSource, entry)));
+    assert.match(read(join(moduleSource, moduleEntries[1])), /^name: cda-project-docs$/m);
+  });
+
   check("output examples do not hide missing prose resource links", () => {
     const fixture = join(scratch, "example links");
     mkdirSync(fixture);
@@ -304,7 +323,7 @@ try {
   check(
     "Project Docs output templates and example content match across runtimes",
     () => {
-      const codex = join(moduleSource, ".agents/skills/codex-project-docs");
+      const codex = join(moduleSource, ".agents/skills/cda-project-docs");
       const claude = join(moduleSource, ".claude/references/project-docs");
       for (const [from, to] of [
         ["assets/templates", "assets/templates"],
@@ -475,7 +494,7 @@ try {
         existsSync(
           join(
             dest,
-            ".agents/skills/codex-project-docs/references/ownership.md",
+            ".agents/skills/cda-project-docs/references/ownership.md",
           ),
         ),
       );
@@ -516,7 +535,7 @@ try {
       install(dest, ["--claude", "--force"]);
       assert.equal(read(join(dest, ".claude/CLAUDE.md")), legacy);
       assert(!existsSync(join(dest, "CLAUDE.md")));
-      assert(existsSync(join(dest, ".claude/commands/start.md")));
+      assert(existsSync(join(dest, ".claude/commands/cda-start.md")));
     },
   );
   check(
@@ -673,8 +692,8 @@ try {
       assert.match(contract, /Follow `git-workflow\.md`/);
     }
     for (const entrypoint of [
-      ".claude/commands/spec.md",
-      ".agents/skills/codex-spec/SKILL.md",
+      ".claude/commands/cda-spec.md",
+      ".agents/skills/cda-spec/SKILL.md",
     ]) {
       const text = read(join(root, entrypoint));
       assert.match(text, /\*\*Commit cadence\*\*: `commits: per-task` \(default\)/);
@@ -682,8 +701,8 @@ try {
   });
   check("Git consumers use the central policy while explicit exceptions remain", () => {
     for (const file of [
-      ".claude/commands/refactor-memory.md",
-      ".agents/skills/codex-refactor-memory/SKILL.md",
+      ".claude/commands/cda-refactor-memory.md",
+      ".agents/skills/cda-refactor-memory/SKILL.md",
     ]) {
       const text = read(join(root, file));
       assert.match(text, /git-workflow\.md/);
@@ -786,8 +805,8 @@ try {
           file,
         );
       for (const [adapter, rules, commands, suffix] of [
-        [".claude", ".claude/rules", ".claude/commands/", ".md"],
-        [".codex", ".codex/guidelines", ".agents/skills/codex-", "/SKILL.md"],
+        [".claude", ".claude/rules", ".claude/commands/cda-", ".md"],
+        [".codex", ".codex/guidelines", ".agents/skills/cda-", "/SKILL.md"],
       ]) {
         for (const workflow of ["task-management", "spec-workflow"]) {
           const contract = read(join(root, rules, `${workflow}.md`));

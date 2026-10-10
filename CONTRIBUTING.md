@@ -171,7 +171,7 @@ Do not move this repository Git workflow into `.claude/rules/`, `.codex/guidelin
 
 If you're contributing new logic, please adhere to our directory structure:
 
-- `.claude/commands/`: CLAUDART slash commands (`/learn`, `/checkpoint`, etc.). Your command files here should detail the steps the AI takes.
+- `.claude/commands/`: CLAUDART slash commands (`/cda-learn`, `/cda-checkpoint`, etc.). Your command files here should detail the steps the AI takes.
 - `.claude/agents/`: Highly specialized role-based instruction sets (`reviewer.md`, `architect.md`, etc.). Make sure agent prompts are self-contained and heavily instruct the AI on its specific persona and constraints.
 - `.claudart/knowledge/`: Durable, **descriptive** project reference — domain, architecture, glossary, and pointers to canonical docs in other folders. Distinct from rules/guidelines (prescriptive). Only the root `INDEX.md` is surfaced by `start`; optional `_maps/`, topic outlines, and the smallest useful sections are loaded on demand.
 - `.claude/rules/knowledge-management.md` and `.codex/guidelines/knowledge-management.md`: the mirrored semantic contract for capture, lifecycle, bounded retrieval, and project-fact classification. Keep their intent in parity.
