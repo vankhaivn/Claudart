@@ -7,7 +7,7 @@ CLAUDART keeps Claude adapter internals inside `.claude/` and shared project sta
 ## Core Commands
 
 - `/cda-start` orients a new session from `.claudart/CONTEXT.md`, task/spec indexes, the root knowledge router, and recent git history.
-- `/cda-plan <description>` creates a lightweight workspace at `.claudart/tasks/YYYY-MM-DD-NNN-<slug>/TASK.md` when work needs a persistent plan or the user explicitly requests one. Small, clear edits do not require a workspace; file count alone is not a trigger. Artifacts are created only for a concrete need.
+- `/cda-task <description>` creates a lightweight workspace at `.claudart/tasks/YYYY-MM-DD-NNN-<slug>/TASK.md` when work needs a persistent plan or the user explicitly requests one. Small, clear edits do not require a workspace; file count alone is not a trigger. Artifacts are created only for a concrete need.
 - `/cda-spec <mission>` creates a dated mission-scale spec workspace in `.claudart/specs/` — interview → POC artifact → decision-complete SPEC + ROADMAP, approved once as a standing approval.
 - `/cda-spec-run <slug>` executes an approved spec autonomously until final review — verifies acceptance, records ROADMAP task dispositions and evidence, blocks unchanged failure loops, and offers session rotation at phase boundaries.
 - `/cda-refactor-memory` consolidates the memory system and normalizes knowledge in place.

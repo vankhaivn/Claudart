@@ -19,7 +19,7 @@ This repository contains CLAUDART, a markdown-based operating layer for AI codin
 ## Core Commands
 
 - `$cda-start` — orients a new session from current state, task/spec indexes, the root knowledge map only, and recent Git history; it never runs the knowledge checker.
-- `$cda-plan <description>` — creates a lightweight workspace at `.claudart/tasks/YYYY-MM-DD-NNN-<slug>/TASK.md` when work needs a persistent plan or the user explicitly requests one. Small, clear edits do not require a workspace; file count alone is not a trigger. Artifacts are created only for a concrete need.
+- `$cda-task <description>` — creates a lightweight workspace at `.claudart/tasks/YYYY-MM-DD-NNN-<slug>/TASK.md` when work needs a persistent plan or the user explicitly requests one. Small, clear edits do not require a workspace; file count alone is not a trigger. Artifacts are created only for a concrete need.
 - `$cda-spec <mission>` — creates a mission-scale spec workspace in `.claudart/specs/` — interview → POC artifact → decision-complete SPEC + ROADMAP, approved once as a standing approval.
 - `$cda-spec-run <slug>` — executes an approved spec autonomously until final review — verifies acceptance, records ROADMAP task dispositions and evidence, blocks unchanged failure loops, and offers session rotation at phase boundaries.
 - `$cda-project-docs` — when `.agents/skills/cda-project-docs/SKILL.md` is installed, initializes, adopts, updates, audits, or retires current project documentation. Discovery is a focused step when project intent remains unclear.

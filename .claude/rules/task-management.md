@@ -1,7 +1,7 @@
 ---
-paths: [".claude/commands/cda-plan.md"]
+paths: [".claude/commands/cda-task.md"]
 description: How agents create, maintain, resume, and complete persistent implementation plans stored in `.claudart/tasks/`. Replaces session-only plan mode with lightweight task workspaces.
-when_to_use: Whenever the user invokes `/cda-plan`, when a task workspace is open or referenced, or when resuming work that may have an active task in `.claudart/tasks/`.
+when_to_use: Whenever the user invokes `/cda-task`, when a task workspace is open or referenced, or when resuming work that may have an active task in `.claudart/tasks/`.
 tags: [tasks, planning, persistence, cross-session]
 ---
 
@@ -44,7 +44,7 @@ Mission-scale work runs one layer up, in `.claudart/specs/` (see `spec-workflow.
 - **Discovery**: read only `tasks/*/TASK.md` and `tasks/done/*/TASK.md`, with valid workspace ids at those exact depths. Exclude `done/` itself from active discovery. Never recursively discover task bodies, parse attachments as tasks, or follow workspace or `TASK.md` symlinks. Flat Markdown tasks are outside this contract; there is no compatibility or automatic migration path.
 - **Allocation**: reserve sequence numbers from matching directory names in both active and archived locations, including incomplete workspaces missing `TASK.md`. Choose today's highest number + 1; start at 001 when absent. Re-check before creation; never reuse or overwrite a directory. At 999, report exhaustion rather than wrapping.
 - **`done/` is archive.** Move the entire workspace on user-confirmed completion or cancellation. Preserve supporting files; never delete completed workspaces.
-- **`index.md` is a dashboard**, maintained by `/cda-plan` and `/cda-checkpoint`. `TASK.md` owns task state; the index is a convenience cache linking directly to it.
+- **`index.md` is a dashboard**, maintained by `/cda-task` and `/cda-checkpoint`. `TASK.md` owns task state; the index is a convenience cache linking directly to it.
 
 ## Artifact Discipline
 
@@ -379,7 +379,7 @@ Never assume the file is still accurate without verification. Memory Hints are t
 ## `index.md` Format
 
 ```markdown
-<!-- .claudart/tasks/index.md — dashboard of task workspaces. Maintained by /cda-plan and /cda-checkpoint. -->
+<!-- .claudart/tasks/index.md — dashboard of task workspaces. Maintained by /cda-task and /cda-checkpoint. -->
 
 ## Active
 
@@ -410,7 +410,7 @@ Canonical numbers for flagging stalled tasks. `/cda-start` surfaces them, `/cda-
 
 CONTEXT.md and task files are complementary, not exclusive:
 
-- **CONTEXT.md** holds two things: (a) a one-line pointer to the currently-focused task (`Working task \`<slug>\` (see .claudart/tasks/<task-id>/TASK.md)`) so `/cda-start`sees task work at a glance, and (b) ad-hoc work the user asked for **without** a`/cda-plan` — quick fixes, transient tweaks, mid-flight pivots that don't justify a full task document.
+- **CONTEXT.md** holds two things: (a) a one-line pointer to the currently-focused task (`Working task \`<slug>\` (see .claudart/tasks/<task-id>/TASK.md)`) so `/cda-start`sees task work at a glance, and (b) ad-hoc work the user asked for **without** a`/cda-task` — quick fixes, transient tweaks, mid-flight pivots that don't justify a full task document.
 - **Task file** holds the full body: Purpose, Plan of Work, Concrete Steps, Decisions, Memory Hints, etc.
 - **`tasks/index.md`** is the canonical dashboard for _all_ active tasks; CONTEXT only mentions the one in focus.
 

@@ -51,7 +51,7 @@ for layer in claude codex; do
   if [ "$layer" = claude ]; then
     rule="$REPO_ROOT/.claude/rules/task-management.md"
     commands="$REPO_ROOT/.claude/commands"
-    plan="$commands/cda-plan.md"
+    plan="$commands/cda-task.md"
     start="$commands/cda-start.md"
     checkpoint="$commands/cda-checkpoint.md"
     doctor="$commands/cda-doctor.md"
@@ -59,7 +59,7 @@ for layer in claude codex; do
   else
     rule="$REPO_ROOT/.codex/guidelines/task-management.md"
     commands="$REPO_ROOT/.agents/skills"
-    plan="$commands/cda-plan/SKILL.md"
+    plan="$commands/cda-task/SKILL.md"
     start="$commands/cda-start/SKILL.md"
     checkpoint="$commands/cda-checkpoint/SKILL.md"
     doctor="$commands/cda-doctor/SKILL.md"

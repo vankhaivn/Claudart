@@ -29,7 +29,7 @@ Claude Code and Codex read and write the same `.claudart/` folder, so you can sw
 | Mode               | Use it when                                                        | What gets saved                 |
 | ------------------ | ------------------------------------------------------------------ | ------------------------------- |
 | Just ask           | The change is small, clear, and low risk                           | Nothing extra; Git history only |
-| Task (`/cda-plan`) | Work needs a plan that survives interruption, or you asked for one | One `TASK.md`                   |
+| Task (`/cda-task`) | Work needs a plan that survives interruption, or you asked for one | One `TASK.md`                   |
 | Spec (`/cda-spec`) | A whole mission with several phases that you approve once          | A folder in `.claudart/specs/`  |
 
 Rules of thumb:
@@ -40,7 +40,7 @@ Rules of thumb:
 
 ## 3. Tasks
 
-`/cda-plan <task>` creates `.claudart/tasks/YYYY-MM-DD-NNN-<slug>/TASK.md`. That one file holds the current state and next action, the goal, the steps with a check for each, the acceptance criteria, the decisions made, and the outcome. Extra files go in `artifacts/` only when they are really needed, such as a ZIP that reproduces a bug.
+`/cda-task <task>` creates `.claudart/tasks/YYYY-MM-DD-NNN-<slug>/TASK.md`. That one file holds the current state and next action, the goal, the steps with a check for each, the acceptance criteria, the decisions made, and the outcome. Extra files go in `artifacts/` only when they are really needed, such as a ZIP that reproduces a bug.
 
 ### What you see
 
@@ -147,7 +147,7 @@ Installed with `--project-docs`. It adds `/cda-project-docs` (or `$cda-project-d
 | Claude Code            | Codex                  | Purpose                                      |
 | ---------------------- | ---------------------- | -------------------------------------------- |
 | `/cda-start`           | `$cda-start`           | Orient a session                             |
-| `/cda-plan <task>`     | `$cda-plan <task>`     | Create or resume a task                      |
+| `/cda-task <task>`     | `$cda-task <task>`     | Create or resume a task                      |
 | `/cda-spec <mission>`  | `$cda-spec <mission>`  | Create and approve a spec                    |
 | `/cda-spec-run <slug>` | `$cda-spec-run <slug>` | Run an approved spec to final review         |
 | `/cda-checkpoint`      | `$cda-checkpoint`      | Save current state and durable facts         |

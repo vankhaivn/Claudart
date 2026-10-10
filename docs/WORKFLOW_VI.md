@@ -29,7 +29,7 @@ Claude Code và Codex đọc ghi cùng thư mục `.claudart/`, nên bạn có t
 | Chế độ             | Dùng khi                                                   | Lưu lại gì                           |
 | ------------------ | ---------------------------------------------------------- | ------------------------------------ |
 | Nhờ thẳng          | Thay đổi nhỏ, rõ ràng, ít rủi ro                           | Không có gì thêm, chỉ lịch sử Git    |
-| Task (`/cda-plan`) | Việc cần kế hoạch giữ được qua gián đoạn, hoặc bạn yêu cầu | Một file `TASK.md`                   |
+| Task (`/cda-task`) | Việc cần kế hoạch giữ được qua gián đoạn, hoặc bạn yêu cầu | Một file `TASK.md`                   |
 | Spec (`/cda-spec`) | Cả một nhiệm vụ nhiều giai đoạn mà bạn duyệt một lần       | Một thư mục trong `.claudart/specs/` |
 
 Mẹo:
@@ -40,7 +40,7 @@ Mẹo:
 
 ## 3. Task
 
-`/cda-plan <task>` tạo `.claudart/tasks/YYYY-MM-DD-NNN-<slug>/TASK.md`. File này chứa trạng thái hiện tại và bước kế tiếp, mục tiêu, các bước kèm cách kiểm tra từng bước, tiêu chí nghiệm thu, các quyết định đã đưa ra và kết quả. File phụ chỉ đặt vào `artifacts/` khi thật sự cần, ví dụ một file ZIP để tái hiện lỗi.
+`/cda-task <task>` tạo `.claudart/tasks/YYYY-MM-DD-NNN-<slug>/TASK.md`. File này chứa trạng thái hiện tại và bước kế tiếp, mục tiêu, các bước kèm cách kiểm tra từng bước, tiêu chí nghiệm thu, các quyết định đã đưa ra và kết quả. File phụ chỉ đặt vào `artifacts/` khi thật sự cần, ví dụ một file ZIP để tái hiện lỗi.
 
 ### Bạn sẽ thấy gì
 
@@ -147,7 +147,7 @@ Cài bằng `--project-docs`. Module thêm `/cda-project-docs` (hoặc `$cda-pro
 | Claude Code            | Codex                  | Mục đích                                   |
 | ---------------------- | ---------------------- | ------------------------------------------ |
 | `/cda-start`           | `$cda-start`           | Định hướng phiên                           |
-| `/cda-plan <task>`     | `$cda-plan <task>`     | Tạo hoặc tiếp tục một task                 |
+| `/cda-task <task>`     | `$cda-task <task>`     | Tạo hoặc tiếp tục một task                 |
 | `/cda-spec <mission>`  | `$cda-spec <mission>`  | Tạo và duyệt spec                          |
 | `/cda-spec-run <slug>` | `$cda-spec-run <slug>` | Chạy spec đã duyệt tới bước review cuối    |
 | `/cda-checkpoint`      | `$cda-checkpoint`      | Lưu trạng thái hiện tại và sự thật lâu dài |

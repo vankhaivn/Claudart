@@ -8,7 +8,7 @@ Before acting, read `.claude/rules/spec-workflow.md`. It is the canonical contra
 
 ## Resolve the mission and authority
 
-The argument is the mission. If empty, ask what the mission is. Route bounded work to `/cda-plan`; route an undefined project needing current documentation to `/cda-project-docs` when installed. A defined mission may stay here while its requirements are clarified.
+The argument is the mission. If empty, ask what the mission is. Route bounded work to `/cda-task`; route an undefined project needing current documentation to `/cda-project-docs` when installed. A defined mission may stay here while its requirements are clarified.
 
 Read `.claudart/CONTEXT.md`, `.claudart/specs/INDEX.md`, the root knowledge map, relevant project documentation and recent Git history. Additional knowledge retrieval follows `knowledge-management.md`. Proposed behavior is not implemented project reality.
 

@@ -214,10 +214,10 @@ For `.claudart/JOURNAL.md`:
 
 For `.claudart/tasks/`:
 
-- If the folder does not exist but `/cda-plan` is documented in `.claude/commands/`, create only the canonical seed `index.md` and `done/.gitkeep`.
+- If the folder does not exist but `/cda-task` is documented in `.claude/commands/`, create only the canonical seed `index.md` and `done/.gitkeep`.
 - Inventory only `.claudart/tasks/*/TASK.md` and `.claudart/tasks/done/*/TASK.md` at the depths defined in `.claude/rules/task-management.md`. Do not recursively read attachments or follow workspace/`TASK.md` symlinks.
 - If `.claudart/tasks/done/.gitkeep` exists beside a real archived `<task-id>/TASK.md`, remove only that redundant placeholder and report the removal.
-- Preserve task workspaces and their supporting files. Do not modify, move, close, or normalize `TASK.md` or attachments; `/cda-plan` and `/cda-checkpoint` own task state and archival. Do not create `artifacts/`, extract archives, rewrite evidence, migrate flat tasks, or treat missing optional files as repair targets.
+- Preserve task workspaces and their supporting files. Do not modify, move, close, or normalize `TASK.md` or attachments; `/cda-task` and `/cda-checkpoint` own task state and archival. Do not create `artifacts/`, extract archives, rewrite evidence, migrate flat tasks, or treat missing optional files as repair targets.
 
 For `.claudart/specs/`:
 

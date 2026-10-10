@@ -44,14 +44,14 @@ The installer only adds missing files and never touches existing project state.
 
 The agent shows you a plan and waits for your approval before writing anything.
 
-All CLAUDART workflows use the same `cda-` name on both hosts: type `/cda-plan` in Claude Code or `$cda-plan` in Codex. The leading character is the host's invocation syntax, not part of the workflow name.
+All CLAUDART workflows use the same `cda-` name on both hosts: type `/cda-task` in Claude Code or `$cda-task` in Codex. The leading character is the host's invocation syntax, not part of the workflow name.
 
 ## Daily use
 
 | You want to                        | Claude Code            | Codex                  |
 | ---------------------------------- | ---------------------- | ---------------------- |
 | Start a session                    | `/cda-start`           | `$cda-start`           |
-| Plan work that should survive      | `/cda-plan <task>`     | `$cda-plan <task>`     |
+| Plan work that should survive      | `/cda-task <task>`     | `$cda-task <task>`     |
 | Define a large, multi-session job  | `/cda-spec <mission>`  | `$cda-spec <mission>`  |
 | Run an approved spec               | `/cda-spec-run <slug>` | `$cda-spec-run <slug>` |
 | Save state at a stopping point     | `/cda-checkpoint`      | `$cda-checkpoint`      |
