@@ -272,7 +272,7 @@ Its values — `none`, `strategy-only`, `authorized` — and **whether they gate
 
 When `status: in-progress`, the agent maintains `TASK.md` as it works. Save supporting files only under Artifact Discipline and update their purpose links plus the relevant conclusion/check in `TASK.md` in the same work unit:
 
-1. Rewrite **Current State** whenever the status, the next action, or what is waiting changes. Replace superseded wording; history lives in the Decision Log, Surprises, and version control, not in stacked status notes.
+1. Rewrite **Current State** whenever the status, the next action, or what is waiting changes. Replace superseded wording; history lives in the Decision Log and Surprises, not in stacked status notes.
 2. After completing each step, flip `- [ ]` → `- [x]`.
 3. Bump frontmatter `updated:` whenever the file is touched.
 4. Append to **Surprises & Discoveries** only when reality diverges from the plan (e.g., file moved, dependency missing, existing helper found, a check failure that changed the approach). Prefix each entry with a `(YYYY-MM-DD HH:MMZ)` UTC timestamp. Progress narration and routine check results do not belong there.
@@ -281,7 +281,7 @@ When `status: in-progress`, the agent maintains `TASK.md` as it works. Save supp
 7. **Do not delete or rewrite steps that were skipped or abandoned** — strike them through with `~~text~~` and add a Surprises entry explaining why.
 8. Route findings by `.claude/rules/knowledge-management.md`: keep task/WIP/proposal/uncertainty here; promote an eligible descriptive fact directly only under one of the rule's immediate-promotion triggers. Run the checker after a knowledge mutation.
 
-The plan is a living document. Edits to it are part of the work, not an afterthought. Every Decision Log and Surprises entry carries the full `YYYY-MM-DD HH:MMZ` UTC time, read from the system clock when the entry is written (for example `date -u +'%Y-%m-%d %H:%MZ'`). Never estimate, backfill, or batch-apply a time; when no clock is readable, write the date only. Completed steps carry no time: list order and version history already order them.
+The plan is a living document. Edits to it are part of the work, not an afterthought. Every Decision Log and Surprises entry carries the full `YYYY-MM-DD HH:MMZ` UTC time, read from the system clock when the entry is written (for example `date -u +'%Y-%m-%d %H:%MZ'`). Never estimate, backfill, or batch-apply a time; when no clock is readable, write the date only. Completed steps carry no time: list order already orders them.
 
 ## Completion — Reviewer-Gated Closeout
 
