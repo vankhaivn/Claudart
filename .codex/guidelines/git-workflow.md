@@ -23,6 +23,7 @@ If authority is unclear, keep the verified worktree intact and report the ambigu
 
 - Inspect `git status --short` and the relevant diff before staging.
 - Commit only work owned by the current task plus necessary workflow-state updates that belong to the same boundary. Preserve unrelated and pre-existing changes.
+- Commit a state update (`.claudart/` CONTEXT, JOURNAL, task or index) together with the change it describes. Outside checkpoint and memory maintenance, never create a commit that touches only state files: when work changes nothing tracked except state (an operational action, restart or cleanup), leave that edit for the next related commit or checkpoint.
 - Stage explicit paths or owned hunks. Never use broad staging such as `git add -A` or `git add .` merely for convenience.
 - If a file mixes owned and unrelated edits that cannot be separated safely, leave it unstaged and report the incomplete persistence.
 - By default, commit only after the relevant verification passes. A known-failing/WIP snapshot requires an explicit user request.
