@@ -178,8 +178,6 @@ References are starting points, not proof of completeness. Check that they resol
 
 Compaction alone does not require reloading every full document. Missing/broken references, unclear contract scope, mismatched state or an interrupted write require broader inspection, up to complete files when necessary. Do not guess at an unread boundary to save context.
 
-**Legacy recovery:** existing workspaces may keep acceptance checkboxes in SPEC or Current Acceptance Delta in NOTES. Read those sections and LEDGER evidence before relying on them; old ticks alone never establish PASS. On the next authorized state update, reconcile unresolved gaps into ROADMAP and replace the old NOTES delta with a pointer, preserving baseline/impact/history. Do not rewrite approved scenario text or drop unresolved work. At a read-only lock, inspect/report inconsistencies without migrating them. A flat legacy document may need a full read until its relevant contracts can be identified.
-
 ## Select Verification Before Expensive Work
 
 Use the existing task `verify:` and phase/final coverage plan. Before the first expensive batch, or after its scope/verifiers/prerequisites change, reconcile the scenarios due at that boundary with concrete commands/cases, fixtures, expected observables and execution prerequisites. Use discovery/listing or focused inspection when needed; a test filename or count alone does not demonstrate coverage. Future live/manual observations remain pending with explicit owners rather than blocking their software prerequisites.

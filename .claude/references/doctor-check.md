@@ -41,4 +41,4 @@ Findings use `SEVERITY|CODE|path:line|message`. `D` codes belong to doctor check
 - **Exit 1:** contract findings meet that threshold. Report them with their original paths and severities.
 - **Exit 2:** usage/runtime failure or an incomplete mandatory checker. Report the failure; never declare the installation healthy.
 
-Do not run knowledge validation again after this wrapper has invoked it. If the wrapper itself is missing, the doctor workflow may use the legacy knowledge checker once and report the broader mechanical checks as unavailable. Never manufacture a replacement parser during a doctor run.
+Do not run knowledge validation again after this wrapper has invoked it. Never manufacture a replacement parser during a doctor run.

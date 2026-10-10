@@ -22,10 +22,6 @@ Execute the following steps systematically, without losing essential project con
 ## 1. Resolve The Memory Shape
 
 - Treat `CLAUDE.md` as the canonical loader for current CLAUDART projects.
-- If legacy `.claude/CLAUDE.md` also exists, compare it with `CLAUDE.md` before changing either file.
-  - If `CLAUDE.md` is missing, propose relocating the legacy loader to root while preserving project-authored content.
-  - If both are equivalent, retire the legacy duplicate only within the user's authorized scope.
-  - If they differ, merge deliberately into `CLAUDE.md`; never silently discard project-specific instructions from either file.
 - Search skills, agents, and rules for references to deleted or deprecated memory files and update them during the refactor.
 
 ## 2. Analyze The Project
