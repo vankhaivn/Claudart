@@ -45,10 +45,11 @@ When a change replaces an existing behavior, policy, schema, workflow, or instru
 - Remove transition-only wording such as "previously X, now Y", "no longer X", or similar audit narration when the old state has no current operational meaning.
 - Do not keep retired rule text or literals in regression tests merely to assert that they disappeared. Prefer assertions for the current positive contract.
 - Keep historical rationale in Issue, pull-request, and commit history when it materially helps review; do not copy that history into canonical product guidance by default.
-- Preserve old-state details only when they are themselves part of a live requirement, such as migration/upgrade instructions, backward compatibility, an active deprecation window, supported historical formats, rollback/recovery, or user-facing audit/history.
+- Ship no machinery that exists only to carry installations across an upstream rename or layout change: no legacy aliases, installer cleanup, fingerprint tables, fixtures, tests, or upgrade notes tied to a superseded command, skill, or path. Downstream agents reconcile upstream changes through the generic `INTEGRATE.md` protocol.
+- Preserve old-state details only when they are themselves part of a live requirement, such as supported historical formats, rollback/recovery, or user-facing audit/history.
 - An absence assertion is appropriate only when that absence is a current security, compatibility, or correctness invariant, not as a memorial of the implementation path.
 
-Before opening or refreshing a PR that replaces a contract, review the **final file state**, not only the diff. Scan changed canonical surfaces for stale transition wording, superseded literals, and unnecessary legacy/audit notes, and remove them unless one of the live-requirement exceptions above applies.
+Before opening or refreshing a PR that replaces a contract, review the **final file state**, not only the diff. Scan changed canonical surfaces for stale transition wording, superseded literals, unnecessary legacy/audit notes, and migration-only machinery, and remove them unless one of the live-requirement exceptions above applies.
 
 ## Git and GitHub Workflow
 
