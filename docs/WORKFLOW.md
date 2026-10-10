@@ -40,7 +40,7 @@ Rules of thumb:
 
 ## 3. Tasks
 
-`/cda-plan <task>` creates `.claudart/tasks/YYYY-MM-DD-NNN-<slug>/TASK.md`. That one file holds the goal, the steps with a check for each, the acceptance criteria, the decisions made, and the outcome. Extra files go in `artifacts/` only when they are really needed, such as a ZIP that reproduces a bug.
+`/cda-plan <task>` creates `.claudart/tasks/YYYY-MM-DD-NNN-<slug>/TASK.md`. That one file holds the current state and next action, the goal, the steps with a check for each, the acceptance criteria, the decisions made, and the outcome. Extra files go in `artifacts/` only when they are really needed, such as a ZIP that reproduces a bug.
 
 ### What you see
 
@@ -71,7 +71,7 @@ planning ──go──▶ in-progress ──agent proves all──▶ done
                                                      └──you report a problem──▶ in-progress
 ```
 
-A task can also be `blocked` or `cancelled`. Finished tasks move to `tasks/done/`. To resume later, name the task; the agent reads its `TASK.md` and only the files it needs next.
+A task can also be `blocked` or `cancelled`. Finished tasks move to `tasks/done/`; follow-up work after acceptance starts a new task. To resume later, name the task; the agent reads its `TASK.md` and only the files it needs next.
 
 ## 4. Specs for large work
 

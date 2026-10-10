@@ -40,7 +40,7 @@ Mẹo:
 
 ## 3. Task
 
-`/cda-plan <task>` tạo `.claudart/tasks/YYYY-MM-DD-NNN-<slug>/TASK.md`. File này chứa mục tiêu, các bước kèm cách kiểm tra từng bước, tiêu chí nghiệm thu, các quyết định đã đưa ra và kết quả. File phụ chỉ đặt vào `artifacts/` khi thật sự cần, ví dụ một file ZIP để tái hiện lỗi.
+`/cda-plan <task>` tạo `.claudart/tasks/YYYY-MM-DD-NNN-<slug>/TASK.md`. File này chứa trạng thái hiện tại và bước kế tiếp, mục tiêu, các bước kèm cách kiểm tra từng bước, tiêu chí nghiệm thu, các quyết định đã đưa ra và kết quả. File phụ chỉ đặt vào `artifacts/` khi thật sự cần, ví dụ một file ZIP để tái hiện lỗi.
 
 ### Bạn sẽ thấy gì
 
@@ -71,7 +71,7 @@ planning ──làm đi──▶ in-progress ──agent chứng minh đủ─�
                                                               └──bạn báo lỗi──▶ in-progress
 ```
 
-Task cũng có thể ở trạng thái `blocked` hoặc `cancelled`. Task xong được chuyển vào `tasks/done/`. Muốn làm tiếp sau này, chỉ cần nêu tên task; agent đọc `TASK.md` và chỉ những file cần cho bước kế tiếp.
+Task cũng có thể ở trạng thái `blocked` hoặc `cancelled`. Task xong được chuyển vào `tasks/done/`; việc phát sinh sau khi nghiệm thu được mở thành task mới. Muốn làm tiếp sau này, chỉ cần nêu tên task; agent đọc `TASK.md` và chỉ những file cần cho bước kế tiếp.
 
 ## 4. Spec cho việc lớn
 

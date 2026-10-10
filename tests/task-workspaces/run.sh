@@ -100,6 +100,11 @@ for layer in claude codex; do
   done
 
   assert_contains "$rule" '`TASK.md` is the only required file' "$layer has one required document"
+  assert_contains "$rule" 'Rewrite **Current State** whenever the status, the next action, or what is waiting changes.' "$layer keeps one rewritten current state"
+  assert_contains "$rule" 'Do not add top-level sections beyond the skeleton' "$layer keeps the skeleton closed"
+  assert_contains "$rule" 'Record each check'"'"'s **latest result** once' "$layer keeps only the latest check result"
+  assert_contains "$rule" 'A terminal task is closed.' "$layer starts follow-up work in a new task"
+  assert_contains "$doctor" 'Active workspaces also require `## Current State`.' "$layer doctor requires a current state on active tasks"
   assert_contains "$rule" 'tasks/*/TASK.md' "$layer discovers active workspaces shallowly"
   assert_contains "$rule" 'tasks/done/*/TASK.md' "$layer discovers archived workspaces shallowly"
   assert_contains "$rule" 'including incomplete workspaces' "$layer reserves incomplete workspace ids"
