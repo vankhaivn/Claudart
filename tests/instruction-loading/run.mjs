@@ -170,6 +170,16 @@ try {
     const dest = join(scratch, `install ${mode}`);
     install(dest, [`--${mode}`]);
     verifyDoctor(dest, mode, `${mode} core`);
+    check(`${mode}: Git workflow installs unchanged from source`, () => {
+      for (const [layer, directory] of [
+        ["claude", ".claude/rules"],
+        ["codex", ".codex/guidelines"],
+      ]) {
+        if (mode !== "both" && mode !== layer) continue;
+        const relative = `${directory}/git-workflow.md`;
+        assert.equal(read(join(dest, relative)), read(join(root, relative)));
+      }
+    });
     check(`${mode}: only selected runtime layers installed`, () => {
       assert.equal(existsSync(join(dest, ".claude")), mode !== "codex");
       assert.equal(existsSync(join(dest, ".codex")), mode !== "claude");
@@ -634,8 +644,20 @@ try {
   check("Git workflow defaults to scoped local commits under higher policy", () => {
     const claudeGit = read(join(root, ".claude/rules/git-workflow.md"));
     const codexGit = read(join(root, ".codex/guidelines/git-workflow.md"));
+    const commitUnits = (policy) =>
+      policy.split("## Commit verified coherent units\n")[1].split("\n## ")[0];
+    assert.equal(commitUnits(claudeGit), commitUnits(codexGit));
     for (const policy of [claudeGit, codexGit]) {
       assert.match(policy, /local commit is authorized by default/);
+      assert.match(policy, /unit's next related code or documentation commit when possible/);
+      assert.match(policy, /When a verified unit of work ends and no related commit can carry its remaining state/);
+      assert.match(policy, /at most one state-only commit for the finished unit/);
+      assert.match(policy, /upgrade, activation, restart or cleanup is a unit of work/);
+      assert.match(policy, /Never create one commit per state edit/);
+      assert.match(policy, /Before ending a turn that finishes work, check that no uncommitted changes owned by that work remain/);
+      assert.match(policy, /subject to commit authority and workflow-local cadence \(including spec `commits:` settings and checkpoint\)/);
+      assert.match(policy, /Preserve unrelated and pre-existing changes/);
+      assert.match(policy, /report the remaining owned changes and the reason/);
       assert.match(policy, /Never use broad staging such as `git add -A` or `git add .`/);
       assert.match(policy, /Do not add AI\/model\/tool `Co-authored-by` trailers/);
       assert.match(policy, /`codex\/\*`, `claude\/\*`, `agent\/\*`/);
