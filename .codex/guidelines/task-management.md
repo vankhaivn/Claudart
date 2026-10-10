@@ -119,7 +119,7 @@ tags: [1-5 lowercase kebab-case tags]
 
 - [ ] Step 1 — exact action, target file, expected outcome (verify: <observable check>)
 - [ ] Step 2 — ...
-- [x] (YYYY-MM-DD HH:MMZ) Step 0 — example completed step with UTC timestamp
+- [x] Step 0 — example completed step
 
 ## Validation & Acceptance
 
@@ -273,14 +273,14 @@ Its values — `none`, `strategy-only`, `authorized` — and **whether they gate
 When `status: in-progress`, the agent maintains `TASK.md` as it works. Save supporting files only under Artifact Discipline and update their purpose links plus the relevant conclusion/check in `TASK.md` in the same work unit:
 
 1. Rewrite **Current State** whenever the status, the next action, or what is waiting changes. Replace superseded wording; history lives in the Decision Log, Surprises, and version control, not in stacked status notes.
-2. After completing each step, flip `- [ ]` → `- [x]` and prefix with `(YYYY-MM-DD HH:MMZ)` UTC timestamp.
+2. After completing each step, flip `- [ ]` → `- [x]`.
 3. Bump frontmatter `updated:` whenever the file is touched.
 4. Append to **Surprises & Discoveries** only when reality diverges from the plan (e.g., file moved, dependency missing, existing helper found, a check failure that changed the approach). Prefix each entry with a `(YYYY-MM-DD HH:MMZ)` UTC timestamp. Progress narration and routine check results do not belong there.
 5. Append to **Decision Log** when changing approach mid-flight, prefixed with `(YYYY-MM-DD HH:MMZ, <agent>)`. Include rationale.
 6. Record each check's **latest result** once, next to the step or acceptance criterion it proves: one short line with the command or observation and its outcome. Replace it when the check is rerun. Keep long output, logs, and rerun history out of `TASK.md`; retain them as an artifact only when the Artifact Discipline triggers pass.
 7. **Do not delete or rewrite steps that were skipped or abandoned** — strike them through with `~~text~~` and add a Surprises entry explaining why.
 
-The plan is a living document. Edits to it are part of the work, not an afterthought. Every in-task log entry — a completed step, a Decision Log line, a Surprises line — carries the full `YYYY-MM-DD HH:MMZ` UTC time, never date-only: one task often logs several entries in a single day, and the time is the only thing that keeps them ordered for audit.
+The plan is a living document. Edits to it are part of the work, not an afterthought. Every Decision Log and Surprises entry carries the full `YYYY-MM-DD HH:MMZ` UTC time, read from the system clock when the entry is written (for example `date -u +'%Y-%m-%d %H:%MZ'`). Never estimate, backfill, or batch-apply a time; when no clock is readable, write the date only. Completed steps carry no time: list order and version history already order them.
 
 Default discoveries to the task file. Promote one immediately only under the knowledge-maintenance exception; checkpoint can bulk-evaluate the remaining candidates later.
 
