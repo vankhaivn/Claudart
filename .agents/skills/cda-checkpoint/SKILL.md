@@ -1,5 +1,5 @@
 ---
-name: codex-checkpoint
+name: cda-checkpoint
 description: Bulk-maintain shared project state, task/spec indexes, JOURNAL history, and eligible durable project knowledge at a session boundary.
 ---
 
@@ -14,13 +14,13 @@ Checkpoint is a bulk-maintenance boundary, not the only way to write knowledge. 
 ## Hard Rules
 
 1. `.claudart/CONTEXT.md` is overwritten, not appended. Anything not still true right now must be removed.
-2. `.claudart/CONTEXT.md` hard ceiling: 150 lines, target under 100. If your draft exceeds 150, stop and ask the user to trim manually or run `$codex-refactor-memory`.
+2. `.claudart/CONTEXT.md` hard ceiling: 150 lines, target under 100. If your draft exceeds 150, stop and ask the user to trim manually or run `$cda-refactor-memory`.
 3. `.claudart/JOURNAL.md` is append-only. Never edit or delete prior entries. Each new entry is a single line.
 4. Never add `.claudart/JOURNAL.md` as auto-loaded context in `AGENTS.md` or `.codex/guidelines/`. If such an auto-load already exists, remove that wiring and warn the user; JOURNAL remains append-only and outside session context.
 5. Skip JOURNAL entirely when there is nothing meaningful to record. Empty entries pollute the file.
-6. Task workspaces keep their own bodies and supporting files; CONTEXT.md never absorbs a task body. But CONTEXT.md should still reference the currently-focused task by slug + path in `## In Progress` so `$codex-start` sees both task and non-task work in one place. Two valid CONTEXT entries:
+6. Task workspaces keep their own bodies and supporting files; CONTEXT.md never absorbs a task body. But CONTEXT.md should still reference the currently-focused task by slug + path in `## In Progress` so `$cda-start` sees both task and non-task work in one place. Two valid CONTEXT entries:
    - Task reference: `- Working task \`add-jwt-auth\` (see .claudart/tasks/2026-05-13-001-add-jwt-auth/TASK.md) <!-- since: YYYY-MM-DD -->`
-   - Ad-hoc non-task change the user requested without creating a `$codex-plan` (a quick tweak, a transient pivot): CONTEXT is its **only** home, so it gets a **micro-handoff** — intent in the user's words + files of interest + next step (see Step 4) — not just a one-line pointer.
+   - Ad-hoc non-task change the user requested without creating a `$cda-plan` (a quick tweak, a transient pivot): CONTEXT is its **only** home, so it gets a **micro-handoff** — intent in the user's words + files of interest + next step (see Step 4) — not just a one-line pointer.
      Checkpoint _syncs_ `tasks/index.md` AND ensures CONTEXT references the focus task, but never copies a task's Steps/Decisions/Surprises into CONTEXT.
 7. Subagent threads are not durable project memory. Do not store subagent ids, nicknames, or transient thread state in CONTEXT. Store only durable outcomes: decisions, unresolved blockers, validated findings, changed ownership boundaries, and next steps.
 
@@ -44,7 +44,7 @@ For each item currently in `.claudart/CONTEXT.md`, decide one of using current e
 | Done / resolved / merged                                                                            | Drop it from `.claudart/CONTEXT.md`. Candidate for JOURNAL if it was a real decision, completion, or pivot.                                                      |
 | Superseded by newer state                                                                           | Drop the old item and write the new current state.                                                                                                               |
 | A standing owner preference or approval, in the owner's words                                       | Record it in `.claudart/OWNER.md` under `.codex/guidelines/ai-behavior.md` if it is missing, then drop it from CONTEXT; a one-time approval stays with its work. |
-| Broad recurring code-area or workflow behavior relevant to future work                              | Propose moving it into `.codex/guidelines/` via `$codex-learn`, then drop it from CONTEXT.                                                                       |
+| Broad recurring code-area or workflow behavior relevant to future work                              | Propose moving it into `.codex/guidelines/` via `$cda-learn`, then drop it from CONTEXT.                                                                         |
 | Descriptive, durable-beyond-current-work, current, and evidenced project fact (scope may be narrow) | Flag for **Step 6c**, then drop it from CONTEXT after its owner or knowledge route is updated and the relevant validation passes.                                |
 | WIP, proposed future state, task/acceptance state, or an uncertain/conflicting observation          | Keep it in the task/spec/CONTEXT candidate surface; never promote it as an active fact.                                                                          |
 
@@ -55,7 +55,7 @@ Pure tactical noise is dropped silently.
 Add to `.claudart/CONTEXT.md` only what is true now:
 
 - Work that is mid-stream, with `file:line` where useful. If the work is being tracked in a task file, reference it by slug + path (e.g., `Working task \`add-jwt-auth\` (see .claudart/tasks/2026-05-13-001-add-jwt-auth/TASK.md)`). Do not duplicate the task body here.
-- Ad-hoc changes the user requested _without_ creating a `$codex-plan` (quick fixes, transient tweaks, mid-flight pivots). These have no task file, so CONTEXT **is** their handoff summary, not just a note. Give each _active_ one a **micro-handoff** (see Step 4 skeleton): the user's intent in their own words, the files of interest with `file:line`, and the next concrete step. Mark them `(no task)`.
+- Ad-hoc changes the user requested _without_ creating a `$cda-plan` (quick fixes, transient tweaks, mid-flight pivots). These have no task file, so CONTEXT **is** their handoff summary, not just a note. Give each _active_ one a **micro-handoff** (see Step 4 skeleton): the user's intent in their own words, the files of interest with `file:line`, and the next concrete step. Mark them `(no task)`.
 - Decisions just made that are not yet codified in guidelines.
 - Durable subagent outcomes that still matter after this session, such as a validated finding, unresolved worker/reviewer blocker, or changed ownership boundary. Do not mention subagent thread ids.
 - Open questions or blockers currently unresolved.
@@ -67,7 +67,7 @@ A standing owner correction, preference, or approval belongs in `.claudart/OWNER
 
 Be terse: task references, decisions, and blockers are one short sentence each. Only _active_ `(no task)` work earns the 3-line micro-handoff, and only while it is live — the moment it ships or is abandoned, drop it this same checkpoint (JOURNAL it if it was a real decision/completion). That triage is what keeps CONTEXT under the ceiling.
 
-For every new bullet, append `<!-- since: YYYY-MM-DD -->` using today's date. If you keep an existing bullet, preserve its original `since:` date rather than resetting it. Codex is not documented to strip HTML comments, so keep these comments short; they exist so `$codex-doctor` can flag old decisions that should graduate into guidelines.
+For every new bullet, append `<!-- since: YYYY-MM-DD -->` using today's date. If you keep an existing bullet, preserve its original `since:` date rather than resetting it. Codex is not documented to strip HTML comments, so keep these comments short; they exist so `$cda-doctor` can flag old decisions that should graduate into guidelines.
 
 ### Step 4: Build the New CONTEXT
 
@@ -96,7 +96,7 @@ Use this skeleton. Omit any section that has nothing to say.
 
 ## Recent Decisions (not yet promoted to guidelines)
 
-- [Decision + brief why; promote when it stabilizes — behavior → .codex/guidelines/ via $codex-learn, eligible descriptive fact → its owner under the knowledge guideline] <!-- since: YYYY-MM-DD -->
+- [Decision + brief why; promote when it stabilizes — behavior → .codex/guidelines/ via $cda-learn, eligible descriptive fact → its owner under the knowledge guideline] <!-- since: YYYY-MM-DD -->
 
 ## Next Session Should Start By
 
@@ -164,13 +164,13 @@ Skip entirely if `.claudart/specs/` does not exist.
 3. Detect any top-level spec whose `status` is `done` or `cancelled`. These have passed their user gate (or were cancelled) and were not yet archived. For each:
    - Move the entire folder to `.claudart/specs/done/<folder-id>/`, preserving the existing dated folder name. Repair knowledge `sources` that point into the moved folder as the closure in `.codex/guidelines/spec-workflow.md` defines.
    - Append the completion/cancellation line to `.claudart/JOURNAL.md` only if the recent journal tail does not already contain that spec completion/cancellation.
-   - Before archiving, scan `NOTES.md` for `→ graduate:` flags: evaluate `knowledge/` flags against the capture gate in Step 6c, surface `$codex-learn` flags as proposals in the report, and clear only flags successfully routed or explicitly retained as candidates.
+   - Before archiving, scan `NOTES.md` for `→ graduate:` flags: evaluate `knowledge/` flags against the capture gate in Step 6c, surface `$cda-learn` flags as proposals in the report, and clear only flags successfully routed or explicitly retained as candidates.
    - DO NOT archive `awaiting-final-review` specs. Those are explicitly waiting for user confirmation; archiving them defeats the final gate. They stay in the top-level specs folder and appear in the Active list.
 4. List `.claudart/specs/done/*/SPEC.md`. For each, read frontmatter only (`slug`, `status`, `created`, `updated`). If any archived spec is not `done` or `cancelled`, flag it in the report and do not move it automatically.
 5. Rewrite `INDEX.md` per the canonical format in `.codex/guidelines/spec-workflow.md` — Active entries link to top-level dated folders and include every status except `done`/`cancelled` (with the ⏳ marker on `poc-review` and `awaiting-final-review`); Done entries link to `done/<folder-id>/SPEC.md` and include `done`/`cancelled`.
 6. Flag stalled specs per the Staleness Thresholds table in `.codex/guidelines/task-management.md`, mapped as: `running` ↔ `in-progress`, `poc-review`/`awaiting-final-review` ↔ `awaiting-review`, `drafting` ↔ `planning`. List flagged specs in the report. For execution activity, use the latest recorded ROADMAP/LEDGER activity under the spec rule; an unchanged SPEC contract date alone does not mean execution has stalled. Report missing activity evidence without inventing an update.
-7. Scan each Active spec's `NOTES.md` for `→ graduate:` flags: evaluate `knowledge/` flags in Step 6c, surface `$codex-learn` flags as proposals in the report, and clear only flags successfully routed or explicitly retained as candidates.
-8. Do NOT tick roadmap boxes, write LEDGER entries, or change any spec `status` — those transitions belong to `$codex-spec`, `$codex-spec-run`, and the user.
+7. Scan each Active spec's `NOTES.md` for `→ graduate:` flags: evaluate `knowledge/` flags in Step 6c, surface `$cda-learn` flags as proposals in the report, and clear only flags successfully routed or explicitly retained as candidates.
+8. Do NOT tick roadmap boxes, write LEDGER entries, or change any spec `status` — those transitions belong to `$cda-spec`, `$cda-spec-run`, and the user.
 
 ### Step 6c: Route Durable Facts to Their Owners
 
@@ -181,7 +181,7 @@ Before evaluating or writing any candidate, read `.codex/guidelines/knowledge-ma
 For candidates from Step 2, Step 3, task close, or spec NOTES:
 
 1. Distill claims rather than copying chronology or task prose. Promote only claims that are descriptive, durable beyond the current work, current, and evidenced. A fact may be narrowly scoped when its typed `scope` records that boundary.
-2. Keep WIP/proposals/state in task/spec/CONTEXT. Route behavior to `$codex-learn`. Keep uncertainty as a candidate; when evidence contradicts an existing canonical owner, mark that owner `review-needed` with a `status_note` instead of asserting a replacement.
+2. Keep WIP/proposals/state in task/spec/CONTEXT. Route behavior to `$cda-learn`. Keep uncertainty as a candidate; when evidence contradicts an existing canonical owner, mark that owner `review-needed` with a `status_note` instead of asserting a replacement.
 3. Read the root router and the smallest relevant maps/topics within the guideline's budget. Patch the existing owner first, subject to the detail budget in `.codex/references/knowledge-maintenance.md`; otherwise create a focused topic only when no owner exists.
 4. Write canonical frontmatter and update the topic plus its reachable root/domain-map route atomically. Preserve curated hooks, grouping, ordering, and external routes. Never auto-delete, retire, supersede, or promote an ambiguous unindexed file.
 5. After all knowledge mutations in this checkpoint, run `bash .codex/scripts/knowledge-check.sh --root .`. Repair in-scope mechanical failures before reporting success. If the checker is missing, stop the knowledge mutation and report a High-severity installation problem.
@@ -206,7 +206,7 @@ Output a 6-line summary:
 2. Items kept, dropped, and added.
 3. JOURNAL entries appended, or `none`.
 4. Tasks synced: active=<n>, archived this run=<n>, stalled=<n>; specs synced: active=<n>, archived this run=<n>, stalled=<n>.
-5. Knowledge entries written/updated (list slugs, or `none`), candidates retained/review-needed, checker result, owner-profile entries added or updated (or `none`), and anything proposed for `$codex-learn`.
+5. Knowledge entries written/updated (list slugs, or `none`), candidates retained/review-needed, checker result, owner-profile entries added or updated (or `none`), and anything proposed for `$cda-learn`.
 6. Git persistence: the new commit SHA and summary when committed, otherwise `CHECKPOINT NOT PERSISTED IN GIT: commit required` plus the reason. Do not diagnose unrelated uncommitted work in this summary.
 
 ## When to Run This Command

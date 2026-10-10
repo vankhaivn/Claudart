@@ -2,7 +2,7 @@
 
 Run `npm run test:instruction-loading` (also included in `npm run check`). Node's standard library and the installer's existing Bash/tar prerequisites are sufficient; this adds no downstream runtime dependency.
 
-The test stages the core runtime directories and Project Docs module in a temporary archive, substitutes an offline `curl` fixture, and runs the actual installer in Claude, Codex, and combined modes. It checks loader placement, relative import resolution, conditional reference copies and links, and the absence of universal path globs on conditional Claude workflows. A negative fixture demonstrates that repeating the `.claude/` prefix breaks a relative import.
+The test checks that the Claude and Codex entrypoints share the `cda-` namespace. It then stages the core runtime directories and Project Docs module in a temporary archive, substitutes an offline `curl` fixture, and runs the actual installer in Claude, Codex, and combined modes. It checks loader placement, relative import resolution, conditional reference copies and links, and the absence of universal path globs on conditional Claude workflows. A negative fixture demonstrates that repeating the `.claude/` prefix breaks a relative import.
 
 Core-only and module-enabled installations must also copy each selected runtime's doctor wrapper, adjacent parser, and knowledge checker unchanged and execute the installed doctor helper successfully offline. The dedicated `tests/doctor-check/` suite covers negative findings and checker boundaries.
 

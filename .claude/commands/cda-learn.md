@@ -4,7 +4,7 @@ description: Reflect on completed work, promote validated behavioral learning, a
 
 Please execute a Retrospective & Learning Protocol on the work you just completed.
 
-Based on the "Agent Self-Evolution & Context Maintenance" section in `CLAUDE.md`, perform this protocol. `/learn` may run mid-session. It primarily owns behavioral learning; it is not a required detour before an eligible descriptive fact can enter knowledge.
+Based on the "Agent Self-Evolution & Context Maintenance" section in `CLAUDE.md`, perform this protocol. `/cda-learn` may run mid-session. It primarily owns behavioral learning; it is not a required detour before an eligible descriptive fact can enter knowledge.
 
 ## Re-Ground In The Rule Set
 
@@ -49,7 +49,7 @@ Walk the conversation chronologically, comparing each assistant turn against the
 
 4. If knowledge changed, run `bash .claude/scripts/knowledge-check.sh`. Report checker failures and never claim the mutation healthy while they remain.
 
-**Boundary**: `/learn` updates **rules, `.claudart/OWNER.md`, `.claudart/knowledge/`, and `CLAUDE.md` only**. Do NOT modify `.claudart/CONTEXT.md` (that's `/checkpoint`'s job) and do NOT rewrite `.claudart/JOURNAL.md` entries (it's append-only). You may read both as evidence. `/checkpoint` bulk-maintains remaining candidates but is not the sole knowledge write gate.
+**Boundary**: `/cda-learn` updates **rules, `.claudart/OWNER.md`, `.claudart/knowledge/`, and `CLAUDE.md` only**. Do NOT modify `.claudart/CONTEXT.md` (that's `/cda-checkpoint`'s job) and do NOT rewrite `.claudart/JOURNAL.md` entries (it's append-only). You may read both as evidence. `/cda-checkpoint` bulk-maintains remaining candidates but is not the sole knowledge write gate.
 
 ## Output Standard
 

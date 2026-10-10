@@ -77,11 +77,11 @@ Only empty seeds are distributed. Existing state is project-owned and preserved 
 
 **Codex adapter** (`.codex/` + `.agents/skills/`):
 
-- native skills under `.agents/skills/codex-*`, including referenced support files;
+- native skills under `.agents/skills/cda-*`, including referenced support files;
 - `.codex/guidelines/`, `.codex/references/`, `.codex/scripts/`, `.codex/agents/`, and `.codex/config.toml`;
 - `.codex/AGENTS.md` as the source template for the canonical downstream root `AGENTS.md`.
 
-**Optional modules:** install only when selected. Project Docs lives under `modules/project-docs/` in upstream; overlay its `.claude/` and/or `.agents/` payload at the downstream root for the selected runtimes. This adds `.claude/commands/project-docs.md` or `.agents/skills/codex-project-docs/` and their referenced files. Do not copy the module's source wrapper or packaging README into the project. It supplies documentation-lifecycle guidance; it does not install a documentation tree or own a project's existing documentation by default.
+**Optional modules:** install only when selected. Project Docs lives under `modules/project-docs/` in upstream; overlay its `.claude/` and/or `.agents/` payload at the downstream root for the selected runtimes. This adds `.claude/commands/cda-project-docs.md` or `.agents/skills/cda-project-docs/` and their referenced files. Do not copy the module's source wrapper or packaging README into the project. It supplies documentation-lifecycle guidance; it does not install a documentation tree or own a project's existing documentation by default.
 
 Include the selected module's output templates and filled examples in its resource closure, retaining their module-relative paths. They are reusable authoring resources, not live project docs: do not instantiate templates or apply the example snippets during integration. Preserve custom resource edits under the same reconciliation rules as other instructions.
 
@@ -232,11 +232,11 @@ When semantic judgment is needed, first review only the changed files and their 
 - the affected contract is repository-wide;
 - the user explicitly requested a full health audit.
 
-When triggered, run `/doctor` for Claude or `$codex-doctor` for Codex. Doctor is diagnostic only. Report findings; do not turn them into automatic writes.
+When triggered, run `/cda-doctor` for Claude or `$cda-doctor` for Codex. Doctor is diagnostic only. Report findings; do not turn them into automatic writes.
 
 ### 4.3 Refactor-memory is opt-in
 
-Never run `/refactor-memory` or `$codex-refactor-memory` automatically after integration. Run it only when a concrete finding is owned by that workflow, the exact additional files and intended changes are presented, and the user explicitly approves those writes.
+Never run `/cda-refactor-memory` or `$cda-refactor-memory` automatically after integration. Run it only when a concrete finding is owned by that workflow, the exact additional files and intended changes are presented, and the user explicitly approves those writes.
 
 After an approved refactor-memory run, repeat mandatory fast verification. Repeat doctor only when the original finding requires semantic confirmation or the user explicitly requests it. There is no default `doctor → refactor-memory → doctor` chain.
 

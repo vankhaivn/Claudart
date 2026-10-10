@@ -1,5 +1,5 @@
 ---
-name: codex-project-docs
+name: cda-project-docs
 description: Establish, adopt, update, or review current project documentation and its sources of authority. Use for project-doc lifecycle requests, including natural-language requests to reconcile or compact stale docs.
 ---
 

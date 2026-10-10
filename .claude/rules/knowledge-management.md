@@ -9,7 +9,7 @@ tags: [knowledge, memory, routing, validation]
 
 `.claudart/knowledge/` stores durable **descriptive** project facts and compact routes to other current owners. A topic owns a fact when no source code, schema, generated reference, project document, or other authoritative source already states that same claim as its maintained contract. Source code can be evidence for a distinct, useful synthesis in knowledge without owning that synthesis. `INDEX.md` and `_maps/*.md` are compact routers. Choose ownership by the subject and evidence, not by which agent or reader needs the information; keep one owner per fact and link from other surfaces.
 
-This rule is the root contract for retrieval and classification. Routine `/start` reads only `.claudart/knowledge/INDEX.md`; it does not load this rule, detail topics, domain maps, the maintenance reference, or the checker.
+This rule is the root contract for retrieval and classification. Routine `/cda-start` reads only `.claudart/knowledge/INDEX.md`; it does not load this rule, detail topics, domain maps, the maintenance reference, or the checker.
 
 ## Load Maintenance Detail Only When Needed
 
@@ -47,7 +47,7 @@ Route everything else by kind:
 
 - WIP, proposals, task status, acceptance state, and discoveries local to current work stay in the active task, spec, or `CONTEXT.md`.
 - How to work with the project owner, including the people around the project and the owner's corrections, preferences, and standing approvals, goes to `.claudart/OWNER.md`.
-- Other recurring behavior, conventions, behavioral corrections, and reusable procedures go to the owning rule, normally through `/learn`.
+- Other recurring behavior, conventions, behavioral corrections, and reusable procedures go to the owning rule, normally through `/cda-learn`.
 - Uncertain or conflicting observations remain candidates in the working artifact. Existing knowledge they call into question is not current authority until verified.
 - An observation of runtime or environment state that repository evidence cannot confirm is not an authoritative claim. When it is worth keeping, it goes in the owning topic's `## Point-in-time observations` section under the maintenance reference.
 

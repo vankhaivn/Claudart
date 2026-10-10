@@ -45,10 +45,10 @@ assert_not_contains() {
 
 CODEX_RULE=$REPO_ROOT/.codex/guidelines/spec-workflow.md
 CLAUDE_RULE=$REPO_ROOT/.claude/rules/spec-workflow.md
-CODEX_RUNNER=$REPO_ROOT/.agents/skills/codex-spec-run/SKILL.md
-CLAUDE_RUNNER=$REPO_ROOT/.claude/commands/spec-run.md
-CODEX_AUTHOR=$REPO_ROOT/.agents/skills/codex-spec/SKILL.md
-CLAUDE_AUTHOR=$REPO_ROOT/.claude/commands/spec.md
+CODEX_RUNNER=$REPO_ROOT/.agents/skills/cda-spec-run/SKILL.md
+CLAUDE_RUNNER=$REPO_ROOT/.claude/commands/cda-spec-run.md
+CODEX_AUTHOR=$REPO_ROOT/.agents/skills/cda-spec/SKILL.md
+CLAUDE_AUTHOR=$REPO_ROOT/.claude/commands/cda-spec.md
 
 if /bin/bash -n "$TEST_DIR/run.sh"; then
   pass "Bash syntax is valid"
@@ -82,8 +82,8 @@ for rule in "$CODEX_RULE" "$CLAUDE_RULE"; do
 done
 
 for checkpoint in \
-  "$REPO_ROOT/.agents/skills/codex-checkpoint/SKILL.md" \
-  "$REPO_ROOT/.claude/commands/checkpoint.md"; do
+  "$REPO_ROOT/.agents/skills/cda-checkpoint/SKILL.md" \
+  "$REPO_ROOT/.claude/commands/cda-checkpoint.md"; do
   assert_contains "$checkpoint" \
     'Repair knowledge `sources` that point into the moved folder' \
     "checkpoint spec archive keeps knowledge sources resolvable"

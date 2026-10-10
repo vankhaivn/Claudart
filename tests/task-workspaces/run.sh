@@ -51,19 +51,19 @@ for layer in claude codex; do
   if [ "$layer" = claude ]; then
     rule="$REPO_ROOT/.claude/rules/task-management.md"
     commands="$REPO_ROOT/.claude/commands"
-    plan="$commands/plan.md"
-    start="$commands/start.md"
-    checkpoint="$commands/checkpoint.md"
-    doctor="$commands/doctor.md"
-    refactor="$commands/refactor-memory.md"
+    plan="$commands/cda-plan.md"
+    start="$commands/cda-start.md"
+    checkpoint="$commands/cda-checkpoint.md"
+    doctor="$commands/cda-doctor.md"
+    refactor="$commands/cda-refactor-memory.md"
   else
     rule="$REPO_ROOT/.codex/guidelines/task-management.md"
     commands="$REPO_ROOT/.agents/skills"
-    plan="$commands/codex-plan/SKILL.md"
-    start="$commands/codex-start/SKILL.md"
-    checkpoint="$commands/codex-checkpoint/SKILL.md"
-    doctor="$commands/codex-doctor/SKILL.md"
-    refactor="$commands/codex-refactor-memory/SKILL.md"
+    plan="$commands/cda-plan/SKILL.md"
+    start="$commands/cda-start/SKILL.md"
+    checkpoint="$commands/cda-checkpoint/SKILL.md"
+    doctor="$commands/cda-doctor/SKILL.md"
+    refactor="$commands/cda-refactor-memory/SKILL.md"
   fi
 
   # Canonical artifact semantics live in the rule/guideline. The command/skill

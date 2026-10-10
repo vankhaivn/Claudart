@@ -9,28 +9,28 @@ Tài liệu mô tả cách hoạt động, không liệt kê mọi rule. Contrac
 ## 1. Một phiên bình thường
 
 ```text
-/start  →  làm việc  →  /checkpoint
+/cda-start  →  làm việc  →  /cda-checkpoint
               │
-              └─ đang điều tra dở mà hết context?  →  /handoff
+              └─ đang điều tra dở mà hết context?  →  /cda-handoff
 ```
 
-**Start.** `/start` (hoặc `$codex-start`) đọc trạng thái hiện tại trong `CONTEXT.md`, danh sách task và spec, mục lục knowledge, lịch sử Git gần đây và handoff đang chờ nếu có. Lệnh này cố ý nhẹ, không đọc hết mọi file. Nếu tin nhắn của bạn đã nêu task cần làm tiếp, agent vào thẳng task đó.
+**Start.** `/cda-start` (hoặc `$cda-start`) đọc trạng thái hiện tại trong `CONTEXT.md`, danh sách task và spec, mục lục knowledge, lịch sử Git gần đây và handoff đang chờ nếu có. Lệnh này cố ý nhẹ, không đọc hết mọi file. Nếu tin nhắn của bạn đã nêu task cần làm tiếp, agent vào thẳng task đó.
 
 **Làm việc.** Cứ nhờ việc bạn cần. Agent tự chọn quy mô phù hợp (xem bên dưới).
 
-**Checkpoint.** Tới điểm dừng tự nhiên, `/checkpoint` viết lại `CONTEXT.md`, cập nhật danh sách task và spec, chuyển trạng thái cũ vào `JOURNAL.md` và lưu những sự thật đáng giữ thành knowledge.
+**Checkpoint.** Tới điểm dừng tự nhiên, `/cda-checkpoint` viết lại `CONTEXT.md`, cập nhật danh sách task và spec, chuyển trạng thái cũ vào `JOURNAL.md` và lưu những sự thật đáng giữ thành knowledge.
 
-**Handoff.** Chỉ dùng cho một cuộc điều tra khó phải làm tiếp ở phiên mới. `/handoff` ghi giả thuyết hiện tại, bằng chứng, các hướng đã thất bại và bước tiếp theo cụ thể vào `HANDOFF.md`. Lần `/start` tiếp theo đọc rồi xóa nó. Đây không phải bản tóm tắt phiên.
+**Handoff.** Chỉ dùng cho một cuộc điều tra khó phải làm tiếp ở phiên mới. `/cda-handoff` ghi giả thuyết hiện tại, bằng chứng, các hướng đã thất bại và bước tiếp theo cụ thể vào `HANDOFF.md`. Lần `/cda-start` tiếp theo đọc rồi xóa nó. Đây không phải bản tóm tắt phiên.
 
 Claude Code và Codex đọc ghi cùng thư mục `.claudart/`, nên bạn có thể đổi công cụ giữa các phiên. Dùng lần lượt, đừng cho hai bên cùng sửa một file một lúc.
 
 ## 2. Chọn quy mô công việc
 
-| Chế độ         | Dùng khi                                                   | Lưu lại gì                           |
-| -------------- | ---------------------------------------------------------- | ------------------------------------ |
-| Nhờ thẳng      | Thay đổi nhỏ, rõ ràng, ít rủi ro                           | Không có gì thêm, chỉ lịch sử Git    |
-| Task (`/plan`) | Việc cần kế hoạch giữ được qua gián đoạn, hoặc bạn yêu cầu | Một file `TASK.md`                   |
-| Spec (`/spec`) | Cả một nhiệm vụ nhiều giai đoạn mà bạn duyệt một lần       | Một thư mục trong `.claudart/specs/` |
+| Chế độ             | Dùng khi                                                   | Lưu lại gì                           |
+| ------------------ | ---------------------------------------------------------- | ------------------------------------ |
+| Nhờ thẳng          | Thay đổi nhỏ, rõ ràng, ít rủi ro                           | Không có gì thêm, chỉ lịch sử Git    |
+| Task (`/cda-plan`) | Việc cần kế hoạch giữ được qua gián đoạn, hoặc bạn yêu cầu | Một file `TASK.md`                   |
+| Spec (`/cda-spec`) | Cả một nhiệm vụ nhiều giai đoạn mà bạn duyệt một lần       | Một thư mục trong `.claudart/specs/` |
 
 Mẹo:
 
@@ -40,7 +40,7 @@ Mẹo:
 
 ## 3. Task
 
-`/plan <task>` tạo `.claudart/tasks/YYYY-MM-DD-NNN-<slug>/TASK.md`. File này chứa mục tiêu, các bước kèm cách kiểm tra từng bước, tiêu chí nghiệm thu, các quyết định đã đưa ra và kết quả. File phụ chỉ đặt vào `artifacts/` khi thật sự cần, ví dụ một file ZIP để tái hiện lỗi.
+`/cda-plan <task>` tạo `.claudart/tasks/YYYY-MM-DD-NNN-<slug>/TASK.md`. File này chứa mục tiêu, các bước kèm cách kiểm tra từng bước, tiêu chí nghiệm thu, các quyết định đã đưa ra và kết quả. File phụ chỉ đặt vào `artifacts/` khi thật sự cần, ví dụ một file ZIP để tái hiện lỗi.
 
 ### Bạn sẽ thấy gì
 
@@ -75,7 +75,7 @@ Task cũng có thể ở trạng thái `blocked` hoặc `cancelled`. Task xong �
 
 ## 4. Spec cho việc lớn
 
-`/spec <mission>` phỏng vấn bạn, có thể dựng một proof of concept nhỏ, rồi viết kế hoạch đủ chi tiết để chạy mà không cần cuộc trò chuyện ban đầu. Lệnh này không viết code sản phẩm.
+`/cda-spec <mission>` phỏng vấn bạn, có thể dựng một proof of concept nhỏ, rồi viết kế hoạch đủ chi tiết để chạy mà không cần cuộc trò chuyện ban đầu. Lệnh này không viết code sản phẩm.
 
 | File         | Chứa                                                     |
 | ------------ | -------------------------------------------------------- |
@@ -87,7 +87,7 @@ Task cũng có thể ở trạng thái `blocked` hoặc `cancelled`. Task xong �
 
 Bạn duyệt `SPEC.md` và `ROADMAP.md` một lần. Lần duyệt đó áp dụng cho mọi việc trong phạm vi, nhưng không cho thay đổi ngoài lề hay đổi mục tiêu; những thứ đó cần sửa spec và duyệt lại.
 
-Sau đó `/spec-run <slug>` đi lần lượt theo roadmap: làm, kiểm tra, ghi bằng chứng, sang việc tiếp. Check thất bại chỉ được thử lại khi có gì đó thực sự thay đổi. Ở ranh giới giữa các giai đoạn, agent có thể gợi ý checkpoint hoặc mở phiên mới; bạn không trả lời thì việc vẫn chạy tiếp.
+Sau đó `/cda-spec-run <slug>` đi lần lượt theo roadmap: làm, kiểm tra, ghi bằng chứng, sang việc tiếp. Check thất bại chỉ được thử lại khi có gì đó thực sự thay đổi. Ở ranh giới giữa các giai đoạn, agent có thể gợi ý checkpoint hoặc mở phiên mới; bạn không trả lời thì việc vẫn chạy tiếp.
 
 Khi mọi thứ xong, agent chạy các check nghiệm thu và dừng ở `awaiting-final-review`. Chỉ bạn mới đánh dấu spec là xong.
 
@@ -111,13 +111,13 @@ Khi mọi thứ xong, agent chạy các check nghiệm thu và dừng ở `await
 
 Nếu code, schema hay tài liệu dự án đã sở hữu sự thật đó, knowledge chỉ trỏ tới. Agent đọc knowledge theo bản đồ: `INDEX.md` gốc trước, rồi chỉ topic và đoạn liên quan. Đọc không bao giờ làm thay đổi nó.
 
-**Kiểm tra.** `/doctor` chạy một check cấu trúc chỉ đọc, rồi xem xét ý nghĩa và tính nhất quán. Chỉ chạy checker knowledge:
+**Kiểm tra.** `/cda-doctor` chạy một check cấu trúc chỉ đọc, rồi xem xét ý nghĩa và tính nhất quán. Chỉ chạy checker knowledge:
 
 ```bash
 bash .claude/scripts/knowledge-check.sh --root .
 ```
 
-Với Codex thì dùng `.codex/scripts/`. Checker tìm cấu trúc và liên kết hỏng, nhưng không biết một phát biểu có đúng hay không. `/refactor-memory` sắp xếp lại kho khi nó đã rối.
+Với Codex thì dùng `.codex/scripts/`. Checker tìm cấu trúc và liên kết hỏng, nhưng không biết một phát biểu có đúng hay không. `/cda-refactor-memory` sắp xếp lại kho khi nó đã rối.
 
 ## 6. Git
 
@@ -140,22 +140,22 @@ Agent chính cũng có thể chia việc cho agent phụ khi công cụ hỗ tr�
 
 ## 8. Project Docs (tùy chọn)
 
-Cài bằng `--project-docs`. Module thêm `/project-docs` (hoặc `$codex-project-docs`) để tạo, tiếp nhận, cập nhật, audit hoặc dọn gọn tài liệu của chính dự án bạn, kèm template và ví dụ. Nó không tự chạy và không tạo tài liệu lúc cài. Xem [trang module](../modules/project-docs/README.md).
+Cài bằng `--project-docs`. Module thêm `/cda-project-docs` (hoặc `$cda-project-docs`) để tạo, tiếp nhận, cập nhật, audit hoặc dọn gọn tài liệu của chính dự án bạn, kèm template và ví dụ. Nó không tự chạy và không tạo tài liệu lúc cài. Xem [trang module](../modules/project-docs/README.md).
 
 ## 9. Lệnh
 
-| Claude Code        | Codex                    | Mục đích                                   |
-| ------------------ | ------------------------ | ------------------------------------------ |
-| `/start`           | `$codex-start`           | Định hướng phiên                           |
-| `/plan <task>`     | `$codex-plan <task>`     | Tạo hoặc tiếp tục một task                 |
-| `/spec <mission>`  | `$codex-spec <mission>`  | Tạo và duyệt spec                          |
-| `/spec-run <slug>` | `$codex-spec-run <slug>` | Chạy spec đã duyệt tới bước review cuối    |
-| `/checkpoint`      | `$codex-checkpoint`      | Lưu trạng thái hiện tại và sự thật lâu dài |
-| `/handoff`         | `$codex-handoff`         | Tạm dừng cuộc điều tra khó cho phiên mới   |
-| `/learn`           | `$codex-learn`           | Biến bài học lặp lại thành rule            |
-| `/doctor`          | `$codex-doctor`          | Kiểm tra sức khỏe                          |
-| `/refactor-memory` | `$codex-refactor-memory` | Sắp xếp lại kho bộ nhớ                     |
-| `/project-docs`    | `$codex-project-docs`    | Quản lý tài liệu dự án (tùy chọn)          |
+| Claude Code            | Codex                  | Mục đích                                   |
+| ---------------------- | ---------------------- | ------------------------------------------ |
+| `/cda-start`           | `$cda-start`           | Định hướng phiên                           |
+| `/cda-plan <task>`     | `$cda-plan <task>`     | Tạo hoặc tiếp tục một task                 |
+| `/cda-spec <mission>`  | `$cda-spec <mission>`  | Tạo và duyệt spec                          |
+| `/cda-spec-run <slug>` | `$cda-spec-run <slug>` | Chạy spec đã duyệt tới bước review cuối    |
+| `/cda-checkpoint`      | `$cda-checkpoint`      | Lưu trạng thái hiện tại và sự thật lâu dài |
+| `/cda-handoff`         | `$cda-handoff`         | Tạm dừng cuộc điều tra khó cho phiên mới   |
+| `/cda-learn`           | `$cda-learn`           | Biến bài học lặp lại thành rule            |
+| `/cda-doctor`          | `$cda-doctor`          | Kiểm tra sức khỏe                          |
+| `/cda-refactor-memory` | `$cda-refactor-memory` | Sắp xếp lại kho bộ nhớ                     |
+| `/cda-project-docs`    | `$cda-project-docs`    | Quản lý tài liệu dự án (tùy chọn)          |
 
 ## 10. Cấu trúc sau khi cài
 

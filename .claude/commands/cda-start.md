@@ -9,11 +9,11 @@ The user's current request controls what happens after orientation. If it explic
 ## Procedure
 
 1. Check `.claudart/HANDOFF.md`. If present, read it in full — it is a one-shot reasoning baton written by a previous session in either runtime. Note its `created:` date. Consumption flow: see Case H below. If absent (the normal state), continue silently.
-2. `.claudart/OWNER.md` is loaded through `CLAUDE.md`. If `CLAUDE.md` does not import it, read it and report that the loader needs the import. Follow it for the session and do not summarize it in the report. Read `.claudart/CONTEXT.md` if it exists; if it is missing, say the project has no shared project context yet and suggest `/checkpoint` after meaningful work.
-3. Read `.claudart/tasks/index.md` if it exists and extract `## Active`. If missing, use shallow `.claudart/tasks/*/TASK.md` discovery and report that `/checkpoint` should regenerate the index; a missing cache does not prove there are no tasks.
-4. Resolve Active entries only to `.claudart/tasks/<YYYY-MM-DD-NNN-slug>/TASK.md` and verify existence. Use valid top-level workspace ids during fallback discovery; exclude `done/` itself and symlinked workspaces or `TASK.md` files. Read `TASK.md` frontmatter (`status`, `updated`, `created`, `slug`, `reviewer`) only; report a missing or invalid `reviewer` as incomplete metadata without guessing ownership; flag missing/broken references for `/checkpoint`. Do not read task bodies or artifact contents, recurse into workspaces, or create supporting files during startup.
+2. `.claudart/OWNER.md` is loaded through `CLAUDE.md`. If `CLAUDE.md` does not import it, read it and report that the loader needs the import. Follow it for the session and do not summarize it in the report. Read `.claudart/CONTEXT.md` if it exists; if it is missing, say the project has no shared project context yet and suggest `/cda-checkpoint` after meaningful work.
+3. Read `.claudart/tasks/index.md` if it exists and extract `## Active`. If missing, use shallow `.claudart/tasks/*/TASK.md` discovery and report that `/cda-checkpoint` should regenerate the index; a missing cache does not prove there are no tasks.
+4. Resolve Active entries only to `.claudart/tasks/<YYYY-MM-DD-NNN-slug>/TASK.md` and verify existence. Use valid top-level workspace ids during fallback discovery; exclude `done/` itself and symlinked workspaces or `TASK.md` files. Read `TASK.md` frontmatter (`status`, `updated`, `created`, `slug`, `reviewer`) only; report a missing or invalid `reviewer` as incomplete metadata without guessing ownership; flag missing/broken references for `/cda-checkpoint`. Do not read task bodies or artifact contents, recurse into workspaces, or create supporting files during startup.
 5. Read `.claudart/knowledge/INDEX.md` if it exists — the root router only. Count visible route lines under `## Knowledge` that match the canonical Markdown route grammar; ignore HTML comments/templates and `- _(none)_`, so a seed index reports zero. Do not follow domain-map or topic links during startup. Later work follows the bounded map-first retrieval in `.claude/rules/knowledge-management.md`.
-6. Read `.claudart/specs/INDEX.md` if it exists — the INDEX only. Extract entries under `## Active`. Do NOT read SPEC/ROADMAP/NOTES/LEDGER bodies in `/start`.
+6. Read `.claudart/specs/INDEX.md` if it exists — the INDEX only. Extract entries under `## Active`. Do NOT read SPEC/ROADMAP/NOTES/LEDGER bodies in `/cda-start`.
 7. Run `git log -3 --oneline`. If the directory is not a git repo or has fewer than three commits, report what is available.
 8. Extract only these sections from `.claudart/CONTEXT.md` when present:
    - `## In Progress`
@@ -21,7 +21,7 @@ The user's current request controls what happens after orientation. If it explic
    - `## Open Questions / Blockers`
 9. Do not read `.claudart/JOURNAL.md`.
 10. Do not read task bodies in `.claudart/tasks/done/`.
-11. Do not run `/doctor` or `bash .claude/scripts/knowledge-check.sh`; startup must stay lightweight.
+11. Do not run `/cda-doctor` or `bash .claude/scripts/knowledge-check.sh`; startup must stay lightweight.
 
 ## Output Format
 
@@ -53,9 +53,9 @@ A reasoning baton is waiting. Surface it before anything else:
 > "A previous session left a handoff (created <date>): <Objective, one line>. Recorded next step: <Next Step, one line>. Resume from it? On resume I'll verify its Evidence against current code, then consume the baton. Or tell me to discard it."
 
 - If the baton's `created:` is more than 7 days old, lead with that: reasoning state rots fast — the recorded hypothesis may no longer match the code.
-- **On resume**: warm the session — read the files referenced in Evidence and Next Step (cap ~5), verify the baton's claims still hold against current code, surface any drift, then **delete `.claudart/HANDOFF.md`**. The baton is consumed exactly once; its durable parts were already routed to knowledge/task files by `/handoff`.
+- **On resume**: warm the session — read the files referenced in Evidence and Next Step (cap ~5), verify the baton's claims still hold against current code, surface any drift, then **delete `.claudart/HANDOFF.md`**. The baton is consumed exactly once; its durable parts were already routed to knowledge/task files by `/cda-handoff`.
 - **On discard**: delete the file without acting on it.
-- **If the user starts unrelated work instead**: ask once whether to keep the baton for later or delete it. If kept, it stays on disk untouched — `/doctor` will flag it when stale.
+- **If the user starts unrelated work instead**: ask once whether to keep the baton for later or delete it. If kept, it stays on disk untouched — `/cda-doctor` will flag it when stale.
 
 Never act on baton content without verifying it against the current code first — it is a point-in-time snapshot, and commits may have landed since.
 
@@ -64,17 +64,17 @@ Never act on baton content without verifying it against the current code first �
 For the most relevant spec (prefer `drafting`/`poc-review`/`awaiting-final-review`, then `running`, then `ready`, then `blocked`):
 
 - **`drafting`**: say:
-  > "Spec `<slug>` is being drafted or amended. Run `/spec` to continue in its existing dated folder."
+  > "Spec `<slug>` is being drafted or amended. Run `/cda-spec` to continue in its existing dated folder."
 - **`poc-review`**: say:
-  > "Spec `<slug>` is waiting for your review — open its dated folder from `.claudart/specs/INDEX.md` (POC in `artifacts/`, then SPEC.md and ROADMAP.md). Approving is a standing approval: `/spec-run` will then execute the whole roadmap without asking again until the final review."
+  > "Spec `<slug>` is waiting for your review — open its dated folder from `.claudart/specs/INDEX.md` (POC in `artifacts/`, then SPEC.md and ROADMAP.md). Approving is a standing approval: `/cda-spec-run` will then execute the whole roadmap without asking again until the final review."
 - **`awaiting-final-review`**: say:
-  > "Spec `<slug>` passed its final gate and is waiting for your demo verification. Run `/spec-run <slug>` to surface the demo steps and final-gate evidence, then confirm to close or report what failed."
+  > "Spec `<slug>` passed its final gate and is waiting for your demo verification. Run `/cda-spec-run <slug>` to surface the demo steps and final-gate evidence, then confirm to close or report what failed."
 - **`ready` / `running`**: say:
-  > "Spec `<slug>` is <status> (updated <date>). Run `/spec-run <slug>` (or the dated folder id if needed) to continue here; a fresh session is optional."
+  > "Spec `<slug>` is <status> (updated <date>). Run `/cda-spec-run <slug>` (or the dated folder id if needed) to continue here; a fresh session is optional."
 - **`blocked`**: say:
-  > "Spec `<slug>` is blocked — the last LEDGER.md entry records why and what unlocks it. Run `/spec-run <slug>` to investigate with a materially different path, or tell me if the external blocker cleared."
+  > "Spec `<slug>` is blocked — the last LEDGER.md entry records why and what unlocks it. Run `/cda-spec-run <slug>` to investigate with a materially different path, or tell me if the external blocker cleared."
 
-Do not infer execution from an orientation-only request. When the current request explicitly says to run, implement, continue, or resume this approved spec, hand control to `/spec-run` without another confirmation.
+Do not infer execution from an orientation-only request. When the current request explicitly says to run, implement, continue, or resume this approved spec, hand control to `/cda-spec-run` without another confirmation.
 
 ### Case A — At least one task with `status: awaiting-review`, `in-progress`, or `blocked`
 
@@ -99,11 +99,11 @@ Surface the Next-Session line (or the micro-handoff's label and its `Next:` step
 
 Ask plainly:
 
-> "No active task or session handoff found. What would you like to tackle? If it's non-trivial or multi-session, I can run `/plan <description>` to create a lightweight task workspace with TASK.md only unless supporting material is actually needed."
+> "No active task or session handoff found. What would you like to tackle? If it's non-trivial or multi-session, I can run `/cda-plan <description>` to create a lightweight task workspace with TASK.md only unless supporting material is actually needed."
 
 ## Notes
 
 - Keep the report short and actionable.
 - **Warm resume for ad-hoc work:** when the user picks up a `(no task)` micro-handoff from `## In Progress` (Case B), read the files on its `Files:` line (cap ~5) before acting — the same warm-up a task resume gets. This is the `/compact`-style "re-read recent files" applied to un-planned work.
-- If `.claudart/CONTEXT.md` items look stale (e.g., dated `<!-- since: -->` more than 30 days old), mention that `/checkpoint` should refresh them after this session.
+- If `.claudart/CONTEXT.md` items look stale (e.g., dated `<!-- since: -->` more than 30 days old), mention that `/cda-checkpoint` should refresh them after this session.
 - Flag stale Active tasks per the **Staleness Thresholds** table in `.claude/rules/task-management.md` (stalled `in-progress`, stuck `awaiting-review`, abandoned `planning`) — surface a stuck `awaiting-review` prominently; it is not abandoned, it just needs the user's sign-off.

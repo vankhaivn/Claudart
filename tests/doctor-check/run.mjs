@@ -83,15 +83,15 @@ function fixture(name, layer = "codex", layout = "installed") {
     );
     mkdirSync(join(dir, ".codex/agents"), { recursive: true });
     for (const name of [
-      "codex-start",
-      "codex-checkpoint",
-      "codex-learn",
-      "codex-doctor",
-      "codex-refactor-memory",
-      "codex-plan",
-      "codex-handoff",
-      "codex-spec",
-      "codex-spec-run",
+      "cda-start",
+      "cda-checkpoint",
+      "cda-learn",
+      "cda-doctor",
+      "cda-refactor-memory",
+      "cda-plan",
+      "cda-handoff",
+      "cda-spec",
+      "cda-spec-run",
     ])
       write(
         join(dir, `.agents/skills/${name}/SKILL.md`),
@@ -111,15 +111,15 @@ function fixture(name, layer = "codex", layout = "installed") {
     ])
       write(join(dir, `.claude/rules/${name}.md`), rule);
     for (const name of [
-      "start",
-      "learn",
-      "refactor-memory",
-      "doctor",
-      "checkpoint",
-      "plan",
-      "handoff",
-      "spec",
-      "spec-run",
+      "cda-start",
+      "cda-learn",
+      "cda-refactor-memory",
+      "cda-doctor",
+      "cda-checkpoint",
+      "cda-plan",
+      "cda-handoff",
+      "cda-spec",
+      "cda-spec-run",
     ])
       write(
         join(dir, `.claude/commands/${name}.md`),

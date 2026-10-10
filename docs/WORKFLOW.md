@@ -9,28 +9,28 @@ It describes behavior, not every rule. The exact contracts the agent follows liv
 ## 1. A normal session
 
 ```text
-/start  →  do the work  →  /checkpoint
+/cda-start  →  do the work  →  /cda-checkpoint
               │
-              └─ stuck mid-investigation and out of context?  →  /handoff
+              └─ stuck mid-investigation and out of context?  →  /cda-handoff
 ```
 
-**Start.** `/start` (or `$codex-start`) reads the current state in `CONTEXT.md`, the task and spec lists, the knowledge index, recent Git history, and any pending handoff. It is deliberately light; it does not read every file. If your message already names the task to continue, the agent goes straight to it.
+**Start.** `/cda-start` (or `$cda-start`) reads the current state in `CONTEXT.md`, the task and spec lists, the knowledge index, recent Git history, and any pending handoff. It is deliberately light; it does not read every file. If your message already names the task to continue, the agent goes straight to it.
 
 **Work.** Ask for what you need. The agent picks the right size of work (see below).
 
-**Checkpoint.** At a natural stopping point, `/checkpoint` rewrites `CONTEXT.md`, updates the task and spec lists, moves old state into `JOURNAL.md`, and saves facts worth keeping as knowledge.
+**Checkpoint.** At a natural stopping point, `/cda-checkpoint` rewrites `CONTEXT.md`, updates the task and spec lists, moves old state into `JOURNAL.md`, and saves facts worth keeping as knowledge.
 
-**Handoff.** Only for a hard investigation that must continue in a fresh session. `/handoff` writes the current hypothesis, evidence, dead ends, and the exact next step to `HANDOFF.md`. The next `/start` reads it and deletes it. It is not a session summary.
+**Handoff.** Only for a hard investigation that must continue in a fresh session. `/cda-handoff` writes the current hypothesis, evidence, dead ends, and the exact next step to `HANDOFF.md`. The next `/cda-start` reads it and deletes it. It is not a session summary.
 
 Claude Code and Codex read and write the same `.claudart/` folder, so you can switch tools between sessions. Use them one after another, not at the same time on the same files.
 
 ## 2. Pick the size of the work
 
-| Mode           | Use it when                                                        | What gets saved                 |
-| -------------- | ------------------------------------------------------------------ | ------------------------------- |
-| Just ask       | The change is small, clear, and low risk                           | Nothing extra; Git history only |
-| Task (`/plan`) | Work needs a plan that survives interruption, or you asked for one | One `TASK.md`                   |
-| Spec (`/spec`) | A whole mission with several phases that you approve once          | A folder in `.claudart/specs/`  |
+| Mode               | Use it when                                                        | What gets saved                 |
+| ------------------ | ------------------------------------------------------------------ | ------------------------------- |
+| Just ask           | The change is small, clear, and low risk                           | Nothing extra; Git history only |
+| Task (`/cda-plan`) | Work needs a plan that survives interruption, or you asked for one | One `TASK.md`                   |
+| Spec (`/cda-spec`) | A whole mission with several phases that you approve once          | A folder in `.claudart/specs/`  |
 
 Rules of thumb:
 
@@ -40,7 +40,7 @@ Rules of thumb:
 
 ## 3. Tasks
 
-`/plan <task>` creates `.claudart/tasks/YYYY-MM-DD-NNN-<slug>/TASK.md`. That one file holds the goal, the steps with a check for each, the acceptance criteria, the decisions made, and the outcome. Extra files go in `artifacts/` only when they are really needed, such as a ZIP that reproduces a bug.
+`/cda-plan <task>` creates `.claudart/tasks/YYYY-MM-DD-NNN-<slug>/TASK.md`. That one file holds the goal, the steps with a check for each, the acceptance criteria, the decisions made, and the outcome. Extra files go in `artifacts/` only when they are really needed, such as a ZIP that reproduces a bug.
 
 ### What you see
 
@@ -75,7 +75,7 @@ A task can also be `blocked` or `cancelled`. Finished tasks move to `tasks/done/
 
 ## 4. Specs for large work
 
-`/spec <mission>` interviews you, may build a small proof of concept, and writes a plan detailed enough to run without the original conversation. It does not write the product code.
+`/cda-spec <mission>` interviews you, may build a small proof of concept, and writes a plan detailed enough to run without the original conversation. It does not write the product code.
 
 | File         | Holds                                               |
 | ------------ | --------------------------------------------------- |
@@ -87,7 +87,7 @@ A task can also be `blocked` or `cancelled`. Finished tasks move to `tasks/done/
 
 You approve `SPEC.md` and `ROADMAP.md` once. That approval covers all work inside the scope, but not unrelated changes or a change of intent; those need an amendment.
 
-`/spec-run <slug>` then works through the roadmap: implement, verify, record evidence, move on. A failed check is retried only after something real changes. At phase boundaries the agent may suggest a checkpoint or a fresh session; work continues if you don't answer.
+`/cda-spec-run <slug>` then works through the roadmap: implement, verify, record evidence, move on. A failed check is retried only after something real changes. At phase boundaries the agent may suggest a checkpoint or a fresh session; work continues if you don't answer.
 
 When everything is done, the agent runs the acceptance checks and stops at `awaiting-final-review`. Only you mark the spec done.
 
@@ -111,13 +111,13 @@ When everything is done, the agent runs the acceptance checks and stops at `awai
 
 If the code, a schema, or a project doc already owns the fact, knowledge just links to it. The agent reads knowledge map-first: the root `INDEX.md`, then only the relevant topic and section. Reading never changes it.
 
-**Checking it.** `/doctor` runs a read-only structural check, then reviews meaning and consistency. To run just the knowledge checker:
+**Checking it.** `/cda-doctor` runs a read-only structural check, then reviews meaning and consistency. To run just the knowledge checker:
 
 ```bash
 bash .claude/scripts/knowledge-check.sh --root .
 ```
 
-Use `.codex/scripts/` for Codex. The checker finds broken structure and links; it cannot tell whether a statement is true. `/refactor-memory` reorganizes the store when it has grown messy.
+Use `.codex/scripts/` for Codex. The checker finds broken structure and links; it cannot tell whether a statement is true. `/cda-refactor-memory` reorganizes the store when it has grown messy.
 
 ## 6. Git
 
@@ -140,22 +140,22 @@ The main agent may also split work across helper agents when the tool supports i
 
 ## 8. Project Docs (optional)
 
-Installed with `--project-docs`. It adds `/project-docs` (or `$codex-project-docs`) to create, adopt, update, audit, or tidy your project's own documentation, with templates and examples. It never runs on its own and never creates docs at install time. See the [module page](../modules/project-docs/README.md).
+Installed with `--project-docs`. It adds `/cda-project-docs` (or `$cda-project-docs`) to create, adopt, update, audit, or tidy your project's own documentation, with templates and examples. It never runs on its own and never creates docs at install time. See the [module page](../modules/project-docs/README.md).
 
 ## 9. Commands
 
-| Claude Code        | Codex                    | Purpose                                      |
-| ------------------ | ------------------------ | -------------------------------------------- |
-| `/start`           | `$codex-start`           | Orient a session                             |
-| `/plan <task>`     | `$codex-plan <task>`     | Create or resume a task                      |
-| `/spec <mission>`  | `$codex-spec <mission>`  | Create and approve a spec                    |
-| `/spec-run <slug>` | `$codex-spec-run <slug>` | Run an approved spec to final review         |
-| `/checkpoint`      | `$codex-checkpoint`      | Save current state and durable facts         |
-| `/handoff`         | `$codex-handoff`         | Pause a hard investigation for a new session |
-| `/learn`           | `$codex-learn`           | Turn a repeated lesson into a rule           |
-| `/doctor`          | `$codex-doctor`          | Health check                                 |
-| `/refactor-memory` | `$codex-refactor-memory` | Reorganize the memory store                  |
-| `/project-docs`    | `$codex-project-docs`    | Manage project documentation (optional)      |
+| Claude Code            | Codex                  | Purpose                                      |
+| ---------------------- | ---------------------- | -------------------------------------------- |
+| `/cda-start`           | `$cda-start`           | Orient a session                             |
+| `/cda-plan <task>`     | `$cda-plan <task>`     | Create or resume a task                      |
+| `/cda-spec <mission>`  | `$cda-spec <mission>`  | Create and approve a spec                    |
+| `/cda-spec-run <slug>` | `$cda-spec-run <slug>` | Run an approved spec to final review         |
+| `/cda-checkpoint`      | `$cda-checkpoint`      | Save current state and durable facts         |
+| `/cda-handoff`         | `$cda-handoff`         | Pause a hard investigation for a new session |
+| `/cda-learn`           | `$cda-learn`           | Turn a repeated lesson into a rule           |
+| `/cda-doctor`          | `$cda-doctor`          | Health check                                 |
+| `/cda-refactor-memory` | `$cda-refactor-memory` | Reorganize the memory store                  |
+| `/cda-project-docs`    | `$cda-project-docs`    | Manage project documentation (optional)      |
 
 ## 10. Installed layout
 

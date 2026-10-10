@@ -96,8 +96,8 @@ fi
 # Check the selected module before copying any files.
 if [[ "$INSTALL_PROJECT_DOCS" == true ]]; then
   MODULE_ROOT="$TMPDIR/modules/project-docs"
-  if { [[ "$INSTALL_CLAUDE" == true ]] && [[ ! -f "$MODULE_ROOT/.claude/commands/project-docs.md" ]]; } ||
-     { [[ "$INSTALL_CODEX" == true ]] && [[ ! -f "$MODULE_ROOT/.agents/skills/codex-project-docs/SKILL.md" ]]; }; then
+  if { [[ "$INSTALL_CLAUDE" == true ]] && [[ ! -f "$MODULE_ROOT/.claude/commands/cda-project-docs.md" ]]; } ||
+     { [[ "$INSTALL_CODEX" == true ]] && [[ ! -f "$MODULE_ROOT/.agents/skills/cda-project-docs/SKILL.md" ]]; }; then
     printf '%s Project Docs payload is missing from the downloaded source.\n' "$(red "error")" >&2
     exit 1
   fi
@@ -243,12 +243,12 @@ fi
 
 printf '%s\n' "$(bold "Next steps:")"
 if [[ "$INSTALL_CLAUDE" == true ]]; then
-  printf '  Claude Code  →  open project, run /start\n'
+  printf '  Claude Code  →  open project, run /cda-start\n'
 fi
 if [[ "$INSTALL_CODEX" == true ]]; then
   # The dollar-prefixed skill names are intentional literals.
   # shellcheck disable=SC2016
-  printf '  Codex        →  open project, run $codex-start\n'
+  printf '  Codex        →  open project, run $cda-start\n'
 fi
 if [[ "$INSTALL_PROJECT_DOCS" == true ]]; then
   printf '  Project Docs →  use init for a new idea, adopt for an existing project\n'

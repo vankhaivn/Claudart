@@ -11,7 +11,7 @@ An eligible fact may be promoted immediately only when at least one trigger appl
 - confirmed source drift requires an owner trust or content update;
 - a lifecycle workflow reaches its defined promotion boundary.
 
-Otherwise preserve the observation as a candidate in its owning work artifact. `$codex-checkpoint` performs bulk maintenance and promotion, but it is not the only write gate.
+Otherwise preserve the observation as a candidate in its owning work artifact. `$cda-checkpoint` performs bulk maintenance and promotion, but it is not the only write gate.
 
 Never auto-write after every exploration. Never copy a transcript, chronology, or entire canonical document into knowledge. Reference the source and preserve only the compact fact needed for future routing. If uncertainty or conflict invalidates an existing owner, set it to `review-needed`, preserve the evidence, and explain the uncertainty in `status_note`.
 

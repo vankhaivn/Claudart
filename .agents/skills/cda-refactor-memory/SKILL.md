@@ -1,5 +1,5 @@
 ---
-name: codex-refactor-memory
+name: cda-refactor-memory
 description: Consolidate Codex project memory and perform controlled, in-place normalization of knowledge, guidelines, skills, and agent wiring.
 ---
 
@@ -10,9 +10,9 @@ Refactor the repository-local Codex operating layer without losing project conte
 For a knowledge contract upgrade, use this sequence:
 
 ```text
-$codex-doctor
-$codex-refactor-memory
-$codex-doctor
+$cda-doctor
+$cda-refactor-memory
+$cda-doctor
 ```
 
 The first doctor run establishes a read-only baseline; refactor performs one controlled in-place normalization; the final doctor run verifies the result.
