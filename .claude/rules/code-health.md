@@ -101,12 +101,14 @@ Let configured formatters and linters settle mechanical style. Comments should e
 
 ## 9. Use Tests as Behavioral Evidence
 
-Choose tests according to the changed risk and contract:
+Choose verification according to the changed risk and contract. Reuse or strengthen relevant existing checks before adding a new case; a fix does not automatically require a new test:
 
 - For a bug fix, reproduce the relevant failure before correcting it when practical.
 - For risky refactoring, establish characterization or contract coverage before changing structure; distinguish required behavior from known defects.
 - For new behavior, cover the intended outcome and meaningful boundary or failure cases.
 - For stateful or concurrent paths, verify relevant transitions, isolation, ordering, cleanup, and retry behavior at the appropriate level.
+
+For low-risk, reversible copy, spacing, or mechanical edits, existing checks and focused inspection may be sufficient; inspect rendered output for visible changes. Follow repository-required checks.
 
 Assert observable behavior and stable contracts rather than incidental call choreography. Use focused deterministic tests where suitable; add integration, end-to-end, property-based, fuzz, visual, accessibility, or performance checks when their particular risk warrants them, not as a universal checklist.
 
@@ -116,7 +118,11 @@ A regression test should fail when its claimed defect is present. Never weaken a
 
 Ground expected results in requirements, independently checked examples, invariants, or an appropriate reference. Current output, calling the behavior under test to compute its expected result, or copying its algorithm is not an independent correctness oracle. Shared setup is fine; characterization records existing behavior, not proof that it is correct.
 
-Use relevant existing tests to choose the smallest useful addition for a plausible regression or meaningful contract boundary. Coverage and test counts alone neither justify new cases nor establish correctness. Similar syntax or cross-layer overlap does not prove redundancy; consolidate only when retained checks preserve meaningful protection.
+A new case should protect a plausible regression or meaningful contract boundary that relevant existing checks do not already cover. Coverage and test counts alone neither justify new cases nor establish correctness. Similar syntax or cross-layer overlap does not prove redundancy; consolidate only when retained checks preserve meaningful protection.
+
+When reviewing tests or verification assets, establish their current purpose before trimming assertions: a supported behavior, consumer, contract, or compatibility obligation. A historical task, callable CLI, unique assertion, or test of the harness itself does not alone establish that need. Cover the assigned scope; example names are not an exhaustive inventory.
+
+When no current obligation remains, retire an obsolete proof of concept, experiment harness, or superseded verifier together with its exclusive tests, fixtures, launchers, CLI entries, and current operating guidance. Check static, dynamic, and external consumers where applicable. Preserve shared assets with current consumers and actual stored-data, compatibility, recovery, or rollback obligations. Removing a harness does not authorize removing product capabilities or history.
 
 Apply these criteria within existing implementation and review, without adding mandatory review rounds, agents, per-test justification/reporting, whole-suite audits, or mutation-testing passes. Names, inputs, and assertions normally suffice; explain only non-obvious expectations. Beyond existing project-required checks, extend verification only for a concrete assertion concern or uncovered material risk, using a bounded check in the affected scope.
 
