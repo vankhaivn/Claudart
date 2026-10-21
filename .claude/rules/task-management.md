@@ -149,6 +149,7 @@ The task file is the interface between the session that plans and the session th
 - **Carry**: decisions (what was chosen, why, what was rejected), non-obvious constraints and pitfalls discovered while exploring, and a `verify:` check per step.
 - **Do not carry**: the solution. No code snippets, pseudo-code, or line-level edit instructions in Concrete Steps. If writing a step required solving the problem first, the plan has overstepped — lift the step back to decision + verify and let the executor derive the how.
 - A step may stay vague about _how_ as long as its `verify:` is sharp about _what success is_. Verification substitutes for detail: it catches executor drift at the step where it happens, at a fraction of the tokens.
+- `verify:` names the behavior that must hold and, when known, the existing check or observation that proves it. It does not prescribe new tests per item; when coverage is missing, name the unprotected behavior and let the executor extend its owner check under the code-health testing guidance.
 - A well-written step can be handed verbatim to a subagent as the **Goal** of a worker prompt (see `agent-delegation.md`). Self-contained means it carries the decisions, constraints, and verify — not the answer.
 
 ### User-facing plan brief

@@ -82,7 +82,7 @@ POC artifacts freeze only the aspects the user chose: interaction, appearance, p
 
 ## ROADMAP.md — plan and current execution state
 
-A later executor must understand the work without interview context. Record boundaries, dependencies, relevant contract/scenario references, chosen approaches where they matter, and a sharp `verify:`. Exact file paths are useful when known or contractual; do not pre-solve internal implementation. Plan Altitude from `task-management.md` still applies.
+A later executor must understand the work without interview context. Record boundaries, dependencies, relevant contract/scenario references, chosen approaches where they matter, and a sharp `verify:` that names the behavior and its proving check rather than prescribing new tests. Exact file paths are useful when known or contractual; do not pre-solve internal implementation. Plan Altitude from `task-management.md` still applies.
 
 ```markdown
 # ROADMAP — <Mission Title>

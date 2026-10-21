@@ -108,6 +108,8 @@ Choose verification according to the changed risk and contract. Reuse or strengt
 - For new behavior, cover the intended outcome and meaningful boundary or failure cases.
 - For stateful or concurrent paths, verify relevant transitions, isolation, ordering, cleanup, and retry behavior at the appropriate level.
 
+Before adding a test, locate the existing check that owns the behavior and extend it, usually with a row in its table or matrix. Add a new case only for a meaningful input or state that check cannot express, and a new test file or suite only when the behavior has no owner check. This applies equally to data-loss, duplicate-effect and recovery fixes: proving a defect does not require a separate incident test. A request, plan step or review asking for "tests for X" names behavior X to protect; the owner check satisfies it, not a copy at each caller.
+
 For low-risk, reversible copy, spacing, or mechanical edits, existing checks and focused inspection may be sufficient; inspect rendered output for visible changes. Follow repository-required checks.
 
 Assert observable behavior and stable contracts rather than incidental call choreography. Use focused deterministic tests where suitable; add integration, end-to-end, property-based, fuzz, visual, accessibility, or performance checks when their particular risk warrants them, not as a universal checklist.
@@ -119,6 +121,8 @@ A regression test should fail when its claimed defect is present. Never weaken a
 Ground expected results in requirements, independently checked examples, invariants, or an appropriate reference. Current output, calling the behavior under test to compute its expected result, or copying its algorithm is not an independent correctness oracle. Shared setup is fine; characterization records existing behavior, not proof that it is correct.
 
 A new case should protect a plausible regression or meaningful contract boundary that relevant existing checks do not already cover. Coverage and test counts alone neither justify new cases nor establish correctness. Similar syntax or cross-layer overlap does not prove redundancy; consolidate only when retained checks preserve meaningful protection.
+
+Give each shared rule (labels, formatting, retries, permissions, validation or refusal matrices) one owner test with its full matrix; each caller keeps at most one check that it applies the rule. Tests do not encode repository history: task or issue ids, release or deployment numbers, milestone or phase labels, incident replays, documentation or prompt prose, or incidental version, key or table inventories. Keep a real compatibility contract in its dedicated contract fixture, replace incidental pins with behavioral invariants, and delete characterization or refactor proofs once the refactor lands, after moving any consequential behavior to its owner test.
 
 When reviewing tests or verification assets, establish their current purpose before trimming assertions: a supported behavior, consumer, contract, or compatibility obligation. A historical task, callable CLI, unique assertion, or test of the harness itself does not alone establish that need. Cover the assigned scope; example names are not an exhaustive inventory.
 
@@ -146,7 +150,7 @@ Report exact commands, observed outcomes, and scope. Do not claim a check passed
 
 ## 12. Review with Evidence, Not Refactoring Quotas
 
-For a finding, identify the location, affected behavior or maintenance scenario, concrete evidence, and consequence. Separate verified defects, evidenced structural problems, and hypotheses needing investigation. Distinguish impact from confidence. Size, naming preference, a missing pattern, or a coverage percentage alone is not a defect.
+For a finding, identify the location, affected behavior or maintenance scenario, concrete evidence, and consequence. Separate verified defects, evidenced structural problems, and hypotheses needing investigation. Distinguish impact from confidence. Size, naming preference, a missing pattern, or a coverage percentage alone is not a defect. A missing test at one caller is not a finding when an owner check already protects the behavior; a request for more coverage names the unprotected behavior and the owner check to extend.
 
 Before proposing a refactor, consider leaving the code as-is, a local correction, reuse of an existing owner, and a new boundary. Recommend the least disruptive option that addresses the actual problem. Explain what gets easier to change, understand, test, or operate; do not justify work solely by fewer lines or more files.
 
@@ -160,7 +164,7 @@ Before finishing, check:
 - **Correctness and safety:** Relevant inputs, state, effects, failure paths, concurrency, and resources are accounted for.
 - **Ownership and growth:** The affected units remain cohesive; new policies or effects have a clear owner and explicit dependencies.
 - **Simplicity:** Boundaries reduce reasoning cost without speculative layers, cosmetic splitting, or inappropriate consolidation.
-- **Evidence and operations:** Relevant tests and checks support the claims; failures remain diagnosable and limitations are explicit.
+- **Evidence and operations:** Relevant tests and checks support the claims; failures remain diagnosable and limitations are explicit. New coverage extends owner checks; when one behavior change forces edits across many test files, consolidate the duplicated rule instead of updating each copy.
 - **Diff and net value:** There is no unrelated churn or loss of user work, and the benefit justifies the change risk.
 
 If a gate fails, revise within scope or report the blocker; revert only your own edits when necessary. Distinguish implementation finished, validation blocked, and awaiting approval according to the repository workflow. Do not mark incomplete acceptance criteria satisfied.
