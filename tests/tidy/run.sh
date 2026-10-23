@@ -142,6 +142,12 @@ git -C "$repo" checkout -q -- .
 sed -i.bak 's/ and \[missing\](gone.md)//' "$repo/docs/guide.md" && rm -f "$repo/docs/guide.md.bak"
 bash "$SCRIPTS/verify.sh" --root "$repo" >"$out"; status=$?
 [ "$status" -eq 0 ] && pass "verify exits 0 when nothing is lost" || fail "verify exits 0 when nothing is lost"
+git -C "$repo" checkout -q -- .
+sed -i.bak -e 's/Deploys must use/Deploys use/' -e '/^See /d' "$repo/docs/guide.md" && rm -f "$repo/docs/guide.md.bak"
+bash "$SCRIPTS/verify.sh" --root "$repo" >"$out"
+refute "$out" '^LOST\|.*unique-flag-alpha$' "verify accepts a fact kept in the rewritten text"
+expect "$out" '^LOST\|docs/guide\.md\|ops\.md$' "verify reports a removed link to an existing page"
+refute "$out" '^LOST\|.*gone\.md$' "verify ignores a removed link to a missing page"
 
 empty="$TMP_ROOT/empty"
 mkdir -p "$empty" && git -C "$empty" init -q && printf '# Empty\n' >"$empty/README.md"
