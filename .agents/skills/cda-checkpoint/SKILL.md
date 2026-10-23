@@ -3,36 +3,25 @@ name: cda-checkpoint
 description: Bulk-maintain shared project state, task/spec indexes, JOURNAL history, and eligible durable project knowledge at a session boundary.
 ---
 
-# CodexCheckpoint
+# Codex Checkpoint
 
-Update `.claudart/CONTEXT.md` to reflect the current state of work from a Codex session. Sync `.claudart/tasks/index.md` with current TASK.md states. Append meaningful retired items to `.claudart/JOURNAL.md`. Run this at the end of meaningful sessions.
+Write a session checkpoint: a declarative snapshot of what is true now, not a log of what happened. Update `.claudart/CONTEXT.md`, sync the task and spec indexes, and append meaningful retired items to `.claudart/JOURNAL.md`.
 
-The output is not a log of what happened. It is a declarative snapshot of what is true right now. Lifelong append is the failure mode this command exists to prevent.
+## Rules
 
-Checkpoint is a bulk-maintenance boundary, not the only way to write knowledge. A user may request an eligible knowledge update in natural language at any point; that update follows `.codex/guidelines/knowledge-management.md` immediately and does not require checkpoint.
-
-## Hard Rules
-
-1. `.claudart/CONTEXT.md` is overwritten, not appended. Anything not still true right now must be removed.
-2. `.claudart/CONTEXT.md` hard ceiling: 150 lines, target under 100. If your draft exceeds 150, stop and ask the user to trim manually or run `$cda-refactor-memory`. Each bullet is one short sentence. Evidence, run or job IDs, timestamps, test totals and quoted chat stay in the task, commit or JOURNAL; CONTEXT links to them.
-3. `.claudart/JOURNAL.md` is append-only. Never edit or delete prior entries. Each new entry is a single line.
-4. Never add `.claudart/JOURNAL.md` as auto-loaded context in `AGENTS.md` or `.codex/guidelines/`. If such an auto-load already exists, remove that wiring and warn the user; JOURNAL remains append-only and outside session context.
-5. Skip JOURNAL entirely when there is nothing meaningful to record. Empty entries pollute the file.
-6. Task workspaces keep their own bodies and supporting files; CONTEXT.md never absorbs a task body. But CONTEXT.md should still reference the currently-focused task by slug + path in `## In Progress` so `$cda-start` sees both task and non-task work in one place. Two valid CONTEXT entries:
-   - Task reference: `- Working task \`add-jwt-auth\` (see .claudart/tasks/2026-05-13-001-add-jwt-auth/TASK.md) <!-- since: YYYY-MM-DD -->`
-   - Ad-hoc non-task change the user requested without creating a `$cda-task` (a quick tweak, a transient pivot): CONTEXT is its **only** home, so it gets a **micro-handoff** — intent + files of interest + next step (see Step 4) — not just a one-line pointer.
-     Checkpoint _syncs_ `tasks/index.md` AND ensures CONTEXT references the focus task, but never copies a task's Steps/Decisions/Surprises into CONTEXT.
-7. Subagent threads are not durable project memory. Do not store subagent ids, nicknames, or transient thread state in CONTEXT. Store only durable outcomes: decisions, unresolved blockers, validated findings, changed ownership boundaries, and next steps.
-
-8. Shared state belongs to the project, not this session. Preserve another session's unresolved work, blockers and next actions unless current evidence or the user resolves them. Absence from this conversation is not completion. Re-read CONTEXT and any index immediately before writing; if the file changed since inspection, reconcile the delta before replacing it. Serialize shared writes; this workflow is not a concurrent merge service.
+1. `.claudart/CONTEXT.md` is overwritten, not appended. Remove anything that is no longer true.
+2. `.claudart/CONTEXT.md` has a hard ceiling of 150 lines, target under 100. Over the ceiling, ask the user to trim manually or run `$cda-refactor-memory`. Each bullet is one short sentence. Evidence, run or job IDs, timestamps, test totals and quoted chat stay in the task, commit or JOURNAL; CONTEXT links to them.
+3. `.claudart/JOURNAL.md` is append-only: never edit or delete prior entries, and write each new entry as a single line. Never add it as auto-loaded context in `AGENTS.md` or `.codex/guidelines/`. If such wiring already exists, remove it and warn the user.
+4. CONTEXT never absorbs a task body. `## In Progress` points to the focused task or spec by slug and path, so `$cda-start` sees task and non-task work in one place.
+5. Shared state belongs to the project, not this session. Preserve another session's unresolved work, blockers and next actions unless current evidence or the user resolves them. Absence from this conversation is not completion. Re-read CONTEXT and any index immediately before writing; if the file changed since inspection, reconcile the delta before replacing it. Serialize shared writes; this workflow is not a concurrent merge service.
 
 ## Procedure
 
 ### Step 1: Read Prior State
 
-- Read `.claudart/CONTEXT.md`. If it does not exist, treat it as empty.
-- Read the last ~30 lines of `.claudart/JOURNAL.md` to avoid duplicate entries. If it does not exist, create it later.
-- Skim the recent conversation and `git log -10 --oneline` to understand what changed since the last checkpoint.
+- Read `.claudart/CONTEXT.md`; treat a missing file as empty.
+- Read the last ~30 lines of `.claudart/JOURNAL.md` to avoid duplicate entries.
+- Skim the recent conversation and `git log -10 --oneline` for what changed since the last checkpoint.
 
 ### Step 2: Triage Every CONTEXT Item
 
@@ -41,37 +30,31 @@ For each item currently in `.claudart/CONTEXT.md`, decide one of using current e
 | Status                                                                                                      | Action                                                                                                                                                                                                                                                 |
 | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Still true right now                                                                                        | Keep it, refreshing wording if needed. Preserve any existing `<!-- since: YYYY-MM-DD -->` comment.                                                                                                                                                     |
-| Done / resolved / merged                                                                                    | Drop it from `.claudart/CONTEXT.md`. Candidate for JOURNAL if it was a real decision, completion, or pivot.                                                                                                                                            |
+| Done / resolved / merged                                                                                    | Drop it from CONTEXT. Candidate for JOURNAL if it was a real decision, completion, or pivot. Pure tactical noise is dropped silently.                                                                                                                  |
 | Superseded by newer state                                                                                   | Drop the old item and write the new current state.                                                                                                                                                                                                     |
 | A standing owner preference or approval about working with the owner, stated or confirmed by the owner      | Record it in `.claudart/OWNER.md` under `.codex/guidelines/ai-behavior.md` if it is missing, then drop it from CONTEXT; a correction about work an existing guideline owns goes to that guideline (next row); a one-time approval stays with its work. |
 | Broad recurring behavior for a code area, workflow, or other area a guideline owns, relevant to future work | Propose moving it into `.codex/guidelines/` via `$cda-learn`, then drop it from CONTEXT.                                                                                                                                                               |
-| Descriptive, durable-beyond-current-work, current, and evidenced project fact (scope may be narrow)         | Flag for **Step 6c**, then drop it from CONTEXT after its owner or knowledge route is updated and the relevant validation passes.                                                                                                                      |
+| Descriptive, durable-beyond-current-work, current, and evidenced project fact (scope may be narrow)         | Flag for Step 6c, then drop it from CONTEXT after its owner or knowledge route is updated and the relevant validation passes.                                                                                                                          |
 | WIP, proposed future state, task/acceptance state, or an uncertain/conflicting observation                  | Keep it in the task/spec/CONTEXT candidate surface; never promote it as an active fact.                                                                                                                                                                |
-
-Pure tactical noise is dropped silently.
 
 ### Step 3: Add New State from This Session
 
 Add to `.claudart/CONTEXT.md` only what is true now:
 
-- Work that is mid-stream, with `file:line` where useful. If the work is being tracked in a task file, reference it by slug + path (e.g., `Working task \`add-jwt-auth\` (see .claudart/tasks/2026-05-13-001-add-jwt-auth/TASK.md)`). Do not duplicate the task body here.
-- Ad-hoc changes the user requested _without_ creating a `$cda-task` (quick fixes, transient tweaks, mid-flight pivots). These have no task file, so CONTEXT **is** their handoff summary, not just a note. Give each _active_ one a **micro-handoff** (see Step 4 skeleton): the user's intent in one sentence, at most three files of interest with `file:line`, and the next concrete step. Mark them `(no task)`.
+- Work in progress, with `file:line` where useful. Tracked work gets the task or spec pointer from the Step 4 skeleton.
+- Each active change the user requested without a `$cda-task` gets a `(no task)` micro-handoff from the Step 4 skeleton, because CONTEXT is its only home. Keep it only while the work is live; when it ships or is abandoned, drop it in this checkpoint and journal it if it was a real decision or completion.
 - Decisions just made that are not yet codified in guidelines.
-- Durable subagent outcomes that still matter after this session, such as a validated finding, unresolved worker/reviewer blocker, or changed ownership boundary. Do not mention subagent thread ids.
-- Open questions or blockers currently unresolved.
+- Durable subagent outcomes that still matter, such as a validated finding, an unresolved worker or reviewer blocker, or a changed ownership boundary. Never store subagent ids, nicknames, or thread state.
+- Open questions and blockers still unresolved.
 - The single most useful thing the next session should do first.
 
-A fact that passes the full knowledge capture gate does not belong in CONTEXT — flag it for **Step 6c**. Proposed, uncertain, conflicting, or current-work-only observations remain in their working artifact until verified; CONTEXT holds transient state, not canonical reference knowledge.
+A standing owner correction, preference, or approval from this session belongs in `.claudart/OWNER.md`, not CONTEXT; route it, and every other new item, as the Step 2 table routes existing ones.
 
-A standing owner correction, preference, or approval about working with the owner belongs in `.claudart/OWNER.md`, not CONTEXT; one about work an existing guideline owns goes to that guideline. Record any from this session that the profile does not hold yet, following `.codex/guidelines/ai-behavior.md`.
-
-Be terse: task references, decisions, and blockers are one short sentence each. Only _active_ `(no task)` work earns the 3-line micro-handoff, and only while it is live — the moment it ships or is abandoned, drop it this same checkpoint (JOURNAL it if it was a real decision/completion). That triage is what keeps CONTEXT under the ceiling.
-
-For every new bullet, append `<!-- since: YYYY-MM-DD -->` using today's date. If you keep an existing bullet, preserve its original `since:` date rather than resetting it. Codex is not documented to strip HTML comments, so keep these comments short; they exist so `$cda-doctor` can flag old decisions that should graduate into guidelines.
+Task references, decisions, and blockers are one short sentence each. Append `<!-- since: YYYY-MM-DD -->` with today's date to every new bullet, and keep the original date on a kept bullet; `$cda-doctor` uses it to flag old decisions. Codex is not documented to strip HTML comments, so keep these comments short.
 
 ### Step 4: Build the New CONTEXT
 
-Use this skeleton. Omit any section that has nothing to say.
+Use this skeleton and omit any section that has nothing to say:
 
 ```markdown
 <!-- .claudart/CONTEXT.md - current state of work. Updated by checkpoint. Declarative, not a log. -->
@@ -103,17 +86,17 @@ Use this skeleton. Omit any section that has nothing to say.
 - [One concrete action, e.g. "run pytest tests/auth/" or "ask user about caching strategy"] <!-- since: YYYY-MM-DD -->
 ```
 
-Count lines. If more than 150, stop and report to the user. Do not write the file.
+A micro-handoff lists at most three files. Count lines; if the draft exceeds 150, stop and report to the user without writing the file.
 
 ### Step 5: Append to JOURNAL
 
-For every item dropped in Step 2 because it was done, decided, pivoted, or resolved, write one line to `.claudart/JOURNAL.md` in this format:
+For every item dropped in Step 2 because it was done, decided, pivoted, or resolved, append one line:
 
 ```text
 YYYY-MM-DD | <type> | <one short summary, optional commit ref>
 ```
 
-Types:
+Use exactly one type:
 
 - `decision`: an architectural or non-obvious choice was settled.
 - `completed`: a chunk of work finished.
@@ -121,82 +104,56 @@ Types:
 - `blocker-resolved`: an external blocker cleared.
 - `cancelled`: a task was abandoned (used by the Step 6b archive flow; Outcomes in the task file explain why).
 
-Examples:
+Example: `2026-04-28 | decision | Use JWT with refresh tokens in httpOnly cookie, not localStorage`
 
-```text
-2026-04-28 | decision | Use JWT with refresh tokens in httpOnly cookie, not localStorage
-2026-04-28 | completed | Auth refactor merged, commit abc1234
-2026-04-29 | pivot | Dropped GraphQL, going REST due to caching simplicity
-2026-04-30 | blocker-resolved | Redis available in staging
-```
-
-If `.claudart/JOURNAL.md` does not exist, create it with the canonical CLAUDART header before appending.
-
-If there is nothing to journal, skip this step. Do not write empty entries.
+If `.claudart/JOURNAL.md` does not exist, create it with the canonical header before appending. If there is nothing meaningful to journal, skip this step; never write empty entries.
 
 ### Step 6: Overwrite CONTEXT
 
-Now, and only now, write the new `.claudart/CONTEXT.md` from Step 4.
+Write the new `.claudart/CONTEXT.md` from Step 4.
 
 ### Step 6b: Sync .claudart/tasks/index.md
 
-This step is independent of CONTEXT.md. Skip entirely if `.claudart/tasks/` does not exist.
+This step is independent of CONTEXT.md. Skip it if `.claudart/tasks/` does not exist.
 
 1. List `.claudart/tasks/*/TASK.md` from valid top-level workspace ids only, excluding `done/` itself and symlinked workspaces or `TASK.md` files. Read only frontmatter (`status`, `slug`, `created`, `updated`, `reviewer`). Never recursively enumerate task bodies or parse attachments as tasks.
 2. List `.claudart/tasks/done/*/TASK.md` at that exact depth. Read the same metadata. Flag an archived nonterminal task or a validly named workspace missing `TASK.md`; do not move, repair, or infer status automatically.
-3. Detect top-level workspaces whose `TASK.md` status is `done` or `cancelled`. These are terminal by user confirmation, agent-reviewed evidence closeout, or cancellation and have not yet been archived. Require a valid `reviewer: user | agent` before archiving; report incomplete metadata without inventing acceptance ownership. For each:
+3. Move the entire workspace of each top-level task whose status is `done` or `cancelled` with the Shared archive flow in `.codex/guidelines/task-management.md`, under these conditions:
+   - Require a valid `reviewer: user | agent` before archiving; report incomplete metadata without inventing acceptance ownership.
    - Confirm `Outcomes & Retrospective` is filled in `TASK.md`. If empty, report it; do not invent the outcome.
-   - Before archiving, inspect only `TASK.md` Memory Hints and Related Docs for eligible knowledge candidates; use the full knowledge capture gate in Step 6c. Do not bulk-read supporting files or promote task/WIP/proposal state.
-   - Move the entire workspace to `.claudart/tasks/done/<task-id>/`, preserving its id and all contents. Follow the task contract's archive safeguards: if the destination exists (including a symlink), stop that archive and report the collision; never overwrite, merge, or nest it. Confirm a successful move before updating references or journaling. Do not create, rewrite, extract, or delete artifacts.
-   - Append a completion/cancellation line linking `tasks/done/<task-id>/TASK.md` to `.claudart/JOURNAL.md` only if the recent journal tail does not already contain that closure. Use the Shared archive flow format from `.codex/guidelines/task-management.md`, with type `cancelled` for cancellation. Never rewrite journal history.
-   - Update any live CONTEXT/HANDOFF pointer to the archived `TASK.md` without copying its body. Repair knowledge `sources` that point into the moved workspace as the archive flow in `.codex/guidelines/task-management.md` defines.
-   - **DO NOT archive `awaiting-review` tasks.** This state requires `reviewer: user`. Report inconsistent reviewer/status metadata without requesting a completion signal. Checkpoint never changes task status, reviewer, or acceptance boxes.
-4. Rewrite `.claudart/tasks/index.md` per the canonical **"`index.md` Format"** in `.codex/guidelines/task-management.md`, with links to `<task-id>/TASK.md` and `done/<task-id>/TASK.md`. Active includes `awaiting-review` with its ⏳ marker; Recently Done covers the last 14 days. Report any still-unarchived terminal workspace rather than linking it to a nonexistent archive.
-5. Enforce the 100-line ceiling and trim ladder. Missing `artifacts/` is normal; checkpoint never creates supporting files.
-6. Flag stalled tasks using the **Staleness Thresholds** in `.codex/guidelines/task-management.md`; surface the needed user decision rather than cancelling or reopening work automatically.
+   - Before archiving, inspect only `TASK.md` Memory Hints and Related Docs for knowledge candidates for Step 6c. Do not bulk-read supporting files or promote task/WIP/proposal state.
+   - Append the flow's JOURNAL line only if the recent journal tail does not already contain it, with type `cancelled` for a cancellation.
+   - Never archive `awaiting-review` tasks; that state requires `reviewer: user`. Report inconsistent reviewer/status metadata without requesting a completion signal. Checkpoint never changes task status, reviewer, or acceptance boxes.
+4. Rewrite `.claudart/tasks/index.md` per the `index.md` Format in `.codex/guidelines/task-management.md`, including its 100-line ceiling and trim ladder. Report any still-unarchived terminal workspace rather than linking it to a nonexistent archive. Missing `artifacts/` is normal; checkpoint never creates supporting files.
+5. Flag stalled tasks using the Staleness Thresholds in `.codex/guidelines/task-management.md`; surface the needed user decision rather than cancelling or reopening work automatically.
 
 ### Step 6b2: Sync .claudart/specs/INDEX.md
 
-Skip entirely if `.claudart/specs/` does not exist.
+Skip this step if `.claudart/specs/` does not exist.
 
 1. Ensure `.claudart/specs/done/` exists.
 2. List `.claudart/specs/*/SPEC.md` from top-level dated folders only (exclude `INDEX.md` and the `done/` subfolder). For each, read frontmatter only (`slug`, `status`, `created`, `updated`).
-3. Detect any top-level spec whose `status` is `done` or `cancelled`. These have passed their user gate (or were cancelled) and were not yet archived. For each:
-   - Move the entire folder to `.claudart/specs/done/<folder-id>/`, preserving the existing dated folder name. Repair knowledge `sources` that point into the moved folder as the closure in `.codex/guidelines/spec-workflow.md` defines.
-   - Append the completion/cancellation line to `.claudart/JOURNAL.md` only if the recent journal tail does not already contain that spec completion/cancellation.
-   - Before archiving, scan `NOTES.md` for `→ graduate:` flags: evaluate `knowledge/` flags against the capture gate in Step 6c, surface `$cda-learn` flags as proposals in the report, and clear only flags successfully routed or explicitly retained as candidates.
-   - DO NOT archive `awaiting-final-review` specs. Those are explicitly waiting for user confirmation; archiving them defeats the final gate. They stay in the top-level specs folder and appear in the Active list.
-4. List `.claudart/specs/done/*/SPEC.md`. For each, read frontmatter only (`slug`, `status`, `created`, `updated`). If any archived spec is not `done` or `cancelled`, flag it in the report and do not move it automatically.
-5. Rewrite `INDEX.md` per the canonical format in `.codex/guidelines/spec-workflow.md` — Active entries link to top-level dated folders and include every status except `done`/`cancelled` (with the ⏳ marker on `poc-review` and `awaiting-final-review`); Done entries link to `done/<folder-id>/SPEC.md` and include `done`/`cancelled`.
-6. Flag stalled specs per the Staleness Thresholds table in `.codex/guidelines/task-management.md`, mapped as: `running` ↔ `in-progress`, `poc-review`/`awaiting-final-review` ↔ `awaiting-review`, `drafting` ↔ `planning`. List flagged specs in the report. For execution activity, use the latest recorded ROADMAP/LEDGER activity under the spec rule; an unchanged SPEC contract date alone does not mean execution has stalled. Report missing activity evidence without inventing an update.
-7. Scan each Active spec's `NOTES.md` for `→ graduate:` flags: evaluate `knowledge/` flags in Step 6c, surface `$cda-learn` flags as proposals in the report, and clear only flags successfully routed or explicitly retained as candidates.
-8. Do NOT tick roadmap boxes, write LEDGER entries, or change any spec `status` — those transitions belong to `$cda-spec`, `$cda-spec-run`, and the user.
+3. Scan `NOTES.md` of each Active spec, and of each terminal spec before archiving it, for `→ graduate:` flags: evaluate `knowledge/` flags in Step 6c and surface `$cda-learn` flags as proposals in the report. Clear only flags successfully routed or deliberately reclassified; keep unresolved candidates flagged in NOTES.
+4. For each top-level spec whose `status` is `done` or `cancelled`:
+   - Move the entire folder to `.claudart/specs/done/<folder-id>/`, preserving the dated folder name. Repair knowledge `sources` that point into the moved folder as the closure in `.codex/guidelines/spec-workflow.md` defines.
+   - Append the completion or cancellation line to `.claudart/JOURNAL.md` only if the recent journal tail does not already contain it.
+   - Never archive `awaiting-final-review` specs; they wait for the user's final confirmation and stay in the Active list.
+5. List `.claudart/specs/done/*/SPEC.md` frontmatter. Flag any archived spec that is not `done` or `cancelled`; do not move it automatically.
+6. Rewrite `INDEX.md` per the format in `.codex/guidelines/spec-workflow.md`.
+7. Flag stalled specs per the Staleness Thresholds in `.codex/guidelines/task-management.md`, mapped as `running` ↔ `in-progress`, `poc-review`/`awaiting-final-review` ↔ `awaiting-review`, `drafting` ↔ `planning`. Measure execution activity from the latest ROADMAP/LEDGER activity under the spec guideline, not the SPEC contract date. Report missing activity evidence without inventing an update.
+8. Never tick ROADMAP boxes, write LEDGER entries, or change a spec `status`; those transitions belong to `$cda-spec`, `$cda-spec-run`, and the user.
 
 ### Step 6c: Route Durable Facts to Their Owners
 
-Skip if no candidate fact surfaced; do not run the knowledge checker for a checkpoint that makes no knowledge mutation.
+Skip this step if no candidate from this session, task closeout, or spec NOTES passes the capture gates in `.codex/guidelines/knowledge-management.md`, and do not run the checker when no knowledge changed. Checkpoint is bulk maintenance, not the only knowledge write gate; a natural-language knowledge update mid-session follows that guideline directly.
 
-Before evaluating or writing any candidate, read `.codex/guidelines/knowledge-management.md` in full. It owns the knowledge capture, routing, lifecycle, and validation contract; do not recreate a second schema here. Identify the fact's existing owner first. When another current source owns it, leave only a knowledge route or minimal unique context; checkpoint does not take over full project-document maintenance or require a docs audit.
-
-For candidates from Step 2, Step 3, task close, or spec NOTES:
-
-1. Distill claims rather than copying chronology or task prose. Promote only claims that are descriptive, durable beyond the current work, current, and evidenced. A fact may be narrowly scoped when its typed `scope` records that boundary.
-2. Keep WIP/proposals/state in task/spec/CONTEXT. Route behavior to `$cda-learn`. Keep uncertainty as a candidate; when evidence contradicts an existing canonical owner, mark that owner `review-needed` with a `status_note` instead of asserting a replacement.
-3. Read the root router and the smallest relevant maps/topics within the guideline's budget. Patch the existing owner first, subject to the detail budget in `.codex/references/knowledge-maintenance.md`; otherwise create a focused topic only when no owner exists.
-4. Write canonical frontmatter and update the topic plus its reachable root/domain-map route atomically. Preserve curated hooks, grouping, ordering, and external routes. Never auto-delete, retire, supersede, or promote an ambiguous unindexed file.
-5. After all knowledge mutations in this checkpoint, run `bash .codex/scripts/knowledge-check.sh --root .`. Repair in-scope mechanical failures before reporting success. If the checker is missing, stop the knowledge mutation and report a High-severity installation problem.
-
-The Git diff remains the review surface. Checkpoint may bulk-promote eligible facts, but it is not an exclusive write boundary.
+For each eligible claim, read the knowledge guideline in full, patch the owner under `.codex/references/knowledge-maintenance.md`, and update its reachable route in the same change. Checkpoint does not take over project-document maintenance or require a docs audit. Never write secrets. Run `bash .codex/scripts/knowledge-check.sh --root .` after the final knowledge mutation and repair in-scope mechanical failures; report any remaining findings and do not claim the update healthy. These writes are autonomous; the Git diff is the review surface.
 
 ### Step 6d: Persist Through the Shared Git Workflow
 
 A checkpoint is durable in Git only when its in-scope delta is committed. For Git persistence, read `.codex/guidelines/git-workflow.md`; that shared contract owns higher-scope/runtime, repository, user, staging, identity, and remote/history rules.
 
-1. Inspect the final `git status --short` and relevant diffs after all checkpoint writes.
-2. Determine the checkpoint-owned delta: verified in-scope session work that is still uncommitted plus the CONTEXT/JOURNAL/index/archive/owner-profile/knowledge maintenance produced by this checkpoint. Preserve unrelated or pre-existing work.
-3. If the shared Git workflow authorizes a local commit at this boundary, stage only the owned paths/hunks and commit the coherent checkpoint delta using the repository's message convention. Do nothing when the owned delta is already fully persisted.
-4. Respect workflow-local narrowing. In particular, a spec with `commits: user` remains no-auto-commit for its spec-owned changes; checkpoint must not use its maintenance role to bypass that choice.
-5. If higher-scope policy blocks the commit, staging cannot be isolated safely, or the commit fails, leave the worktree intact and report `CHECKPOINT NOT PERSISTED IN GIT: commit required` plus the concise reason. Never describe an uncommitted checkpoint as durable.
+The checkpoint-owned delta is verified in-scope session work that is still uncommitted plus the CONTEXT, JOURNAL, index, archive, owner-profile and knowledge maintenance this checkpoint produced. When the shared Git workflow authorizes a local commit, stage only the owned paths or hunks and commit that delta with the repository's message convention; do nothing when it is already persisted. A spec with `commits: user` stays no-auto-commit for its spec-owned changes; checkpoint does not bypass that choice. If policy blocks the commit, staging cannot be isolated safely, or the commit fails, leave the worktree intact and report `CHECKPOINT NOT PERSISTED IN GIT: commit required` plus the reason. Never describe an uncommitted checkpoint as durable.
 
 ### Step 7: Report
 
@@ -208,18 +165,3 @@ Output a 6-line summary:
 4. Tasks synced: active=<n>, archived this run=<n>, stalled=<n>; specs synced: active=<n>, archived this run=<n>, stalled=<n>.
 5. Knowledge entries written/updated (list slugs, or `none`), candidates retained/review-needed, checker result, owner-profile entries added or updated (or `none`), and anything proposed for `$cda-learn`.
 6. Git persistence: the new commit SHA and summary when committed, otherwise `CHECKPOINT NOT PERSISTED IN GIT: commit required` plus the reason. Do not diagnose unrelated uncommitted work in this summary.
-
-## When to Run This Command
-
-Good triggers:
-
-- End of a significant Codex work session.
-- Before `/compact` or equivalent context compaction.
-- Before switching to a different feature or branch.
-- When the user says they will pick this up later.
-
-Bad triggers:
-
-- After every tool call.
-- During active debugging where state is not stable yet.
-- A natural-language request to distill eligible knowledge mid-session; perform that update directly instead of forcing an unrelated checkpoint.

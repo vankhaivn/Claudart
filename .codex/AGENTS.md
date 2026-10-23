@@ -58,7 +58,6 @@ When the optional Project Docs skill is present, use it for project-document own
 
 - Behavior, contracts, setup or operations change → update the owning document in the same change, as the universal behavior rule defines.
 - Existing Codex guidelines change → update the relevant file in `.codex/guidelines/`.
-- Owner corrections, standing preferences, and approvals → record them in `.claudart/OWNER.md` when they happen, as `.codex/guidelines/ai-behavior.md` defines.
 - New domains/layers → create a new guideline file with flow-style `paths: [...]`, `description:`, `when_to_use:`, and inline `tags: [...]` frontmatter, then ensure `AGENTS.md` points to it when globally relevant.
-- Durable project facts → follow the four-invariant Knowledge Contract and its conditional maintenance reference; a natural-language mid-session update is sufficient when the capture gate passes. Keep one owner per fact across project docs, source references, and knowledge.
+- Durable project facts → follow the Knowledge Contract above and its conditional maintenance reference.
 - Live state → update `.claudart/CONTEXT.md` through `$cda-checkpoint`.

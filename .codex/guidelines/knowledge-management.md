@@ -9,7 +9,7 @@ tags: [knowledge, retrieval, evidence, memory]
 
 `.claudart/knowledge/` stores durable **descriptive** project facts and compact routes to other current owners. A topic owns a fact when no source code, schema, generated reference, project document, or other authoritative source already states that same claim as its maintained contract. Source code can be evidence for a distinct, useful synthesis in knowledge without owning that synthesis. `INDEX.md` and `_maps/*.md` are compact routers. Choose ownership by the subject and evidence, not by which agent or reader needs the information; keep one owner per fact and link from other surfaces.
 
-This guideline is the root contract for retrieval and classification. Routine `$cda-start` reads only `.claudart/knowledge/INDEX.md`; it does not load this guideline, detail topics, domain maps, the maintenance reference, or the checker.
+This guideline is the root contract for retrieval and classification.
 
 ## Load Maintenance Detail Only When Needed
 
@@ -51,4 +51,4 @@ Route everything else by kind:
 - Uncertain or conflicting observations remain candidates in the working artifact. Existing knowledge they call into question is not current authority until verified.
 - An observation of runtime or environment state that repository evidence cannot confirm is not an authoritative claim. When it is worth keeping, it goes in the owning topic's `## Point-in-time observations` section under the maintenance reference.
 
-Eligibility does not authorize a write. Never mutate knowledge merely because retrieval found a qualifying claim, and never capture automatically after exploration. When the task includes an authorized mutation or a lifecycle workflow reaches a possible promotion boundary, load the maintenance reference and apply its trigger, owner, routing, and validation contract.
+Eligibility does not authorize a write; the maintenance reference owns capture triggers. Load it when the task includes an authorized mutation or a lifecycle workflow reaches a possible promotion boundary.

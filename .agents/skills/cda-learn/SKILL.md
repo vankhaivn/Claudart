@@ -41,29 +41,25 @@ For each validated behavior:
 6. Put a repository-wide Codex standard in `AGENTS.md`.
 7. Put an owner working preference (communication, pacing, approvals, the people around the project, or a mistake to avoid) in `.claudart/OWNER.md` under `.codex/guidelines/ai-behavior.md`. Record missing entries, merge near-duplicates, and sharpen scope or exceptions instead of creating a guideline.
 
-Guideline frontmatter uses `paths:`, `description:`, `when_to_use:`, and `tags:`. Keep `paths:` and `tags:` as compact flow sequences. Keep bodies prescriptive and concise; cite stable source paths instead of pasting code.
-
 ## 4. Route Non-Behavioral Material
 
-- Descriptive, durable-beyond-current-work, current, evidenced fact → follow the full knowledge guideline now. Find the fact's authoritative owner first; knowledge owns it only if no other current source does. Keep any knowledge copy to a route or minimal unique context, update its reachable route atomically, and run `bash .codex/scripts/knowledge-check.sh --root .` after a knowledge mutation.
+- Descriptive fact → its owner under `.codex/guidelines/knowledge-management.md`; run `bash .codex/scripts/knowledge-check.sh --root .` after a knowledge mutation.
 - WIP, proposal, acceptance state, or task-local discovery → keep it in the active task, spec, or `CONTEXT.md`.
-- Uncertain or conflicting observation → keep it as a candidate, or mark a contradicted canonical owner `review-needed` with evidence and `status_note`.
 - Retired chronology → leave it in JOURNAL; do not rewrite JOURNAL.
 
-`$cda-learn` may write an eligible fact immediately. `$cda-checkpoint` performs bulk maintenance but is not an exclusive knowledge write gate.
+`$cda-learn` may write an eligible fact immediately; `$cda-checkpoint` is not an exclusive knowledge write gate.
 
 ## 5. Output Standard
 
 - Make every rule verifiable from repository evidence.
-- Keep guideline frontmatter complete, with flow-style `paths:` and `tags:` containing 1-5 lowercase kebab-case values.
+- Guideline frontmatter has `paths:`, `description:`, `when_to_use:`, and `tags:`, with flow-style `paths:` and `tags:` containing 1-5 lowercase kebab-case values.
 - State each guideline once, in plain words. Fix a repeated violation by sharpening its wording or scope, not with capitalized emphasis, which current models over-apply.
-- Do not paste long code snippets; cite stable sources.
+- Do not paste code snippets; cite stable sources.
 - Summarize each file changed, the lesson it owns, knowledge checker results when applicable, and unresolved contradictions.
 
 ## Boundaries
 
 - Do not modify `.claudart/CONTEXT.md`; checkpoint owns it.
 - Do not rewrite or delete `.claudart/JOURNAL.md`.
-- Do not auto-delete, retire, supersede, or promote ambiguous knowledge.
 - Do not create a guideline for a descriptive fact or a knowledge topic for behavior.
 - Execute safe, in-scope memory changes, validate them, and report each file touched and why.
