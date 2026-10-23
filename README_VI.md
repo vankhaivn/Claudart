@@ -72,7 +72,7 @@ Sửa nhỏ và rõ ràng thì không cần lệnh nào, cứ nhờ thẳng. Xem
 | `.claudart/tasks/`     | Kế hoạch task                         |
 | `.claudart/specs/`     | Spec cho việc lớn                     |
 | `.claudart/VERSION`    | Commit upstream của từng layer đã cài |
-| `.claude/`, `.codex/`  | Rule, lệnh và script của agent        |
+| `.claude/`, `.codex/`  | Rule, skill và script của agent       |
 
 ## Đóng góp
 

@@ -1,5 +1,7 @@
 ---
+name: cda-task
 description: Create or resume a lightweight persistent task workspace in .claudart/tasks/ when work benefits from a durable plan; execute it too when the user has already asked to implement.
+disable-model-invocation: true
 ---
 
 Create or resume a persistent task workspace whose `TASK.md` is the authoritative plan. Before acting, read `.claude/rules/task-management.md`; it owns the workspace schema, artifact rules, state machine, approval signals, progress updates, resumption, and completion gate. Read `.claude/rules/agent-delegation.md` only when delegation is relevant.

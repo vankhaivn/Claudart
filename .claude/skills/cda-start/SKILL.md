@@ -1,8 +1,10 @@
 ---
+name: cda-start
 description: Orient a new CLAUDART session from current context, recent git history, and active task workspaces
+disable-model-invocation: true
 ---
 
-Start this session with a lightweight CLAUDART orientation. This command is read-only, with one exception: consuming the handoff baton (Case H) deletes `.claudart/HANDOFF.md` once the user resumes or discards it.
+Start this session with a lightweight CLAUDART orientation. This skill is read-only, with one exception: consuming the handoff baton (Case H) deletes `.claudart/HANDOFF.md` once the user resumes or discards it.
 
 The user's current request controls what happens after orientation. When it explicitly selects a task or spec, or says to run, continue or resume the unambiguous current focus, complete the lightweight inventory, then load that workflow's canonical files and continue under its authorization rules without asking again: hand an approved spec to `/cda-spec-run`, and resume a task under the Resumption protocol in `.claude/rules/task-management.md`. The same direct instruction satisfies `planning → in-progress` for a task still in planning. An orientation-only request never implies execution, resumption or completion. A startup scan never overrides or delays an explicit request.
 

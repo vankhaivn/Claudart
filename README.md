@@ -72,7 +72,7 @@ Small, clear edits need no command at all; just ask. See the [workflow guide](do
 | `.claudart/tasks/`     | Task plans                              |
 | `.claudart/specs/`     | Large-work specifications               |
 | `.claudart/VERSION`    | Upstream commit each layer came from    |
-| `.claude/`, `.codex/`  | Agent rules, commands, and scripts      |
+| `.claude/`, `.codex/`  | Agent rules, skills, and scripts        |
 
 ## Contributing
 

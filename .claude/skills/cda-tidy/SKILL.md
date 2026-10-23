@@ -22,7 +22,7 @@ The bundled scripts in `.claude/skills/cda-tidy/scripts/` do the mechanical work
 2. Run `bash .claude/skills/cda-tidy/scripts/scope.sh`. For each scope it finds the last commit whose `Claudart-Tidy:` trailer names that scope and lists the files changed since; a scope never tidied, or every scope with `--full`, is reviewed in full. On a root without Git, add `--snapshot <dir outside the root>`; verify needs that copy. Add `--include <path>` for each other folder the user names as project docs, and pass the same flags to signals and verify. A Git repository needs at least one commit.
 3. Run `bash .claude/scripts/doctor-check.sh --root . --layer claude` once as the mechanical baseline.
 4. Run `bash .claude/skills/cda-tidy/scripts/signals.sh` with the same `--full` and `--include` flags.
-5. When `.claude/references/project-docs/ownership.md` exists, read it and use its owner table to decide where each fact belongs. Otherwise follow the repository's existing documentation layout.
+5. When `.claude/skills/cda-project-docs/references/ownership.md` exists, read it and use its owner table to decide where each fact belongs. Otherwise follow the repository's existing documentation layout.
 
 Read each file under review in full before judging it. Signals miss paraphrased duplicates, stale claims and caveats that change nothing; find those by reading.
 

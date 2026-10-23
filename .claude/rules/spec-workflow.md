@@ -1,5 +1,5 @@
 ---
-paths: [".claude/commands/cda-spec.md", ".claude/commands/cda-spec-run.md"]
+paths: [".claude/skills/cda-spec*/SKILL.md"]
 description: Dated mission-scale specs with standing approval, scoped context loading, owned execution state and evidence-driven verification through final user review.
 when_to_use: Whenever the user invokes `/cda-spec` or `/cda-spec-run`, when a spec folder under `.claudart/specs/` is open or referenced, or when resuming mission-scale work that spans many sessions.
 tags: [specs, loop-engineering, autonomy, cross-session, missions]

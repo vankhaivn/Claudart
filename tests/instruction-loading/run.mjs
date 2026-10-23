@@ -158,12 +158,11 @@ try {
       "learn", "doctor", "tidy",
     ];
     for (const action of actions) {
-      const command = join(root, `.claude/commands/cda-${action}.md`);
-      const skill = join(root, `.claude/skills/cda-${action}/SKILL.md`);
+      const claude = join(root, `.claude/skills/cda-${action}/SKILL.md`);
       const codex = join(root, `.agents/skills/cda-${action}/SKILL.md`);
-      assert(existsSync(command) !== existsSync(skill), `cda-${action} needs one Claude entrypoint`);
-      if (existsSync(skill))
-        assert.match(read(skill), new RegExp(`^name: cda-${action}$`, "m"));
+      assert(existsSync(claude), claude);
+      assert.match(read(claude), new RegExp(`^name: cda-${action}$`, "m"));
+      assert.match(read(claude), /^disable-model-invocation: true$/m);
       assert(existsSync(codex), codex);
       assert.match(read(codex), new RegExp(`^name: cda-${action}$`, "m"));
     }
@@ -193,7 +192,7 @@ try {
       assert(!existsSync(join(dest, ".codex/AGENTS.md")));
     });
     check(`${mode}: core install leaves optional Project Docs absent`, () => {
-      assert(!existsSync(join(dest, ".claude/commands/cda-project-docs.md")));
+      assert(!existsSync(join(dest, ".claude/skills/cda-project-docs")));
       assert(!existsSync(join(dest, ".agents/skills/cda-project-docs")));
       assert(!existsSync(join(dest, "docs")));
     });
@@ -261,7 +260,7 @@ try {
             : []),
         ];
         for (const folder of [
-          ...(mode !== "codex" ? [".claude/commands"] : []),
+          ...(mode !== "codex" ? [".claude/skills"] : []),
           ...(mode !== "claude" ? [".agents/skills"] : []),
         ]) {
           entrypoints.push(
@@ -287,12 +286,14 @@ try {
   }
   const moduleSource = join(root, "modules/project-docs");
   const moduleEntries = [
-    ".claude/commands/cda-project-docs.md",
+    ".claude/skills/cda-project-docs/SKILL.md",
     ".agents/skills/cda-project-docs/SKILL.md",
   ];
   check("optional module exposes cda-project-docs in both adapters", () => {
-    for (const entry of moduleEntries) assert(existsSync(join(moduleSource, entry)));
-    assert.match(read(join(moduleSource, moduleEntries[1])), /^name: cda-project-docs$/m);
+    for (const entry of moduleEntries) {
+      assert(existsSync(join(moduleSource, entry)));
+      assert.match(read(join(moduleSource, entry)), /^name: cda-project-docs$/m);
+    }
   });
 
   check("output examples do not hide missing prose resource links", () => {
@@ -322,45 +323,17 @@ try {
     assert.deepEqual(resourceGraph(entry), new Set([entry, reference, asset]));
   });
   check(
-    "Project Docs output templates and example content match across runtimes",
+    "Project Docs references and templates are identical across runtimes",
     () => {
       const codex = join(moduleSource, ".agents/skills/cda-project-docs");
-      const claude = join(moduleSource, ".claude/references/project-docs");
-      for (const [from, to] of [
-        ["assets/templates", "assets/templates"],
-        ["references/examples", "examples"],
-      ]) {
-        const originals = files(join(codex, from));
-        assert.deepEqual(
-          originals.map((file) => file.slice(join(codex, from).length + 1)),
-          files(join(claude, to)).map((file) =>
-            file.slice(join(claude, to).length + 1),
-          ),
-        );
-        for (const file of originals) {
-          const relative = file.slice(join(codex, from).length + 1);
-          assert.equal(read(file), read(join(claude, to, relative)), relative);
-        }
-      }
-      const guides = [
-        join(codex, "references/templates.md"),
-        join(claude, "templates.md"),
-      ].map((file) =>
-        read(file)
-          .replaceAll("../assets/templates/", "assets/templates/")
-          .split("\n")
-          // Different link lengths change only the formatter's table padding.
-          .map((line) =>
-            line.startsWith("|")
-              ? line
-                  .split("|")
-                  .map((cell) => cell.trim().replace(/^-+$/, "---"))
-                  .join("|")
-              : line,
-          )
-          .join("\n"),
-      );
-      assert.equal(guides[0], guides[1]);
+      const claude = join(moduleSource, ".claude/skills/cda-project-docs");
+      const relative = (base) =>
+        files(base)
+          .map((file) => file.slice(base.length + 1))
+          .filter((file) => file !== "SKILL.md");
+      assert.deepEqual(relative(codex), relative(claude));
+      for (const file of relative(codex))
+        assert.equal(read(join(codex, file)), read(join(claude, file)), file);
     },
   );
   for (const mode of ["claude", "codex", "both"]) {
@@ -468,7 +441,7 @@ try {
         "docs/releases/v1.md":
           "# Supported release\n\nVersion 1 remains supported.\n",
         "CLAUDE.md": "# Custom Claude root loader\n",
-        ".claude/commands/project-discovery.md":
+        ".claude/skills/project-discovery/SKILL.md":
           "Custom team interview; preserve this file.\n",
         ".agents/skills/codex-project-discovery/SKILL.md":
           "Custom team discovery skill.\n",
@@ -489,7 +462,7 @@ try {
           `Additive install overwrote ${relative}`,
         );
       assert(
-        existsSync(join(dest, ".claude/references/project-docs/ownership.md")),
+        existsSync(join(dest, ".claude/skills/cda-project-docs/references/ownership.md")),
       );
       assert(
         existsSync(
@@ -692,7 +665,7 @@ try {
       assert.match(contract, /Follow `git-workflow\.md`/);
     }
     for (const entrypoint of [
-      ".claude/commands/cda-spec.md",
+      ".claude/skills/cda-spec/SKILL.md",
       ".agents/skills/cda-spec/SKILL.md",
     ]) {
       const text = read(join(root, entrypoint));
@@ -807,7 +780,7 @@ try {
           file,
         );
       for (const [adapter, rules, commands, suffix] of [
-        [".claude", ".claude/rules", ".claude/commands/cda-", ".md"],
+        [".claude", ".claude/rules", ".claude/skills/cda-", "/SKILL.md"],
         [".codex", ".codex/guidelines", ".agents/skills/cda-", "/SKILL.md"],
       ]) {
         for (const workflow of ["task-management", "spec-workflow"]) {

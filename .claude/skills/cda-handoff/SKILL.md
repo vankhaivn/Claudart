@@ -1,5 +1,7 @@
 ---
+name: cda-handoff
 description: Write a single-slot session baton (.claudart/HANDOFF.md) that distills this session's reasoning state — objective, hypothesis, evidence, dead ends, exact next step — so a fresh session can resume seamlessly. Run when the context window is nearly full or when pausing mid-investigation.
+disable-model-invocation: true
 ---
 
 Hand off this session's reasoning state to a future session that has none of your context. `/cda-checkpoint` records the state of the project; handoff records the state of the conversation: the working hypothesis, the evidence gathered, the dead ends ruled out, and the exact next move. Handoff is not a session-end ritual; use it when the conversation itself must survive a context boundary, such as a nearly full window or an investigation paused mid-flight.

@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-CLAUDART keeps Claude adapter internals inside `.claude/` and shared project state inside `.claudart/`. This source template is installed as the downstream project's `CLAUDE.md`; keep project-specific loader content there and use `.claude/` for commands, skills, agents, rules, references, and scripts.
+CLAUDART keeps Claude adapter internals inside `.claude/` and shared project state inside `.claudart/`. This source template is installed as the downstream project's `CLAUDE.md`; keep project-specific loader content there and use `.claude/` for skills, agents, rules, references, and scripts.
 
 ## Core Commands
 
@@ -11,7 +11,7 @@ CLAUDART keeps Claude adapter internals inside `.claude/` and shared project sta
 - `/cda-spec <mission>` creates a dated mission-scale spec workspace in `.claudart/specs/` — interview → POC artifact → decision-complete SPEC + ROADMAP, approved once as a standing approval.
 - `/cda-spec-run <slug>` executes an approved spec autonomously until final review — verifies acceptance, records ROADMAP task dispositions and evidence, blocks unchanged failure loops, and offers session rotation at phase boundaries.
 - `/cda-tidy` cleans project docs, knowledge, CONTEXT, OWNER and project rules to the current-document contract, reviewing only what changed since the last tidy commit.
-- `/cda-project-docs` initializes, adopts, updates, audits, or retires current project documentation when `.claude/commands/cda-project-docs.md` is installed. Discovery is a focused step when project intent remains unclear.
+- `/cda-project-docs` initializes, adopts, updates, audits, or retires current project documentation when `.claude/skills/cda-project-docs/SKILL.md` is installed. Discovery is a focused step when project intent remains unclear.
 - `/cda-checkpoint` rewrites current state, syncs task/spec indexes, appends meaningful history, and bulk-maintains eligible knowledge candidates.
 - `/cda-handoff` writes a single-slot session baton (`.claudart/HANDOFF.md`) distilling this session's reasoning state — run when the context window is nearly full or when pausing mid-investigation; the next `/cda-start` consumes and deletes it. Never auto-load `HANDOFF.md`.
 - `/cda-learn` promotes validated recurring behavior into `.claude/rules/` and routes descriptive facts to their owners.

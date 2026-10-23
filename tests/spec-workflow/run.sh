@@ -35,9 +35,9 @@ assert_contains() {
 CODEX_RULE=$REPO_ROOT/.codex/guidelines/spec-workflow.md
 CLAUDE_RULE=$REPO_ROOT/.claude/rules/spec-workflow.md
 CODEX_RUNNER=$REPO_ROOT/.agents/skills/cda-spec-run/SKILL.md
-CLAUDE_RUNNER=$REPO_ROOT/.claude/commands/cda-spec-run.md
+CLAUDE_RUNNER=$REPO_ROOT/.claude/skills/cda-spec-run/SKILL.md
 CODEX_AUTHOR=$REPO_ROOT/.agents/skills/cda-spec/SKILL.md
-CLAUDE_AUTHOR=$REPO_ROOT/.claude/commands/cda-spec.md
+CLAUDE_AUTHOR=$REPO_ROOT/.claude/skills/cda-spec/SKILL.md
 
 if /bin/bash -n "$TEST_DIR/run.sh"; then
   pass "Bash syntax is valid"
@@ -68,7 +68,7 @@ done
 
 for checkpoint in \
   "$REPO_ROOT/.agents/skills/cda-checkpoint/SKILL.md" \
-  "$REPO_ROOT/.claude/commands/cda-checkpoint.md"; do
+  "$REPO_ROOT/.claude/skills/cda-checkpoint/SKILL.md"; do
   assert_contains "$checkpoint" \
     'Repair knowledge `sources` that point into the moved folder' \
     "checkpoint spec archive keeps knowledge sources resolvable"
