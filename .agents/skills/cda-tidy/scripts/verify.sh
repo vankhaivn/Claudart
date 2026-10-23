@@ -97,33 +97,41 @@ awk -F'\t' '
     while (match(line, /https?:\/\/[^ )>"`\047]+/)) { emit(substr(line, RSTART, RLENGTH), "text"); line = substr(line, RSTART + RLENGTH) }
   }' "$TIDY_TMP/removed" >"$TIDY_TMP/tokens"
 
-cut -f2 "$TIDY_TMP/tokens" >"$TIDY_TMP/patterns"
-: >"$TIDY_TMP/found"
-if [ -s "$TIDY_TMP/patterns" ]; then
-  # Search the project's own files: tracked and untracked in Git, otherwise the
-  # tree without dependency folders and nested repositories.
-  if [ "$IS_GIT" = 1 ]; then
-    git -C "$ROOT" grep --untracked -I -h -o -F -f "$TIDY_TMP/patterns" -- . 2>/dev/null >"$TIDY_TMP/found"
-  else
-    awk -v root="$ROOT" '{ print root "/" $0 }' "$TIDY_TMP/nested" >"$TIDY_TMP/prune"
-    find "$ROOT" \( -name .git -o -name node_modules \) -prune -o -type f -print 2>/dev/null |
-      awk -v prune="$TIDY_TMP/prune" '
-        BEGIN { while ((getline p < prune) > 0) skip[p] = 1 }
-        { for (d = $0; sub(/\/[^\/]*$/, "", d) > 0; ) if (d in skip) next; print }' |
-      tr '\n' '\0' | xargs -0 grep -hoIF -f "$TIDY_TMP/patterns" 2>/dev/null >"$TIDY_TMP/found"
-  fi
-  grep -hoF -f "$TIDY_TMP/patterns" "$TIDY_TMP/added" 2>/dev/null >>"$TIDY_TMP/found"
+# A token kept in the new text is not lost.
+awk -F'\t' -v added="$TIDY_TMP/added" '
+  BEGIN { while ((getline a < added) > 0) text = text a "\n" }
+  index(text, $2) == 0' "$TIDY_TMP/tokens" >"$TIDY_TMP/candidates"
+
+# The project's own files: tracked and untracked in Git, otherwise the tree
+# without dependency folders and nested repositories.
+if [ "$IS_GIT" = 1 ]; then
+  git -C "$ROOT" -c core.quotePath=false ls-files --cached --others --exclude-standard >"$TIDY_TMP/project"
+else
+  awk -v root="$ROOT" '{ print root "/" $0 }' "$TIDY_TMP/nested" >"$TIDY_TMP/prune"
+  find "$ROOT" \( -name .git -o -name node_modules \) -prune -o -type f -print 2>/dev/null |
+    awk -v prune="$TIDY_TMP/prune" '
+      BEGIN { while ((getline p < prune) > 0) skip[p] = 1 }
+      { for (d = $0; sub(/\/[^\/]*$/, "", d) > 0; ) if (d in skip) next; print }' >"$TIDY_TMP/project"
 fi
-awk -F'\t' -v found="$TIDY_TMP/found" '
-  BEGIN { while ((getline f < found) > 0) ok[f] = 1 }
-  !($2 in ok) { print $1 "\t" $2 "\t" $3 }' "$TIDY_TMP/tokens" |
-  while IFS='	' read -r rel token kind; do
-    # A removed link matters only when its target page still exists.
-    if [ "$kind" = link ] && [ -z "$(find "$ROOT" -name .git -prune -o -name "$token" -print 2>/dev/null | head -n 1)" ]; then
-      continue
-    fi
-    printf 'LOST|%s|%s\n' "$rel" "$token"
-  done >"$TIDY_TMP/out"
+awk -F/ '{ print $NF }' "$TIDY_TMP/project" | sort -u >"$TIDY_TMP/names"
+
+# One fixed-string search per token with an early exit: searching for all
+# tokens in one pass checks each of them on every line and stalls on large trees.
+in_project() {
+  if [ "$IS_GIT" = 1 ]; then
+    git -C "$ROOT" grep -q -I -F --untracked -e "$1" -- . 2>/dev/null
+  else
+    [ -n "$(tr '\n' '\0' <"$TIDY_TMP/project" | xargs -0 grep -lIF -e "$1" -- 2>/dev/null | head -n 1)" ]
+  fi
+}
+
+while IFS='	' read -r rel token kind; do
+  # A removed link matters only when its target page still exists.
+  if [ "$kind" = link ] && ! grep -qxF -e "$token" "$TIDY_TMP/names"; then
+    continue
+  fi
+  in_project "$token" || printf 'LOST|%s|%s\n' "$rel" "$token"
+done <"$TIDY_TMP/candidates" >"$TIDY_TMP/out"
 
 # Removed lines that carry a constraint, decision or reason and were not moved verbatim.
 awk -F'\t' -v added="$TIDY_TMP/added" '
