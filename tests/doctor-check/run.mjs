@@ -119,15 +119,12 @@ function fixture(name, layer = "codex", layout = "installed") {
       "cda-handoff",
       "cda-spec",
       "cda-spec-run",
+      "cda-tidy",
     ])
       write(
-        join(dir, `.claude/commands/${name}.md`),
-        "---\ndescription: test command\n---\n# Command\n",
+        join(dir, `.claude/skills/${name}/SKILL.md`),
+        `---\nname: ${name}\ndescription: test skill\n---\n# Skill\n`,
       );
-    write(
-      join(dir, ".claude/skills/cda-tidy/SKILL.md"),
-      "---\nname: cda-tidy\ndescription: test skill\n---\n# Skill\n",
-    );
     mkdirSync(join(dir, ".claude/agents"), { recursive: true });
   }
   return dir;

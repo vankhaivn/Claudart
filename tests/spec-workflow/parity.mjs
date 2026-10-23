@@ -13,15 +13,13 @@ function body(source) {
     .replaceAll(".codex/guidelines/", ".claude/rules/")
     .replaceAll(".codex/scripts/", ".claude/scripts/")
     .replaceAll("agent: codex #", "agent: claude #")
-    .replaceAll("This skill", "This command")
-    .replaceAll("this skill", "this command")
     .trim();
 }
 
 const pairs = [
   [".codex/guidelines/spec-workflow.md", ".claude/rules/spec-workflow.md"],
-  [".agents/skills/cda-spec/SKILL.md", ".claude/commands/cda-spec.md"],
-  [".agents/skills/cda-spec-run/SKILL.md", ".claude/commands/cda-spec-run.md"],
+  [".agents/skills/cda-spec/SKILL.md", ".claude/skills/cda-spec/SKILL.md"],
+  [".agents/skills/cda-spec-run/SKILL.md", ".claude/skills/cda-spec-run/SKILL.md"],
 ];
 
 // Runtime paths, command names, provenance and entrypoint headings differ;

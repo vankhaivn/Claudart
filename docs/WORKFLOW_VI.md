@@ -4,7 +4,7 @@
 
 Hướng dẫn này giải thích cách làm việc với CLAUDART sau khi cài: một phiên trông như thế nào, việc nên lớn cỡ nào, bạn sẽ được nhờ review những gì và thông tin được lưu ở đâu.
 
-Tài liệu mô tả cách hoạt động, không liệt kê mọi rule. Contract chính xác mà agent tuân theo nằm trong `.claude/rules/`, `.claude/commands/` và `.claude/skills/` (Claude Code) hoặc `.codex/guidelines/` và `.agents/skills/` (Codex).
+Tài liệu mô tả cách hoạt động, không liệt kê mọi rule. Contract chính xác mà agent tuân theo nằm trong `.claude/rules/` và `.claude/skills/` (Claude Code) hoặc `.codex/guidelines/` và `.agents/skills/` (Codex).
 
 ## 1. Một phiên bình thường
 
@@ -164,7 +164,7 @@ Cài bằng `--project-docs`. Module thêm `/cda-project-docs` (hoặc `$cda-pro
 CLAUDE.md          # loader của Claude Code
 AGENTS.md          # loader của Codex
 .claudart/         # trạng thái chung: CONTEXT, OWNER, JOURNAL, knowledge/, tasks/, specs/
-.claude/           # Claude Code: commands/, skills/, rules/, agents/, references/, scripts/
+.claude/           # Claude Code: skills/, rules/, agents/, references/, scripts/
 .codex/            # Codex: guidelines/, agents/, references/, scripts/, config.toml
 .agents/skills/    # skill của Codex
 ```

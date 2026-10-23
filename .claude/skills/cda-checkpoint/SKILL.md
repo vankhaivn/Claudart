@@ -1,5 +1,7 @@
 ---
+name: cda-checkpoint
 description: Rewrite current context, sync task/spec indexes, append meaningful history, and bulk-maintain eligible durable descriptive knowledge
+disable-model-invocation: true
 ---
 
 Write a session checkpoint: a declarative snapshot of what is true now, not a log of what happened.

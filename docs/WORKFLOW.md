@@ -4,7 +4,7 @@
 
 This guide explains how to work with CLAUDART once it is installed: what a session looks like, how big a piece of work should be, what you will be asked to review, and where information is kept.
 
-It describes behavior, not every rule. The exact contracts the agent follows live in `.claude/rules/`, `.claude/commands/` and `.claude/skills/` (Claude Code) or `.codex/guidelines/` and `.agents/skills/` (Codex).
+It describes behavior, not every rule. The exact contracts the agent follows live in `.claude/rules/` and `.claude/skills/` (Claude Code) or `.codex/guidelines/` and `.agents/skills/` (Codex).
 
 ## 1. A normal session
 
@@ -164,7 +164,7 @@ Installed with `--project-docs`. It adds `/cda-project-docs` (or `$cda-project-d
 CLAUDE.md          # Claude Code loader
 AGENTS.md          # Codex loader
 .claudart/         # shared state: CONTEXT, OWNER, JOURNAL, knowledge/, tasks/, specs/
-.claude/           # Claude Code: commands/, skills/, rules/, agents/, references/, scripts/
+.claude/           # Claude Code: skills/, rules/, agents/, references/, scripts/
 .codex/            # Codex: guidelines/, agents/, references/, scripts/, config.toml
 .agents/skills/    # Codex skills
 ```

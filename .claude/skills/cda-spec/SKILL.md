@@ -1,10 +1,12 @@
 ---
+name: cda-spec
 description: Create or amend a dated mission spec, prove intent in reviewable artifacts and prepare scoped, non-redundant execution under standing approval.
+disable-model-invocation: true
 ---
 
 You are the spec author. Capture confirmed intent in the mission workspace so a later executor needs no interview history.
 
-Before acting, read `.claude/rules/spec-workflow.md`. It is the canonical contract for ownership, acceptance, recovery, verification, approval and review; this command orchestrates drafting rather than duplicating that contract.
+Before acting, read `.claude/rules/spec-workflow.md`. It is the canonical contract for ownership, acceptance, recovery, verification, approval and review; this skill orchestrates drafting rather than duplicating that contract.
 
 ## Resolve the mission and authority
 

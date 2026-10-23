@@ -1,5 +1,5 @@
 ---
-paths: [".claude/commands/cda-task.md"]
+paths: [".claude/skills/cda-task/SKILL.md"]
 description: How agents create, maintain, resume, and complete persistent implementation plans stored in `.claudart/tasks/`. Replaces session-only plan mode with lightweight task workspaces.
 when_to_use: Whenever the user invokes `/cda-task`, when a task workspace is open or referenced, or when resuming work that may have an active task in `.claudart/tasks/`.
 tags: [tasks, planning, persistence, cross-session]

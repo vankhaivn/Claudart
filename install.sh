@@ -58,7 +58,7 @@ ADAPTERS
   Both                    all of the above
 
 OPTIONAL MODULES
-  --project-docs           Project documentation lifecycle commands and references
+  --project-docs           Project documentation lifecycle skill and references
                           Does not generate or migrate your project documentation
 EOF2
 }
@@ -104,7 +104,7 @@ UPSTREAM_COMMIT="$(gzip -dc "$ARCHIVE" 2>/dev/null | head -c 1024 |
 # Check the selected module before copying any files.
 if [[ "$INSTALL_PROJECT_DOCS" == true ]]; then
   MODULE_ROOT="$TMPDIR/modules/project-docs"
-  if { [[ "$INSTALL_CLAUDE" == true ]] && [[ ! -f "$MODULE_ROOT/.claude/commands/cda-project-docs.md" ]]; } ||
+  if { [[ "$INSTALL_CLAUDE" == true ]] && [[ ! -f "$MODULE_ROOT/.claude/skills/cda-project-docs/SKILL.md" ]]; } ||
      { [[ "$INSTALL_CODEX" == true ]] && [[ ! -f "$MODULE_ROOT/.agents/skills/cda-project-docs/SKILL.md" ]]; }; then
     printf '%s Project Docs payload is missing from the downloaded source.\n' "$(red "error")" >&2
     exit 1

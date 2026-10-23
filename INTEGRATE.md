@@ -75,7 +75,7 @@ Only empty seeds are distributed. Existing state is project-owned and preserved 
 **Claude adapter** (root `CLAUDE.md` + `.claude/`):
 
 - `.claude/CLAUDE.md` is the source template for the canonical downstream root `CLAUDE.md`; do not install a duplicate under `.claude/`;
-- `.claude/commands/`, `.claude/skills/` (skill folders with bundled scripts), `.claude/agents/`, path-scoped `.claude/rules/`, conditional `.claude/references/`, and read-only checker helpers under `.claude/scripts/`.
+- `.claude/skills/` (one folder per workflow, with any bundled scripts or references), `.claude/agents/`, path-scoped `.claude/rules/`, conditional `.claude/references/`, and read-only checker helpers under `.claude/scripts/`.
 
 **Codex adapter** (`.codex/` + `.agents/skills/`):
 
@@ -83,7 +83,7 @@ Only empty seeds are distributed. Existing state is project-owned and preserved 
 - `.codex/guidelines/`, `.codex/references/`, `.codex/scripts/`, `.codex/agents/`, and `.codex/config.toml`;
 - `.codex/AGENTS.md` as the source template for the canonical downstream root `AGENTS.md`.
 
-**Optional modules:** install only when selected. Project Docs lives under `modules/project-docs/` in upstream; overlay its `.claude/` and/or `.agents/` payload at the downstream root for the selected runtimes. This adds `.claude/commands/cda-project-docs.md` or `.agents/skills/cda-project-docs/` and their referenced files. Do not copy the module's source wrapper or packaging README into the project. It supplies documentation-lifecycle guidance; it does not install a documentation tree or own a project's existing documentation by default.
+**Optional modules:** install only when selected. Project Docs lives under `modules/project-docs/` in upstream; overlay its `.claude/` and/or `.agents/` payload at the downstream root for the selected runtimes. This adds `.claude/skills/cda-project-docs/` or `.agents/skills/cda-project-docs/` with their references and templates. Do not copy the module's source wrapper or packaging README into the project. It supplies documentation-lifecycle guidance; it does not install a documentation tree or own a project's existing documentation by default.
 
 Include the selected module's output templates and filled examples in its resource closure, retaining their module-relative paths. They are reusable authoring resources, not live project docs: do not instantiate templates or apply the example snippets during integration. Preserve custom resource edits under the same reconciliation rules as other instructions.
 

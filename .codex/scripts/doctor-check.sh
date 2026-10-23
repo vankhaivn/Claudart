@@ -319,11 +319,10 @@ else
   for rule in ai-behavior code-health git-workflow task-management agent-delegation spec-workflow knowledge-management; do
     require_file ".claude/rules/$rule.md" ERROR "restore core rule"
   done
-  require_dir .claude/commands ERROR "restore core commands"
-  for command in cda-start cda-learn cda-doctor cda-checkpoint cda-task cda-handoff cda-spec cda-spec-run; do
-    require_file ".claude/commands/$command.md" ERROR "restore core command"
+  require_dir .claude/skills ERROR "restore core skills"
+  for skill in cda-start cda-learn cda-doctor cda-checkpoint cda-task cda-handoff cda-spec cda-spec-run cda-tidy; do
+    require_file ".claude/skills/$skill/SKILL.md" ERROR "restore core skill"
   done
-  require_file .claude/skills/cda-tidy/SKILL.md ERROR "restore core skill"
   require_dir .claude/agents WARNING "restore agent directory"
   queue_tree .claude/rules
   queue_tree .claude/commands
