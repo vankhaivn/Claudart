@@ -61,7 +61,7 @@ Route content by meaning before reorganizing files. Do not move WIP or a propose
 7. Promote stable behavioral decisions from CONTEXT to the correct guideline through checkpoint semantics. Leave temporary decisions in CONTEXT. Route purely descriptive guideline content to its fact owner only after the capture gate passes and ask before removing the original guideline.
 8. Cross-link `.claudart/OWNER.md`, `.claudart/CONTEXT.md`, the universal behavior guideline, every globally relevant workflow guideline, and the knowledge root router from `AGENTS.md`. Never auto-load JOURNAL, HANDOFF, task bodies, or knowledge details.
 9. Ensure `ai-behavior.md` exists without overwriting user customizations. Follow the active harness policy for delegation; keep decomposition, disjoint ownership, non-overlap, parent validation, and durable result recording in `agent-delegation.md` instead of inventing a conflicting permission rule.
-10. Ensure `## Agent Self-Evolution & Context Maintenance` remains in `AGENTS.md`: project-wide behavior updates its owner guideline, owner corrections and preferences update `.claudart/OWNER.md`, new guideline owners get indexed, eligible descriptive facts use the knowledge contract, global Codex behavior updates `AGENTS.md`, and live state uses checkpoint.
+10. Ensure `## Agent Self-Evolution & Context Maintenance` remains in `AGENTS.md`: project-wide behavior updates its owner guideline, new guideline owners get indexed, eligible descriptive facts use the knowledge contract, global Codex behavior updates `AGENTS.md`, and live state uses checkpoint.
 
 Semantic audit results must identify guidelines changed, stale rules fixed, source debt left in code/docs, split/merge actions, and decisions still requiring the user.
 
@@ -102,7 +102,6 @@ After the normalization batch, run `bash .codex/scripts/knowledge-check.sh --roo
 ## 7. Audit Skills And Agents
 
 - Validate every `SKILL.md` frontmatter and confirm the workflow remains executable with its referenced guidelines and one-hop resources. Repair stale references and generated markers without making skills duplicate canonical guideline contracts.
-- Keep skills concise and load detailed contracts from their canonical guideline instead of copying them.
 - For every `.codex/agents/*.toml`, require `name`, `description`, `model`, `model_reasoning_effort`, `sandbox_mode`, and `developer_instructions`. Keep explorers and review-only/audit-only agents read-only. Allow workspace writes only when the declared purpose explicitly requires implementation, as with a refiner or worker.
 - Confirm every write-capable agent defines ownership boundaries, protects unrelated user work, validates its changes, and says it must not revert edits made by others in parallel. Replace hardcoded grep lists with repository discovery and project tooling. If two agents' responsibilities overlap by more than 50%, propose a merge but do not perform it without user confirmation.
 - Parent review remains required for delegated results.

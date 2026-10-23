@@ -2,31 +2,23 @@
 description: Rewrite current context, sync task/spec indexes, append meaningful history, and bulk-maintain eligible durable descriptive knowledge
 ---
 
-You are about to write a session checkpoint. The output is **not a log of what happened** — it is a **declarative snapshot of what is true right now**. Lifelong append is the failure mode this command exists to prevent.
+Write a session checkpoint: a declarative snapshot of what is true now, not a log of what happened.
 
-## Hard Rules (read before doing anything)
+## Rules
 
-1. **.claudart/CONTEXT.md is overwritten, not appended.** Anything not still true _right now_ must be removed.
-2. **.claudart/CONTEXT.md hard ceiling: 150 lines, target < 100.** If your draft exceeds 150, STOP and ask the user to trim manually or run `/cda-refactor-memory`. Each bullet is one short sentence. Evidence, run or job IDs, timestamps, test totals and quoted chat stay in the task, commit or JOURNAL; CONTEXT links to them.
-3. **.claudart/JOURNAL.md is append-only.** Never edit or delete prior entries. Each new entry is a single line.
-4. **Never add `.claudart/JOURNAL.md` as auto-loaded context in `CLAUDE.md` or `.claude/rules/`. If such an auto-load already exists, remove that wiring and warn the user; JOURNAL remains append-only and outside session context.**
-5. **Skip JOURNAL entirely when there is nothing meaningful to record.** Empty entries pollute the file.
-6. **Task workspaces keep their own bodies and supporting files; CONTEXT.md never absorbs a task body.** But CONTEXT.md **should** still reference the currently-focused task by slug + path in `## In Progress` so `/cda-start` sees both task and non-task work in one place. Two valid CONTEXT entries:
-   - Task reference: `- Working task \`add-jwt-auth\` (see .claudart/tasks/2026-05-13-001-add-jwt-auth/TASK.md) <!-- since: YYYY-MM-DD -->`
-   - Ad-hoc non-task change the user requested without creating a `/cda-task` (a quick tweak, a transient pivot): CONTEXT is its **only** home, so it gets a **micro-handoff** — intent + files of interest + next step (see Step 4) — not just a one-line pointer.
-     Checkpoint _syncs_ `tasks/index.md` AND ensures CONTEXT references the focus task — but never copies a task's Steps/Decisions/Surprises into CONTEXT.
-7. **Subagent threads are not durable project memory.** Do not store subagent ids, nicknames, or transient thread state in CONTEXT. Store only durable outcomes: decisions, unresolved blockers, validated findings, changed ownership boundaries, and next steps.
-8. **Checkpoint is bulk maintenance, not the only knowledge write gate.** Follow `.claude/rules/knowledge-management.md`; eligible facts may already have been promoted through a natural-language mid-session update.
-
-9. Shared state belongs to the project, not this session. Preserve another session's unresolved work, blockers and next actions unless current evidence or the user resolves them. Absence from this conversation is not completion. Re-read CONTEXT and any index immediately before writing; if the file changed since inspection, reconcile the delta before replacing it. Serialize shared writes; this workflow is not a concurrent merge service.
+1. `.claudart/CONTEXT.md` is overwritten, not appended. Remove anything that is no longer true.
+2. `.claudart/CONTEXT.md` has a hard ceiling of 150 lines, target under 100. Over the ceiling, ask the user to trim manually or run `/cda-refactor-memory`. Each bullet is one short sentence. Evidence, run or job IDs, timestamps, test totals and quoted chat stay in the task, commit or JOURNAL; CONTEXT links to them.
+3. `.claudart/JOURNAL.md` is append-only: never edit or delete prior entries, and write each new entry as a single line. Never add it as auto-loaded context in `CLAUDE.md` or `.claude/rules/`. If such wiring already exists, remove it and warn the user.
+4. CONTEXT never absorbs a task body. `## In Progress` points to the focused task or spec by slug and path, so `/cda-start` sees task and non-task work in one place.
+5. Shared state belongs to the project, not this session. Preserve another session's unresolved work, blockers and next actions unless current evidence or the user resolves them. Absence from this conversation is not completion. Re-read CONTEXT and any index immediately before writing; if the file changed since inspection, reconcile the delta before replacing it. Serialize shared writes; this workflow is not a concurrent merge service.
 
 ## Procedure
 
 ### Step 1 — Read prior state
 
-- Read `.claudart/CONTEXT.md`. If it doesn't exist, treat as empty.
-- Read the last ~30 lines of `.claudart/JOURNAL.md` to know what was already journaled (avoid duplicates). If it doesn't exist, you'll create it later.
-- Skim recent conversation + `git log -10 --oneline` to know what's happened since the last checkpoint.
+- Read `.claudart/CONTEXT.md`; treat a missing file as empty.
+- Read the last ~30 lines of `.claudart/JOURNAL.md` to avoid duplicate entries.
+- Skim the recent conversation and `git log -10 --oneline` for what changed since the last checkpoint.
 
 ### Step 2 — Triage every section
 
@@ -35,35 +27,31 @@ For each item currently in `.claudart/CONTEXT.md`, decide one of using current e
 | Status                                                                                                 | Action                                                                                                                                                                                                                                  |
 | ------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Still true right now                                                                                   | Keep it (refresh wording if needed). Preserve any existing `<!-- since: YYYY-MM-DD -->` comment.                                                                                                                                        |
-| Done / resolved / merged                                                                               | **Drop from .claudart/CONTEXT.md.** Candidate for JOURNAL if it was a real decision, completion, or pivot. Pure tactical noise (e.g., "tried X, didn't work") is dropped silently.                                                      |
+| Done / resolved / merged                                                                               | Drop it from CONTEXT. Candidate for JOURNAL if it was a real decision, completion, or pivot. Pure tactical noise (e.g., "tried X, didn't work") is dropped silently.                                                                    |
 | Superseded by a newer state                                                                            | Drop the old, write the new                                                                                                                                                                                                             |
 | A standing owner preference or approval about working with the owner, stated or confirmed by the owner | Record it in `.claudart/OWNER.md` under `.claude/rules/ai-behavior.md` if it is missing, then drop it from CONTEXT; a correction about work an existing rule owns goes to that rule (next row); a one-time approval stays with its work |
-| A durable convention for a code area, workflow, or other area a rule owns                              | This has graduated beyond CONTEXT — propose `.claude/rules/` via `/cda-learn`, then drop from CONTEXT                                                                                                                                   |
-| A fact that may pass the knowledge capture gates                                                       | Flag for **Step 6c**; it may be local in scope but must be descriptive, durable beyond this work, current, and evidenced                                                                                                                |
+| A durable convention for a code area, workflow, or other area a rule owns                              | Propose `.claude/rules/` via `/cda-learn`, then drop it from CONTEXT                                                                                                                                                                    |
+| A fact that may pass the knowledge capture gates                                                       | Flag for Step 6c; it may be local in scope but must be descriptive, durable beyond this work, current, and evidenced                                                                                                                    |
 | Uncertain, conflicting, WIP, or proposed state                                                         | Keep it as a candidate in the owning task/spec/CONTEXT surface; do not promote it as canonical knowledge                                                                                                                                |
 
 ### Step 3 — Add new state from this session
 
-Add to `.claudart/CONTEXT.md` only what's true _now_:
+Add to `.claudart/CONTEXT.md` only what is true now:
 
-- What you are mid-stream on (with `file:line` if applicable). **If the work is being tracked in a task file**, reference it by slug + path (e.g., `Working task \`add-jwt-auth\` (see .claudart/tasks/2026-05-13-001-add-jwt-auth/TASK.md)`). Do not duplicate the task body here.
-- Ad-hoc changes the user requested _without_ creating a `/cda-task` (quick fixes, transient tweaks, mid-flight pivots) — these have no task file, so CONTEXT **is** their handoff summary, not just a note. Give each _active_ one a **micro-handoff** (see Step 4 skeleton): the user's intent in one sentence, at most three files of interest with `file:line`, and the next concrete step. Mark them `(no task)`.
-- Decisions just made that are not yet codified in rules
-- Durable subagent outcomes that still matter after this session, such as a validated finding, an unresolved worker/reviewer blocker, or a changed ownership boundary. Do not mention subagent thread ids.
-- Open questions / blockers currently unresolved
-- The single most useful thing the next session should do first
+- Work in progress, with `file:line` where useful. Tracked work gets the task or spec pointer from the Step 4 skeleton.
+- Each active change the user requested without a `/cda-task` gets a `(no task)` micro-handoff from the Step 4 skeleton, because CONTEXT is its only home. Keep it only while the work is live; when it ships or is abandoned, drop it in this checkpoint and journal it if it was a real decision or completion.
+- Decisions just made that are not yet codified in rules.
+- Durable subagent outcomes that still matter, such as a validated finding, an unresolved worker or reviewer blocker, or a changed ownership boundary. Never store subagent ids, nicknames, or thread state.
+- Open questions and blockers still unresolved.
+- The single most useful thing the next session should do first.
 
-A descriptive fact that passes `.claude/rules/knowledge-management.md` does not belong in CONTEXT merely because this session discovered it — flag it for **Step 6c**. Scope may be local. WIP, proposed, uncertain, or conflicting claims stay in the owning work surface.
+A standing owner correction, preference, or approval from this session belongs in `.claudart/OWNER.md`, not CONTEXT; route it, and every other new item, as the Step 2 table routes existing ones.
 
-A standing owner correction, preference, or approval about working with the owner belongs in `.claudart/OWNER.md`, not CONTEXT; one about work an existing rule owns goes to that rule. Record any from this session that the profile does not hold yet, following `.claude/rules/ai-behavior.md`.
-
-Be terse: task references, decisions, and blockers are one short sentence each. Only _active_ `(no task)` work earns the 3-line micro-handoff, and only while it is live — the moment it ships or is abandoned, drop it this same checkpoint (JOURNAL it if it was a real decision/completion). That triage is what keeps CONTEXT under the ceiling.
-
-For every new bullet, append `<!-- since: YYYY-MM-DD -->` using today's date. If you keep an existing bullet, preserve its original `since:` date rather than resetting it. These comments make `/cda-doctor` able to flag old decisions that should graduate into rules.
+Task references, decisions, and blockers are one short sentence each. Append `<!-- since: YYYY-MM-DD -->` with today's date to every new bullet, and keep the original date on a kept bullet; `/cda-doctor` uses it to flag old decisions.
 
 ### Step 4 — Build the new .claudart/CONTEXT.md
 
-Use this skeleton; **omit any section that has nothing to say**:
+Use this skeleton and omit any section that has nothing to say:
 
 ```markdown
 <!-- .claudart/CONTEXT.md — current state of work. Updated by /cda-checkpoint. Declarative, not a log. -->
@@ -95,17 +83,17 @@ Use this skeleton; **omit any section that has nothing to say**:
 - [One concrete action, e.g., "run pytest tests/auth/", "ask user about caching strategy"] <!-- since: YYYY-MM-DD -->
 ```
 
-Count lines. If > 150, STOP and report to the user; do not write the file.
+A micro-handoff lists at most three files. Count lines; if the draft exceeds 150, stop and report to the user without writing the file.
 
 ### Step 5 — Append to .claudart/JOURNAL.md
 
-For every item that was DROPPED in Step 2 because it was _done/decided/pivoted_, write **one line** to `.claudart/JOURNAL.md` in this format:
+For every item dropped in Step 2 because it was done, decided, or pivoted, append one line:
 
 ```
 YYYY-MM-DD | <type> | <one short summary, optional commit ref>
 ```
 
-Types (use exactly one):
+Use exactly one type:
 
 - `decision` — an architectural or non-obvious choice was settled
 - `completed` — a chunk of work finished (link commit if available)
@@ -113,81 +101,56 @@ Types (use exactly one):
 - `blocker-resolved` — external blocker cleared
 - `cancelled` — a task was abandoned (used by the Step 6b archive flow; Outcomes in the task file explain why)
 
-Examples:
+Example: `2026-04-28 | decision | Use JWT with refresh tokens in httpOnly cookie (not localStorage)`
 
-```
-2026-04-28 | decision | Use JWT with refresh tokens in httpOnly cookie (not localStorage)
-2026-04-28 | completed | Auth refactor merged — commit abc1234
-2026-04-29 | pivot | Dropped GraphQL, going REST due to caching simplicity
-2026-04-30 | blocker-resolved | Redis available in staging
-```
-
-If `.claudart/JOURNAL.md` doesn't exist, create it with the canonical header (see CLAUDART template) before appending.
-
-If there is nothing to journal, skip this step. Do NOT write empty entries.
+If `.claudart/JOURNAL.md` does not exist, create it with the canonical header before appending. If there is nothing meaningful to journal, skip this step; never write empty entries.
 
 ### Step 6 — Overwrite .claudart/CONTEXT.md
 
-Now (and only now) write the new `.claudart/CONTEXT.md` from Step 4.
+Write the new `.claudart/CONTEXT.md` from Step 4.
 
 ### Step 6b — Sync .claudart/tasks/index.md
 
-This step is independent of CONTEXT.md. Skip entirely if `.claudart/tasks/` does not exist.
+This step is independent of CONTEXT.md. Skip it if `.claudart/tasks/` does not exist.
 
 1. List `.claudart/tasks/*/TASK.md` from valid top-level workspace ids only, excluding `done/` itself and symlinked workspaces or `TASK.md` files. Read only frontmatter (`status`, `slug`, `created`, `updated`, `reviewer`). Never recursively enumerate task bodies or parse attachments as tasks.
 2. List `.claudart/tasks/done/*/TASK.md` at that exact depth. Read the same metadata. Flag an archived nonterminal task or a validly named workspace missing `TASK.md`; do not move, repair, or infer status automatically.
-3. Detect top-level workspaces whose `TASK.md` status is `done` or `cancelled`. These are terminal by user confirmation, agent-reviewed evidence closeout, or cancellation and have not yet been archived. Require a valid `reviewer: user | agent` before archiving; report incomplete metadata without inventing acceptance ownership. For each:
+3. Move the entire workspace of each top-level task whose status is `done` or `cancelled` with the Shared archive flow in `.claude/rules/task-management.md`, under these conditions:
+   - Require a valid `reviewer: user | agent` before archiving; report incomplete metadata without inventing acceptance ownership.
    - Confirm `Outcomes & Retrospective` is filled in `TASK.md`. If empty, report it; do not invent the outcome.
-   - Before archiving, inspect only `TASK.md` Memory Hints and Related Docs for eligible knowledge candidates; use the full knowledge capture gate in Step 6c. Do not bulk-read supporting files or promote task/WIP/proposal state.
-   - Move the entire workspace to `.claudart/tasks/done/<task-id>/`, preserving its id and all contents. Follow the task contract's archive safeguards: if the destination exists (including a symlink), stop that archive and report the collision; never overwrite, merge, or nest it. Confirm a successful move before updating references or journaling. Do not create, rewrite, extract, or delete artifacts.
-   - Append a completion/cancellation line linking `tasks/done/<task-id>/TASK.md` to `.claudart/JOURNAL.md` only if the recent journal tail does not already contain that closure. Use the Shared archive flow format from `.claude/rules/task-management.md`, with type `cancelled` for cancellation. Never rewrite journal history.
-   - Update any live CONTEXT/HANDOFF pointer to the archived `TASK.md` without copying its body. Repair knowledge `sources` that point into the moved workspace as the archive flow in `.claude/rules/task-management.md` defines.
-   - **DO NOT archive `awaiting-review` tasks.** This state requires `reviewer: user`. Report inconsistent reviewer/status metadata without requesting a completion signal. Checkpoint never changes task status, reviewer, or acceptance boxes.
-4. Rewrite `.claudart/tasks/index.md` per the canonical **"`index.md` Format"** in `.claude/rules/task-management.md`, with links to `<task-id>/TASK.md` and `done/<task-id>/TASK.md`. Active includes `awaiting-review` with its ⏳ marker; Recently Done covers the last 14 days. Report any still-unarchived terminal workspace rather than linking it to a nonexistent archive.
-5. Enforce the 100-line ceiling and trim ladder. Missing `artifacts/` is normal; checkpoint never creates supporting files.
-6. Flag stalled tasks using the **Staleness Thresholds** in `.claude/rules/task-management.md`; surface the needed user decision rather than cancelling or reopening work automatically.
+   - Before archiving, inspect only `TASK.md` Memory Hints and Related Docs for knowledge candidates for Step 6c. Do not bulk-read supporting files or promote task/WIP/proposal state.
+   - Append the flow's JOURNAL line only if the recent journal tail does not already contain it, with type `cancelled` for a cancellation.
+   - Never archive `awaiting-review` tasks; that state requires `reviewer: user`. Report inconsistent reviewer/status metadata without requesting a completion signal. Checkpoint never changes task status, reviewer, or acceptance boxes.
+4. Rewrite `.claudart/tasks/index.md` per the `index.md` Format in `.claude/rules/task-management.md`, including its 100-line ceiling and trim ladder. Report any still-unarchived terminal workspace rather than linking it to a nonexistent archive. Missing `artifacts/` is normal; checkpoint never creates supporting files.
+5. Flag stalled tasks using the Staleness Thresholds in `.claude/rules/task-management.md`; surface the needed user decision rather than cancelling or reopening work automatically.
 
 ### Step 6b2 — Sync .claudart/specs/INDEX.md
 
-Skip entirely if `.claudart/specs/` does not exist.
+Skip this step if `.claudart/specs/` does not exist.
 
 1. Ensure `.claudart/specs/done/` exists.
 2. List `.claudart/specs/*/SPEC.md` from top-level dated folders only (exclude `INDEX.md` and the `done/` subfolder). For each, read frontmatter only (`slug`, `status`, `created`, `updated`).
-3. Detect any top-level spec whose `status` is `done` or `cancelled`. These have passed their user gate (or were cancelled) and were not yet archived. For each:
-   - Move the entire folder to `.claudart/specs/done/<folder-id>/`, preserving the existing dated folder name. Repair knowledge `sources` that point into the moved folder as the closure in `.claude/rules/spec-workflow.md` defines.
-   - Append the completion/cancellation line to `.claudart/JOURNAL.md` only if the recent journal tail does not already contain that spec completion/cancellation.
-   - Before archiving, scan `NOTES.md` for `→ graduate:` flags: route `knowledge/` flags into Step 6c and surface `/cda-learn` flags as proposals. Clear only a claim that was successfully promoted or deliberately reclassified; keep unresolved candidates flagged in NOTES.
-   - DO NOT archive `awaiting-final-review` specs. Those are explicitly waiting for user confirmation; archiving them defeats the final gate. They stay in the top-level specs folder and appear in the Active list.
-4. List `.claudart/specs/done/*/SPEC.md`. For each, read frontmatter only (`slug`, `status`, `created`, `updated`). If any archived spec is not `done` or `cancelled`, flag it in the report and do not move it automatically.
-5. Rewrite `INDEX.md` per the canonical format in `.claude/rules/spec-workflow.md` — Active entries link to top-level dated folders and include every status except `done`/`cancelled` (with the ⏳ marker on `poc-review` and `awaiting-final-review`); Done entries link to `done/<folder-id>/SPEC.md` and include `done`/`cancelled`.
-6. Flag stalled specs per the Staleness Thresholds table in `.claude/rules/task-management.md`, mapped as: `running` ↔ `in-progress`, `poc-review`/`awaiting-final-review` ↔ `awaiting-review`, `drafting` ↔ `planning`. List flagged specs in the report. For execution activity, use the latest recorded ROADMAP/LEDGER activity under the spec rule; an unchanged SPEC contract date alone does not mean execution has stalled. Report missing activity evidence without inventing an update.
-7. Scan each Active spec's `NOTES.md` for `→ graduate:` flags: route `knowledge/` flags into Step 6c and surface `/cda-learn` flags as proposals. Clear only successfully promoted or deliberately reclassified claims; retain unresolved candidates.
-8. Do NOT tick roadmap boxes, write LEDGER entries, or change any spec `status` — those transitions belong to `/cda-spec`, `/cda-spec-run`, and the user.
+3. Scan `NOTES.md` of each Active spec, and of each terminal spec before archiving it, for `→ graduate:` flags: route `knowledge/` flags into Step 6c and surface `/cda-learn` flags as proposals. Clear only a claim that was successfully promoted or deliberately reclassified; keep unresolved candidates flagged in NOTES.
+4. For each top-level spec whose `status` is `done` or `cancelled`:
+   - Move the entire folder to `.claudart/specs/done/<folder-id>/`, preserving the dated folder name. Repair knowledge `sources` that point into the moved folder as the closure in `.claude/rules/spec-workflow.md` defines.
+   - Append the completion or cancellation line to `.claudart/JOURNAL.md` only if the recent journal tail does not already contain it.
+   - Never archive `awaiting-final-review` specs; they wait for the user's final confirmation and stay in the Active list.
+5. List `.claudart/specs/done/*/SPEC.md` frontmatter. Flag any archived spec that is not `done` or `cancelled`; do not move it automatically.
+6. Rewrite `INDEX.md` per the format in `.claude/rules/spec-workflow.md`.
+7. Flag stalled specs per the Staleness Thresholds in `.claude/rules/task-management.md`, mapped as `running` ↔ `in-progress`, `poc-review`/`awaiting-final-review` ↔ `awaiting-review`, `drafting` ↔ `planning`. Measure execution activity from the latest ROADMAP/LEDGER activity under the spec rule, not the SPEC contract date. Report missing activity evidence without inventing an update.
+8. Never tick ROADMAP boxes, write LEDGER entries, or change a spec `status`; those transitions belong to `/cda-spec`, `/cda-spec-run`, and the user.
 
 ### Step 6c — Route durable facts to their owners
 
-Read `.claude/rules/knowledge-management.md` and skip if no candidate from this session, task closeout, or spec NOTES passes its capture gates.
+Skip this step if no candidate from this session, task closeout, or spec NOTES passes the capture gates in `.claude/rules/knowledge-management.md`. Checkpoint is bulk maintenance, not the only knowledge write gate; mid-session promotion under that rule remains valid.
 
-Distill rather than copy work history. Keep task/spec state and proposals in their owning artifacts, route behavioral lessons to `/cda-learn`, and leave uncertain/conflicting claims as candidates or mark an existing owner `review-needed`. Identify each fact's existing owner; when another current source owns it, leave only a knowledge route or minimal unique context. Checkpoint does not take over full project-document maintenance or require a docs audit. Never write secrets.
-
-For each eligible claim:
-
-1. Route map-first and patch the existing canonical owner before creating a focused topic, subject to the detail budget in `.claude/references/knowledge-maintenance.md`. Create a knowledge owner only when no other authoritative source owns that fact.
-2. Apply the canonical frontmatter, trust, scope, relation, and route grammar from the knowledge rule. Update `updated` only for a content edit and `last_verified` only for an evidence check.
-3. Update the topic and its reachable root/domain map atomically. Preserve curated titles, hooks, grouping, ordering, and external routes; never auto-promote an ambiguous unindexed file or auto-delete a topic.
-4. Run `bash .claude/scripts/knowledge-check.sh` after the final knowledge mutation. If it fails, report the exact findings and do not claim the knowledge update healthy.
-
-Checkpoint performs these writes autonomously as bulk maintenance; direct mid-session promotion remains valid only under the knowledge rule's capture gates and immediate-promotion triggers. The git diff is the review surface.
+For each eligible claim, read the knowledge rule, patch the owner under `.claude/references/knowledge-maintenance.md`, and update its reachable route in the same change. Checkpoint does not take over project-document maintenance or require a docs audit. Never write secrets. Run `bash .claude/scripts/knowledge-check.sh` after the final knowledge mutation; if it fails, report the exact findings and do not claim the update healthy. These writes are autonomous; the Git diff is the review surface.
 
 ### Step 6d — Persist through the shared Git workflow
 
 A checkpoint is durable in Git only when its in-scope delta is committed. For Git persistence, read `.claude/rules/git-workflow.md`; that shared contract owns higher-scope/runtime, repository, user, staging, identity, and remote/history rules.
 
-1. Inspect the final `git status --short` and relevant diffs after all checkpoint writes.
-2. Determine the checkpoint-owned delta: verified in-scope session work that is still uncommitted plus the CONTEXT/JOURNAL/index/archive/owner-profile/knowledge maintenance produced by this checkpoint. Preserve unrelated or pre-existing work.
-3. If the shared Git workflow authorizes a local commit at this boundary, stage only the owned paths/hunks and commit the coherent checkpoint delta using the repository's message convention. Do nothing when the owned delta is already fully persisted.
-4. Respect workflow-local narrowing. In particular, a spec with `commits: user` remains no-auto-commit for its spec-owned changes; checkpoint must not use its maintenance role to bypass that choice.
-5. If higher-scope policy blocks the commit, staging cannot be isolated safely, or the commit fails, leave the worktree intact and report `CHECKPOINT NOT PERSISTED IN GIT: commit required` plus the concise reason. Never describe an uncommitted checkpoint as durable.
+The checkpoint-owned delta is verified in-scope session work that is still uncommitted plus the CONTEXT, JOURNAL, index, archive, owner-profile and knowledge maintenance this checkpoint produced. When the shared Git workflow authorizes a local commit, stage only the owned paths or hunks and commit that delta with the repository's message convention; do nothing when it is already persisted. A spec with `commits: user` stays no-auto-commit for its spec-owned changes; checkpoint does not bypass that choice. If policy blocks the commit, staging cannot be isolated safely, or the commit fails, leave the worktree intact and report `CHECKPOINT NOT PERSISTED IN GIT: commit required` plus the reason. Never describe an uncommitted checkpoint as durable.
 
 ### Step 7 — Report
 
@@ -199,18 +162,3 @@ Output a 6-line summary:
 4. Tasks synced: active=<n>, archived this run=<n>, stalled=<n>; specs synced: active=<n>, archived this run=<n>, stalled=<n>
 5. Knowledge entries written/updated this run (list slugs, or "none"); owner-profile entries added or updated (or "none"); plus anything proposed for `/cda-learn` (recurring behavior → rules)
 6. Git persistence: the new commit SHA and summary when committed, otherwise `CHECKPOINT NOT PERSISTED IN GIT: commit required` plus the reason. Do not diagnose unrelated uncommitted work in this summary.
-
-## When to Run This Command
-
-Good triggers:
-
-- End of a significant work session
-- Before `/compact`
-- Before switching to a different feature/branch
-- When the user says "let's pick this up tomorrow"
-- Right before closing your laptop
-
-Bad triggers:
-
-- After every single tool call (overhead with no benefit)
-- During active back-and-forth debugging (state isn't stable yet)

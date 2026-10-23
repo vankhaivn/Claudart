@@ -2,59 +2,43 @@
 description: Reflect on completed work, promote validated behavioral learning, and route durable descriptive facts correctly
 ---
 
-Please execute a Retrospective & Learning Protocol on the work you just completed.
-
-Based on the "Agent Self-Evolution & Context Maintenance" section in `CLAUDE.md`, perform this protocol. `/cda-learn` may run mid-session. It primarily owns behavioral learning; it is not a required detour before an eligible descriptive fact can enter knowledge.
+Run a retrospective on the work you just completed, following the "Agent Self-Evolution & Context Maintenance" section in `CLAUDE.md`. `/cda-learn` may run mid-session. It owns behavioral learning; it is not a required detour before an eligible descriptive fact can enter knowledge.
 
 ## Re-Ground In The Rule Set
-
-Before any retrospective:
 
 1. Read `CLAUDE.md` in full.
 2. Read the rule, command, and agent files that governed this session. Use frontmatter and targeted search to find relevant owners; do not read every rule blindly.
 3. Read every file in `.claude/agents/*.md` whose tools you used during this session.
-4. Read `.claudart/CONTEXT.md` to know what state the work was in when this session started, and `.claudart/OWNER.md` for the current owner working agreement.
-5. Build a short mental index: rule name → core constraint → loophole keyword (if any).
-
-You cannot judge deviations against rules you haven't re-read. If `.claude/rules/` is empty or missing, note that and continue with `CLAUDE.md` only.
+4. Read `.claudart/CONTEXT.md` for the state the work started from, and `.claudart/OWNER.md` for the current owner working agreement.
+5. Build a short index: rule name → core constraint → known loophole. If `.claude/rules/` is empty or missing, note that and continue with `CLAUDE.md` only.
 
 ## Rule Refinement
 
-Walk the conversation chronologically, comparing each assistant turn against the rule index from the re-grounding pass.
+Walk the conversation chronologically, comparing each assistant turn against the rule index.
 
-1. List every moment the user corrected you OR you deviated from a rule. For each one, answer: _"What rationalization did I use to justify the deviation?"_ — do not just say "I missed the rule".
-2. Did any rule fail because it only described the happy path without closing obvious loopholes?
-3. For each identified gap, sharpen the existing sentence so it closes the loophole; when useful, state that the constraint still applies under the rationalization that caused the violation.
-4. If rules contradict each other, resolve the contradiction immediately in `.claude/rules/` or `CLAUDE.md`.
-5. Also save quiet _confirmations_: if the user accepted an unusual judgment call without pushback, that's a validated approach — record it so you don't drift away from it next time.
+1. List every moment the user corrected you or you deviated from a rule, and name the rationalization you used to justify each deviation, not merely "I missed the rule".
+2. Find rules that failed because they described only the happy path.
+3. For each gap, sharpen the existing sentence so it closes the loophole; when useful, state that the constraint still applies under the rationalization that caused the violation.
+4. Resolve contradictions between rules immediately in `.claude/rules/` or `CLAUDE.md`.
+5. Save quiet confirmations too: an unusual judgment call the user accepted without pushback is a validated approach to keep.
 
 ## Route What Was Learned
 
-1. Identify any core bug root-causes, architectural decisions, or new design patterns successfully validated in this session.
-2. **Pattern check via JOURNAL** — `.claudart/JOURNAL.md` can grow to thousands of lines, so NEVER full-read it. Use this token-efficient strategy:
-   - **Tail first**: read only the last ~200 lines via `tail -n 200 .claudart/JOURNAL.md` (Bash) or `Read` with an `offset` near EOF.
-   - **Grep when targeted**: if you suspect a specific pattern is recurring, use `grep '| decision |' .claudart/JOURNAL.md` (or `pivot`) to surface only matching lines without loading the rest.
-   - Look for the same `decision` or `pivot` recurring 2+ times in what you read. A repeating decision is a strong signal that the underlying principle should graduate from CONTEXT/JOURNAL into `.claude/rules/`. Surface these candidates explicitly.
-   - Skip this step entirely if `.claudart/JOURNAL.md` doesn't exist or has fewer than 5 entries.
-3. Before updating files:
-   - First, use the rule-file list from the re-grounding pass.
-   - Compare the new knowledge with the scope of these existing files.
-   - **CRITICAL CONSTRAINT**: DO NOT shoehorn or force new concepts into an existing file if the match is less than 80%. It is strictly PREFERRED to create a new domain file rather than polluting existing specific rules.
-   - Then, decide:
-     - Existing domain (perfect match) → Update the exact file in `.claude/rules/`.
-     - New domain (no strong match) → Create a new `.md` file in `.claude/rules/` with complete YAML frontmatter and add a conditional route to `CLAUDE.md`. Reserve automatic `@` imports for universal guidance and resolve them relative to the importing file.
-     - Global standard (applies universally) → Update `CLAUDE.md` (or `.claude/rules/ai-behavior.md` if it's a behavioral rather than structural rule).
-     - Owner working preference (communication, pacing, approvals, the people around the project, or a mistake to avoid) → `.claudart/OWNER.md` under `.claude/rules/ai-behavior.md`. Record missing entries, merge near-duplicates, and sharpen scope or exceptions instead of creating a rule.
-     - Descriptive fact → apply `.claude/rules/knowledge-management.md`. Promote it directly only if it is durable beyond the current work, current, evidenced, and correctly scoped. Find the authoritative owner first; knowledge owns the fact only when no other current source does. Keep any knowledge copy to a route or minimal unique context and update its reachable map atomically; leave WIP/proposals in the task/spec/CONTEXT surface and uncertainty/conflict as a candidate or `review-needed`.
-
+1. Identify bug root causes, architectural decisions, or design patterns validated in this session.
+2. Check recurrence in `.claudart/JOURNAL.md` without full-reading it: tail the last ~200 lines and grep targeted `| decision |` or `| pivot |` lines. A decision or pivot recurring two or more times is a candidate to graduate into `.claude/rules/`; surface it. Skip this check if JOURNAL is missing or has fewer than 5 entries.
+3. Route each lesson to one owner:
+   - An existing rule whose scope matches at least 80% → update that file. Below that, create a focused rule file instead of stretching a weaker match, and add its conditional route to `CLAUDE.md`.
+   - A universal standard → `CLAUDE.md`, or `.claude/rules/ai-behavior.md` when it is behavioral rather than structural.
+   - An owner working preference (communication, pacing, approvals, the people around the project, or a mistake to avoid) → `.claudart/OWNER.md` under `.claude/rules/ai-behavior.md`. Record missing entries, merge near-duplicates, and sharpen scope or exceptions instead of creating a rule.
+   - A descriptive fact → its owner under `.claude/rules/knowledge-management.md`; leave WIP and proposals in their task, spec or CONTEXT.
 4. If knowledge changed, run `bash .claude/scripts/knowledge-check.sh`. Report checker failures and never claim the mutation healthy while they remain.
 
-**Boundary**: `/cda-learn` updates **rules, `.claudart/OWNER.md`, `.claudart/knowledge/`, and `CLAUDE.md` only**. Do NOT modify `.claudart/CONTEXT.md` (that's `/cda-checkpoint`'s job) and do NOT rewrite `.claudart/JOURNAL.md` entries (it's append-only). You may read both as evidence. `/cda-checkpoint` bulk-maintains remaining candidates but is not the sole knowledge write gate.
+`/cda-learn` updates rules, `.claudart/OWNER.md`, `.claudart/knowledge/`, and `CLAUDE.md` only. It may read CONTEXT and JOURNAL as evidence but never modifies CONTEXT or rewrites JOURNAL entries.
 
 ## Output Standard
 
-- Rules must be **verifiable**: a reader must be able to check whether the rule was followed by reading the code. If you cannot verify it, rewrite it.
-- New or updated rule files must include frontmatter with `paths:`, `description:`, `when_to_use:`, and `tags:`. Write `paths:` as a YAML flow sequence, e.g. `paths: ["src/**/*.ts", "test/**/*.ts"]`; never use block-list style. Write `tags:` as an inline YAML array on one line, e.g. `tags: [architecture, nestjs, boundaries]`; never use block-list style. Use 1-5 lowercase kebab-case tags that describe the domain or scope.
+- A reader must be able to check from the code whether a rule was followed; rewrite any rule that cannot be verified.
+- Rule files carry the frontmatter `CLAUDE.md` defines, with `paths:` as a YAML flow sequence and `tags:` as a one-line inline array of 1-5 lowercase kebab-case values.
 - State each rule once, in plain words. Fix a repeated violation by sharpening its wording or scope, not with capitalized emphasis, which current models over-apply.
-- **NO CODE SNIPPETS** in rule files. Reference the source file and line (e.g., `src/services/foo.ts:45`) so context never goes stale. Code in rule files rots.
-- Execute file changes autonomously without asking for permission, then generate a brief summary listing each file touched and the reason.
+- Rule files contain no code snippets; cite the source file and line (e.g., `src/services/foo.ts:45`).
+- Make the file changes without asking for permission, then list each file touched and why.
