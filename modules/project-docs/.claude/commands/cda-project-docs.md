@@ -1,5 +1,5 @@
 ---
-description: Establish, adopt, update, audit, or compact current project documentation and its sources of authority
+description: Establish, adopt, update, or audit current project documentation and its sources of authority
 ---
 
 # Project Docs
@@ -12,7 +12,7 @@ Infer the operation from the request; an explicit mode name is optional:
 - **Adopt:** take on an existing project or scattered documentation. Read [bootstrap](../references/project-docs/bootstrap.md).
 - **Update:** change the owning docs and dependent routes when an approved decision or observed behavior changes them. Read [maintenance](../references/project-docs/maintenance.md).
 - **Audit:** assess ownership, routes, evidence, and drift; report findings without edits unless the user also asked to fix them. Read [maintenance](../references/project-docs/maintenance.md).
-- **Compact:** make an authorized, focused cleanup of superseded or duplicated docs. Read [maintenance](../references/project-docs/maintenance.md).
+- **Clean up:** stale, duplicated or noisy docs are cleaned by `/cda-tidy`, which reads [ownership](../references/project-docs/ownership.md) to place each fact.
 
 For any operation that selects or changes a source of authority, read [ownership](../references/project-docs/ownership.md). Read only the mode reference needed for this request. Delivery and release are contexts for update or audit, not required stages or permission to release; follow the project's actual use and commitments.
 

@@ -10,7 +10,7 @@ Write a session checkpoint: a declarative snapshot of what is true now, not a lo
 ## Rules
 
 1. `.claudart/CONTEXT.md` is overwritten, not appended. Remove anything that is no longer true.
-2. `.claudart/CONTEXT.md` has a hard ceiling of 150 lines, target under 100. Over the ceiling, ask the user to trim manually or run `$cda-refactor-memory`. Each bullet is one short sentence. Evidence, run or job IDs, timestamps, test totals and quoted chat stay in the task, commit or JOURNAL; CONTEXT links to them.
+2. `.claudart/CONTEXT.md` has a hard ceiling of 150 lines, target under 100. Over the ceiling, ask the user to trim manually or run `$cda-tidy`. Each bullet is one short sentence. Evidence, run or job IDs, timestamps, test totals and quoted chat stay in the task, commit or JOURNAL; CONTEXT links to them.
 3. `.claudart/JOURNAL.md` is append-only: never edit or delete prior entries, and write each new entry as a single line. Never add it as auto-loaded context in `AGENTS.md` or `.codex/guidelines/`. If such wiring already exists, remove it and warn the user.
 4. CONTEXT never absorbs a task body. `## In Progress` points to the focused task or spec by slug and path, so `$cda-start` sees task and non-task work in one place.
 5. Shared state belongs to the project, not this session. Preserve another session's unresolved work, blockers and next actions unless current evidence or the user resolves them. Absence from this conversation is not completion. Re-read CONTEXT and any index immediately before writing; if the file changed since inspection, reconcile the delta before replacing it. Serialize shared writes; this workflow is not a concurrent merge service.

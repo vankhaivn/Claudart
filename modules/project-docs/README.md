@@ -16,15 +16,14 @@ Use `--codex` or `--both` for the other layers. This adds `/cda-project-docs` (C
 
 Ask in plain language or name a mode:
 
-| Mode        | Use it to                                                      |
-| ----------- | -------------------------------------------------------------- |
-| **Init**    | Start docs for a new or loosely defined project                |
-| **Adopt**   | Take over an existing or scattered set of docs                 |
-| **Update**  | Reflect a change in intent, behavior, contracts, or operations |
-| **Audit**   | Review ownership, links, and drift without editing             |
-| **Compact** | Remove outdated or duplicate material, when you authorize it   |
+| Mode       | Use it to                                                      |
+| ---------- | -------------------------------------------------------------- |
+| **Init**   | Start docs for a new or loosely defined project                |
+| **Adopt**  | Take over an existing or scattered set of docs                 |
+| **Update** | Reflect a change in intent, behavior, contracts, or operations |
+| **Audit**  | Review ownership, links, and drift without editing             |
 
-It runs only when you ask, or when a task changes what current docs say. It never audits on every session.
+It runs only when you ask, or when a task changes what current docs say. It never audits on every session. Cleaning outdated or duplicate material is the core `/cda-tidy` workflow, which uses this module's ownership rules when the module is installed.
 
 ## Templates
 
