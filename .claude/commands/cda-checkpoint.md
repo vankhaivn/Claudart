@@ -7,13 +7,13 @@ You are about to write a session checkpoint. The output is **not a log of what h
 ## Hard Rules (read before doing anything)
 
 1. **.claudart/CONTEXT.md is overwritten, not appended.** Anything not still true _right now_ must be removed.
-2. **.claudart/CONTEXT.md hard ceiling: 150 lines, target < 100.** If your draft exceeds 150, STOP and ask the user to trim manually or run `/cda-refactor-memory`.
+2. **.claudart/CONTEXT.md hard ceiling: 150 lines, target < 100.** If your draft exceeds 150, STOP and ask the user to trim manually or run `/cda-refactor-memory`. Each bullet is one short sentence. Evidence, run or job IDs, timestamps, test totals and quoted chat stay in the task, commit or JOURNAL; CONTEXT links to them.
 3. **.claudart/JOURNAL.md is append-only.** Never edit or delete prior entries. Each new entry is a single line.
 4. **Never add `.claudart/JOURNAL.md` as auto-loaded context in `CLAUDE.md` or `.claude/rules/`. If such an auto-load already exists, remove that wiring and warn the user; JOURNAL remains append-only and outside session context.**
 5. **Skip JOURNAL entirely when there is nothing meaningful to record.** Empty entries pollute the file.
 6. **Task workspaces keep their own bodies and supporting files; CONTEXT.md never absorbs a task body.** But CONTEXT.md **should** still reference the currently-focused task by slug + path in `## In Progress` so `/cda-start` sees both task and non-task work in one place. Two valid CONTEXT entries:
    - Task reference: `- Working task \`add-jwt-auth\` (see .claudart/tasks/2026-05-13-001-add-jwt-auth/TASK.md) <!-- since: YYYY-MM-DD -->`
-   - Ad-hoc non-task change the user requested without creating a `/cda-task` (a quick tweak, a transient pivot): CONTEXT is its **only** home, so it gets a **micro-handoff** — intent in the user's words + files of interest + next step (see Step 4) — not just a one-line pointer.
+   - Ad-hoc non-task change the user requested without creating a `/cda-task` (a quick tweak, a transient pivot): CONTEXT is its **only** home, so it gets a **micro-handoff** — intent + files of interest + next step (see Step 4) — not just a one-line pointer.
      Checkpoint _syncs_ `tasks/index.md` AND ensures CONTEXT references the focus task — but never copies a task's Steps/Decisions/Surprises into CONTEXT.
 7. **Subagent threads are not durable project memory.** Do not store subagent ids, nicknames, or transient thread state in CONTEXT. Store only durable outcomes: decisions, unresolved blockers, validated findings, changed ownership boundaries, and next steps.
 8. **Checkpoint is bulk maintenance, not the only knowledge write gate.** Follow `.claude/rules/knowledge-management.md`; eligible facts may already have been promoted through a natural-language mid-session update.
@@ -32,22 +32,22 @@ You are about to write a session checkpoint. The output is **not a log of what h
 
 For each item currently in `.claudart/CONTEXT.md`, decide one of using current evidence; retain unresolved work outside this session:
 
-| Status                                                                                     | Action                                                                                                                                                                                                                                  |
-| ------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Still true right now                                                                       | Keep it (refresh wording if needed). Preserve any existing `<!-- since: YYYY-MM-DD -->` comment.                                                                                                                                        |
-| Done / resolved / merged                                                                   | **Drop from .claudart/CONTEXT.md.** Candidate for JOURNAL if it was a real decision, completion, or pivot. Pure tactical noise (e.g., "tried X, didn't work") is dropped silently.                                                      |
-| Superseded by a newer state                                                                | Drop the old, write the new                                                                                                                                                                                                             |
-| A standing owner preference or approval about working with the owner, in the owner's words | Record it in `.claudart/OWNER.md` under `.claude/rules/ai-behavior.md` if it is missing, then drop it from CONTEXT; a correction about work an existing rule owns goes to that rule (next row); a one-time approval stays with its work |
-| A durable convention for a code area, workflow, or other area a rule owns                  | This has graduated beyond CONTEXT — propose `.claude/rules/` via `/cda-learn`, then drop from CONTEXT                                                                                                                                   |
-| A fact that may pass the knowledge capture gates                                           | Flag for **Step 6c**; it may be local in scope but must be descriptive, durable beyond this work, current, and evidenced                                                                                                                |
-| Uncertain, conflicting, WIP, or proposed state                                             | Keep it as a candidate in the owning task/spec/CONTEXT surface; do not promote it as canonical knowledge                                                                                                                                |
+| Status                                                                                                 | Action                                                                                                                                                                                                                                  |
+| ------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Still true right now                                                                                   | Keep it (refresh wording if needed). Preserve any existing `<!-- since: YYYY-MM-DD -->` comment.                                                                                                                                        |
+| Done / resolved / merged                                                                               | **Drop from .claudart/CONTEXT.md.** Candidate for JOURNAL if it was a real decision, completion, or pivot. Pure tactical noise (e.g., "tried X, didn't work") is dropped silently.                                                      |
+| Superseded by a newer state                                                                            | Drop the old, write the new                                                                                                                                                                                                             |
+| A standing owner preference or approval about working with the owner, stated or confirmed by the owner | Record it in `.claudart/OWNER.md` under `.claude/rules/ai-behavior.md` if it is missing, then drop it from CONTEXT; a correction about work an existing rule owns goes to that rule (next row); a one-time approval stays with its work |
+| A durable convention for a code area, workflow, or other area a rule owns                              | This has graduated beyond CONTEXT — propose `.claude/rules/` via `/cda-learn`, then drop from CONTEXT                                                                                                                                   |
+| A fact that may pass the knowledge capture gates                                                       | Flag for **Step 6c**; it may be local in scope but must be descriptive, durable beyond this work, current, and evidenced                                                                                                                |
+| Uncertain, conflicting, WIP, or proposed state                                                         | Keep it as a candidate in the owning task/spec/CONTEXT surface; do not promote it as canonical knowledge                                                                                                                                |
 
 ### Step 3 — Add new state from this session
 
 Add to `.claudart/CONTEXT.md` only what's true _now_:
 
 - What you are mid-stream on (with `file:line` if applicable). **If the work is being tracked in a task file**, reference it by slug + path (e.g., `Working task \`add-jwt-auth\` (see .claudart/tasks/2026-05-13-001-add-jwt-auth/TASK.md)`). Do not duplicate the task body here.
-- Ad-hoc changes the user requested _without_ creating a `/cda-task` (quick fixes, transient tweaks, mid-flight pivots) — these have no task file, so CONTEXT **is** their handoff summary, not just a note. Give each _active_ one a **micro-handoff** (see Step 4 skeleton): the user's intent in their own words, the files of interest with `file:line`, and the next concrete step. Mark them `(no task)`.
+- Ad-hoc changes the user requested _without_ creating a `/cda-task` (quick fixes, transient tweaks, mid-flight pivots) — these have no task file, so CONTEXT **is** their handoff summary, not just a note. Give each _active_ one a **micro-handoff** (see Step 4 skeleton): the user's intent in one sentence, at most three files of interest with `file:line`, and the next concrete step. Mark them `(no task)`.
 - Decisions just made that are not yet codified in rules
 - Durable subagent outcomes that still matter after this session, such as a validated finding, an unresolved worker/reviewer blocker, or a changed ownership boundary. Do not mention subagent thread ids.
 - Open questions / blockers currently unresolved
@@ -78,7 +78,7 @@ Use this skeleton; **omit any section that has nothing to say**:
 - Running spec `<slug>` (see .claudart/specs/YYYY-MM-DD-<slug>/SPEC.md) <!-- since: YYYY-MM-DD -->
 <!-- un-planned work → CONTEXT is the only handoff, so each live thread gets a micro-handoff -->
 - <short label> (no task) <!-- since: YYYY-MM-DD -->
-  > "<the user's intent, quoted in their own words>"
+  - Intent: <the requested outcome in one sentence; quote only a short constraint whose exact wording matters>
   - Files: path/to/file.ext:LINE — why it matters
   - Next: <one concrete step>
 
@@ -88,7 +88,7 @@ Use this skeleton; **omit any section that has nothing to say**:
 
 ## Recent Decisions (not yet promoted to rules)
 
-- [Decision + brief why; behavior → .claude/rules/ via /cda-learn; eligible descriptive fact → its owner under the knowledge rule] <!-- since: YYYY-MM-DD -->
+- [Decision and its reason in one sentence; behavior → .claude/rules/ via /cda-learn; eligible descriptive fact → its owner under the knowledge rule] <!-- since: YYYY-MM-DD -->
 
 ## Next Session Should Start By
 
@@ -102,7 +102,7 @@ Count lines. If > 150, STOP and report to the user; do not write the file.
 For every item that was DROPPED in Step 2 because it was _done/decided/pivoted_, write **one line** to `.claudart/JOURNAL.md` in this format:
 
 ```
-YYYY-MM-DD | <type> | <one-line summary, optional commit ref>
+YYYY-MM-DD | <type> | <one short summary, optional commit ref>
 ```
 
 Types (use exactly one):

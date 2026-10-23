@@ -10,7 +10,7 @@ Distill. Never dump transcript.
 
 1. **Single slot.** `.claudart/HANDOFF.md` is the only handoff file, and it is replaced only after the existing baton is consumed, discarded or explicitly approved for replacement, not appended. It is a baton, not an archive: written once here, consumed once by the next `/cda-start`, then deleted. NEVER create dated copies, a `handoff/` folder, or a second slot.
 2. **Distill, don't transcribe.** No raw chat history, no message-by-message replay. Hard ceiling: 150 lines; target under 100. Repeated compaction is cumulatively lossy — a tight baton beats a long echo.
-3. **Verbatim tier.** Three things must be quoted word-for-word, never paraphrased:
+3. **Verbatim tier.** Three things must be quoted word-for-word, never paraphrased, using the shortest exact phrase that carries each:
    - explicit constraints or instructions the user stated (security rules, "don't touch X", style preferences);
    - the user's most recent request;
    - the quote anchoring where work stopped (see Hard Rule 7).
@@ -67,7 +67,7 @@ task: <active task slug, or none>
 
 ## Evidence
 
-- `path/to/file.ext:42` — what this shows and why it matters
+- `path/to/file.ext:42` — what this shows and why it matters (at most five items)
 
 ## Dead Ends — do not retry
 

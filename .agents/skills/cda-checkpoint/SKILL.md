@@ -14,13 +14,13 @@ Checkpoint is a bulk-maintenance boundary, not the only way to write knowledge. 
 ## Hard Rules
 
 1. `.claudart/CONTEXT.md` is overwritten, not appended. Anything not still true right now must be removed.
-2. `.claudart/CONTEXT.md` hard ceiling: 150 lines, target under 100. If your draft exceeds 150, stop and ask the user to trim manually or run `$cda-refactor-memory`.
+2. `.claudart/CONTEXT.md` hard ceiling: 150 lines, target under 100. If your draft exceeds 150, stop and ask the user to trim manually or run `$cda-refactor-memory`. Each bullet is one short sentence. Evidence, run or job IDs, timestamps, test totals and quoted chat stay in the task, commit or JOURNAL; CONTEXT links to them.
 3. `.claudart/JOURNAL.md` is append-only. Never edit or delete prior entries. Each new entry is a single line.
 4. Never add `.claudart/JOURNAL.md` as auto-loaded context in `AGENTS.md` or `.codex/guidelines/`. If such an auto-load already exists, remove that wiring and warn the user; JOURNAL remains append-only and outside session context.
 5. Skip JOURNAL entirely when there is nothing meaningful to record. Empty entries pollute the file.
 6. Task workspaces keep their own bodies and supporting files; CONTEXT.md never absorbs a task body. But CONTEXT.md should still reference the currently-focused task by slug + path in `## In Progress` so `$cda-start` sees both task and non-task work in one place. Two valid CONTEXT entries:
    - Task reference: `- Working task \`add-jwt-auth\` (see .claudart/tasks/2026-05-13-001-add-jwt-auth/TASK.md) <!-- since: YYYY-MM-DD -->`
-   - Ad-hoc non-task change the user requested without creating a `$cda-task` (a quick tweak, a transient pivot): CONTEXT is its **only** home, so it gets a **micro-handoff** — intent in the user's words + files of interest + next step (see Step 4) — not just a one-line pointer.
+   - Ad-hoc non-task change the user requested without creating a `$cda-task` (a quick tweak, a transient pivot): CONTEXT is its **only** home, so it gets a **micro-handoff** — intent + files of interest + next step (see Step 4) — not just a one-line pointer.
      Checkpoint _syncs_ `tasks/index.md` AND ensures CONTEXT references the focus task, but never copies a task's Steps/Decisions/Surprises into CONTEXT.
 7. Subagent threads are not durable project memory. Do not store subagent ids, nicknames, or transient thread state in CONTEXT. Store only durable outcomes: decisions, unresolved blockers, validated findings, changed ownership boundaries, and next steps.
 
@@ -43,7 +43,7 @@ For each item currently in `.claudart/CONTEXT.md`, decide one of using current e
 | Still true right now                                                                                        | Keep it, refreshing wording if needed. Preserve any existing `<!-- since: YYYY-MM-DD -->` comment.                                                                                                                                                     |
 | Done / resolved / merged                                                                                    | Drop it from `.claudart/CONTEXT.md`. Candidate for JOURNAL if it was a real decision, completion, or pivot.                                                                                                                                            |
 | Superseded by newer state                                                                                   | Drop the old item and write the new current state.                                                                                                                                                                                                     |
-| A standing owner preference or approval about working with the owner, in the owner's words                  | Record it in `.claudart/OWNER.md` under `.codex/guidelines/ai-behavior.md` if it is missing, then drop it from CONTEXT; a correction about work an existing guideline owns goes to that guideline (next row); a one-time approval stays with its work. |
+| A standing owner preference or approval about working with the owner, stated or confirmed by the owner      | Record it in `.claudart/OWNER.md` under `.codex/guidelines/ai-behavior.md` if it is missing, then drop it from CONTEXT; a correction about work an existing guideline owns goes to that guideline (next row); a one-time approval stays with its work. |
 | Broad recurring behavior for a code area, workflow, or other area a guideline owns, relevant to future work | Propose moving it into `.codex/guidelines/` via `$cda-learn`, then drop it from CONTEXT.                                                                                                                                                               |
 | Descriptive, durable-beyond-current-work, current, and evidenced project fact (scope may be narrow)         | Flag for **Step 6c**, then drop it from CONTEXT after its owner or knowledge route is updated and the relevant validation passes.                                                                                                                      |
 | WIP, proposed future state, task/acceptance state, or an uncertain/conflicting observation                  | Keep it in the task/spec/CONTEXT candidate surface; never promote it as an active fact.                                                                                                                                                                |
@@ -55,7 +55,7 @@ Pure tactical noise is dropped silently.
 Add to `.claudart/CONTEXT.md` only what is true now:
 
 - Work that is mid-stream, with `file:line` where useful. If the work is being tracked in a task file, reference it by slug + path (e.g., `Working task \`add-jwt-auth\` (see .claudart/tasks/2026-05-13-001-add-jwt-auth/TASK.md)`). Do not duplicate the task body here.
-- Ad-hoc changes the user requested _without_ creating a `$cda-task` (quick fixes, transient tweaks, mid-flight pivots). These have no task file, so CONTEXT **is** their handoff summary, not just a note. Give each _active_ one a **micro-handoff** (see Step 4 skeleton): the user's intent in their own words, the files of interest with `file:line`, and the next concrete step. Mark them `(no task)`.
+- Ad-hoc changes the user requested _without_ creating a `$cda-task` (quick fixes, transient tweaks, mid-flight pivots). These have no task file, so CONTEXT **is** their handoff summary, not just a note. Give each _active_ one a **micro-handoff** (see Step 4 skeleton): the user's intent in one sentence, at most three files of interest with `file:line`, and the next concrete step. Mark them `(no task)`.
 - Decisions just made that are not yet codified in guidelines.
 - Durable subagent outcomes that still matter after this session, such as a validated finding, unresolved worker/reviewer blocker, or changed ownership boundary. Do not mention subagent thread ids.
 - Open questions or blockers currently unresolved.
@@ -86,7 +86,7 @@ Use this skeleton. Omit any section that has nothing to say.
 - Running spec `<slug>` (see .claudart/specs/YYYY-MM-DD-<slug>/SPEC.md) <!-- since: YYYY-MM-DD -->
 <!-- un-planned work → CONTEXT is the only handoff, so each live thread gets a micro-handoff -->
 - <short label> (no task) <!-- since: YYYY-MM-DD -->
-  > "<the user's intent, quoted in their own words>"
+  - Intent: <the requested outcome in one sentence; quote only a short constraint whose exact wording matters>
   - Files: path/to/file.ext:LINE — why it matters
   - Next: <one concrete step>
 
@@ -96,7 +96,7 @@ Use this skeleton. Omit any section that has nothing to say.
 
 ## Recent Decisions (not yet promoted to guidelines)
 
-- [Decision + brief why; promote when it stabilizes — behavior → .codex/guidelines/ via $cda-learn, eligible descriptive fact → its owner under the knowledge guideline] <!-- since: YYYY-MM-DD -->
+- [Decision and its reason in one sentence; promote when it stabilizes — behavior → .codex/guidelines/ via $cda-learn, eligible descriptive fact → its owner under the knowledge guideline] <!-- since: YYYY-MM-DD -->
 
 ## Next Session Should Start By
 
@@ -110,7 +110,7 @@ Count lines. If more than 150, stop and report to the user. Do not write the fil
 For every item dropped in Step 2 because it was done, decided, pivoted, or resolved, write one line to `.claudart/JOURNAL.md` in this format:
 
 ```text
-YYYY-MM-DD | <type> | <one-line summary, optional commit ref>
+YYYY-MM-DD | <type> | <one short summary, optional commit ref>
 ```
 
 Types:

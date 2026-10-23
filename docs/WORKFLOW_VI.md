@@ -93,15 +93,16 @@ Khi mọi thứ xong, agent chạy các check nghiệm thu và dừng ở `await
 
 ## 5. Thông tin nào để ở đâu
 
-| Nơi lưu                     | Chứa                                    | Không chứa                          |
-| --------------------------- | --------------------------------------- | ----------------------------------- |
-| `CONTEXT.md`                | Điều đang đúng lúc này, để làm tiếp     | Lịch sử, tài liệu tham khảo         |
-| `OWNER.md`                  | Cách bạn muốn làm việc với agent        | Quy ước code, secret                |
-| `JOURNAL.md`                | Lịch sử đã cũ (không tự động tải)       | Chỉ dẫn                             |
-| `rules/` hoặc `guidelines/` | Agent nên hành xử thế nào               | Sự thật về dự án                    |
-| `knowledge/`                | Sự thật lâu dài, có bằng chứng về dự án | Kế hoạch, phỏng đoán, việc đang làm |
-| `tasks/`, `specs/`          | Việc đang làm                           | Tài liệu dự án chung                |
-| `HANDOFF.md`                | Mạch suy luận cho phiên kế tiếp         | Thứ gì lâu dài                      |
+| Nơi lưu                     | Chứa                                        | Không chứa                                        |
+| --------------------------- | ------------------------------------------- | ------------------------------------------------- |
+| `CONTEXT.md`                | Điều đang đúng lúc này, để làm tiếp         | Lịch sử, tài liệu tham khảo                       |
+| `OWNER.md`                  | Cách bạn muốn làm việc với agent            | Quy ước code, secret                              |
+| `JOURNAL.md`                | Lịch sử đã cũ (không tự động tải)           | Chỉ dẫn                                           |
+| `rules/` hoặc `guidelines/` | Agent nên hành xử thế nào                   | Sự thật về dự án                                  |
+| `knowledge/`                | Sự thật lâu dài, có bằng chứng về dự án     | Kế hoạch, phỏng đoán, việc đang làm               |
+| `tasks/`, `specs/`          | Việc đang làm, bằng chứng và lịch sử của nó | Tài liệu dự án chung                              |
+| Tài liệu dự án              | Hiện trạng, viết cho người đọc của nó       | Ghi chú cập nhật theo ngày, kết quả test, mã task |
+| `HANDOFF.md`                | Mạch suy luận cho phiên kế tiếp             | Thứ gì lâu dài                                    |
 
 **Hồ sơ owner.** Khi bạn sửa agent hoặc nêu một ưu tiên lâu dài ("luôn trả lời bằng tiếng Việt", "không bao giờ push khi chưa hỏi"), agent thêm một dòng có ngày vào `OWNER.md` và báo cho bạn. Một lần cho phép duy nhất không bao giờ bị ghi thành cho phép thường trực. Chỉ dẫn hiện tại của bạn luôn thắng file này.
 

@@ -1,5 +1,6 @@
 <!-- .claudart/CONTEXT.md — shared current project state, maintained by checkpoint.
-Declarative, not a log. Keep under 150 lines; target under 100.
+Declarative, not a log. Keep under 150 lines; target under 100. One short sentence per bullet;
+evidence, IDs, timestamps and quoted chat stay in the task, commit or JOURNAL.
 Preserve unresolved work across sessions and runtimes. Do not record Git status.
 History belongs in Git and JOURNAL.md; durable facts belong with their owners. -->
 

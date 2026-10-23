@@ -45,7 +45,7 @@ When the optional Project Docs command is present, use it for project-document o
 
 ## Agent Self-Evolution & Context Maintenance
 
-- "Do not assume a human will document your code patterns. If you build it, document it."
+- Behavior, contracts, setup or operations change -> update the owning document in the same change, as the universal behavior rule defines.
 - Existing rules change -> update the relevant file in `.claude/rules/`.
 - Owner corrections, standing preferences, and approvals -> record them in `.claudart/OWNER.md` when they happen, as the universal behavior rule defines.
 - New domains/layers -> CREATE a new rule file in `.claude/rules/` (with flow-style `paths: [...]`, `description:`, `when_to_use:`, and inline `tags: [...]` frontmatter) and add a conditional route in this file's Domain Rules section. Use narrow paths for conditional rules; reserve `@` imports for universal guidance, with paths relative to this file.

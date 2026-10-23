@@ -4,7 +4,7 @@ Author notes: Adapt this for engineers and operators who need a current system-l
 
 # {{project_name}} architecture
 
-**Applies to:** {{system_revision_deployment_or_other_relevant_scope_and_evidence}}.
+**Applies to:** {{system_revision_deployment_or_other_relevant_scope_and_a_link_to_its_evidence}}.
 
 ## System context
 

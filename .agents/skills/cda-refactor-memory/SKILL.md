@@ -47,7 +47,7 @@ Route content by meaning before reorganizing files. Do not move WIP or a propose
 3. Discover linters, formatters, test runners, and validation commands. Delegate style enforcement to those tools instead of copying their rules into `AGENTS.md`.
 4. Inspect the active `AGENTS.md`, deprecated memory files, current guidelines, and stable decisions in CONTEXT. Split candidates by type and owner before moving them: owner working preference → `.claudart/OWNER.md`; other behavior → guideline; eligible fact → its current authoritative source or knowledge when no other owner exists; WIP/proposal → task/spec/CONTEXT.
 5. Ensure `.codex/guidelines/` exists, then extract detailed behavior into the smallest set of domain guidelines with clear ownership and useful `paths:`. Do not create files for symmetry or force a weak concept into an unrelated owner. Use `.codex/guidelines/*.md` for semantic guidance; never place it in `.codex/rules/`, whose optional `*.rules` files are reserved for Codex permission or environment rules.
-6. Keep each rule verifiable, scoped, loophole-closed, and unambiguous about critical constraints. Use stable file/symbol references rather than long code snippets or fragile line excerpts.
+6. Keep each rule verifiable, scoped, loophole-closed, and stated once in plain words without capitalized emphasis. Use stable file/symbol references rather than long code snippets or fragile line excerpts.
 7. Never write secrets, tokens, keys, production credentials, or real `.env` values into any memory tier.
 
 ## 4. Refactor AGENTS And Guidelines

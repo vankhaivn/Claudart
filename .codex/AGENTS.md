@@ -56,7 +56,7 @@ When the optional Project Docs skill is present, use it for project-document own
 
 ## Agent Self-Evolution & Context Maintenance
 
-- "Do not assume a human will document your code patterns. If you build it, document it."
+- Behavior, contracts, setup or operations change → update the owning document in the same change, as the universal behavior rule defines.
 - Existing Codex guidelines change → update the relevant file in `.codex/guidelines/`.
 - Owner corrections, standing preferences, and approvals → record them in `.claudart/OWNER.md` when they happen, as `.codex/guidelines/ai-behavior.md` defines.
 - New domains/layers → create a new guideline file with flow-style `paths: [...]`, `description:`, `when_to_use:`, and inline `tags: [...]` frontmatter, then ensure `AGENTS.md` points to it when globally relevant.

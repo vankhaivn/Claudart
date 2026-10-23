@@ -69,8 +69,8 @@ Required for each rule file:
 Rule Quality Checklist:
 
 1. Verifiable: a reader can check whether the rule was followed by reading the repo.
-2. Loophole-closed: if a rule has an obvious bypass, add `NEVER do X, even when Y seems like a good reason`.
-3. Critical-tagged: prefix high-priority constraints with `NEVER`, `YOU MUST`, `IMPORTANT`, or similar unambiguous language.
+2. Loophole-closed: if a rule has an obvious bypass, sharpen its sentence to close it.
+3. Plain: state each constraint once, without capitalized emphasis.
 4. Scoped: the rule belongs in the named file and does not duplicate unrelated guidance elsewhere.
 
 ## 5. Audit Domain Rule Semantics
@@ -255,7 +255,7 @@ At the end of `CLAUDE.md`, ensure `## Agent Self-Evolution & Context Maintenance
 
 Include these rules:
 
-- "Do not assume a human will document your code patterns. If you build it, document it."
+- Behavior, contracts, setup or operations change → update the owning document in the same change, as `.claude/rules/ai-behavior.md` defines.
 - Existing rules change → update the relevant file in `.claude/rules/`.
 - New domains/layers → CREATE a new rule file in `.claude/rules/` (with flow-style `paths: [...]`, `description:`, `when_to_use:`, and inline `tags: [...]` frontmatter) and add a conditional Domain Rules route. Reserve automatic imports for universal guidance, using paths relative to the importing file.
 - Durable descriptive facts that pass `.claude/rules/knowledge-management.md` → find the authoritative owner; knowledge owns only facts without another owner and otherwise keeps compact routes or minimal unique context. For a knowledge mutation, patch the topic and reachable map atomically, then run the checker. Scope may be local; task/spec state stays local.

@@ -93,15 +93,16 @@ When everything is done, the agent runs the acceptance checks and stops at `awai
 
 ## 5. Where information goes
 
-| Store                     | Holds                                      | Does not hold                    |
-| ------------------------- | ------------------------------------------ | -------------------------------- |
-| `CONTEXT.md`              | What is true now, to resume work           | History, reference material      |
-| `OWNER.md`                | How you want to work with the agent        | Code conventions, secrets        |
-| `JOURNAL.md`              | Retired history (not loaded automatically) | Instructions                     |
-| `rules/` or `guidelines/` | How the agent should behave                | Facts about the project          |
-| `knowledge/`              | Durable, evidenced facts about the project | Plans, guesses, work in progress |
-| `tasks/`, `specs/`        | Work in progress                           | General project documentation    |
-| `HANDOFF.md`              | Reasoning for the next session only        | Anything permanent               |
+| Store                     | Holds                                        | Does not hold                              |
+| ------------------------- | -------------------------------------------- | ------------------------------------------ |
+| `CONTEXT.md`              | What is true now, to resume work             | History, reference material                |
+| `OWNER.md`                | How you want to work with the agent          | Code conventions, secrets                  |
+| `JOURNAL.md`              | Retired history (not loaded automatically)   | Instructions                               |
+| `rules/` or `guidelines/` | How the agent should behave                  | Facts about the project                    |
+| `knowledge/`              | Durable, evidenced facts about the project   | Plans, guesses, work in progress           |
+| `tasks/`, `specs/`        | Work in progress, its evidence and history   | General project documentation              |
+| Project docs              | The current state, written for their readers | Dated update notes, test results, task IDs |
+| `HANDOFF.md`              | Reasoning for the next session only          | Anything permanent                         |
 
 **Owner profile.** When you correct the agent or state a lasting preference ("always answer in Vietnamese", "never push without asking"), it adds one dated line to `OWNER.md` and tells you. A one-time approval is never recorded as a standing one. Your current instruction always wins over the file.
 

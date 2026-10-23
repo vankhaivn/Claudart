@@ -139,7 +139,7 @@ tags: [1-5 lowercase kebab-case tags]
 
 ## Outcomes & Retrospective
 
-<Leave empty during planning; draft at awaiting-review and finalize at done or cancelled. Write one final summary, not a running log of gates or check runs: what was delivered, what gaps remain, what was learned.>
+<Leave empty during planning; draft at awaiting-review and finalize at done or cancelled. Write one final summary without subsections, not a running log of gates or check runs: what was delivered, what gaps remain, what was learned.>
 ```
 
 ## Plan Altitude
