@@ -120,7 +120,7 @@ for layer in claude codex; do
   assert_contains "$rule" 'Verify the move succeeded before updating references or journaling.' "$layer records only successful moves"
   assert_contains "$rule" 'Repair every knowledge `sources` entry that points into the moved workspace' "$layer archive keeps knowledge sources resolvable"
   assert_contains "$rule" 'a path repair changes neither `updated` nor `last_verified`' "$layer archive repair is not a content or evidence change"
-  assert_contains "$rule" 'Do NOT move the workspace' "$layer preserves the user completion gate"
+  assert_contains "$rule" 'Do not move the workspace' "$layer preserves the user completion gate"
   assert_contains "$rule" 'local-only' "$layer exposes non-portable inputs"
   assert_contains "$rule" 'no compatibility or automatic migration path' "$layer supports only the current layout"
   assert_contains "$plan" 'Honor an explicit request for a persistent plan' "$layer honors small explicit plans"
