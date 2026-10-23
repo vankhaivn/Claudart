@@ -48,16 +48,17 @@ Các workflow CLAUDART dùng chung tên `cda-` trên cả hai công cụ: gọi 
 
 ## Dùng hằng ngày
 
-| Bạn muốn                         | Claude Code            | Codex                  |
-| -------------------------------- | ---------------------- | ---------------------- |
-| Bắt đầu phiên                    | `/cda-start`           | `$cda-start`           |
-| Lập kế hoạch cần giữ lại         | `/cda-task <task>`     | `$cda-task <task>`     |
-| Định nghĩa việc lớn, nhiều phiên | `/cda-spec <mission>`  | `$cda-spec <mission>`  |
-| Chạy spec đã duyệt               | `/cda-spec-run <slug>` | `$cda-spec-run <slug>` |
-| Lưu trạng thái khi tới điểm dừng | `/cda-checkpoint`      | `$cda-checkpoint`      |
-| Tạm dừng một cuộc điều tra khó   | `/cda-handoff`         | `$cda-handoff`         |
-| Biến bài học lặp lại thành rule  | `/cda-learn`           | `$cda-learn`           |
-| Kiểm tra bản cài                 | `/cda-doctor`          | `$cda-doctor`          |
+| Bạn muốn                          | Claude Code            | Codex                  |
+| --------------------------------- | ---------------------- | ---------------------- |
+| Bắt đầu phiên                     | `/cda-start`           | `$cda-start`           |
+| Lập kế hoạch cần giữ lại          | `/cda-task <task>`     | `$cda-task <task>`     |
+| Định nghĩa việc lớn, nhiều phiên  | `/cda-spec <mission>`  | `$cda-spec <mission>`  |
+| Chạy spec đã duyệt                | `/cda-spec-run <slug>` | `$cda-spec-run <slug>` |
+| Lưu trạng thái khi tới điểm dừng  | `/cda-checkpoint`      | `$cda-checkpoint`      |
+| Tạm dừng một cuộc điều tra khó    | `/cda-handoff`         | `$cda-handoff`         |
+| Biến bài học lặp lại thành rule   | `/cda-learn`           | `$cda-learn`           |
+| Kiểm tra bản cài                  | `/cda-doctor`          | `$cda-doctor`          |
+| Dọn docs, knowledge và trạng thái | `/cda-tidy`            | `$cda-tidy`            |
 
 Sửa nhỏ và rõ ràng thì không cần lệnh nào, cứ nhờ thẳng. Xem [hướng dẫn quy trình](docs/WORKFLOW_VI.md) để biết khi nào dùng task, khi nào dùng spec.
 

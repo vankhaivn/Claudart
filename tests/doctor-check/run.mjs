@@ -87,7 +87,7 @@ function fixture(name, layer = "codex", layout = "installed") {
       "cda-checkpoint",
       "cda-learn",
       "cda-doctor",
-      "cda-refactor-memory",
+      "cda-tidy",
       "cda-task",
       "cda-handoff",
       "cda-spec",
@@ -113,7 +113,6 @@ function fixture(name, layer = "codex", layout = "installed") {
     for (const name of [
       "cda-start",
       "cda-learn",
-      "cda-refactor-memory",
       "cda-doctor",
       "cda-checkpoint",
       "cda-task",
@@ -125,6 +124,10 @@ function fixture(name, layer = "codex", layout = "installed") {
         join(dir, `.claude/commands/${name}.md`),
         "---\ndescription: test command\n---\n# Command\n",
       );
+    write(
+      join(dir, ".claude/skills/cda-tidy/SKILL.md"),
+      "---\nname: cda-tidy\ndescription: test skill\n---\n# Skill\n",
+    );
     mkdirSync(join(dir, ".claude/agents"), { recursive: true });
   }
   return dir;

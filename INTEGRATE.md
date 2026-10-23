@@ -12,9 +12,9 @@ This file is a **protocol, not an installer**. Follow it top to bottom. It exist
 >
 > **"Customized" means user-authored content, not every local difference.** A CLAUDART-shipped file whose local copy merely matches an older upstream state is stale, not custom. Upgrade stale template content; preserve and deliberately re-apply real project-specific additions. Never keep an older upstream value, such as a narrower permission or default, as a presumed customization or for safety; a difference is custom only when evidence shows the project authored it.
 >
-> **Mechanical verification first; semantic maintenance only when justified.** Every integration gets a bounded, read-only verification pass. Do not run `doctor → refactor-memory → doctor` merely because files were installed or upgraded. Doctor is conditional and diagnostic; refactor-memory is write-capable and requires a concrete finding plus explicit approval.
+> **Mechanical verification first; semantic maintenance only when justified.** Every integration gets a bounded, read-only verification pass. Do not run doctor or tidy merely because files were installed or upgraded. Doctor is conditional and diagnostic; tidy rewrites live docs and state and runs only on a separate user request.
 >
-> **Integration validation precedence.** Step 4 governs this integration run. Generic first-run suggestions elsewhere do not make doctor or refactor-memory mandatory here.
+> **Integration validation precedence.** Step 4 governs this integration run. Generic first-run suggestions elsewhere do not make doctor or tidy mandatory here.
 
 ---
 
@@ -75,7 +75,7 @@ Only empty seeds are distributed. Existing state is project-owned and preserved 
 **Claude adapter** (root `CLAUDE.md` + `.claude/`):
 
 - `.claude/CLAUDE.md` is the source template for the canonical downstream root `CLAUDE.md`; do not install a duplicate under `.claude/`;
-- `.claude/commands/`, `.claude/agents/`, path-scoped `.claude/rules/`, conditional `.claude/references/`, and read-only checker helpers under `.claude/scripts/`.
+- `.claude/commands/`, `.claude/skills/` (skill folders with bundled scripts), `.claude/agents/`, path-scoped `.claude/rules/`, conditional `.claude/references/`, and read-only checker helpers under `.claude/scripts/`.
 
 **Codex adapter** (`.codex/` + `.agents/skills/`):
 
@@ -108,7 +108,7 @@ Treat an optional module as a selected dependency closure, separate from the cor
 
 Copy the current shared seeds once, selected adapter payload, and approved optional-module payload. Splice CLAUDART routes into any existing canonical or overlapping loader; never replace project-authored loader content. For missing live-state files, create only the current empty seed/header. For Claude, place the source template `.claude/CLAUDE.md` at the canonical downstream root `CLAUDE.md`; treat an existing downstream `.claude/CLAUDE.md` as a legacy same-concept/different-file collision that must be reconciled or explicitly retired, not left as a competing loader. For Codex, place `.codex/AGENTS.md` at root `AGENTS.md` and avoid competing loaders.
 
-Scenario A is the fast path: do not inspect full history and do not schedule doctor or refactor-memory when Step 4 verification can prove the installation mechanically.
+Scenario A is the fast path: do not inspect full history and do not schedule doctor or tidy when Step 4 verification can prove the installation mechanically.
 
 ### Scenario B — Merge into an existing workflow
 
@@ -174,7 +174,7 @@ Separate requested module changes from optional recommendations. For each recomm
 
 For each merge, identify what current upstream content will be introduced and what downstream content will be preserved or relocated. For each retirement, identify the replacement or current owner. Mark live-state files explicitly as preserved.
 
-Also state the validation profile: mandatory fast verification, any already-justified targeted semantic review, whether a full doctor trigger exists, and that refactor-memory will not run without a later concrete finding and separate approval.
+Also state the validation profile: mandatory fast verification, any already-justified targeted semantic review, whether a full doctor trigger exists, and that tidy will not run as part of integration.
 
 Wait for explicit approval before writing. Approval for this plan does not pre-approve additional normalization discovered later.
 
@@ -243,11 +243,9 @@ When semantic judgment is needed, first review only the changed files and their 
 
 When triggered, run `/cda-doctor` for Claude or `$cda-doctor` for Codex. Doctor is diagnostic only. Report findings; do not turn them into automatic writes.
 
-### 4.3 Refactor-memory is opt-in
+### 4.3 Tidy is a separate request
 
-Never run `/cda-refactor-memory` or `$cda-refactor-memory` automatically after integration. Run it only when a concrete finding is owned by that workflow, the exact additional files and intended changes are presented, and the user explicitly approves those writes.
-
-After an approved refactor-memory run, repeat mandatory fast verification. Repeat doctor only when the original finding requires semantic confirmation or the user explicitly requests it. There is no default `doctor → refactor-memory → doctor` chain.
+Never run `/cda-tidy` or `$cda-tidy` as part of integration. Integration preserves live state and project docs; cleaning them is a separate request the user makes after the integration is committed, in a new session so the updated instructions are loaded. When doctor findings or the user's goals point to that cleanup, say so in the report.
 
 ### 4.4 Report the result
 

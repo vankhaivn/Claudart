@@ -220,8 +220,8 @@ require_file "$LOADER" ERROR "restore the $LAYER loader"
 require_file "$STATE_DIR/CONTEXT.md" WARNING "run the checkpoint workflow"
 require_file "$STATE_DIR/JOURNAL.md" WARNING "run the checkpoint workflow"
 require_file "$STATE_DIR/OWNER.md" INFO "restore the owner profile seed"
-require_dir "$STATE_DIR/knowledge" WARNING "run the refactor-memory workflow"
-require_file "$STATE_DIR/knowledge/INDEX.md" WARNING "run the refactor-memory workflow"
+require_dir "$STATE_DIR/knowledge" WARNING "restore the knowledge seed"
+require_file "$STATE_DIR/knowledge/INDEX.md" WARNING "restore the knowledge seed"
 require_dir "$STATE_DIR/tasks" WARNING "run the plan workflow"
 require_file "$STATE_DIR/tasks/index.md" WARNING "run the checkpoint workflow"
 require_dir "$STATE_DIR/tasks/done" WARNING "run the checkpoint workflow"
@@ -308,7 +308,7 @@ if [ "$LAYER" = codex ]; then
   require_dir .codex/agents WARNING "restore agent metadata directory"
   require_file .codex/config.toml ERROR "restore Codex configuration"
   require_dir .agents/skills ERROR "restore core skills"
-  for skill in cda-start cda-checkpoint cda-learn cda-doctor cda-refactor-memory cda-task cda-handoff cda-spec cda-spec-run; do
+  for skill in cda-start cda-checkpoint cda-learn cda-doctor cda-tidy cda-task cda-handoff cda-spec cda-spec-run; do
     require_file ".agents/skills/$skill/SKILL.md" ERROR "restore core skill"
   done
   queue_tree .codex/guidelines
@@ -320,12 +320,14 @@ else
     require_file ".claude/rules/$rule.md" ERROR "restore core rule"
   done
   require_dir .claude/commands ERROR "restore core commands"
-  for command in cda-start cda-learn cda-refactor-memory cda-doctor cda-checkpoint cda-task cda-handoff cda-spec cda-spec-run; do
+  for command in cda-start cda-learn cda-doctor cda-checkpoint cda-task cda-handoff cda-spec cda-spec-run; do
     require_file ".claude/commands/$command.md" ERROR "restore core command"
   done
+  require_file .claude/skills/cda-tidy/SKILL.md ERROR "restore core skill"
   require_dir .claude/agents WARNING "restore agent directory"
   queue_tree .claude/rules
   queue_tree .claude/commands
+  queue_tree .claude/skills
   queue_tree .claude/agents
   queue_tree .claude/references
 fi
@@ -477,6 +479,11 @@ else
       check_metadata "${f#"$ROOT/"}" "$kind"
     done
   done
+  if [ -d "$ROOT/.claude/skills" ] && [ ! -L "$ROOT/.claude/skills" ]; then
+    for f in "$ROOT"/.claude/skills/*/SKILL.md; do
+      [ -f "$f" ] && check_metadata "${f#"$ROOT/"}" skill
+    done
+  fi
 fi
 
 resolve_link() {

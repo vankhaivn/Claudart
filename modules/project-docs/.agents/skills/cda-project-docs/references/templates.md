@@ -46,7 +46,7 @@ These are update contexts, not a required sequence of project stages.
 - **Plan:** link the current owners from the task/spec; keep the proposed delta, steps, and acceptance there. A pending summary in current docs is useful when readers need to know an approved change is not yet delivered.
 - **Implement:** update affected current owners with evidenced reality. Preserve the approved requirement when code is incomplete or incorrect. Current `main` can be the project's maintained behavior scope.
 - **Deliver, when applicable:** update running/deployed or supported scopes from the evidence relevant to that delivery method. Retain separate release and older-version claims only where those distinctions and commitments exist.
-- **Compact:** replace obsolete current guidance and remove resolved pending summaries; retain consequential rationale in a decision record when useful. A decision record is not required for ordinary edits.
+- **Tidy:** replace obsolete current guidance and remove resolved pending summaries; retain consequential rationale in a decision record when useful. A decision record is not required for ordinary edits.
 
 Read the [new-project example](examples/new-project.md) for a minimal initial output, the [main-latest example](examples/main-latest.md) for an app already used during development, or the [adopted-project example](examples/adopted-project.md) for an existing owner map and versioned delivery. Select only the relevant example. They are synthetic illustrations, not evidence about real applications.
 

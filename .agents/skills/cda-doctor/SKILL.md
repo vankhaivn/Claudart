@@ -5,7 +5,7 @@ description: Run a read-only Codex installation health check with a mechanical b
 
 # Codex Doctor
 
-Run a read-only health check of the selected Codex CLAUDART layer. Do not auto-fix anything. Report findings for the user to address with `$cda-refactor-memory` or a deliberate manual edit.
+Run a read-only health check of the selected Codex CLAUDART layer. Do not auto-fix anything. Report findings for the user to address with `$cda-tidy` for docs, state, knowledge and project guidelines, `INTEGRATE.md` for installation and routing, or a deliberate manual edit.
 
 ## Mechanical Baseline
 
@@ -68,4 +68,4 @@ For `.claudart/specs/`, follow `.codex/guidelines/spec-workflow.md` for metadata
 
 ## Reporting
 
-Use passing, warnings, errors, and one recommended next step. State whether the mechanical baseline ran and its result. Only declare the installation healthy when all mandatory mechanical checks ran and passed and the semantic and remaining structural checks also pass. Doctor is read-only and does not require a `$cda-doctor` → `$cda-refactor-memory` → `$cda-doctor` chain.
+Use passing, warnings, errors, and one recommended next step. State whether the mechanical baseline ran and its result. Only declare the installation healthy when all mandatory mechanical checks ran and passed and the semantic and remaining structural checks also pass. Doctor is read-only and does not require a follow-up `$cda-tidy` run.

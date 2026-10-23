@@ -55,7 +55,6 @@ for layer in claude codex; do
     start="$commands/cda-start.md"
     checkpoint="$commands/cda-checkpoint.md"
     doctor="$commands/cda-doctor.md"
-    refactor="$commands/cda-refactor-memory.md"
   else
     rule="$REPO_ROOT/.codex/guidelines/task-management.md"
     commands="$REPO_ROOT/.agents/skills"
@@ -63,7 +62,6 @@ for layer in claude codex; do
     start="$commands/cda-start/SKILL.md"
     checkpoint="$commands/cda-checkpoint/SKILL.md"
     doctor="$commands/cda-doctor/SKILL.md"
-    refactor="$commands/cda-refactor-memory/SKILL.md"
   fi
 
   # Canonical artifact semantics live in the rule/guideline. The command/skill
@@ -151,7 +149,6 @@ for layer in claude codex; do
   assert_contains "$doctor" 'Missing `artifacts/` or `### Workspace Files` is normal' "$layer doctor accepts the minimal workspace"
   assert_contains "$doctor" 'Do not read artifact bodies' "$layer doctor checks links without processing payloads"
   assert_contains "$doctor" '`None.` is valid' "$layer doctor does not demand filler"
-  assert_contains "$refactor" 'TASK.md' "$layer maintenance recognizes the entrypoint"
   seed="$REPO_ROOT/.claudart/tasks/index.md"
   assert_contains "$seed" '<task-id>/TASK.md' "$layer seed points to the authoritative entrypoint"
   assert_not_contains "$seed" '](' "$layer ships no live task in its dashboard"

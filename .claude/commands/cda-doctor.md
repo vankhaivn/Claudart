@@ -2,7 +2,7 @@
 description: Run a read-only Claude CLAUDART health check with a mechanical baseline and bounded semantic audits.
 ---
 
-Run a health check of the selected Claude CLAUDART layer. This command is diagnostic only: do not auto-fix files. Report findings for the user to address with `/cda-refactor-memory` or a deliberate manual edit.
+Run a health check of the selected Claude CLAUDART layer. This command is diagnostic only: do not auto-fix files. Report findings for the user to address with `/cda-tidy` for docs, state, knowledge and project rules, `INTEGRATE.md` for installation and routing, or a deliberate manual edit.
 
 ## Mechanical Baseline
 
@@ -64,4 +64,4 @@ For `.claudart/specs/`, follow `.claude/rules/spec-workflow.md` for metadata, st
 
 ## Reporting
 
-Use passing, warnings, errors, and one recommended next step. State whether the mechanical baseline ran and its result. Only declare the installation healthy when all mandatory mechanical checks ran and passed and the semantic and remaining structural checks also pass. Doctor is read-only and does not require a `/cda-doctor` → `/cda-refactor-memory` → `/cda-doctor` chain.
+Use passing, warnings, errors, and one recommended next step. State whether the mechanical baseline ran and its result. Only declare the installation healthy when all mandatory mechanical checks ran and passed and the semantic and remaining structural checks also pass. Doctor is read-only and does not require a follow-up `/cda-tidy` run.

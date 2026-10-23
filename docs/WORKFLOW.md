@@ -4,7 +4,7 @@
 
 This guide explains how to work with CLAUDART once it is installed: what a session looks like, how big a piece of work should be, what you will be asked to review, and where information is kept.
 
-It describes behavior, not every rule. The exact contracts the agent follows live in `.claude/rules/` and `.claude/commands/` (Claude Code) or `.codex/guidelines/` and `.agents/skills/` (Codex).
+It describes behavior, not every rule. The exact contracts the agent follows live in `.claude/rules/`, `.claude/commands/` and `.claude/skills/` (Claude Code) or `.codex/guidelines/` and `.agents/skills/` (Codex).
 
 ## 1. A normal session
 
@@ -118,7 +118,7 @@ If the code, a schema, or a project doc already owns the fact, knowledge just li
 bash .claude/scripts/knowledge-check.sh --root .
 ```
 
-Use `.codex/scripts/` for Codex. The checker finds broken structure and links; it cannot tell whether a statement is true. `/cda-refactor-memory` reorganizes the store when it has grown messy.
+Use `.codex/scripts/` for Codex. The checker finds broken structure and links; it cannot tell whether a statement is true. `/cda-tidy` cleans the store, project docs and current state when they have grown stale or noisy; each run reviews only what changed since the last tidy commit.
 
 ## 6. Git
 
@@ -141,7 +141,7 @@ The main agent may also split work across helper agents when the tool supports i
 
 ## 8. Project Docs (optional)
 
-Installed with `--project-docs`. It adds `/cda-project-docs` (or `$cda-project-docs`) to create, adopt, update, audit, or tidy your project's own documentation, with templates and examples. It never runs on its own and never creates docs at install time. See the [module page](../modules/project-docs/README.md).
+Installed with `--project-docs`. It adds `/cda-project-docs` (or `$cda-project-docs`) to create, adopt, update or audit your project's own documentation, with templates and examples. Cleanup runs through `/cda-tidy`, which uses the module's ownership rules. It never runs on its own and never creates docs at install time. See the [module page](../modules/project-docs/README.md).
 
 ## 9. Commands
 
@@ -155,7 +155,7 @@ Installed with `--project-docs`. It adds `/cda-project-docs` (or `$cda-project-d
 | `/cda-handoff`         | `$cda-handoff`         | Pause a hard investigation for a new session |
 | `/cda-learn`           | `$cda-learn`           | Turn a repeated lesson into a rule           |
 | `/cda-doctor`          | `$cda-doctor`          | Health check                                 |
-| `/cda-refactor-memory` | `$cda-refactor-memory` | Reorganize the memory store                  |
+| `/cda-tidy`            | `$cda-tidy`            | Clean docs, knowledge and state              |
 | `/cda-project-docs`    | `$cda-project-docs`    | Manage project documentation (optional)      |
 
 ## 10. Installed layout
@@ -164,7 +164,7 @@ Installed with `--project-docs`. It adds `/cda-project-docs` (or `$cda-project-d
 CLAUDE.md          # Claude Code loader
 AGENTS.md          # Codex loader
 .claudart/         # shared state: CONTEXT, OWNER, JOURNAL, knowledge/, tasks/, specs/
-.claude/           # Claude Code: commands/, rules/, agents/, references/, scripts/
+.claude/           # Claude Code: commands/, skills/, rules/, agents/, references/, scripts/
 .codex/            # Codex: guidelines/, agents/, references/, scripts/, config.toml
 .agents/skills/    # Codex skills
 ```

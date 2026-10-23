@@ -29,7 +29,7 @@ If authority is unclear, keep the verified worktree intact and report the ambigu
 - If a file mixes owned and unrelated edits that cannot be separated safely, leave it unstaged and report the incomplete persistence.
 - By default, commit only after the relevant verification passes. A known-failing/WIP snapshot requires an explicit user request.
 - Direct/ad-hoc work may commit after its coherent verified outcome. A persistent task may commit verified implementation at its review-ready boundary. User-reviewed tasks still need user acceptance before closure/archive; agent-reviewed tasks may close from complete evidence under `task-management.md`. Neither path changes remote/history authority.
-- Checkpoint and refactor-memory use this same policy for their verified in-scope changes. They do not define independent commit authorization.
+- Checkpoint and tidy use this same policy for their verified in-scope changes. They do not define independent commit authorization.
 - A spec follows its `commits:` cadence from `spec-workflow.md`, subject to this authority contract.
 
 Follow the repository's commit-message convention. If none exists, use a concise imperative summary of the actual change.

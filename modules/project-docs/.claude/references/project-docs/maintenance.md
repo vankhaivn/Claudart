@@ -1,4 +1,4 @@
-# Update, audit, and compact
+# Update, audit, and fix
 
 Use [ownership](ownership.md) to identify the current owner before editing or judging a claim. Inspect only affected topics and their routes first; expand to a broader audit when the request or the observed disorder calls for it. A session, checkpoint, or small code edit alone does not trigger a full docs audit.
 
@@ -14,8 +14,8 @@ Keep established page shapes when they serve their readers. If the change expose
 
 Audit is read-only when the user asks for a review. Check the relevant router and owners for broken/orphan routes, two current owners for one fact, claims that contradict source or approved decisions, stale proposal presented as active intent, unshipped behavior presented as released, and task history filling current guidance. Assess gaps against actual use, agreed constraints, and existing commitments. Do not add a production-readiness gate or report absent formal release machinery as a defect by itself. Concrete behavior, data, or operating problems still matter in a personal or development project. Distinguish demonstrated errors from missing evidence and open product decisions. Provide file/topic-specific findings, the evidence, impact, and a proposed keep/rewrite/merge/retire action. Do not infer that old dates, long files, or untracked files are obsolete.
 
-## Compact or fix: perform the authorized cleanup
+## Fix: apply the audit's repair path
 
-When the user asks to fix, reconcile, or compact, make the scoped edits without a new per-file approval gate. Define the replacement owner and affected links before removing duplicate prose. Keep current facts, distinct scopes, supported versions, and still-useful rationale; retire superseded guidance only when approval and evidence establish that it no longer applies. History belongs in existing Git/release/work records unless a decision record has ongoing value. Do not automatically archive a copy after each change.
+When the user asks to fix or reconcile audit findings, make the scoped edits without a new per-file approval gate. A broader cleanup of stale, duplicated or noisy docs belongs to the core tidy workflow (`/cda-tidy` or `$cda-tidy`). Define the replacement owner and affected links before removing duplicate prose. Keep current facts, distinct scopes, supported versions, and still-useful rationale; retire superseded guidance only when approval and evidence establish that it no longer applies. History belongs in existing Git/release/work records unless a decision record has ongoing value. Do not automatically archive a copy after each change.
 
 Preserve original inputs, untracked files, custom docs, and team/external sources unless the user's permission actually covers their modification or deletion. If authority remains ambiguous, leave the disputed material intact and state the decision needed. After edits, check changed links and relevant project validation, inspect the diff for accidental loss, and report remaining uncertainty. Knowledge changes must follow the selected runtime's knowledge maintenance reference and checker.

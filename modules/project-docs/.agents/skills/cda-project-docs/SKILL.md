@@ -1,6 +1,6 @@
 ---
 name: cda-project-docs
-description: Establish, adopt, update, or review current project documentation and its sources of authority. Use for project-doc lifecycle requests, including natural-language requests to reconcile or compact stale docs.
+description: Establish, adopt, update, or review current project documentation and its sources of authority. Use for project-doc lifecycle requests; cleaning stale or duplicated docs belongs to cda-tidy.
 ---
 
 # Project Docs
@@ -13,7 +13,7 @@ Infer the operation from the request; a mode name is optional:
 - **Adopt:** take on an existing project or scattered docs. Read [bootstrap](references/bootstrap.md).
 - **Update:** change owning docs and dependent routes when an approved decision or observed behavior changes them. Read [maintenance](references/maintenance.md).
 - **Audit:** assess ownership, routes, evidence, and drift; report without edits unless the user also asks to fix them. Read [maintenance](references/maintenance.md).
-- **Compact:** make an authorized, focused cleanup of superseded or duplicated docs. Read [maintenance](references/maintenance.md).
+- **Clean up:** stale, duplicated or noisy docs are cleaned by `$cda-tidy`, which reads [ownership](references/ownership.md) to place each fact.
 
 For any operation that selects or changes a source of authority, read [ownership](references/ownership.md). Read only the mode reference needed. Delivery and release are contexts for update or audit, not required stages or permission to release; follow the project's actual use and commitments.
 

@@ -58,6 +58,7 @@ All CLAUDART workflows use the same `cda-` name on both hosts: type `/cda-task` 
 | Pause a hard investigation mid-way | `/cda-handoff`         | `$cda-handoff`         |
 | Turn a repeated lesson into a rule | `/cda-learn`           | `$cda-learn`           |
 | Check the installation             | `/cda-doctor`          | `$cda-doctor`          |
+| Clean up docs, knowledge and state | `/cda-tidy`            | `$cda-tidy`            |
 
 Small, clear edits need no command at all; just ask. See the [workflow guide](docs/WORKFLOW.md) for when to use a task or a spec.
 

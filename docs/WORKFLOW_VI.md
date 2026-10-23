@@ -4,7 +4,7 @@
 
 Hướng dẫn này giải thích cách làm việc với CLAUDART sau khi cài: một phiên trông như thế nào, việc nên lớn cỡ nào, bạn sẽ được nhờ review những gì và thông tin được lưu ở đâu.
 
-Tài liệu mô tả cách hoạt động, không liệt kê mọi rule. Contract chính xác mà agent tuân theo nằm trong `.claude/rules/` và `.claude/commands/` (Claude Code) hoặc `.codex/guidelines/` và `.agents/skills/` (Codex).
+Tài liệu mô tả cách hoạt động, không liệt kê mọi rule. Contract chính xác mà agent tuân theo nằm trong `.claude/rules/`, `.claude/commands/` và `.claude/skills/` (Claude Code) hoặc `.codex/guidelines/` và `.agents/skills/` (Codex).
 
 ## 1. Một phiên bình thường
 
@@ -118,7 +118,7 @@ Nếu code, schema hay tài liệu dự án đã sở hữu sự thật đó, kn
 bash .claude/scripts/knowledge-check.sh --root .
 ```
 
-Với Codex thì dùng `.codex/scripts/`. Checker tìm cấu trúc và liên kết hỏng, nhưng không biết một phát biểu có đúng hay không. `/cda-refactor-memory` sắp xếp lại kho khi nó đã rối.
+Với Codex thì dùng `.codex/scripts/`. Checker tìm cấu trúc và liên kết hỏng, nhưng không biết một phát biểu có đúng hay không. `/cda-tidy` dọn kho, tài liệu dự án và trạng thái hiện tại khi chúng đã cũ hoặc nhiễu; mỗi lần chỉ xem phần đã đổi kể từ lần tidy gần nhất.
 
 ## 6. Git
 
@@ -141,7 +141,7 @@ Agent chính cũng có thể chia việc cho agent phụ khi công cụ hỗ tr�
 
 ## 8. Project Docs (tùy chọn)
 
-Cài bằng `--project-docs`. Module thêm `/cda-project-docs` (hoặc `$cda-project-docs`) để tạo, tiếp nhận, cập nhật, audit hoặc dọn gọn tài liệu của chính dự án bạn, kèm template và ví dụ. Nó không tự chạy và không tạo tài liệu lúc cài. Xem [trang module](../modules/project-docs/README.md).
+Cài bằng `--project-docs`. Module thêm `/cda-project-docs` (hoặc `$cda-project-docs`) để tạo, tiếp nhận, cập nhật hoặc audit tài liệu của chính dự án bạn, kèm template và ví dụ. Việc dọn dẹp đi qua `/cda-tidy`, dùng các quy tắc ownership của module. Nó không tự chạy và không tạo tài liệu lúc cài. Xem [trang module](../modules/project-docs/README.md).
 
 ## 9. Lệnh
 
@@ -155,7 +155,7 @@ Cài bằng `--project-docs`. Module thêm `/cda-project-docs` (hoặc `$cda-pro
 | `/cda-handoff`         | `$cda-handoff`         | Tạm dừng cuộc điều tra khó cho phiên mới   |
 | `/cda-learn`           | `$cda-learn`           | Biến bài học lặp lại thành rule            |
 | `/cda-doctor`          | `$cda-doctor`          | Kiểm tra sức khỏe                          |
-| `/cda-refactor-memory` | `$cda-refactor-memory` | Sắp xếp lại kho bộ nhớ                     |
+| `/cda-tidy`            | `$cda-tidy`            | Dọn docs, knowledge và trạng thái          |
 | `/cda-project-docs`    | `$cda-project-docs`    | Quản lý tài liệu dự án (tùy chọn)          |
 
 ## 10. Cấu trúc sau khi cài
@@ -164,7 +164,7 @@ Cài bằng `--project-docs`. Module thêm `/cda-project-docs` (hoặc `$cda-pro
 CLAUDE.md          # loader của Claude Code
 AGENTS.md          # loader của Codex
 .claudart/         # trạng thái chung: CONTEXT, OWNER, JOURNAL, knowledge/, tasks/, specs/
-.claude/           # Claude Code: commands/, rules/, agents/, references/, scripts/
+.claude/           # Claude Code: commands/, skills/, rules/, agents/, references/, scripts/
 .codex/            # Codex: guidelines/, agents/, references/, scripts/, config.toml
 .agents/skills/    # skill của Codex
 ```

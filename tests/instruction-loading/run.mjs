@@ -155,12 +155,15 @@ try {
   check("both adapters expose the same cda- workflow names", () => {
     const actions = [
       "start", "task", "spec", "spec-run", "checkpoint", "handoff",
-      "learn", "doctor", "refactor-memory",
+      "learn", "doctor", "tidy",
     ];
     for (const action of actions) {
-      const claude = join(root, `.claude/commands/cda-${action}.md`);
+      const command = join(root, `.claude/commands/cda-${action}.md`);
+      const skill = join(root, `.claude/skills/cda-${action}/SKILL.md`);
       const codex = join(root, `.agents/skills/cda-${action}/SKILL.md`);
-      assert(existsSync(claude), claude);
+      assert(existsSync(command) !== existsSync(skill), `cda-${action} needs one Claude entrypoint`);
+      if (existsSync(skill))
+        assert.match(read(skill), new RegExp(`^name: cda-${action}$`, "m"));
       assert(existsSync(codex), codex);
       assert.match(read(codex), new RegExp(`^name: cda-${action}$`, "m"));
     }
@@ -698,12 +701,12 @@ try {
   });
   check("Git consumers use the central policy while explicit exceptions remain", () => {
     for (const file of [
-      ".claude/commands/cda-refactor-memory.md",
-      ".agents/skills/cda-refactor-memory/SKILL.md",
+      ".claude/skills/cda-tidy/SKILL.md",
+      ".agents/skills/cda-tidy/SKILL.md",
     ]) {
       const text = read(join(root, file));
-      assert.match(text, /git-workflow\.md/);
-      assert.match(text, /[Cc]ommit the verified in-scope refactor result/);
+      assert.match(text, /Commit under `[^`]*git-workflow\.md`/);
+      assert.match(text, /^Claudart-Tidy: /m);
     }
     for (const file of [
       ".claude/rules/agent-delegation.md",
