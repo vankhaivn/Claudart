@@ -96,22 +96,22 @@ Goal: <observable milestone>
 - [ ] P1.1 <action and ownership boundary> (contracts: <S#/section refs>; verify: <observable>)
 - [ ] P1.2 <action> (depends: P1.1; contracts: <refs>; verify: <observable>)
 
-**Phase validation:** <due scenarios → concrete verifiers/cases, fixtures and prerequisites;
-name composite coverage and the smallest non-redundant final verification set>
+**Phase validation:** <the commands or cases that prove the due scenario IDs, their prerequisites,
+and the smallest non-redundant final verification set>
 
 ## Current Acceptance Delta
 
 - None.
-<!-- Or: <S# or named gate>: <unresolved gap>; owner: <task-id>;
-evidence: <LEDGER entry>; baseline: <gate ref, when applicable>;
-impact: <affected scenarios/checks>; next: <action or NOTES hypothesis ref>. -->
+<!-- Or one line per gap: <S# or named gate>: <unresolved gap>; owner: <task-id>;
+evidence: <LEDGER entry>; next: <action or NOTES hypothesis ref>.
+A review back-edge also names its baseline gate and affected scenarios. -->
 ```
 
 Task dispositions:
 
 - `- [ ] <task>`: pending, runnable only when its dependencies are satisfied and it is not blocked.
 - `- [x] <task>`: completed, backed by a `task-completed` evidence entry.
-- `- [x] ~~<task>~~ — superseded by <task-id or reason>`: terminal, backed by `replanned`.
+- `- [x] ~~<task>~~ — superseded by <task-id or short reason>`: terminal, backed by a `replanned` entry that holds the full reason.
 - `- [ ] <task> — ⚠ blocked: <condition>; unlock: <required input/change>`: unresolved, skipped by selection and prevents final completion.
 - Unchecked struck rows are invalid. Reconcile from evidence; ambiguous disposition becomes a blocker, never an assumed completion.
 
@@ -126,11 +126,11 @@ The executor may append genuinely missing implementation work and log it, within
 ```markdown
 ### YYYY-MM-DD HH:MMZ — <event> <task-id or scope>
 
-- Evidence: <command/case or observation → result; scenario refs; state/environment proved>
+- Evidence: <command/case or observation → result; scenario refs>
 - Decision: <optional change and why; link to its current owner>
 ```
 
-Events include `run-started`, `task-started`, `task-completed`, `validation-failed`, `phase-validated`, `task-blocked`, `replanned`, `delegated`, `circuit-breaker`, `rotation-checkpoint`, `scope-change` (user-initiated only), and `final-gate`. Never rewrite or delete historical entries. Store large outputs in appropriate artifacts and reference them.
+Events include `run-started`, `task-started`, `task-completed`, `validation-failed`, `phase-validated`, `task-blocked`, `replanned`, `delegated`, `circuit-breaker`, `rotation-checkpoint`, `scope-change` (user-initiated only), and `final-gate`. Never rewrite or delete historical entries. An entry is its header plus at most three short lines; `task-started` and `delegated` may be the header alone. Only gate entries add the fields below, one line each. Record what was done and observed, not lists of actions that were not taken. Store large outputs in appropriate artifacts and reference them.
 
 Each successful gate records its **resulting revision or bounded worktree fingerprint**, actual environment/artifact, observed scenario coverage, and `executed`, `covered` and any `reused` evidence. For a dirty tree, identify the base revision and relevant changed-path/content digests; exclude secrets and unrelated user files. Record relevant verifier, fixture/configuration and dependency state, using existing build/test identifiers where available rather than maintaining a per-file cache.
 

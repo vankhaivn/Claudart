@@ -41,7 +41,7 @@ Write ROADMAP tasks with ownership boundaries, dependencies, relevant scenario/c
 
 Map due scenarios to concrete verifiers/cases, necessary fixtures and prerequisites in the existing phase/final plan. Name composite coverage and the smallest non-redundant verification set; do not schedule included leaf checks again without a distinct observable. Planned verifiers may be implemented by their owning tasks, but their coverage must be reconciled before an expensive batch runs.
 
-For a new mission, initialize LEDGER and concise NOTES containing only useful pointers, pitfalls and unresolved reasoning. Put Current Acceptance Delta in ROADMAP. On amendment, preserve evidence and completed/superseded work; add only the approved change. Follow legacy recovery rather than silently discarding existing notes or acceptance gaps.
+For a new mission, initialize LEDGER and concise NOTES containing only useful pointers, pitfalls and unresolved reasoning. Put Current Acceptance Delta in ROADMAP. On amendment, preserve evidence and completed/superseded work; add only the approved change. Never silently discard existing notes or acceptance gaps.
 
 ## Check and present
 

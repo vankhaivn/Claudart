@@ -45,7 +45,7 @@ Author notes: Adapt one copy per meaningful capability, for readers implementing
 
 {{Describe_actual_behavior_in_this_scope_and_any_gap_against_the_agreed_behavior.}}
 
-**Evidence and scope:** {{branch_commit_checkout_or_environment_with_source_checks_or_observation_and_what_they_establish}}.
+**Applies to:** {{branch_environment_or_cohort_and_a_link_to_the_check_or_work_record_that_establishes_it}}.
 
 <!-- Omit this section when current behavior already covers the only relevant scope. -->
 

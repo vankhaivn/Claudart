@@ -406,6 +406,23 @@ try {
     assertCode(result, "D116");
   });
 
+  check("long CONTEXT and OWNER entries warn at their first long line", () => {
+    const dir = fixture("long-entries");
+    const since = " <!-- since: 2026-09-01 -->";
+    write(
+      join(dir, ".claudart/CONTEXT.md"),
+      `# Context\n- ${"c".repeat(398)}${since}\n- ${"c".repeat(399)}\n- ${"c".repeat(450)}\n`,
+    );
+    write(join(dir, ".claudart/OWNER.md"), `# Owner\n- ${"o".repeat(398)}\n`);
+    const result = run(dir, "codex");
+    assert.equal(result.status, 0, result.out);
+    assert.match(
+      result.out,
+      /^WARNING\|D117\|\.claudart\/CONTEXT\.md:3\|2 line\(s\) exceed 400 bytes/m,
+    );
+    assertNoCode(result, "D118");
+  });
+
   check("owner profile size boundary and missing seed signals", () => {
     const limit = fixture("owner-at-limit");
     write(join(limit, ".claudart/OWNER.md"), `${"owner\n".repeat(60)}`);

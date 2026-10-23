@@ -11,7 +11,7 @@ Based on the "Agent Self-Evolution & Context Maintenance" section in `CLAUDE.md`
 Before any retrospective:
 
 1. Read `CLAUDE.md` in full.
-2. Read every file in `.claude/rules/*.md` in full (use Glob first if you don't already know what exists).
+2. Read the rule, command, and agent files that governed this session. Use frontmatter and targeted search to find relevant owners; do not read every rule blindly.
 3. Read every file in `.claude/agents/*.md` whose tools you used during this session.
 4. Read `.claudart/CONTEXT.md` to know what state the work was in when this session started, and `.claudart/OWNER.md` for the current owner working agreement.
 5. Build a short mental index: rule name → core constraint → loophole keyword (if any).
@@ -24,7 +24,7 @@ Walk the conversation chronologically, comparing each assistant turn against the
 
 1. List every moment the user corrected you OR you deviated from a rule. For each one, answer: _"What rationalization did I use to justify the deviation?"_ — do not just say "I missed the rule".
 2. Did any rule fail because it only described the happy path without closing obvious loopholes?
-3. For each identified gap, update the rule using this pattern: `NEVER do X, even when Y seems like a good reason` — explicitly name the rationalization so future runs cannot reuse it.
+3. For each identified gap, sharpen the existing sentence so it closes the loophole; when useful, state that the constraint still applies under the rationalization that caused the violation.
 4. If rules contradict each other, resolve the contradiction immediately in `.claude/rules/` or `CLAUDE.md`.
 5. Also save quiet _confirmations_: if the user accepted an unusual judgment call without pushback, that's a validated approach — record it so you don't drift away from it next time.
 
@@ -55,6 +55,6 @@ Walk the conversation chronologically, comparing each assistant turn against the
 
 - Rules must be **verifiable**: a reader must be able to check whether the rule was followed by reading the code. If you cannot verify it, rewrite it.
 - New or updated rule files must include frontmatter with `paths:`, `description:`, `when_to_use:`, and `tags:`. Write `paths:` as a YAML flow sequence, e.g. `paths: ["src/**/*.ts", "test/**/*.ts"]`; never use block-list style. Write `tags:` as an inline YAML array on one line, e.g. `tags: [architecture, nestjs, boundaries]`; never use block-list style. Use 1-5 lowercase kebab-case tags that describe the domain or scope.
-- Use `NEVER`, `YOU MUST`, or `IMPORTANT` emphasis for rules that have been violated before — this signals priority to future runs.
+- State each rule once, in plain words. Fix a repeated violation by sharpening its wording or scope, not with capitalized emphasis, which current models over-apply.
 - **NO CODE SNIPPETS** in rule files. Reference the source file and line (e.g., `src/services/foo.ts:45`) so context never goes stale. Code in rule files rots.
 - Execute file changes autonomously without asking for permission, then generate a brief summary listing each file touched and the reason.

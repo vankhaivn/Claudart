@@ -56,7 +56,7 @@ Guideline frontmatter uses `paths:`, `description:`, `when_to_use:`, and `tags:`
 
 - Make every rule verifiable from repository evidence.
 - Keep guideline frontmatter complete, with flow-style `paths:` and `tags:` containing 1-5 lowercase kebab-case values.
-- Use unambiguous critical language for constraints proven easy to violate.
+- State each guideline once, in plain words. Fix a repeated violation by sharpening its wording or scope, not with capitalized emphasis, which current models over-apply.
 - Do not paste long code snippets; cite stable sources.
 - Summarize each file changed, the lesson it owns, knowledge checker results when applicable, and unresolved contradictions.
 

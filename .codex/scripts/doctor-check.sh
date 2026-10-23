@@ -245,9 +245,28 @@ line_count_signal() {
   fi
 }
 
+line_length_signal() {
+  long_rel=$1; long_limit=$2; long_code=$3
+  private_path "$long_rel" && return
+  has_symlink "$long_rel" && return
+  [ -f "$ROOT/$long_rel" ] && [ -r "$ROOT/$long_rel" ] || return
+  long_result=$(LC_ALL=C awk -v limit="$long_limit" '
+    { line=$0; gsub(/[ \t]*<!--[^>]*-->/, "", line) }
+    length(line) > limit { if(!first) first=NR; count++ }
+    END { if(count) print first, count }
+  ' "$ROOT/$long_rel" 2>/dev/null) || {
+    add ERROR D905 "$long_rel" 1 "cannot measure lines"; INCOMPLETE=1; return;
+  }
+  [ -n "$long_result" ] || return
+  set -- $long_result
+  add WARNING "$long_code" "$long_rel" "$1" "$2 line(s) exceed $long_limit bytes; keep one short sentence per entry"
+}
+
 line_count_signal "$LOADER" 100 D110 WARNING
 line_count_signal "$STATE_DIR/CONTEXT.md" 150 D111 WARNING
 line_count_signal "$STATE_DIR/OWNER.md" 60 D116 WARNING
+line_length_signal "$STATE_DIR/CONTEXT.md" 400 D117
+line_length_signal "$STATE_DIR/OWNER.md" 400 D118
 if [ -f "$ROOT/$STATE_DIR/HANDOFF.md" ] && ! has_symlink "$STATE_DIR/HANDOFF.md"; then
   add INFO D112 "$STATE_DIR/HANDOFF.md" 1 "unconsumed handoff baton present"
   line_count_signal "$STATE_DIR/HANDOFF.md" 150 D113 ERROR
