@@ -47,7 +47,6 @@ When the optional Project Docs command is present, use it for project-document o
 
 - Behavior, contracts, setup or operations change -> update the owning document in the same change, as the universal behavior rule defines.
 - Existing rules change -> update the relevant file in `.claude/rules/`.
-- Owner corrections, standing preferences, and approvals -> record them in `.claudart/OWNER.md` when they happen, as the universal behavior rule defines.
-- New domains/layers -> CREATE a new rule file in `.claude/rules/` (with flow-style `paths: [...]`, `description:`, `when_to_use:`, and inline `tags: [...]` frontmatter) and add a conditional route in this file's Domain Rules section. Use narrow paths for conditional rules; reserve `@` imports for universal guidance, with paths relative to this file.
-- Durable descriptive facts that pass the knowledge rule -> find their owner first. Knowledge owns a fact only when no other authoritative source does; otherwise keep a pointer or minimal unique context. For a knowledge mutation, patch the topic and reachable map atomically, then run the checker. Mid-session natural-language updates are valid; `/cda-checkpoint` is bulk maintenance, not the sole write gate.
+- New domains/layers -> create a new rule file in `.claude/rules/` (with flow-style `paths: [...]`, `description:`, `when_to_use:`, and inline `tags: [...]` frontmatter) and add a conditional route in this file's Domain Rules section. Use narrow paths for conditional rules; reserve `@` imports for universal guidance, with paths relative to this file.
+- Durable descriptive facts -> follow the knowledge rule and its maintenance reference.
 - Global changes -> update `CLAUDE.md` directly.

@@ -105,12 +105,11 @@ sensitivity: internal
 ---
 ```
 
+Map fields follow the topic rules above, except:
+
 - `name` matches the map filename.
-- `type` is exactly `map`; status is only `active` or `review-needed`.
-- An active map requires `last_verified` and at least one of `sources` or `verify`.
-- A `review-needed` map requires `status_note`.
-- Optional map fields are `aliases`, `triggers`, `scope`, `last_verified`, `sources`, `verify`, `status_note`, and `sensitivity`.
-- A map routes topics only. `related` and `supersedes` are forbidden on maps.
+- `type` is exactly `map`, and `status` is only `active` or `review-needed`.
+- A map routes topics only, so `related` and `supersedes` are forbidden.
 
 ## Router Grammar And Lifecycle
 
