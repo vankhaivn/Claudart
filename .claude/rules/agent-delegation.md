@@ -1,7 +1,7 @@
 ---
 paths: [".claude/agents/**"]
-description: Claude Code subagent delegation — when delegation pays off and how to delegate well (decomposition, worker prompts, anti-shadow-run, persistence), layered on top of the Agent tool's built-in mechanics.
-when_to_use: When multi-step work may split into parallel, context-heavy, or independently assessable units, or when delegating to subagents — for the project's decision, decomposition, worker-prompt, anti-shadow-run, and finding-persistence guidance.
+description: Claude Code subagent delegation — how to delegate well once the ai-behavior criteria favor it (model routing, decomposition, worker prompts, anti-shadow-run, persistence), layered on top of the Agent tool's built-in mechanics.
+when_to_use: Before spawning, resuming, or sending new work to a subagent, and when consuming worker results — for the project's routing, decomposition, worker-prompt, anti-shadow-run, and finding-persistence guidance.
 tags: [subagents, delegation, parallelism, orchestration]
 ---
 
@@ -39,13 +39,7 @@ Before dispatching an ordinary delegated unit, record its routing decision in th
 
 ## Decomposition and ownership
 
-Whether to delegate is a separate decision from which model a unit needs. Delegate a concrete bounded unit when it brings at least one of these benefits:
-
-- **Parallelism:** independent units can run at the same time.
-- **Context protection:** a broad, read-heavy investigation (codebase sweep, multi-source research, large log or diff triage) would fill the parent's context when only its conclusion is needed, or a long task has a self-contained step whose details the parent does not need for integration and verification.
-- **Independent assessment:** a fresh review or second opinion adds value.
-
-A parent that could do the unit itself still delegates when one of these benefits applies. Keep a unit local when briefing a delegate would cost about as much as doing it, such as a small edit or a lookup in a known file. Difficulty alone justifies neither another agent nor a stronger model.
+Decide whether to delegate under the criteria in `.claude/rules/ai-behavior.md` (Delegate When It Pays Off); this rule covers the model choice and how a delegated unit runs.
 
 Continue independent work while delegates run, and wait for and consume a result when the next step depends on it. Do not re-investigate a delegated question in parallel or treat silence as failure; inspect, steer, or stop a delegate that appears stuck before taking over.
 
