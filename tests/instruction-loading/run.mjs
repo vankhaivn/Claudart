@@ -686,6 +686,10 @@ try {
         workflow,
         /standing approval replaces task, phase and delegation approval inside a running spec/,
       );
+      assert.match(
+        workflow,
+        /Record every ordering constraint as `depends:`, including two tasks that write the same files; the build-order note explains and adds no order\. Split a task whose parts wait on different dependencies\./,
+      );
     }
     assert.equal(dispatchContracts[0], dispatchContracts[1]);
     assert.equal(loopContracts[0], loopContracts[1]);

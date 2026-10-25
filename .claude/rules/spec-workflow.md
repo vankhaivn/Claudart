@@ -87,7 +87,7 @@ Write for an executor without interview context: boundaries, dependencies, contr
 ```markdown
 # ROADMAP — <Mission Title>
 
-<Build order and important dependencies; optional parallel waves under the active harness.>
+<Build order rationale and optional parallel waves; every ordering constraint is also a task's `depends:`.>
 
 ## Phase 1 — <name>
 
@@ -115,7 +115,7 @@ Task dispositions:
 - `- [ ] <task> — ⚠ blocked: <condition>; unlock: <required input/change>`: unresolved, skipped by selection and prevents final completion.
 - Unchecked struck rows are invalid. Reconcile from evidence; ambiguous disposition becomes a blocker, never an assumed completion.
 
-Size a task around one coherent observable and its proof. Phases yield observable progress early. Dependencies are acyclic; numbering does not make work runnable. Order release work as software verification → rehearsal/readiness → separately authorized release/cutover → post-release observations, omitting stages outside approved scope. A software gate never requires future live evidence, which stays pending with an owner, and release never waits for a gate that includes post-release checks.
+Size a task around one coherent observable and its proof. Phases yield observable progress early. Dependencies are acyclic; numbering does not make work runnable. Record every ordering constraint as `depends:`, including two tasks that write the same files; the build-order note explains and adds no order. Split a task whose parts wait on different dependencies. Order release work as software verification → rehearsal/readiness → separately authorized release/cutover → post-release observations, omitting stages outside approved scope. A software gate never requires future live evidence, which stays pending with an owner, and release never waits for a gate that includes post-release checks.
 
 The Current Acceptance Delta exists only in ROADMAP. It lists contradicted or unproven obligations and approved review changes, keyed by scenario or gate, and references LEDGER and NOTES instead of copying them. A review back-edge records the latest successful final-gate baseline and provisional impact, recomputed from the actual changed surface before verification. Only valid evidence clears a gap; reassigning its task does not.
 
