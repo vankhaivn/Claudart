@@ -423,6 +423,57 @@ try {
     assertNoCode(result, "D118");
   });
 
+  check(
+    "task sequences are unique and task links resolve without crossing workspaces",
+    () => {
+      const dir = fixture("task-workspaces");
+      const tasks = join(dir, ".claudart/tasks");
+      write(
+        join(tasks, "2026-10-01-001-alpha/TASK.md"),
+        "[own](artifacts/a.md)\n[missing](artifacts/none.md)\n[peer](../2026-10-01-002-beta/TASK.md)\n[archived](../done/2026-09-01-001-gamma/TASK.md)\n[site](https://example.com/x)\n",
+      );
+      write(join(tasks, "2026-10-01-001-alpha/artifacts/a.md"), "# A\n");
+      write(join(tasks, "2026-10-01-002-beta/TASK.md"), "# Beta\n");
+      write(join(tasks, "done/2026-10-01-002-beta-old/TASK.md"), "# Old\n");
+      write(
+        join(tasks, "done/2026-09-01-001-gamma/TASK.md"),
+        "[old](../2026-09-01-002-delta/TASK.md)\n[gone](artifacts/missing.md)\n[live](../../2026-10-01-001-alpha/TASK.md)\n",
+      );
+      write(join(tasks, "done/2026-09-01-002-delta/TASK.md"), "# Delta\n");
+      write(join(tasks, "notes/TASK.md"), "[ignored](missing.md)\n");
+      symlinkSync(
+        join(tasks, "2026-10-01-001-alpha"),
+        join(tasks, "2026-10-01-003-linked"),
+      );
+      const before = snapshot(dir);
+      const result = run(dir, "codex");
+      assert.equal(result.status, 0, result.out);
+      assert.equal(snapshot(dir), before);
+      const findings = (code) =>
+        result.out.match(new RegExp(`^WARNING\\|${code}\\|.*$`, "gm")) ?? [];
+      assert.deepEqual(
+        findings("D119").map((line) => line.split("|")[2]),
+        [
+          ".claudart/tasks/2026-10-01-002-beta:1",
+          ".claudart/tasks/done/2026-10-01-002-beta-old:1",
+        ],
+      );
+      assert.deepEqual(
+        findings("D208").map((line) => line.split("|")[2]),
+        [".claudart/tasks/2026-10-01-001-alpha/TASK.md:2"],
+      );
+      assert.deepEqual(
+        findings("D209").map((line) => line.split("|")[2]),
+        [
+          ".claudart/tasks/2026-10-01-001-alpha/TASK.md:3",
+          ".claudart/tasks/2026-10-01-001-alpha/TASK.md:4",
+          ".claudart/tasks/done/2026-09-01-001-gamma/TASK.md:3",
+        ],
+      );
+      assert.doesNotMatch(result.out, /linked|notes/);
+    },
+  );
+
   check("owner profile size boundary and missing seed signals", () => {
     const limit = fixture("owner-at-limit");
     write(join(limit, ".claudart/OWNER.md"), `${"owner\n".repeat(60)}`);
