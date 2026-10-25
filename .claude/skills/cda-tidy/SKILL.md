@@ -1,7 +1,6 @@
 ---
 name: cda-tidy
-description: Clean project docs, knowledge, CONTEXT, OWNER and project rules to the Keep Documents Current contract, reviewing only what changed since the last tidy commit. Run only when the user asks for a tidy or cleanup.
-disable-model-invocation: true
+description: Clean project docs, knowledge, CONTEXT, OWNER and project rules to the Keep Documents Current contract, reviewing only what changed since the last tidy commit. Use only when the user asks for it, by command or in words.
 ---
 
 # Tidy

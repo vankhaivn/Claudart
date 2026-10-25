@@ -1,6 +1,6 @@
 ---
 name: cda-checkpoint
-description: Bulk-maintain shared project state, task/spec indexes, JOURNAL history, and eligible durable project knowledge at a session boundary.
+description: Bulk-maintain shared project state, task/spec indexes, JOURNAL history, and eligible durable project knowledge at a session boundary. Use only when the user asks for it, by command or in words.
 ---
 
 # Codex Checkpoint

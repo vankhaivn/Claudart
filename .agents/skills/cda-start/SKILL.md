@@ -1,6 +1,6 @@
 ---
 name: cda-start
-description: Orient a new Codex session from current state, active task/spec indexes, the root knowledge router, and recent Git history without running heavy validation.
+description: Orient a new Codex session from current state, active task/spec indexes, the root knowledge router, and recent Git history without running heavy validation. Use only when the user asks for it, by command or in words.
 ---
 
 # Codex Start

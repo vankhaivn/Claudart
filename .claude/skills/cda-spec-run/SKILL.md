@@ -1,7 +1,6 @@
 ---
 name: cda-spec-run
-description: Execute an approved dated spec with scoped context and evidence-driven verification until final user review or a real blocker.
-disable-model-invocation: true
+description: Execute an approved dated spec with scoped context and evidence-driven verification until final user review or a real blocker. Use only when the user asks for it, by command or in words.
 ---
 
 Execute an approved mission. Read `.claude/rules/spec-workflow.md` first; it is the canonical contract for ownership, scoped loading, verification, recovery and review. This skill supplies runner routing.

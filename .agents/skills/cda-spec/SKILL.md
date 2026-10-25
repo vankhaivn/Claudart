@@ -1,6 +1,6 @@
 ---
 name: cda-spec
-description: Create or amend a dated mission spec, prove intent in reviewable artifacts and prepare scoped, non-redundant execution under standing approval.
+description: Create or amend a dated mission spec, prove intent in reviewable artifacts and prepare scoped, non-redundant execution under standing approval. Use only when the user asks for it, by command or in words.
 ---
 
 # Codex Spec

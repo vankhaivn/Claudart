@@ -1,7 +1,6 @@
 ---
 name: cda-learn
-description: Reflect on completed work, promote validated behavioral learning, and route durable descriptive facts correctly
-disable-model-invocation: true
+description: Reflect on completed work, promote validated behavioral learning, and route durable descriptive facts correctly. Use only when the user asks for it, by command or in words.
 ---
 
 Run a retrospective on the work you just completed, following the "Agent Self-Evolution & Context Maintenance" section in `CLAUDE.md`. `/cda-learn` may run mid-session. It owns behavioral learning; it is not a required detour before an eligible descriptive fact can enter knowledge.

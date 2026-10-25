@@ -1,7 +1,6 @@
 ---
 name: cda-spec
-description: Create or amend a dated mission spec, prove intent in reviewable artifacts and prepare scoped, non-redundant execution under standing approval.
-disable-model-invocation: true
+description: Create or amend a dated mission spec, prove intent in reviewable artifacts and prepare scoped, non-redundant execution under standing approval. Use only when the user asks for it, by command or in words.
 ---
 
 You are the spec author. Capture confirmed intent in the mission workspace so a later executor needs no interview history.

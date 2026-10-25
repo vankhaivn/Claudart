@@ -1,6 +1,6 @@
 ---
 name: cda-learn
-description: Run a behavior-first Codex retrospective, strengthen relevant guidelines, and route any durable descriptive facts to the canonical knowledge workflow.
+description: Run a behavior-first Codex retrospective, strengthen relevant guidelines, and route any durable descriptive facts to the canonical knowledge workflow. Use only when the user asks for it, by command or in words.
 ---
 
 # Codex Learn

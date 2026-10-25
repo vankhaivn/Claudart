@@ -1,6 +1,6 @@
 ---
 name: cda-project-docs
-description: Establish, adopt, update, or review current project documentation and its sources of authority. Use for project-doc lifecycle requests; cleaning stale or duplicated docs belongs to cda-tidy.
+description: Establish, adopt, update, or review current project documentation and its sources of authority. Use for project-doc lifecycle requests; cleaning stale or duplicated docs belongs to cda-tidy. Use only when the user asks for it, by command or in words.
 ---
 
 # Project Docs

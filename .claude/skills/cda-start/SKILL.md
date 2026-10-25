@@ -1,7 +1,6 @@
 ---
 name: cda-start
-description: Orient a new CLAUDART session from current context, recent git history, and active task workspaces
-disable-model-invocation: true
+description: Orient a new CLAUDART session from current context, recent git history, and active task workspaces. Use only when the user asks for it, by command or in words.
 ---
 
 Start this session with a lightweight CLAUDART orientation. This skill is read-only, with one exception: consuming the handoff baton (Case H) deletes `.claudart/HANDOFF.md` once the user resumes or discards it.

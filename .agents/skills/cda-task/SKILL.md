@@ -1,6 +1,6 @@
 ---
 name: cda-task
-description: Create or resume a lightweight persistent task workspace in .claudart/tasks/ when work benefits from a durable plan; execute it too when the user has already asked to implement.
+description: Create or resume a lightweight persistent task workspace in .claudart/tasks/ when work benefits from a durable plan; execute it too when the user has already asked to implement. Use only when the user asks for it, by command or in words.
 ---
 
 # Codex Task

@@ -152,19 +152,30 @@ try {
     }
   }
 
-  check("both adapters expose the same cda- workflow names", () => {
+  check("both adapters expose the same request-invoked cda- workflows", () => {
     const actions = [
       "start", "task", "spec", "spec-run", "checkpoint", "handoff",
       "learn", "doctor", "tidy",
     ];
-    for (const action of actions) {
-      const claude = join(root, `.claude/skills/cda-${action}/SKILL.md`);
-      const codex = join(root, `.agents/skills/cda-${action}/SKILL.md`);
-      assert(existsSync(claude), claude);
-      assert.match(read(claude), new RegExp(`^name: cda-${action}$`, "m"));
-      assert.match(read(claude), /^disable-model-invocation: true$/m);
-      assert(existsSync(codex), codex);
-      assert.match(read(codex), new RegExp(`^name: cda-${action}$`, "m"));
+    const skills = actions.flatMap((action) => [
+      [action, `.claude/skills/cda-${action}/SKILL.md`],
+      [action, `.agents/skills/cda-${action}/SKILL.md`],
+    ]);
+    skills.push(
+      ["project-docs", "modules/project-docs/.claude/skills/cda-project-docs/SKILL.md"],
+      ["project-docs", "modules/project-docs/.agents/skills/cda-project-docs/SKILL.md"],
+    );
+    for (const [action, relative] of skills) {
+      const skill = join(root, relative);
+      assert(existsSync(skill), skill);
+      const text = read(skill);
+      assert.match(text, new RegExp(`^name: cda-${action}$`, "m"));
+      assert.doesNotMatch(text, /^disable-model-invocation:/m, relative);
+      assert.match(
+        text,
+        /^description: .* Use only when the user asks for it, by command or in words\.$/m,
+        relative,
+      );
     }
   });
 
