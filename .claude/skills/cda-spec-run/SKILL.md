@@ -20,4 +20,4 @@ Resolve the argument as the rule's File Layout section defines. Load context by 
 
 ## Execute and finish
 
-Run the rule's loop, persisting under `commits:` and `git-workflow.md` within the active harness and explicit resource budgets. Read `agent-delegation.md` before authorized delegation. Close with the rule's final gate: `full-baseline` or `scoped-review` chosen from the actual changed surface, recorded with the resulting revision or bounded worktree fingerprint.
+Run the rule's loop, persisting under `commits:` and `git-workflow.md` within the active harness and explicit resource budgets. Read `agent-delegation.md` before delegating. Close with the rule's final gate: `full-baseline` or `scoped-review` chosen from the actual changed surface, recorded with the resulting revision or bounded worktree fingerprint.

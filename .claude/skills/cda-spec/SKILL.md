@@ -27,7 +27,7 @@ Choose the smallest artifact set that resolves the remaining questions and let t
 
 ## Prepare the execution plan
 
-Explore existing implementation patterns read-only. Delegate only under the active harness and `agent-delegation.md`; no exploration result authorizes implementation.
+Explore existing implementation patterns read-only. Delegate a broad, read-heavy survey when the criteria in `ai-behavior.md` apply, under `agent-delegation.md`; no exploration result authorizes implementation.
 
 Write ROADMAP under the rule's ROADMAP section. Make each phase validation the smallest non-redundant set: when a composite check runs its leaf checks, schedule a leaf again only for a distinct observable. A planned verifier may be built by its owning task.
 

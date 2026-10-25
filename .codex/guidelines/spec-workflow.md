@@ -87,7 +87,7 @@ Write for an executor without interview context: boundaries, dependencies, contr
 ```markdown
 # ROADMAP — <Mission Title>
 
-<Build order and important dependencies; optional parallel waves under the active harness.>
+<Build order rationale and optional parallel waves; every ordering constraint is also a task's `depends:`.>
 
 ## Phase 1 — <name>
 
@@ -115,7 +115,7 @@ Task dispositions:
 - `- [ ] <task> — ⚠ blocked: <condition>; unlock: <required input/change>`: unresolved, skipped by selection and prevents final completion.
 - Unchecked struck rows are invalid. Reconcile from evidence; ambiguous disposition becomes a blocker, never an assumed completion.
 
-Size a task around one coherent observable and its proof. Phases yield observable progress early. Dependencies are acyclic; numbering does not make work runnable. Order release work as software verification → rehearsal/readiness → separately authorized release/cutover → post-release observations, omitting stages outside approved scope. A software gate never requires future live evidence, which stays pending with an owner, and release never waits for a gate that includes post-release checks.
+Size a task around one coherent observable and its proof. Phases yield observable progress early. Dependencies are acyclic; numbering does not make work runnable. Record every ordering constraint as `depends:`, including two tasks that write the same files; the build-order note explains and adds no order. Split a task whose parts wait on different dependencies. Order release work as software verification → rehearsal/readiness → separately authorized release/cutover → post-release observations, omitting stages outside approved scope. A software gate never requires future live evidence, which stays pending with an owner, and release never waits for a gate that includes post-release checks.
 
 The Current Acceptance Delta exists only in ROADMAP. It lists contradicted or unproven obligations and approved review changes, keyed by scenario or gate, and references LEDGER and NOTES instead of copying them. A review back-edge records the latest successful final-gate baseline and provisional impact, recomputed from the actual changed surface before verification. Only valid evidence clears a gap; reassigning its task does not.
 
@@ -162,7 +162,7 @@ For a direct knowledge mutation, read `knowledge-management.md` and its maintena
 
 ## Standing Approval and Authority
 
-The user approves SPEC + ROADMAP once. That standing approval replaces task and phase approval inside a running spec; do not create task-layer work or stop for intermediate review. Approval alone leaves the spec `ready`; an instruction to execute lets the same session enter `running` and stays valid until withdrawn. Approval never authorizes work beyond the approved scope or existing authority. A material scope change needs amendment and renewed approval.
+The user approves SPEC + ROADMAP once. That standing approval replaces task, phase and delegation approval inside a running spec; do not create task-layer work or stop for intermediate review. Approval alone leaves the spec `ready`; an instruction to execute lets the same session enter `running` and stays valid until withdrawn. Approval never authorizes work beyond the approved scope or existing authority. A material scope change needs amendment and renewed approval.
 
 `commits:` sets local commit cadence: `per-task` is the default and creates a verified task restore point, `per-phase` waits for phase validation, and `user` disables automatic commits. Follow `git-workflow.md` and higher-scope restrictions; this setting never grants push, history rewrite, deployment or production authority.
 
@@ -186,8 +186,8 @@ The final verification plan exercises the candidate's relevant component interac
 
 ## The Loop
 
-1. **Orient and select.** Load by scope and reconcile interrupted state. Pick a pending task whose dependencies are satisfied and that is not blocked. Run prepared waves in parallel only under the active harness and `agent-delegation.md`.
-2. **Implement.** Append `task-started` before edits. Before authorized delegation, record the routing decision required by `agent-delegation.md`, owner and expected output; reassess when a resume or follow-up changes the unit.
+1. **Orient and select.** Load by scope and reconcile interrupted state. Pick a pending task whose dependencies are satisfied and that is not blocked. Then weigh the other ready tasks and the selected task's read-heavy steps against the delegation criteria in `ai-behavior.md`, and delegate what qualifies under `agent-delegation.md`. Dependencies define the ready set; waves are optional.
+2. **Implement.** Append `task-started` before edits. Before delegating, record the routing decision required by `agent-delegation.md`, owner and expected output; reassess when a resume or follow-up changes the unit.
 3. **Verify.** Before an expensive batch, reconcile coverage, then run the smallest non-redundant set that proves the due observables on the actual candidate.
 4. **Record, then mark complete.** Append observed evidence and `task-completed` before ticking ROADMAP, then clear only the delta this evidence resolves. On failure append `validation-failed`, update the delta and reopen the responsible work.
 5. **Persist the verified unit.** Under `per-task`, make a coherent local commit under `git-workflow.md` (`spec(<slug>): <task-id> <summary>` unless repository conventions differ). If policy blocks the commit, keep the worktree, report it and continue authorized work unless that is unsafe.
