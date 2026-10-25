@@ -16,6 +16,7 @@ CLAUDART keeps Claude adapter internals inside `.claude/` and shared project sta
 - `/cda-handoff` writes a single-slot session baton (`.claudart/HANDOFF.md`) distilling this session's reasoning state — run when the context window is nearly full or when pausing mid-investigation; the next `/cda-start` consumes and deletes it. Never auto-load `HANDOFF.md`.
 - `/cda-learn` promotes validated recurring behavior into `.claude/rules/` and routes descriptive facts to their owners.
 - `/cda-doctor` runs the mechanical knowledge checker followed by a read-only semantic health audit.
+- `/cda-upgrade` updates this project's CLAUDART installation from upstream `main` by following its `INTEGRATE.md`; it shows the plan before writing and leaves `HANDOFF.md` untouched.
 
 Task bodies (`.claudart/tasks/*/TASK.md`) and artifacts are not auto-imported. Read the selected `TASK.md` on resume, then only supporting files needed for the next action.
 

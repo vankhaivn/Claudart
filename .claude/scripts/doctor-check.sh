@@ -308,7 +308,7 @@ if [ "$LAYER" = codex ]; then
   require_dir .codex/agents WARNING "restore agent metadata directory"
   require_file .codex/config.toml ERROR "restore Codex configuration"
   require_dir .agents/skills ERROR "restore core skills"
-  for skill in cda-start cda-checkpoint cda-learn cda-doctor cda-tidy cda-task cda-handoff cda-spec cda-spec-run; do
+  for skill in cda-start cda-checkpoint cda-learn cda-doctor cda-tidy cda-task cda-handoff cda-spec cda-spec-run cda-upgrade; do
     require_file ".agents/skills/$skill/SKILL.md" ERROR "restore core skill"
   done
   queue_tree .codex/guidelines
@@ -320,7 +320,7 @@ else
     require_file ".claude/rules/$rule.md" ERROR "restore core rule"
   done
   require_dir .claude/skills ERROR "restore core skills"
-  for skill in cda-start cda-learn cda-doctor cda-checkpoint cda-task cda-handoff cda-spec cda-spec-run cda-tidy; do
+  for skill in cda-start cda-learn cda-doctor cda-checkpoint cda-task cda-handoff cda-spec cda-spec-run cda-tidy cda-upgrade; do
     require_file ".claude/skills/$skill/SKILL.md" ERROR "restore core skill"
   done
   require_dir .claude/agents WARNING "restore agent directory"

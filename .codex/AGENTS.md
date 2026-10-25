@@ -28,6 +28,7 @@ This repository contains CLAUDART, a markdown-based operating layer for AI codin
 - `$cda-learn` — promotes validated recurring behavior into Codex guidelines and routes descriptive facts to their owners.
 - `$cda-doctor` — runs the read-only mechanical checker plus semantic health audit.
 - `$cda-tidy` — cleans project docs, knowledge, CONTEXT, OWNER and project guidelines to the current-document contract, reviewing only what changed since the last tidy commit.
+- `$cda-upgrade` — updates this project's CLAUDART installation from upstream `main` by following its `INTEGRATE.md`; it shows the plan before writing and leaves `HANDOFF.md` untouched.
 
 ## Working Style
 
