@@ -589,6 +589,33 @@ try {
       /gpt-\d+(?:\.\d+)?-(?:luna|sol|astra)/i,
     );
   });
+  check("delegation criteria load with the universal behavior rule", () => {
+    const criteria = [];
+    for (const [behavior, delegation] of [
+      [".claude/rules/ai-behavior.md", ".claude/rules/agent-delegation.md"],
+      [".codex/guidelines/ai-behavior.md", ".codex/guidelines/agent-delegation.md"],
+    ]) {
+      const section =
+        /^## Delegate When It Pays Off\n([\s\S]*?)\nWhen delegating, follow `([^`]+)`/m.exec(
+          read(join(root, behavior)),
+        );
+      assert(section, `Missing delegation criteria: ${behavior}`);
+      assert.equal(section[2], delegation);
+      assert.match(section[1], /\*\*Context protection:\*\*/);
+      assert.match(
+        section[1],
+        /Keep a unit local when briefing a delegate would cost about as much/,
+      );
+      criteria.push(section[1].trim());
+      assert(
+        read(join(root, delegation)).includes(
+          `Decide whether to delegate under the criteria in \`${behavior}\``,
+        ),
+        `Delegation rule does not defer to the criteria: ${delegation}`,
+      );
+    }
+    assert.equal(criteria[0], criteria[1]);
+  });
   check("ordinary delegation dispatch and reuse contracts stay aligned", () => {
     const dispatchContracts = [];
     for (const directory of [".claude/rules", ".codex/guidelines"]) {

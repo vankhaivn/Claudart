@@ -1,6 +1,6 @@
 ---
 paths: ["**/*"]
-description: Universal CLAUDART behavior for Codex work, covering documentation ownership, local persistence, and the owner profile.
+description: Universal CLAUDART behavior for Codex work, covering documentation ownership, local persistence, the owner profile, and whether to delegate.
 when_to_use: Every Codex task, regardless of stack or domain.
 tags: [behavior, universal, owner-profile]
 ---
@@ -36,3 +36,15 @@ This applies to project documentation and to current-state files: `CONTEXT.md`, 
 - Write one line under the matching section: the guidance in one sentence, its scope or exception when it has one, and the date. Do not quote the conversation or retell the incident behind it. Replace the entry it refines instead of adding a near-duplicate.
 - Keep the file to at most 60 lines and consolidate before adding when it is full. Never record secrets, credentials, or account identifiers.
 - Mention every profile change in your reply. The current user instruction outranks the profile, and an approval recorded there never widens a higher-scope, repository, or tool restriction.
+
+## Delegate When It Pays Off
+
+Whether to delegate is a separate decision from which model a unit needs. Delegate a concrete bounded unit when it brings at least one of these benefits:
+
+- **Parallelism:** independent units can run at the same time.
+- **Context protection:** a broad, read-heavy investigation (codebase sweep, multi-source research, large log or diff triage) would fill the parent's context when only its conclusion is needed, or a long task has a self-contained step whose details the parent does not need for integration and verification.
+- **Independent assessment:** a fresh review or second opinion adds value.
+
+A parent that could do the unit itself still delegates when one of these benefits applies. Keep a unit local when briefing a delegate would cost about as much as doing it, such as a small edit or a lookup in a known file. Difficulty alone justifies neither another agent nor a stronger model.
+
+When delegating, follow `.codex/guidelines/agent-delegation.md` for model routing, dispatch, worker prompts and integration.
