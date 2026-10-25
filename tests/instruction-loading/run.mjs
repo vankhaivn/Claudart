@@ -154,16 +154,29 @@ try {
 
   check("both adapters expose the same request-invoked cda- workflows", () => {
     const actions = [
-      "start", "task", "spec", "spec-run", "checkpoint", "handoff",
-      "learn", "doctor", "tidy",
+      "start",
+      "task",
+      "spec",
+      "spec-run",
+      "checkpoint",
+      "handoff",
+      "learn",
+      "doctor",
+      "tidy",
     ];
     const skills = actions.flatMap((action) => [
       [action, `.claude/skills/cda-${action}/SKILL.md`],
       [action, `.agents/skills/cda-${action}/SKILL.md`],
     ]);
     skills.push(
-      ["project-docs", "modules/project-docs/.claude/skills/cda-project-docs/SKILL.md"],
-      ["project-docs", "modules/project-docs/.agents/skills/cda-project-docs/SKILL.md"],
+      [
+        "project-docs",
+        "modules/project-docs/.claude/skills/cda-project-docs/SKILL.md",
+      ],
+      [
+        "project-docs",
+        "modules/project-docs/.agents/skills/cda-project-docs/SKILL.md",
+      ],
     );
     for (const [action, relative] of skills) {
       const skill = join(root, relative);
@@ -208,21 +221,24 @@ try {
       assert(!existsSync(join(dest, "docs")));
     });
     if (mode !== "codex") {
-      check(`${mode}: Claude loader is installed at root without a duplicate`, () => {
-        assert.equal(
-          read(join(dest, "CLAUDE.md")),
-          read(join(root, ".claude/CLAUDE.md")),
-        );
-        assert(!existsSync(join(dest, ".claude/CLAUDE.md")));
-        const graph = importGraph(join(dest, "CLAUDE.md"));
-        assert(graph.has(join(dest, ".claude/rules/ai-behavior.md")));
-        assert(graph.has(join(dest, ".claudart/OWNER.md")));
-        assert.equal(
-          graph.size,
-          3,
-          "Only universal behavior and the owner profile are auto-imported",
-        );
-      });
+      check(
+        `${mode}: Claude loader is installed at root without a duplicate`,
+        () => {
+          assert.equal(
+            read(join(dest, "CLAUDE.md")),
+            read(join(root, ".claude/CLAUDE.md")),
+          );
+          assert(!existsSync(join(dest, ".claude/CLAUDE.md")));
+          const graph = importGraph(join(dest, "CLAUDE.md"));
+          assert(graph.has(join(dest, ".claude/rules/ai-behavior.md")));
+          assert(graph.has(join(dest, ".claudart/OWNER.md")));
+          assert.equal(
+            graph.size,
+            3,
+            "Only universal behavior and the owner profile are auto-imported",
+          );
+        },
+      );
     }
     if (mode !== "claude") {
       check(
@@ -303,7 +319,10 @@ try {
   check("optional module exposes cda-project-docs in both adapters", () => {
     for (const entry of moduleEntries) {
       assert(existsSync(join(moduleSource, entry)));
-      assert.match(read(join(moduleSource, entry)), /^name: cda-project-docs$/m);
+      assert.match(
+        read(join(moduleSource, entry)),
+        /^name: cda-project-docs$/m,
+      );
     }
   });
 
@@ -473,14 +492,13 @@ try {
           `Additive install overwrote ${relative}`,
         );
       assert(
-        existsSync(join(dest, ".claude/skills/cda-project-docs/references/ownership.md")),
+        existsSync(
+          join(dest, ".claude/skills/cda-project-docs/references/ownership.md"),
+        ),
       );
       assert(
         existsSync(
-          join(
-            dest,
-            ".agents/skills/cda-project-docs/references/ownership.md",
-          ),
+          join(dest, ".agents/skills/cda-project-docs/references/ownership.md"),
         ),
       );
       install(dest, ["--both", "--force"]);
@@ -584,16 +602,16 @@ try {
       delegation,
       /Resolve the selected family alias against the \*\*current\*\* `spawn_agent` model catalog/,
     );
-    assert.doesNotMatch(
-      delegation,
-      /gpt-\d+(?:\.\d+)?-(?:luna|sol|astra)/i,
-    );
+    assert.doesNotMatch(delegation, /gpt-\d+(?:\.\d+)?-(?:luna|sol|astra)/i);
   });
   check("delegation criteria load with the universal behavior rule", () => {
     const criteria = [];
     for (const [behavior, delegation] of [
       [".claude/rules/ai-behavior.md", ".claude/rules/agent-delegation.md"],
-      [".codex/guidelines/ai-behavior.md", ".codex/guidelines/agent-delegation.md"],
+      [
+        ".codex/guidelines/ai-behavior.md",
+        ".codex/guidelines/agent-delegation.md",
+      ],
     ]) {
       const section =
         /^## Delegate When It Pays Off\n([\s\S]*?)\nWhen delegating, follow `([^`]+)`/m.exec(
@@ -618,6 +636,7 @@ try {
   });
   check("ordinary delegation dispatch and reuse contracts stay aligned", () => {
     const dispatchContracts = [];
+    const loopContracts = [];
     for (const directory of [".claude/rules", ".codex/guidelines"]) {
       const delegation = read(join(root, directory, "agent-delegation.md"));
       assert.match(
@@ -648,57 +667,121 @@ try {
         /before dispatch[\s\S]*?routing decision, worker, expected output, and integration location/,
       );
       const workflow = read(join(root, directory, "spec-workflow.md"));
+      const loop = /^## The Loop\n([\s\S]*?)(?=^## )/m.exec(workflow);
+      assert(loop, `Missing spec loop: ${directory}`);
+      loopContracts.push(loop[1].trim());
+      assert.match(
+        loop[1],
+        /weigh the other ready tasks and the selected task's read-heavy steps against the delegation criteria in `ai-behavior\.md`/,
+      );
+      assert.match(
+        loop[1],
+        /Dependencies define the ready set; waves are optional/,
+      );
+      assert.match(
+        loop[1],
+        /Before delegating, record the routing decision required by `agent-delegation\.md`/,
+      );
       assert.match(
         workflow,
-        /Before authorized delegation, record the routing decision required by `agent-delegation\.md`/,
+        /standing approval replaces task, phase and delegation approval inside a running spec/,
       );
     }
     assert.equal(dispatchContracts[0], dispatchContracts[1]);
-  });
-  check("Git workflow defaults to scoped local commits under higher policy", () => {
-    const claudeGit = read(join(root, ".claude/rules/git-workflow.md"));
-    const codexGit = read(join(root, ".codex/guidelines/git-workflow.md"));
-    const commitUnits = (policy) =>
-      policy.split("## Commit verified coherent units\n")[1].split("\n## ")[0];
-    assert.equal(commitUnits(claudeGit), commitUnits(codexGit));
-    for (const policy of [claudeGit, codexGit]) {
-      assert.match(policy, /local commit is authorized by default/);
-      assert.match(policy, /unit's next related code or documentation commit when possible/);
-      assert.match(policy, /When a verified unit of work ends and no related commit can carry its remaining state/);
-      assert.match(policy, /at most one state-only commit for the finished unit/);
-      assert.match(policy, /upgrade, activation, restart or cleanup is a unit of work/);
-      assert.match(policy, /Never create one commit per state edit/);
-      assert.match(policy, /Before ending a turn that finishes work, check that no uncommitted changes owned by that work remain/);
-      assert.match(policy, /subject to commit authority and workflow-local cadence \(including spec `commits:` settings and checkpoint\)/);
-      assert.match(policy, /Preserve unrelated and pre-existing changes/);
-      assert.match(policy, /report the remaining owned changes and the reason/);
-      assert.match(policy, /Never use broad staging such as `git add -A` or `git add .`/);
-      assert.match(policy, /Do not add AI\/model\/tool `Co-authored-by` trailers/);
-      assert.match(policy, /`codex\/\*`, `claude\/\*`, `agent\/\*`/);
-      assert.match(policy, /does \*\*not\*\* authorize push/);
-      assert.match(policy, /The parent integrates and verifies delegated work/);
+    assert.equal(loopContracts[0], loopContracts[1]);
+    for (const skills of [".claude/skills", ".agents/skills"]) {
+      assert.match(
+        read(join(root, skills, "cda-spec-run/SKILL.md")),
+        /Read `agent-delegation\.md` before delegating\./,
+      );
+      assert.match(
+        read(join(root, skills, "cda-spec/SKILL.md")),
+        /Delegate a broad, read-heavy survey when the criteria in `ai-behavior\.md` apply, under `agent-delegation\.md`/,
+      );
     }
-    assert.match(claudeGit, /~\/\.claude\/CLAUDE\.md/);
-    assert.match(claudeGit, /~\/\.claude\/settings\.json/);
-    assert.match(codexGit, /~\/\.codex\/AGENTS\.md/);
-    assert(
-      read(join(root, ".claude/CLAUDE.md")).includes(
-        ".claude/rules/git-workflow.md",
-      ),
-    );
-    assert(
-      read(join(root, ".codex/AGENTS.md")).includes(
-        ".codex/guidelines/git-workflow.md",
-      ),
-    );
   });
+  check(
+    "Git workflow defaults to scoped local commits under higher policy",
+    () => {
+      const claudeGit = read(join(root, ".claude/rules/git-workflow.md"));
+      const codexGit = read(join(root, ".codex/guidelines/git-workflow.md"));
+      const commitUnits = (policy) =>
+        policy
+          .split("## Commit verified coherent units\n")[1]
+          .split("\n## ")[0];
+      assert.equal(commitUnits(claudeGit), commitUnits(codexGit));
+      for (const policy of [claudeGit, codexGit]) {
+        assert.match(policy, /local commit is authorized by default/);
+        assert.match(
+          policy,
+          /unit's next related code or documentation commit when possible/,
+        );
+        assert.match(
+          policy,
+          /When a verified unit of work ends and no related commit can carry its remaining state/,
+        );
+        assert.match(
+          policy,
+          /at most one state-only commit for the finished unit/,
+        );
+        assert.match(
+          policy,
+          /upgrade, activation, restart or cleanup is a unit of work/,
+        );
+        assert.match(policy, /Never create one commit per state edit/);
+        assert.match(
+          policy,
+          /Before ending a turn that finishes work, check that no uncommitted changes owned by that work remain/,
+        );
+        assert.match(
+          policy,
+          /subject to commit authority and workflow-local cadence \(including spec `commits:` settings and checkpoint\)/,
+        );
+        assert.match(policy, /Preserve unrelated and pre-existing changes/);
+        assert.match(
+          policy,
+          /report the remaining owned changes and the reason/,
+        );
+        assert.match(
+          policy,
+          /Never use broad staging such as `git add -A` or `git add .`/,
+        );
+        assert.match(
+          policy,
+          /Do not add AI\/model\/tool `Co-authored-by` trailers/,
+        );
+        assert.match(policy, /`codex\/\*`, `claude\/\*`, `agent\/\*`/);
+        assert.match(policy, /does \*\*not\*\* authorize push/);
+        assert.match(
+          policy,
+          /The parent integrates and verifies delegated work/,
+        );
+      }
+      assert.match(claudeGit, /~\/\.claude\/CLAUDE\.md/);
+      assert.match(claudeGit, /~\/\.claude\/settings\.json/);
+      assert.match(codexGit, /~\/\.codex\/AGENTS\.md/);
+      assert(
+        read(join(root, ".claude/CLAUDE.md")).includes(
+          ".claude/rules/git-workflow.md",
+        ),
+      );
+      assert(
+        read(join(root, ".codex/AGENTS.md")).includes(
+          ".codex/guidelines/git-workflow.md",
+        ),
+      );
+    },
+  );
   check("spec commit cadence defaults to per-task in both adapters", () => {
     const contracts = [
       read(join(root, ".claude/rules/spec-workflow.md")),
       read(join(root, ".codex/guidelines/spec-workflow.md")),
     ];
     for (const contract of contracts) {
-      assert.match(contract, /commits: per-task # per-task \| per-phase \| user/);
+      assert.match(
+        contract,
+        /commits: per-task # per-task \| per-phase \| user/,
+      );
       assert.match(contract, /`per-task` is the default/);
       assert.match(contract, /Follow `git-workflow\.md`/);
     }
@@ -707,40 +790,49 @@ try {
       ".agents/skills/cda-spec/SKILL.md",
     ]) {
       const text = read(join(root, entrypoint));
-      assert.match(text, /\*\*Commit cadence\*\*: `commits: per-task` \(default\)/);
-    }
-  });
-  check("Git consumers use the central policy while explicit exceptions remain", () => {
-    for (const file of [
-      ".claude/skills/cda-tidy/SKILL.md",
-      ".agents/skills/cda-tidy/SKILL.md",
-    ]) {
-      const text = read(join(root, file));
-      assert.match(text, /Commit under `[^`]*git-workflow\.md`/);
-      assert.match(text, /^Claudart-Tidy: /m);
-    }
-    for (const file of [
-      ".claude/rules/agent-delegation.md",
-      ".codex/guidelines/agent-delegation.md",
-    ]) {
-      const text = read(join(root, file));
-      assert.match(text, /does not authorize subagents to create Git commits/);
-      assert.match(text, /The parent owns Git-history integration/);
-    }
-    assert.match(
-      read(join(root, "INTEGRATE.md")),
-      /Do not commit, push, or merge\./,
-    );
-    for (const file of [
-      ".claude/agents/clean-code-reviewer.md",
-      ".codex/agents/clean-code-reviewer.toml",
-    ]) {
       assert.match(
-        read(join(root, file)),
-        /Do not commit, push, rewrite history, or change Git configuration unless explicitly requested/,
+        text,
+        /\*\*Commit cadence\*\*: `commits: per-task` \(default\)/,
       );
     }
   });
+  check(
+    "Git consumers use the central policy while explicit exceptions remain",
+    () => {
+      for (const file of [
+        ".claude/skills/cda-tidy/SKILL.md",
+        ".agents/skills/cda-tidy/SKILL.md",
+      ]) {
+        const text = read(join(root, file));
+        assert.match(text, /Commit under `[^`]*git-workflow\.md`/);
+        assert.match(text, /^Claudart-Tidy: /m);
+      }
+      for (const file of [
+        ".claude/rules/agent-delegation.md",
+        ".codex/guidelines/agent-delegation.md",
+      ]) {
+        const text = read(join(root, file));
+        assert.match(
+          text,
+          /does not authorize subagents to create Git commits/,
+        );
+        assert.match(text, /The parent owns Git-history integration/);
+      }
+      assert.match(
+        read(join(root, "INTEGRATE.md")),
+        /Do not commit, push, or merge\./,
+      );
+      for (const file of [
+        ".claude/agents/clean-code-reviewer.md",
+        ".codex/agents/clean-code-reviewer.toml",
+      ]) {
+        assert.match(
+          read(join(root, file)),
+          /Do not commit, push, rewrite history, or change Git configuration unless explicitly requested/,
+        );
+      }
+    },
+  );
   // Shared-state behavior uses the real installer and checker binaries, not a
   // test-only implementation of state selection. Fixtures are anonymous data.
   const seeds = [
@@ -837,8 +929,14 @@ try {
           checkpoint,
           /Absence from this conversation is not completion/,
         );
-        assert.match(checkpoint, /For Git persistence, read .*git-workflow\.md/);
-        assert.match(checkpoint, /that shared contract owns higher-scope\/runtime/);
+        assert.match(
+          checkpoint,
+          /For Git persistence, read .*git-workflow\.md/,
+        );
+        assert.match(
+          checkpoint,
+          /that shared contract owns higher-scope\/runtime/,
+        );
         assert.match(checkpoint, /spec with `commits: user`/);
         assert.match(
           checkpoint,
@@ -1030,7 +1128,14 @@ try {
     git("commit", "-qm", "fixture");
     const commit = git("rev-parse", "HEAD").trim();
     const versioned = join(scratch, "versioned.tar.gz");
-    git("archive", "--format=tar.gz", "--prefix=claudart/", "-o", versioned, "HEAD");
+    git(
+      "archive",
+      "--format=tar.gz",
+      "--prefix=claudart/",
+      "-o",
+      versioned,
+      "HEAD",
+    );
     const dest = join(scratch, "recorded version");
     const version = () => read(join(dest, ".claudart/VERSION"));
     install(dest, ["--claude"], versioned);
