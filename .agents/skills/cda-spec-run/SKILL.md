@@ -1,6 +1,6 @@
 ---
 name: cda-spec-run
-description: Execute an approved dated spec with scoped context and evidence-driven verification until final user review or a real blocker.
+description: Execute an approved dated spec with scoped context and evidence-driven verification until final user review or a real blocker. Use only when the user asks for it, by command or in words.
 ---
 
 # Codex Spec Run

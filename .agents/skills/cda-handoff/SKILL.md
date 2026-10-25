@@ -1,6 +1,6 @@
 ---
 name: cda-handoff
-description: Write a single-slot session baton (.claudart/HANDOFF.md) that distills this session's reasoning state — objective, hypothesis, evidence, dead ends, exact next step — so a fresh session can resume seamlessly. Run when the context window is nearly full or when pausing mid-investigation.
+description: Write a single-slot session baton (.claudart/HANDOFF.md) that distills this session's reasoning state — objective, hypothesis, evidence, dead ends, exact next step — so a fresh session can resume seamlessly. Run when the context window is nearly full or when pausing mid-investigation. Use only when the user asks for it, by command or in words.
 ---
 
 # Codex Handoff

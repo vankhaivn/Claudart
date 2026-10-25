@@ -1,7 +1,6 @@
 ---
 name: cda-project-docs
-description: Establish, adopt, update, or audit current project documentation and its sources of authority
-disable-model-invocation: true
+description: Establish, adopt, update, or audit current project documentation and its sources of authority. Use only when the user asks for it, by command or in words.
 ---
 
 # Project Docs

@@ -1,6 +1,6 @@
 ---
 name: cda-doctor
-description: Run a read-only Codex installation health check with a mechanical baseline and bounded semantic audits.
+description: Run a read-only Codex installation health check with a mechanical baseline and bounded semantic audits. Use only when the user asks for it, by command or in words.
 ---
 
 # Codex Doctor

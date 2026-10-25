@@ -1,7 +1,6 @@
 ---
 name: cda-doctor
-description: Run a read-only Claude CLAUDART health check with a mechanical baseline and bounded semantic audits.
-disable-model-invocation: true
+description: Run a read-only Claude CLAUDART health check with a mechanical baseline and bounded semantic audits. Use only when the user asks for it, by command or in words.
 ---
 
 Run a health check of the selected Claude CLAUDART layer. This skill is diagnostic only: do not auto-fix files. Report findings for the user to address with `/cda-tidy` for docs, state, knowledge and project rules, `INTEGRATE.md` for installation and routing, or a deliberate manual edit.
