@@ -275,7 +275,7 @@ After a valid transition to `done` or `cancelled`:
    ```text
    YYYY-MM-DD | completed|cancelled | <slug> — <one-line outcome>, see tasks/done/<task-id>/TASK.md
    ```
-3. Update `.claudart/tasks/index.md`: remove from Active, add to Recently Done with `done/<task-id>/TASK.md`. Update any live CONTEXT/HANDOFF pointer to the new path. Repair every knowledge `sources` entry that points into the moved workspace so it names the archived path; a path repair changes neither `updated` nor `last_verified`. When a repair was made, run the knowledge checker.
+3. Update `.claudart/tasks/index.md`: remove from Active, add to Recently Done with `done/<task-id>/TASK.md`. Update any live CONTEXT/HANDOFF pointer to the new path. Replace any path link from another task or spec into the moved workspace with its workspace id. Repair every knowledge `sources` entry that points into the moved workspace so it names the archived path; a path repair changes neither `updated` nor `last_verified`. When a repair was made, run the knowledge checker.
 4. If a recurring pattern emerged, propose `/cda-learn`.
 5. Promote only descriptive claims that pass the full knowledge gate; keep unresolved claims as candidates in the archive.
 

@@ -17,7 +17,7 @@ Installed projects use `CLAUDE.md` as the Claude loader. For explicit upstream C
 
 For nondefault options or coverage boundaries, read `.claude/references/doctor-check.md`.
 
-The helper owns its default selected-layer structural/readability checks, declared metadata subset and supported types, clear Markdown-resource/local-link checks, real Claude imports, loader/OWNER/CONTEXT/HANDOFF size checks, and its single nested knowledge-check invocation. It does not claim full YAML/TOML validation or semantic health. Optional Project Docs may be absent. Use `--include` only for an explicitly requested extra Markdown source tree or file; do not turn doctor into a documentation-wide scan.
+The helper owns its default selected-layer structural/readability checks, declared metadata subset and supported types, clear Markdown-resource/local-link checks, real Claude imports, loader/OWNER/CONTEXT/HANDOFF size checks, task sequence and task-link checks, and its single nested knowledge-check invocation. It does not claim full YAML/TOML validation or semantic health. Optional Project Docs may be absent. Use `--include` only for an explicitly requested extra Markdown source tree or file; do not turn doctor into a documentation-wide scan.
 
 Preserve the helper output and exit status:
 

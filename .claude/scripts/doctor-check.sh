@@ -485,8 +485,11 @@ else
   fi
 fi
 
-resolve_link() {
-  link_source=$1; link_line=$2; link_raw=$3; link_kind=$4
+# Sets link_rel to the repository-relative target of a local link candidate;
+# returns nonzero for non-local, unsupported, or escaping destinations.
+local_link_rel() {
+  link_source=$1; link_line=$2; link_raw=$3
+  link_rel=
   link_base_source=$link_source
   # The Claude source template is validated as though it were relocated to the
   # downstream root, because its relative imports are authored for that target.
@@ -505,15 +508,15 @@ resolve_link() {
   esac
   case "$link_target" in
     ''|'#'*|*'://'*|mailto:*|data:*|javascript:*|*'{'*|*'}'*|*'<'*|*'>'*|*'*'*|*'?'*|*'['*|*']'*|*'$'*|*'|'*|*"$SEP"*|*$'\r'*|*'
-'*) return ;;
+'*) return 1 ;;
   esac
   link_target=${link_target%%#*}
-  [ -n "$link_target" ] || return
-  case "$link_target" in *\\*) add WARNING D207 "$link_source" "$link_line" "escaped local reference needs review"; return ;; esac
+  [ -n "$link_target" ] || return 1
+  case "$link_target" in *\\*) add WARNING D207 "$link_source" "$link_line" "escaped local reference needs review"; return 1 ;; esac
   link_target=${link_target//%20/ }
   link_target=${link_target//%2F/\/}; link_target=${link_target//%2f/\/}
   link_target=${link_target//%2E/.}; link_target=${link_target//%2e/.}
-  case "$link_target" in *'%'*) add WARNING D204 "$link_source" "$link_line" "encoded local reference needs review"; return ;; esac
+  case "$link_target" in *'%'*) add WARNING D204 "$link_source" "$link_line" "encoded local reference needs review"; return 1 ;; esac
   case "$link_target" in
     /*) link_candidate=${link_target#/} ;;
     *) case "$link_base_source" in
@@ -522,13 +525,18 @@ resolve_link() {
        esac ;;
   esac
   link_rel=$(normalize "$link_candidate") || {
-    add WARNING D203 "$link_source" "$link_line" "local reference escapes repository root; review it"; return;
+    link_rel=
+    add WARNING D203 "$link_source" "$link_line" "local reference escapes repository root; review it"; return 1;
   }
+}
+
+resolve_link() {
+  local_link_rel "$1" "$2" "$3" || return
   private_path "$link_rel" && return
   if has_symlink "$link_rel"; then
     add WARNING D202 "$link_source" "$link_line" "local reference is symlinked; skipped"
   elif [ ! -e "$ROOT/$link_rel" ]; then
-    add ERROR D201 "$link_source" "$link_line" "missing local $link_kind target: $link_rel"
+    add ERROR D201 "$link_source" "$link_line" "missing local $4 target: $link_rel"
   fi
 }
 
@@ -548,6 +556,69 @@ if [ "$INCOMPLETE" -eq 0 ]; then
       esac
     done <"$TMP_DIR/links"
   done <"$TMP_DIR/sources-sorted"
+fi
+
+# Task workspaces: a sequence is unique across active and archived workspaces,
+# and active TASK.md local links resolve. A path into another workspace breaks
+# when either side is archived, so tasks refer to each other by workspace id.
+TASKS_DIR=$STATE_DIR/tasks
+TASK_ID_PATTERN='^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]-[0-9][0-9][0-9]-[a-z0-9]+(-[a-z0-9]+)*$'
+: >"$TMP_DIR/tasks"
+for task_parent in "$TASKS_DIR" "$TASKS_DIR/done"; do
+  [ -d "$ROOT/$task_parent" ] || continue
+  has_symlink "$task_parent" && continue
+  for task_dir in "$ROOT/$task_parent"/*; do
+    task_id=${task_dir##*/}
+    [ -d "$task_dir" ] && [ ! -L "$task_dir" ] || continue
+    [[ $task_id =~ $TASK_ID_PATTERN ]] || continue
+    printf '%s\n' "$task_parent/$task_id" >>"$TMP_DIR/tasks"
+  done
+done
+awk '
+  { id=$0; sub(/.*\//, "", id); seq[NR]=substr(id, 1, 14); path[NR]=$0; count[seq[NR]]++ }
+  END { for(i=1; i<=NR; i++) if(count[seq[i]] > 1) print path[i] "\034" seq[i] }
+' "$TMP_DIR/tasks" >"$TMP_DIR/task-duplicates" || { add ERROR D906 "$TASKS_DIR" 1 "cannot compare task sequences"; INCOMPLETE=1; }
+while IFS="$SEP" read -r duplicate_rel duplicate_seq; do
+  [ -n "$duplicate_rel" ] && add WARNING D119 "$duplicate_rel" 1 "task sequence $duplicate_seq is shared with another workspace"
+done <"$TMP_DIR/task-duplicates"
+
+task_link_scope() {
+  scope_source=$1; scope_line=$2
+  case "$link_rel" in "$TASKS_DIR"/*) ;; *) return ;; esac
+  case "$link_rel/" in "$scope_source"/*) return ;; esac
+  scope_target=${link_rel#"$TASKS_DIR"/}
+  scope_archived=0
+  case "$scope_target" in done/*) scope_archived=1; scope_target=${scope_target#done/} ;; esac
+  scope_target=${scope_target%%/*}
+  [[ $scope_target =~ $TASK_ID_PATTERN ]] || return
+  case "$scope_source" in "$TASKS_DIR"/done/*) [ "$scope_archived" -eq 0 ] || return ;; esac
+  add WARNING D209 "$scope_source/TASK.md" "$scope_line" "path link into task $scope_target; refer to it by workspace id"
+}
+
+if [ "$INCOMPLETE" -eq 0 ]; then
+  while IFS= read -r task_rel; do
+    task_md=$task_rel/TASK.md
+    [ -f "$ROOT/$task_md" ] && [ ! -L "$ROOT/$task_md" ] && [ -r "$ROOT/$task_md" ] || continue
+    if ! awk -v mode=markdown -v layer=task -f "$PARSER" "$ROOT/$task_md" >"$TMP_DIR/task-links"; then
+      add ERROR D903 "$task_md" 1 "Markdown parser failed"; INCOMPLETE=1; break
+    fi
+    case "$task_rel" in "$TASKS_DIR"/done/*) task_archived=1 ;; *) task_archived=0 ;; esac
+    while IFS="$SEP" read -r record field2 field3 field4 field5; do
+      [ "$record" = L ] || continue
+      # Archived evidence is not repaired, so only links that can still break
+      # (into a workspace that has yet to move) are checked there.
+      if [ "$task_archived" -eq 1 ]; then
+        [[ $field3 =~ [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]-[0-9][0-9][0-9]- ]] || continue
+      fi
+      local_link_rel "$task_md" "$field2" "$field3" || continue
+      private_path "$link_rel" && continue
+      has_symlink "$link_rel" && continue
+      if [ "$task_archived" -eq 0 ] && [ ! -e "$ROOT/$link_rel" ]; then
+        add WARNING D208 "$task_md" "$field2" "missing local link target: $link_rel"
+      fi
+      task_link_scope "$task_rel" "$field2"
+    done <"$TMP_DIR/task-links"
+  done <"$TMP_DIR/tasks"
 fi
 
 # The existing knowledge checker is the sole owner of K diagnostics. Call it
