@@ -156,6 +156,7 @@ Cài bằng `--project-docs`. Module thêm `/cda-project-docs` (hoặc `$cda-pro
 | `/cda-learn`           | `$cda-learn`           | Biến bài học lặp lại thành rule            |
 | `/cda-doctor`          | `$cda-doctor`          | Kiểm tra sức khỏe                          |
 | `/cda-tidy`            | `$cda-tidy`            | Dọn docs, knowledge và trạng thái          |
+| `/cda-upgrade`         | `$cda-upgrade`         | Cập nhật CLAUDART từ upstream              |
 | `/cda-project-docs`    | `$cda-project-docs`    | Quản lý tài liệu dự án (tùy chọn)          |
 
 ## 10. Cấu trúc sau khi cài
@@ -171,4 +172,4 @@ AGENTS.md          # loader của Codex
 
 Bạn chỉ có những lớp đã cài. Task, spec và topic knowledge xuất hiện dần khi dự án phát triển.
 
-Nâng cấp bản cài sẵn có thì dùng [INTEGRATE.md](../INTEGRATE.md). Muốn đóng góp cho CLAUDART, xem [CONTRIBUTING.md](../CONTRIBUTING.md).
+Nâng cấp bản cài sẵn có thì chạy `/cda-upgrade` (hoặc `$cda-upgrade`); lệnh này làm theo [INTEGRATE.md](../INTEGRATE.md). Muốn đóng góp cho CLAUDART, xem [CONTRIBUTING.md](../CONTRIBUTING.md).

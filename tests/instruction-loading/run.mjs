@@ -163,6 +163,7 @@ try {
       "learn",
       "doctor",
       "tidy",
+      "upgrade",
     ];
     const skills = actions.flatMap((action) => [
       [action, `.claude/skills/cda-${action}/SKILL.md`],
@@ -189,6 +190,14 @@ try {
         /^description: .* Use only when the user asks for it, by command or in words\.$/m,
         relative,
       );
+    }
+    for (const skills of [".claude/skills", ".agents/skills"]) {
+      const upgrade = read(join(root, skills, "cda-upgrade/SKILL.md"));
+      assert.match(
+        upgrade,
+        /Read `https:\/\/raw\.githubusercontent\.com\/vankhaivn\/Claudart\/main\/INTEGRATE\.md` and follow it/,
+      );
+      assert.match(upgrade, /Leave `\.claudart\/HANDOFF\.md` untouched/);
     }
   });
 

@@ -42,7 +42,7 @@ The installer only adds missing files and never touches existing project state.
 
 > Read https://raw.githubusercontent.com/vankhaivn/Claudart/main/INTEGRATE.md and follow it to integrate or update CLAUDART in this project. Preserve project-specific content and show me the proposed changes before writing them.
 
-The agent shows you a plan and waits for your approval before writing anything.
+The agent shows you a plan and waits for your approval before writing anything. Once CLAUDART is installed, `/cda-upgrade` (or `$cda-upgrade`) runs the same update whenever upstream changes.
 
 All CLAUDART workflows use the same `cda-` name on both hosts: type `/cda-task` in Claude Code or `$cda-task` in Codex. The leading character is the host's invocation syntax, not part of the workflow name.
 
@@ -59,6 +59,7 @@ All CLAUDART workflows use the same `cda-` name on both hosts: type `/cda-task` 
 | Turn a repeated lesson into a rule | `/cda-learn`           | `$cda-learn`           |
 | Check the installation             | `/cda-doctor`          | `$cda-doctor`          |
 | Clean up docs, knowledge and state | `/cda-tidy`            | `$cda-tidy`            |
+| Update CLAUDART from upstream      | `/cda-upgrade`         | `$cda-upgrade`         |
 
 Small, clear edits need no command at all; just ask. See the [workflow guide](docs/WORKFLOW.md) for when to use a task or a spec.
 

@@ -156,6 +156,7 @@ Installed with `--project-docs`. It adds `/cda-project-docs` (or `$cda-project-d
 | `/cda-learn`           | `$cda-learn`           | Turn a repeated lesson into a rule           |
 | `/cda-doctor`          | `$cda-doctor`          | Health check                                 |
 | `/cda-tidy`            | `$cda-tidy`            | Clean docs, knowledge and state              |
+| `/cda-upgrade`         | `$cda-upgrade`         | Update CLAUDART from upstream                |
 | `/cda-project-docs`    | `$cda-project-docs`    | Manage project documentation (optional)      |
 
 ## 10. Installed layout
@@ -171,4 +172,4 @@ AGENTS.md          # Codex loader
 
 You get only the layers you installed. Tasks, specs, and knowledge topics appear as the project grows.
 
-To upgrade an existing installation, use [INTEGRATE.md](../INTEGRATE.md). To contribute to CLAUDART itself, see [CONTRIBUTING.md](../CONTRIBUTING.md).
+To upgrade an existing installation, run `/cda-upgrade` (or `$cda-upgrade`); it follows [INTEGRATE.md](../INTEGRATE.md). To contribute to CLAUDART itself, see [CONTRIBUTING.md](../CONTRIBUTING.md).

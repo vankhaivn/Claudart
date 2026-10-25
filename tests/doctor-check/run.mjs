@@ -92,6 +92,7 @@ function fixture(name, layer = "codex", layout = "installed") {
       "cda-handoff",
       "cda-spec",
       "cda-spec-run",
+      "cda-upgrade",
     ])
       write(
         join(dir, `.agents/skills/${name}/SKILL.md`),
@@ -120,6 +121,7 @@ function fixture(name, layer = "codex", layout = "installed") {
       "cda-spec",
       "cda-spec-run",
       "cda-tidy",
+      "cda-upgrade",
     ])
       write(
         join(dir, `.claude/skills/${name}/SKILL.md`),
@@ -241,21 +243,18 @@ try {
       assert.doesNotMatch(result.out, /missing-root\.md/);
     },
   );
-  check(
-    "Claude source layout validates root-relative template imports",
-    () => {
-      const dir = fixture("source-layout-claude", "claude", "source");
-      write(join(dir, "CLAUDE.md"), "[ignored root loader](missing-root.md)\n");
-      write(
-        join(dir, ".claude/CLAUDE.md"),
-        "# Source template\n\nSee @.claude/rules/ai-behavior.md\n",
-      );
-      const result = run(dir, "claude", ["--layout", "source"]);
-      assert.equal(result.status, 0, result.out);
-      assert.match(result.out, /^INFO\|D000\|\.claude\/CLAUDE.md/m);
-      assert.doesNotMatch(result.out, /missing-root\.md/);
-    },
-  );
+  check("Claude source layout validates root-relative template imports", () => {
+    const dir = fixture("source-layout-claude", "claude", "source");
+    write(join(dir, "CLAUDE.md"), "[ignored root loader](missing-root.md)\n");
+    write(
+      join(dir, ".claude/CLAUDE.md"),
+      "# Source template\n\nSee @.claude/rules/ai-behavior.md\n",
+    );
+    const result = run(dir, "claude", ["--layout", "source"]);
+    assert.equal(result.status, 0, result.out);
+    assert.match(result.out, /^INFO\|D000\|\.claude\/CLAUDE.md/m);
+    assert.doesNotMatch(result.out, /missing-root\.md/);
+  });
 
   check("source layout reports its own missing loader", () => {
     const dir = fixture("source-missing-loader", "codex", "source");
@@ -390,21 +389,24 @@ try {
     assertCode(result, "D325");
   });
 
-  check("oversized OWNER, CONTEXT and HANDOFF report their distinct limits", () => {
-    const dir = fixture("size-limits");
-    write(join(dir, ".claudart/OWNER.md"), `${"owner\n".repeat(61)}`);
-    write(join(dir, ".claudart/CONTEXT.md"), `${"context\n".repeat(151)}`);
-    write(
-      join(dir, ".claudart/HANDOFF.md"),
-      `---\ncreated: 2026-09-01\n---\n${"handoff\n".repeat(151)}`,
-    );
-    const result = run(dir, "codex", ["--today", "2026-09-12"]);
-    assert.equal(result.status, 1, result.out);
-    assertCode(result, "D111");
-    assertCode(result, "D112");
-    assertCode(result, "D113");
-    assertCode(result, "D116");
-  });
+  check(
+    "oversized OWNER, CONTEXT and HANDOFF report their distinct limits",
+    () => {
+      const dir = fixture("size-limits");
+      write(join(dir, ".claudart/OWNER.md"), `${"owner\n".repeat(61)}`);
+      write(join(dir, ".claudart/CONTEXT.md"), `${"context\n".repeat(151)}`);
+      write(
+        join(dir, ".claudart/HANDOFF.md"),
+        `---\ncreated: 2026-09-01\n---\n${"handoff\n".repeat(151)}`,
+      );
+      const result = run(dir, "codex", ["--today", "2026-09-12"]);
+      assert.equal(result.status, 1, result.out);
+      assertCode(result, "D111");
+      assertCode(result, "D112");
+      assertCode(result, "D113");
+      assertCode(result, "D116");
+    },
+  );
 
   check("long CONTEXT and OWNER entries warn at their first long line", () => {
     const dir = fixture("long-entries");

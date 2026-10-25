@@ -42,7 +42,7 @@ Installer chỉ thêm file còn thiếu và không bao giờ đụng vào trạn
 
 > Read https://raw.githubusercontent.com/vankhaivn/Claudart/main/INTEGRATE.md and follow it to integrate or update CLAUDART in this project. Preserve project-specific content and show me the proposed changes before writing them.
 
-Agent sẽ đưa bạn xem kế hoạch và chờ bạn duyệt rồi mới ghi file.
+Agent sẽ đưa bạn xem kế hoạch và chờ bạn duyệt rồi mới ghi file. Khi đã cài CLAUDART, `/cda-upgrade` (hoặc `$cda-upgrade`) chạy đúng việc cập nhật này mỗi khi upstream thay đổi.
 
 Các workflow CLAUDART dùng chung tên `cda-` trên cả hai công cụ: gọi `/cda-task` trong Claude Code hoặc `$cda-task` trong Codex. Ký tự đầu là cú pháp riêng của runtime, không phải phần tên workflow.
 
@@ -59,6 +59,7 @@ Các workflow CLAUDART dùng chung tên `cda-` trên cả hai công cụ: gọi 
 | Biến bài học lặp lại thành rule   | `/cda-learn`           | `$cda-learn`           |
 | Kiểm tra bản cài                  | `/cda-doctor`          | `$cda-doctor`          |
 | Dọn docs, knowledge và trạng thái | `/cda-tidy`            | `$cda-tidy`            |
+| Cập nhật CLAUDART từ upstream     | `/cda-upgrade`         | `$cda-upgrade`         |
 
 Sửa nhỏ và rõ ràng thì không cần lệnh nào, cứ nhờ thẳng. Xem [hướng dẫn quy trình](docs/WORKFLOW_VI.md) để biết khi nào dùng task, khi nào dùng spec.
 
