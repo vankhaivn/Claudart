@@ -58,6 +58,8 @@ for rule in "$CODEX_RULE" "$CLAUDE_RULE"; do
     "rule derives review impact from actual changes"
   assert_contains "$rule" "resulting revision or bounded worktree fingerprint" \
     "rule identifies the state proved by every successful gate"
+  assert_contains "$rule" "consumes none of that budget" \
+    "rule plans a zero-budget rehearsal before budgeted live work"
   assert_contains "$rule" \
     'Repair every knowledge `sources` entry that points into the moved folder' \
     "rule keeps knowledge sources resolvable after archiving"
@@ -113,6 +115,8 @@ for author in "$CODEX_AUTHOR" "$CLAUDE_AUTHOR"; do
     "spec authoring exposes a non-redundant final verification set"
   assert_contains "$author" "composite" \
     "spec authoring records composite coverage"
+  assert_contains "$author" "a rehearsal before budgeted or live work" \
+    "spec authoring checks for a rehearsal before budgeted work"
 done
 
 if node "$TEST_DIR/parity.mjs"; then
