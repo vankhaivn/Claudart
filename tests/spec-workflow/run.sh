@@ -58,6 +58,10 @@ for rule in "$CODEX_RULE" "$CLAUDE_RULE"; do
     "rule derives review impact from actual changes"
   assert_contains "$rule" "resulting revision or bounded worktree fingerprint" \
     "rule identifies the state proved by every successful gate"
+  assert_contains "$rule" "never as a count of attempts" \
+    "rule meters each budget by the resource it consumes"
+  assert_contains "$rule" "consumed none of a budget's resource does not charge it" \
+    "rule keeps attempts that consumed nothing outside the budget"
   assert_contains "$rule" \
     'Repair every knowledge `sources` entry that points into the moved folder' \
     "rule keeps knowledge sources resolvable after archiving"
