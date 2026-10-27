@@ -37,7 +37,7 @@ For a new mission, initialize LEDGER and a short NOTES with only useful pointers
 
 ## Check and present
 
-Read the global contract and review the plan as an executor without interview context: supported first-use path, resolvable references, scenarios without an owning task, dependency order, a rehearsal before budgeted or live work, observable acceptance and feasible verification. Compare task scope with the contract inventory, since valid references do not prove completeness. Fix gaps in the existing documents.
+Read the global contract and review the plan as an executor without interview context: supported first-use path, resolvable references, scenarios without an owning task, dependency order, a rehearsal before budgeted or live work, what each automatic stop protects, observable acceptance and feasible verification. Compare task scope with the contract inventory, since valid references do not prove completeness. Fix gaps in the existing documents.
 
 Set `poc-review`, sync INDEX and present the folder, reference or demo, scope, open decisions and task/phase outline. Report **Commit cadence**: `commits: per-task` (default), or the selected `per-phase`/`user` setting. State that approving SPEC + ROADMAP grants standing implementation approval within existing authority but does not start execution or authorize external actions.
 
