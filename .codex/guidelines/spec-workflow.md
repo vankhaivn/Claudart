@@ -74,7 +74,7 @@ All ROADMAP work completed or explicitly superseded, no unresolved blocker,
 and every scenario supported by valid final-gate evidence. The user confirms done.
 ```
 
-Each scenario must be observable by an executor without interview history. Split independently failing obligations into sub-IDs, but do not turn every assertion into a task or command. State each resource budget in Must-NOT-Have as the scarce resource it meters, such as requests, spend or a downtime window, and what consumes it, never as a count of attempts.
+Each scenario must be observable by an executor without interview history. Split independently failing obligations into sub-IDs, but do not turn every assertion into a task or command. State each resource budget in Must-NOT-Have as the scarce resource it meters, such as requests, spend or a downtime window, and what consumes it, never as a count of attempts. Each automatic stop or acceptance-blocking check states what it protects: a red line, such as the stability or integrity of a shared system, stops the work, while a check that judges only measurement or evidence quality flags the affected result instead. Keep fixed design parameters, such as a workload shape, apart from red lines, so a red line freezes only what it protects.
 
 Scenarios cover initial state. For each different first-use path, trace the minimum supported state through the real entrypoint to the first useful result; each fixture it needs has a supported creation path or an explicit external prerequisite. Cover first-use behavior that differs from later use, and controlled rejection, cancellation or recovery where they matter; an empty input need not succeed. Add no out-of-scope features or state matrix.
 
@@ -197,6 +197,7 @@ The final verification plan exercises the candidate's relevant component interac
 
 - Progress means an acceptance gap clears or its diagnosis narrows enough to change the next action. More tasks, ticks or repeated confirmation of the same failure are not progress.
 - Retry only with a different hypothesis, implementation or verifier, keeping the next action in ROADMAP or NOTES. Otherwise mark the responsible task blocked with its condition and unlock, and continue independent work.
+- Count recurrence by symptom: the same failing stage and error class. When a symptom recurs after two fixes, block the responsible task even if each fix tested a new hypothesis or the root cause is unproven, and report whether the failing check protects a red line or should flag the result instead.
 - Evidence that exercises the required action or observable more directly or representatively invalidates a contradicting green result. Append the failure, update the delta and reopen responsible work; the weaker verifier is no longer sole proof.
 - After two exploration passes with no new facts, act on available evidence or block the affected work. Explicit user or runtime budgets are authoritative. An attempt that consumed none of a budget's resource does not charge it; fix and retry under the rules above.
 - If blockers remain and no independent runnable task does, append `circuit-breaker`, set `status: blocked`, sync INDEX and report the exact unlock condition. Never weaken acceptance or loop silently.

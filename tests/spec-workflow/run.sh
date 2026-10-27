@@ -64,6 +64,12 @@ for rule in "$CODEX_RULE" "$CLAUDE_RULE"; do
     "rule identifies the state proved by every successful gate"
   assert_contains "$rule" "consumes none of that budget" \
     "rule plans a zero-budget rehearsal before budgeted live work"
+  assert_contains "$rule" "Each automatic stop or acceptance-blocking check states what it protects" \
+    "rule classifies every automatic stop by what it protects"
+  assert_contains "$rule" "flags the affected result instead" \
+    "rule keeps quality-only checks from stopping work"
+  assert_contains "$rule" "Count recurrence by symptom" \
+    "rule breaks the loop on a recurring symptom"
   assert_contains "$rule" \
     'Repair every knowledge `sources` entry that points into the moved folder' \
     "rule keeps knowledge sources resolvable after archiving"
@@ -121,6 +127,8 @@ for author in "$CODEX_AUTHOR" "$CLAUDE_AUTHOR"; do
     "spec authoring records composite coverage"
   assert_contains "$author" "a rehearsal before budgeted or live work" \
     "spec authoring checks for a rehearsal before budgeted work"
+  assert_contains "$author" "what each automatic stop protects" \
+    "spec authoring checks what each automatic stop protects"
 done
 
 if node "$TEST_DIR/parity.mjs"; then
