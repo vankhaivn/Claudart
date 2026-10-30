@@ -53,7 +53,7 @@ For each validated behavior:
 
 - Make every rule verifiable from repository evidence.
 - Guideline frontmatter has `paths:`, `description:`, `when_to_use:`, and `tags:`, with flow-style `paths:` and `tags:` containing 1-5 lowercase kebab-case values.
-- State each guideline once, in plain words. Fix a repeated violation by sharpening its wording or scope, not with capitalized emphasis, which current models over-apply.
+- State each guideline once, in plain words. When a type, lint, test or hook could catch a repeated violation on the real mistake, propose that check to the owner instead of adding wording, since this workflow does not write code. Otherwise sharpen the guideline's wording or scope, not with capitalized emphasis, which current models over-apply.
 - Do not paste code snippets; cite stable sources.
 - Summarize each file changed, the lesson it owns, knowledge checker results when applicable, and unresolved contradictions.
 

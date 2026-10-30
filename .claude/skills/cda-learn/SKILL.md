@@ -40,6 +40,6 @@ Walk the conversation chronologically, comparing each assistant turn against the
 
 - A reader must be able to check from the code whether a rule was followed; rewrite any rule that cannot be verified.
 - Rule files carry the frontmatter `CLAUDE.md` defines, with `paths:` as a YAML flow sequence and `tags:` as a one-line inline array of 1-5 lowercase kebab-case values.
-- State each rule once, in plain words. Fix a repeated violation by sharpening its wording or scope, not with capitalized emphasis, which current models over-apply.
+- State each rule once, in plain words. When a type, lint, test or hook could catch a repeated violation on the real mistake, propose that check to the owner instead of adding wording, since this workflow does not write code. Otherwise sharpen the rule's wording or scope, not with capitalized emphasis, which current models over-apply.
 - Rule files contain no code snippets; cite the source file and line (e.g., `src/services/foo.ts:45`).
 - Make the file changes without asking for permission, then list each file touched and why.
