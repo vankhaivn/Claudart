@@ -40,7 +40,7 @@ Rules of thumb:
 
 ## 3. Tasks
 
-`/cda-task <task>` creates `.claudart/tasks/YYYY-MM-DD-NNN-<slug>/TASK.md`. That one file holds the current state and next action, the goal, the steps with a check for each, the acceptance criteria, the decisions made, and the outcome. Extra files go in `artifacts/` only when they are really needed, such as a ZIP that reproduces a bug.
+`/cda-task <task>` creates `.claudart/tasks/YYYY-MM-DD-NNN-<slug>/TASK.md`. That one file holds the current state and next action, the goal, the steps with a check for each, the acceptance criteria, the decisions made, and the outcome. Extra files go in `artifacts/` only when they are really needed, such as a ZIP that reproduces a bug. Keep the result of a run, not the run: anything that can be recreated is left out or removed when the task closes, and `/cda-doctor` warns when a workspace grows too large.
 
 ### What you see
 

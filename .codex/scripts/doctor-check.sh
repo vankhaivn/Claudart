@@ -621,6 +621,28 @@ if [ "$INCOMPLETE" -eq 0 ]; then
   done <"$TMP_DIR/tasks"
 fi
 
+# A task or spec workspace over budget usually holds run output that can be
+# recreated. Archived workspaces count: they keep the same weight.
+SPEC_ID_PATTERN='^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]-[a-z0-9]+(-[a-z0-9]+)*$'
+cp "$TMP_DIR/tasks" "$TMP_DIR/workspaces" || { add ERROR D906 "$TASKS_DIR" 1 "cannot list workspaces"; INCOMPLETE=1; }
+for spec_parent in "$STATE_DIR/specs" "$STATE_DIR/specs/done"; do
+  [ -d "$ROOT/$spec_parent" ] || continue
+  has_symlink "$spec_parent" && continue
+  for spec_dir in "$ROOT/$spec_parent"/*; do
+    spec_id=${spec_dir##*/}
+    [ -d "$spec_dir" ] && [ ! -L "$spec_dir" ] || continue
+    [[ $spec_id =~ $SPEC_ID_PATTERN ]] || continue
+    printf '%s\n' "$spec_parent/$spec_id" >>"$TMP_DIR/workspaces"
+  done
+done
+while IFS= read -r workspace_rel; do
+  workspace_files=$(find "$ROOT/$workspace_rel" -type f 2>/dev/null | wc -l | tr -d ' ')
+  workspace_kb=$(du -sk "$ROOT/$workspace_rel" 2>/dev/null | awk '{ print $1 }')
+  if [ "${workspace_files:-0}" -ge 200 ] || [ "${workspace_kb:-0}" -ge 51200 ]; then
+    add WARNING D120 "$workspace_rel" 1 "workspace holds $workspace_files files and $((${workspace_kb:-0} / 1024)) MB; remove what can be recreated"
+  fi
+done <"$TMP_DIR/workspaces"
+
 # The existing knowledge checker is the sole owner of K diagnostics. Call it
 # exactly once, with selected root/date/threshold, and forward its lines.
 KNOWLEDGE=$SCRIPT_DIR/knowledge-check.sh
