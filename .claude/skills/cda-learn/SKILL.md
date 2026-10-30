@@ -19,7 +19,11 @@ Walk the conversation chronologically, comparing each assistant turn against the
 
 1. List every moment the user corrected you or you deviated from a rule, and name the rationalization you used to justify each deviation, not merely "I missed the rule".
 2. Find rules that failed because they described only the happy path.
-3. For each gap, sharpen the existing sentence so it closes the loophole; when useful, state that the constraint still applies under the rationalization that caused the violation.
+3. For each gap, choose the form by the failure, and add nothing when the model would act correctly without the instruction:
+   - A known rule was bypassed → sharpen the existing sentence so it closes the loophole; when useful, state that the constraint still applies under the rationalization that caused the violation.
+   - The output had the wrong shape → describe what the output is, part by part, instead of banning what it should not contain.
+   - A required element was omitted → add a required slot to the template the agent fills in.
+   - The behavior depends on a condition → state a condition the agent can observe instead of a general rule with exemptions.
 4. Resolve contradictions between rules immediately in `.claude/rules/` or `CLAUDE.md`.
 5. Save quiet confirmations too: an unusual judgment call the user accepted without pushback is a validated approach to keep.
 

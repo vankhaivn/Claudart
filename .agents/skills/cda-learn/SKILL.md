@@ -34,7 +34,11 @@ Use JOURNAL recurrence as evidence: if the same decision or pivot appears at lea
 For each validated behavior:
 
 1. Update the strongest matching existing guideline first.
-2. Close the observed loophole with a verifiable constraint; when useful, state that the constraint still applies under the rationalization that caused the violation.
+2. Choose the form by the failure, and add nothing when the model would act correctly without the instruction:
+   - A known rule was bypassed → close the observed loophole with a verifiable constraint; when useful, state that the constraint still applies under the rationalization that caused the violation.
+   - The output had the wrong shape → describe what the output is, part by part, instead of banning what it should not contain.
+   - A required element was omitted → add a required slot to the template the agent fills in.
+   - The behavior depends on a condition → state a condition the agent can observe instead of a general rule with exemptions.
 3. Resolve contradictions between guidelines or `AGENTS.md` immediately when evidence identifies the winner. If neither wins, surface the decision instead of silently choosing.
 4. Use an existing guideline only when the semantic match is at least 80%. Create a focused owner instead of polluting a weak match; add canonical frontmatter and reference it from `AGENTS.md` when globally relevant.
 5. Put delegation behavior in `.codex/guidelines/agent-delegation.md`.
