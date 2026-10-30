@@ -59,6 +59,8 @@ CLAUDART uses a lightweight GitHub Flow:
 
 `main` is the integration branch. Keep one logical change per branch and pull request, and do not reuse a merged branch for new work.
 
+The owner may commit small, self-explanatory changes directly to `main`, without an Issue, branch, or pull request. Every other change follows the steps below.
+
 ### Step 1 — Reuse or open an issue
 
 Before creating a branch, search relevant open Issues and pull requests. Reuse existing tracking when it already owns the work.
@@ -144,13 +146,11 @@ Opening a PR does not authorize merging it. AI-assisted contributors must not me
 
 ### Step 5 — Merge deliberately
 
-**Squash merge is the default** for ordinary short-lived branches. It keeps `main` concise while allowing iterative commits during review.
+**A merge commit is the default.** It keeps the branch's commits on `main` and marks the pull request boundary, so clean up temporary commits before merge.
 
-Use **rebase merge** only when the branch contains a deliberately curated sequence of independently meaningful commits worth preserving on `main`.
+Use **squash merge** only when the branch history is not worth keeping. Keep the squashed title Conventional Commit-compatible so `main` history stays searchable by change type.
 
-Use a **merge commit** only when preserving branch topology or a multi-commit integration boundary is itself useful and the maintainer intentionally chooses it.
-
-Keep the final merge title Conventional Commit-compatible so `main` history stays searchable by change type.
+Use **rebase merge** only when the maintainer intentionally wants a linear history for that change.
 
 ### Step 6 — Clean up after merge
 
@@ -173,7 +173,7 @@ Do not move this repository Git workflow into `.claude/rules/`, `.codex/guidelin
 If you're contributing new logic, please adhere to our directory structure:
 
 - `.claude/skills/`: CLAUDART workflows as skill folders (`/cda-learn`, `/cda-checkpoint`, etc.), each with a `SKILL.md` that details the steps the AI takes and any bundled scripts or references beside it. The Codex copy lives in `.agents/skills/`; bundled scripts stay byte-identical.
-- `.claude/agents/`: Highly specialized role-based instruction sets (`reviewer.md`, `architect.md`, etc.). Make sure agent prompts are self-contained and heavily instruct the AI on its specific persona and constraints.
+- `.claude/agents/`: Highly specialized role-based instruction sets (`clean-code-reviewer.md`, `security-auditor.md`, etc.). Make sure agent prompts are self-contained and heavily instruct the AI on its specific persona and constraints.
 - `.claudart/knowledge/`: Durable, **descriptive** project reference — domain, architecture, glossary, and pointers to canonical docs in other folders. Distinct from rules/guidelines (prescriptive). Only the root `INDEX.md` is surfaced by `start`; optional `_maps/`, topic outlines, and the smallest useful sections are loaded on demand.
 - `.claude/rules/knowledge-management.md` and `.codex/guidelines/knowledge-management.md`: the mirrored semantic contract for capture, lifecycle, bounded retrieval, and project-fact classification. Keep their intent in parity.
 - `.claude/scripts/knowledge-check.sh` and `.codex/scripts/knowledge-check.sh`: byte-identical copies of the dependency-free, read-only mechanical checker. Change and test them as one unit.
