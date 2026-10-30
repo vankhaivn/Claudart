@@ -118,7 +118,7 @@ This step is independent of CONTEXT.md. Skip it if `.claudart/tasks/` does not e
 
 1. List `.claudart/tasks/*/TASK.md` from valid top-level workspace ids only, excluding `done/` itself and symlinked workspaces or `TASK.md` files. Read only frontmatter (`status`, `slug`, `created`, `updated`, `reviewer`). Never recursively enumerate task bodies or parse attachments as tasks.
 2. List `.claudart/tasks/done/*/TASK.md` at that exact depth. Read the same metadata. Flag an archived nonterminal task or a validly named workspace missing `TASK.md`; do not move, repair, or infer status automatically.
-3. Move the entire workspace of each top-level task whose status is `done` or `cancelled` with the Shared archive flow in `.codex/guidelines/task-management.md`, under these conditions:
+3. Archive each top-level task whose status is `done` or `cancelled` with the Shared archive flow in `.codex/guidelines/task-management.md`, under these conditions:
    - Require a valid `reviewer: user | agent` before archiving; report incomplete metadata without inventing acceptance ownership.
    - Confirm `Outcomes & Retrospective` is filled in `TASK.md`. If empty, report it; do not invent the outcome.
    - Before archiving, inspect only `TASK.md` Memory Hints and Related Docs for knowledge candidates for Step 6c. Do not bulk-read supporting files or promote task/WIP/proposal state.

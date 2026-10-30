@@ -40,7 +40,7 @@ Mẹo:
 
 ## 3. Task
 
-`/cda-task <task>` tạo `.claudart/tasks/YYYY-MM-DD-NNN-<slug>/TASK.md`. File này chứa trạng thái hiện tại và bước kế tiếp, mục tiêu, các bước kèm cách kiểm tra từng bước, tiêu chí nghiệm thu, các quyết định đã đưa ra và kết quả. File phụ chỉ đặt vào `artifacts/` khi thật sự cần, ví dụ một file ZIP để tái hiện lỗi.
+`/cda-task <task>` tạo `.claudart/tasks/YYYY-MM-DD-NNN-<slug>/TASK.md`. File này chứa trạng thái hiện tại và bước kế tiếp, mục tiêu, các bước kèm cách kiểm tra từng bước, tiêu chí nghiệm thu, các quyết định đã đưa ra và kết quả. File phụ chỉ đặt vào `artifacts/` khi thật sự cần, ví dụ một file ZIP để tái hiện lỗi. Chỉ giữ kết quả của một lần chạy, không giữ cả lần chạy: thứ gì tạo lại được thì không lưu hoặc bị bỏ khi đóng task, và `/cda-doctor` cảnh báo khi workspace quá lớn.
 
 ### Bạn sẽ thấy gì
 

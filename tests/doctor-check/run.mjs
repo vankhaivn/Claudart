@@ -476,6 +476,42 @@ try {
     },
   );
 
+  check("task and spec workspaces warn at the file and size budget", () => {
+    const dir = fixture("workspace-budget");
+    const state = join(dir, ".claudart");
+    const fill = (workspace, count) => {
+      write(join(state, workspace, "TASK.md"), "# Work\n");
+      for (let i = 1; i < count; i++) {
+        write(join(state, workspace, `artifacts/run/${i}.json`), "{}\n");
+      }
+    };
+    fill("tasks/2026-10-01-001-under", 199);
+    fill("tasks/2026-10-01-002-at", 200);
+    fill("tasks/done/2026-09-01-001-archived", 200);
+    fill("specs/2026-10-01-under", 199);
+    fill("specs/done/2026-09-01-at", 200);
+    fill("tasks/notes", 200);
+    write(
+      join(state, "tasks/2026-10-01-003-heavy/artifacts/bundle.bin"),
+      Buffer.alloc(50 * 1024 * 1024, 1),
+    );
+    const before = snapshot(dir);
+    const result = run(dir, "codex");
+    assert.equal(result.status, 0, result.out);
+    assert.equal(snapshot(dir), before);
+    assert.deepEqual(
+      (result.out.match(/^WARNING\|D120\|.*$/gm) ?? []).map(
+        (line) => line.split("|")[2],
+      ),
+      [
+        ".claudart/specs/done/2026-09-01-at:1",
+        ".claudart/tasks/2026-10-01-002-at:1",
+        ".claudart/tasks/2026-10-01-003-heavy:1",
+        ".claudart/tasks/done/2026-09-01-001-archived:1",
+      ],
+    );
+  });
+
   check("owner profile size boundary and missing seed signals", () => {
     const limit = fixture("owner-at-limit");
     write(join(limit, ".claudart/OWNER.md"), `${"owner\n".repeat(60)}`);

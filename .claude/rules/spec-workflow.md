@@ -130,7 +130,7 @@ The executor may add missing in-scope work and log it, supersede dead work expli
 - Decision: <optional change and why; link to its current owner>
 ```
 
-Events include `run-started`, `task-started`, `task-completed`, `validation-failed`, `phase-validated`, `task-blocked`, `replanned`, `delegated`, `circuit-breaker`, `rotation-checkpoint`, `scope-change` (user-initiated only), and `final-gate`. Never rewrite or delete historical entries. An entry is its header plus at most three short lines; `task-started` and `delegated` may be the header alone. Only gate entries add the fields below, one line each. Record what was done and observed, not lists of actions that were not taken. Store large outputs in artifacts and reference them.
+Events include `run-started`, `task-started`, `task-completed`, `validation-failed`, `phase-validated`, `task-blocked`, `replanned`, `delegated`, `circuit-breaker`, `rotation-checkpoint`, `scope-change` (user-initiated only), and `final-gate`. Never rewrite or delete historical entries. An entry is its header plus at most three short lines; `task-started` and `delegated` may be the header alone. Only gate entries add the fields below, one line each. Record what was done and observed, not lists of actions that were not taken. Keep a large output in artifacts only under Artifact Discipline in `task-management.md`, and reference it.
 
 Each successful gate records its resulting revision or bounded worktree fingerprint, actual environment or artifact, observed scenario coverage, and `executed`, `covered` and any `reused` evidence. For a dirty tree, give the base revision and changed-path/content digests, excluding secrets and unrelated user files. Record verifier, fixture/configuration and dependency state, reusing existing build/test identifiers.
 
@@ -230,7 +230,8 @@ Broad requests such as “quality” or “production-ready” are not defect an
 
 1. Set `status: done` and append one completion line to `.claudart/JOURNAL.md`, pointing to the archived SPEC.
 2. Evaluate NOTES graduation candidates under the knowledge contract; preserve uncertainty and propose `/cda-learn` for behavioral lessons.
-3. Move the whole folder to `.claudart/specs/done/YYYY-MM-DD-<slug>/` and sync INDEX. Repair every knowledge `sources` entry that points into the moved folder to its archived path; path repair changes neither `updated` nor `last_verified`. Run the knowledge checker after the move if any knowledge file changed.
+3. Remove disposable artifacts under Artifact Discipline in `task-management.md`. Keep the evidence behind every scenario, and when unsure, keep the file and report it.
+4. Move the folder to `.claudart/specs/done/YYYY-MM-DD-<slug>/` and sync INDEX. Repair every knowledge `sources` entry that points into the moved folder to its archived path; path repair changes neither `updated` nor `last_verified`. Run the knowledge checker after the move if any knowledge file changed.
 
 ## Status and Index
 
