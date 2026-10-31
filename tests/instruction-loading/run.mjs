@@ -713,6 +713,17 @@ try {
       );
     }
   });
+  check("an upgrade can refresh a state header and keeps its entries", () => {
+    const protocol = read(join(root, "INTEGRATE.md"));
+    assert.match(
+      protocol,
+      /list replacing only that header in the plan; every entry stays byte-identical/,
+    );
+    assert.match(
+      protocol,
+      /an approved header replacement changed nothing below that header/,
+    );
+  });
   check("session start reports recent commits outside shared state", () => {
     for (const start of [
       ".claude/skills/cda-start/SKILL.md",
