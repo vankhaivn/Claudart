@@ -17,7 +17,7 @@ The user's current request controls what happens after orientation. When it expl
 4. Resolve Active entries only to `.claudart/tasks/<YYYY-MM-DD-NNN-slug>/TASK.md` and verify existence. Use valid top-level workspace ids during fallback discovery; exclude `done/` itself and symlinked workspaces or `TASK.md` files. Read `TASK.md` frontmatter (`status`, `updated`, `created`, `slug`, `reviewer`) only; report a missing or invalid `reviewer` as incomplete metadata without guessing ownership; flag missing/broken references for `$cda-checkpoint`. Do not read task bodies or artifact contents, recurse into workspaces, or create supporting files during startup.
 5. Read `.claudart/knowledge/INDEX.md` if it exists — the root router only. Count visible route lines under `## Knowledge` that match the canonical Markdown route grammar; ignore HTML comments/templates and `- _(none)_`, so a seed index reports zero. Do not read domain maps, topic files, or `.codex/guidelines/knowledge-management.md`, and do not validate freshness or dead links. A later task that needs knowledge loads the guideline and follows its bounded routing contract.
 6. Read `.claudart/specs/INDEX.md` if it exists — the INDEX only — and extract entries under `## Active`. Do not read SPEC, ROADMAP, NOTES or LEDGER bodies.
-7. Run `git log -3 --oneline`. If the directory is not a git repo or has fewer than three commits, report what is available.
+7. Run `git log -3 --format='%h %cs %s' -- ':(top,exclude).claudart'`, the latest commits outside shared state. If the directory is not a git repo or has fewer than three such commits, report what is available.
 8. Extract only `## In Progress`, `## Next Session Should Start By` and `## Open Questions / Blockers` from `.claudart/CONTEXT.md` when present.
 9. Do not read `.claudart/JOURNAL.md` or task bodies in `.claudart/tasks/done/`, and do not run `$cda-doctor` or `bash .codex/scripts/knowledge-check.sh`.
 
@@ -28,7 +28,7 @@ The user's current request controls what happens after orientation. When it expl
 
 **Handoff:** [present — created <date>, objective one-liner; or "None"]
 **Current focus:** [In Progress section, or "None recorded"]
-**Last 3 commits:** [git log -3 --oneline output, compact]
+**Last 3 commits outside state:** [hash, date and subject from that command, compact]
 **Active tasks:** [list of "<slug> (<status>, updated <date>)" from tasks/index.md, or "None"]
 **Active specs:** [list of "<slug> (<status>, updated <date>)" from specs/INDEX.md, or "None"]
 **Project knowledge:** [N root routes in knowledge/INDEX.md, or "none"]

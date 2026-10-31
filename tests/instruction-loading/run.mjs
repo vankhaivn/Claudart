@@ -713,6 +713,20 @@ try {
       );
     }
   });
+  check("session start reports recent commits outside shared state", () => {
+    for (const start of [
+      ".claude/skills/cda-start/SKILL.md",
+      ".agents/skills/cda-start/SKILL.md",
+    ]) {
+      const skill = read(join(root, start));
+      assert.ok(
+        skill.includes(
+          "git log -3 --format='%h %cs %s' -- ':(top,exclude).claudart'",
+        ),
+      );
+      assert.match(skill, /\*\*Last 3 commits outside state:\*\*/);
+    }
+  });
   check(
     "Git workflow defaults to scoped local commits under higher policy",
     () => {
