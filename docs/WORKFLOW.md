@@ -124,6 +124,7 @@ Use `.codex/scripts/` for Codex. The checker finds broken structure and links; i
 
 - The agent may make **local commits** of verified work, unless your global settings, the repository, or you say otherwise.
 - It stages only the files it changed and never adds AI attribution or agent-named branches.
+- State edits inside an open task are committed together at the next boundary, such as a finished phase, a task close or a checkpoint, with one commit per finished unit.
 - It never pushes, merges, rebases, tags, or changes Git config without your explicit permission.
 - A spec can set `commits: per-task` (default), `per-phase`, or `user` (no automatic commits).
 
