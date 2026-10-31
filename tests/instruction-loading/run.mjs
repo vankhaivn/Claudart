@@ -713,6 +713,31 @@ try {
       );
     }
   });
+  check("an upgrade can refresh a state header and keeps its entries", () => {
+    const protocol = read(join(root, "INTEGRATE.md"));
+    assert.match(
+      protocol,
+      /list replacing only that header in the plan; every entry stays byte-identical/,
+    );
+    assert.match(
+      protocol,
+      /an approved header replacement changed nothing below that header/,
+    );
+  });
+  check("session start reports recent commits outside shared state", () => {
+    for (const start of [
+      ".claude/skills/cda-start/SKILL.md",
+      ".agents/skills/cda-start/SKILL.md",
+    ]) {
+      const skill = read(join(root, start));
+      assert.ok(
+        skill.includes(
+          "git log -3 --format='%h %cs %s' -- ':(top,exclude).claudart'",
+        ),
+      );
+      assert.match(skill, /\*\*Last 3 commits outside state:\*\*/);
+    }
+  });
   check(
     "Git workflow defaults to scoped local commits under higher policy",
     () => {
@@ -742,6 +767,19 @@ try {
           /upgrade, activation, restart or cleanup is a unit of work/,
         );
         assert.match(policy, /Never create one commit per state edit/);
+        assert.match(
+          policy,
+          /a round of owner feedback, a measurement or a recorded note does not finish a unit/,
+        );
+        assert.match(
+          policy,
+          /a completed phase of the plan, a task status change or close, a switch to other work, a checkpoint or a handoff/,
+        );
+        assert.match(policy, /One state-only commit covers one finished unit/);
+        assert.match(
+          policy,
+          /an archive or rewrite spanning many tasks is split by task/,
+        );
         assert.match(
           policy,
           /Before ending a turn that finishes work, check that no uncommitted changes owned by that work remain/,

@@ -124,6 +124,7 @@ Với Codex thì dùng `.codex/scripts/`. Checker tìm cấu trúc và liên k�
 
 - Agent được tạo **commit local** cho việc đã kiểm tra xong, trừ khi cấu hình global, repository hoặc bạn nói khác.
 - Agent chỉ stage file nó đã sửa, không bao giờ thêm dòng ghi công AI hay đặt tên branch theo agent.
+- Thay đổi state trong một task đang mở được commit cùng nhau ở mốc kế tiếp, như xong một phase, đóng task hoặc checkpoint, mỗi đơn vị việc đã xong một commit.
 - Agent không bao giờ push, merge, rebase, tag hay đổi cấu hình Git khi chưa được bạn cho phép rõ ràng.
 - Một spec có thể đặt `commits: per-task` (mặc định), `per-phase` hoặc `user` (không tự commit).
 
