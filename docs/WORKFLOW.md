@@ -130,13 +130,12 @@ Use `.codex/scripts/` for Codex. The checker finds broken structure and links; i
 
 ## 7. Specialist agents
 
-Three agents run only when you ask for them by name:
+Two agents run only when you ask for them by name:
 
 | Agent               | Does                                                        |
 | ------------------- | ----------------------------------------------------------- |
 | Clean-code reviewer | A scoped code-health review or behavior-preserving refactor |
 | Security auditor    | A read-only security audit with a written report            |
-| UI visual critic    | A review of rendered UI, slides, or other visual output     |
 
 The main agent may also split work across helper agents when the tool supports it. It stays responsible for checking and integrating their results.
 

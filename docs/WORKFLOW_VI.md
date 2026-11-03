@@ -130,13 +130,12 @@ Với Codex thì dùng `.codex/scripts/`. Checker tìm cấu trúc và liên k�
 
 ## 7. Agent chuyên biệt
 
-Ba agent chỉ chạy khi bạn gọi đích danh:
+Hai agent chỉ chạy khi bạn gọi đích danh:
 
 | Agent               | Làm gì                                                                     |
 | ------------------- | -------------------------------------------------------------------------- |
 | Clean-code reviewer | Review chất lượng code hoặc refactor giữ nguyên hành vi, trong phạm vi hẹp |
 | Security auditor    | Audit bảo mật chỉ đọc, kèm báo cáo                                         |
-| UI visual critic    | Review giao diện, slide hay output hình ảnh đã render                      |
 
 Agent chính cũng có thể chia việc cho agent phụ khi công cụ hỗ trợ. Nó vẫn chịu trách nhiệm kiểm tra và ghép kết quả của chúng.
 
