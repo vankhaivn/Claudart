@@ -633,6 +633,14 @@ try {
         section[1],
         /Keep a unit local when briefing a delegate would cost about as much/,
       );
+      assert.match(
+        section[1],
+        /Choose each delegate's model before spawning it: the lowest class in the routing table that can do the unit, recorded as unit → class → model → reason\. The parent's model is a ceiling, not a default\./,
+      );
+      assert.match(
+        section[1],
+        /the parent's judgment is applied in that review, not by giving the delegate the parent's model/,
+      );
       criteria.push(section[1].trim());
       assert(
         read(join(root, delegation)).includes(

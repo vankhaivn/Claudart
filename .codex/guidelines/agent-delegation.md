@@ -15,12 +15,12 @@ Role and execution profile are separate decisions: `explorer`, `worker`, and `de
 
 Before each ordinary spawn, and before a resume or follow-up introduces a new or materially changed unit, classify the delegated unit by its ambiguity, breadth, consequence of a wrong answer, and difficulty of verification. Choose the lowest class that is likely to complete the unit reliably:
 
-| Class      | Typical delegated unit                                                                                                    | Ideal Codex profile |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------- |
-| `routine`  | focused search, call-site inventory, docs lookup, extraction, mechanical or highly constrained edit                       | `luna` / `high`     |
-| `standard` | bounded implementation or debugging with clear contracts and local verification                                           | `sol` / `medium`    |
-| `complex`  | ambiguous cross-file debugging, architecture-sensitive reasoning, difficult review or integration                         | `sol` / `max`       |
-| `maximum`  | genuinely frontier-level, long-horizon, highly ambiguous work, or a unit whose cheaper attempt exposed a capability limit | `astra` / `high`    |
+| Class      | Typical delegated unit                                                                                                                             | Ideal Codex profile |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| `routine`  | focused search, call-site inventory, docs lookup, extraction, mechanical or highly constrained edit                                                | `luna` / `high`     |
+| `standard` | bounded implementation or debugging with clear contracts and local verification; review against stated criteria whose findings the parent verifies | `sol` / `medium`    |
+| `complex`  | ambiguous cross-file debugging, architecture-sensitive reasoning, review or integration whose errors are hard to verify                            | `sol` / `max`       |
+| `maximum`  | genuinely frontier-level, long-horizon, highly ambiguous work, or a unit whose cheaper attempt exposed a capability limit                          | `astra` / `high`    |
 
 Use Luna/low only for mechanical lookup, extraction, or transformation with an easy correctness check, not merely because a task is short. Astra/high may use lower effort when sufficient. A failed lower-effort attempt is not required before choosing a class.
 
