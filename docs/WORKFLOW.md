@@ -57,8 +57,10 @@ If you only asked for a plan, the agent waits for your "go". If you already said
 
 Every task says who reviews the result: you (`user`) or the agent (`agent`).
 
-- **The agent** closes the task itself when every criterion can be checked objectively, for example "a failed request re-enables the submit button".
+- **The agent** closes the task itself when every criterion can be checked objectively, for example "a failed request re-enables the submit button". It also reviews results you will neither judge nor use, such as a tool only the agent runs.
 - **You** sign off when the result needs your judgment ("does this copy feel reassuring?"), a device or account the agent cannot reach, or when you asked for final approval.
+
+Either way, only you defer work that belongs to the task. The agent finishes what it finds in scope, or asks you, before the task closes.
 
 When you are the reviewer, the agent finishes everything it can check, then stops and shows you the actual result and the one decision left for you. Say "looks good" or "close it" to finish, or describe the problem to reopen the task. Silence or praise does not close it.
 
