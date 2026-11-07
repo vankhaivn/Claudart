@@ -36,7 +36,7 @@ Fix in-scope mechanical failures before reporting success. For an audit or refac
 - A topic may end with one `## Point-in-time observations` section. It holds observations of runtime or environment state that repository evidence cannot confirm. Each entry starts with its observation date (`YYYY-MM-DD`) and states one fact. A newer observation replaces the older one; the section is not a log, and it counts toward the detail budget.
 - `status` and `last_verified` describe the rest of the topic. An observation that cannot be confirmed is never a reason for `review-needed`.
 - `review-needed` means a claim outside that section is unverified, conflicting, or known to have drifted. `status_note` names that claim.
-- When another current source owns the topic's facts, reduce the topic to a route in the same mutation. `review-needed` is not a substitute for that reduction.
+- Reduce a topic to routes one fact at a time, in the same mutation: a fact that another current source states becomes a route to it, and a fact that no source states stays in the topic, which remains its owner. Verifying a topic against its sources does not make the facts they omit removable. `review-needed` is not a substitute for that reduction.
 
 ## Canonical Topic Frontmatter
 
