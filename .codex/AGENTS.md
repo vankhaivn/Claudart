@@ -5,13 +5,13 @@ This repository contains CLAUDART, a markdown-based operating layer for AI codin
 ## Context Loading
 
 - `.claudart/` is the single project-state authority for Claude and Codex, including OWNER, CONTEXT, JOURNAL, HANDOFF, knowledge, tasks and specs. Runtime choice changes execution tools and adapter instructions, not state ownership.
-- Read `.claudart/CONTEXT.md` and relevant indexes before meaningful work; current user instructions take precedence over saved state. Use repository-root paths even from a nested working directory.
+- Read `.claudart/CONTEXT.md` and relevant indexes before meaningful work; current user instructions take precedence over saved state. A CONTEXT line about state outside the repository, such as data, a deployment or an action the user was to take, is a dated note: check it again before a diagnosis or advice relies on it. Use repository-root paths even from a nested working directory.
 - Read `.claudart/OWNER.md` before meaningful work and follow it as the working agreement with the project owner; keep it current under `.codex/guidelines/ai-behavior.md`.
 - Keep scope, standing approvals, evidence and final-review gates when changing runtimes. The `agent` field records provenance; it neither selects a state store nor grants permission. Use the actual host's available tools and capabilities.
 - Shared files support sequential handoff, not automatic concurrent synchronization. Serialize writes to shared summaries, indexes and the handoff slot; preserve unrelated unresolved work. Do not create another state store or use a fallback store.
 - Read `.claudart/tasks/index.md` (if it exists) for active implementation plans.
 - Read `.codex/guidelines/ai-behavior.md`, then load only the additional guideline files relevant to the current task. Do not read every guideline blindly.
-- Read `.codex/guidelines/knowledge-management.md` when retrieving project knowledge. For knowledge writes, audits, or refactors, also follow `.codex/references/knowledge-maintenance.md`; retrieval alone does not require it.
+- Read `.codex/guidelines/knowledge-management.md` when retrieving project knowledge, including before you diagnose a failure or propose a direction in an area `.claudart/knowledge/INDEX.md` routes; that check stays within the fixed retrieval budget and skips the wider repository search. For knowledge writes, audits, or refactors, also follow `.codex/references/knowledge-maintenance.md`; retrieval alone does not require it.
 - Do not auto-load `.claudart/JOURNAL.md`; use it only for explicit history or learning tasks.
 - Do not auto-load `.claudart/HANDOFF.md`; it is a one-shot session baton consumed by `$cda-start`.
 - Do not auto-load `.claudart/tasks/*/TASK.md` bodies or task artifacts. Read the selected `TASK.md` when resuming or working on it, then only supporting files needed for the next action.
