@@ -145,7 +145,7 @@ Skip this step if `.claudart/specs/` does not exist.
 
 ### Step 6c: Route Durable Facts to Their Owners
 
-Skip this step if no candidate from this session, task closeout, or spec NOTES passes the capture gates in `.codex/guidelines/knowledge-management.md`, and do not run the checker when no knowledge changed. Checkpoint is bulk maintenance, not the only knowledge write gate; a natural-language knowledge update mid-session follows that guideline directly.
+Skip this step if no candidate from this session, task closeout, or spec NOTES passes the capture gates in `.codex/guidelines/knowledge-management.md`, and do not run the checker when no knowledge changed. Candidates include facts a later session will need that so far live only in this session's task records, such as how to reach a system, which branch deploys, where an environment moved, a failure already seen and its cause, or an option the user rejected. Checkpoint is bulk maintenance, not the only knowledge write gate; a natural-language knowledge update mid-session follows that guideline directly.
 
 For each eligible claim, read the knowledge guideline in full, patch the owner under `.codex/references/knowledge-maintenance.md`, and update its reachable route in the same change. Checkpoint does not take over project-document maintenance or require a docs audit. Never write secrets. Run `bash .codex/scripts/knowledge-check.sh --root .` after the final knowledge mutation and repair in-scope mechanical failures; report any remaining findings and do not claim the update healthy. These writes are autonomous; the Git diff is the review surface.
 

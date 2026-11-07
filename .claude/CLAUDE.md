@@ -24,7 +24,7 @@ Task bodies (`.claudart/tasks/*/TASK.md`) and artifacts are not auto-imported. R
 
 `.claudart/` is the single project-state authority for Claude and Codex, including OWNER, CONTEXT, JOURNAL, HANDOFF, knowledge, tasks and specs. Runtime choice changes execution tools and adapter instructions, not state ownership.
 
-Read `.claudart/CONTEXT.md` and relevant indexes before meaningful work; current user instructions take precedence over saved state. Use repository-root paths even from a nested working directory. Task bodies and history remain on demand.
+Read `.claudart/CONTEXT.md` and relevant indexes before meaningful work; current user instructions take precedence over saved state. A CONTEXT line about state outside the repository, such as data, a deployment or an action the user was to take, is a dated note: check it again before a diagnosis or advice relies on it. Use repository-root paths even from a nested working directory. Task bodies and history remain on demand.
 
 Keep scope, standing approvals, evidence and final-review gates when changing runtimes. The `agent` field records provenance; it neither selects a state store nor grants permission. Use the actual host's available tools and capabilities.
 
@@ -39,7 +39,7 @@ Read these project-root paths only when their trigger applies. Conditional rules
 - `.claude/rules/task-management.md` when creating, executing, or resuming a persistent task.
 - `.claude/rules/agent-delegation.md` before spawning, resuming, or sending new work to a subagent, and when consuming worker results; whether to delegate is decided under `ai-behavior.md`. Use the current runtime's capabilities.
 - `.claude/rules/spec-workflow.md` when authoring or executing a mission spec.
-- `.claude/rules/knowledge-management.md` when retrieving project knowledge; also read `.claude/references/knowledge-maintenance.md` before knowledge writes, audits, or refactors.
+- `.claude/rules/knowledge-management.md` when retrieving project knowledge, including before you diagnose a failure or propose a direction in an area `.claudart/knowledge/INDEX.md` routes; that check stays within the fixed retrieval budget and skips the wider repository search. Also read `.claude/references/knowledge-maintenance.md` before knowledge writes, audits, or refactors.
 
 Project knowledge: `.claudart/knowledge/INDEX.md` is the root router surfaced by `/cda-start`; it and topic bodies are not auto-imported. Route entries on demand under the knowledge rule.
 When the optional Project Docs command is present, use it for project-document ownership and lifecycle work. Core tasks still follow the repository's existing documentation convention when it is absent.

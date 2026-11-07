@@ -152,7 +152,7 @@ Keep paths, timestamps, checkbox counts, command syntax, and frontmatter out of 
 
 Every task records `reviewer: user | agent` before implementation starts. This field names who owns **final acceptance**, not who implements the task.
 
-Classify from the required acceptance decision and the agent's actual observation boundary. User-visible output alone does not require user review. Objective UI behavior can be agent-reviewed under the same evidence threshold as other work.
+Classify from the required acceptance decision and the agent's actual observation boundary. User-visible output alone does not require user review. Objective UI behavior can be agent-reviewed under the same evidence threshold as other work. Subjective acceptance belongs to the user only when the user will judge or use the result: tooling only the agent runs, and output whose look the user already approved, is agent-reviewed unless the user reserved approval.
 
 Use `reviewer: user` when **any** acceptance criterion requires:
 
@@ -172,6 +172,7 @@ During planning, record the reviewer choice and its source in the Decision Log; 
 | -------------------------------------------------------------------------------------------- | -------- | ----------------------------------------------- |
 | A failed request releases the submit button and retry succeeds; the agent can reproduce both | `agent`  | Objective UI behavior with observable evidence  |
 | A heading matches supplied text exactly                                                      | `agent`  | Deterministic wording check                     |
+| A test harness that only the agent runs makes its debugging workflow simpler                 | `agent`  | The user neither judges nor uses the result     |
 | The user must decide whether new copy feels reassuring                                       | `user`   | Subjective tone judgment                        |
 | Behavior must be confirmed on a device or account unavailable to the agent                   | `user`   | Required observation outside the agent's access |
 | The user explicitly requests final sign-off on an otherwise deterministic fix                | `user`   | Explicit approval ownership                     |
@@ -241,11 +242,11 @@ Every Decision Log and Surprises entry carries the full `YYYY-MM-DD HH:MMZ` UTC 
 
 All tasks use the same proof threshold for `done`: every Concrete Steps and Validation & Acceptance box is checked truthfully, repository-required checks pass, and the supporting evidence is recorded. Only the authority that owns an acceptance criterion may waive it or move it to other work: leave its box unchecked, strike it through, and record the reason, the source, and the receiving task id when it moved, for example `- [ ] ~~Live publish test~~ — moved to <task-id> by the owner (YYYY-MM-DD)`. A struck step or criterion with its recorded reason counts as resolved; any other unchecked box keeps the task open. Required checks that cannot run keep the task active or blocked. The `reviewer` field changes **who owns final acceptance**, not how much verification is required.
 
-User-reviewed tasks stop at `awaiting-review` until their genuine user gate is satisfied; agent-reviewed tasks may close only under the evidence-complete closeout contract. Before either path, verify the reviewer against the final criteria and current evidence. Complete all agent-verifiable work, including relevant failure cases, before requesting user acceptance. Do not transfer unfinished agent verification to the user.
+User-reviewed tasks stop at `awaiting-review` until their genuine user gate is satisfied; agent-reviewed tasks may close only under the evidence-complete closeout contract. Before either path, verify the reviewer against the final criteria and current evidence. Complete all agent-verifiable work, including relevant failure cases, before requesting user acceptance. Do not transfer unfinished agent verification to the user. Only the user defers in-scope work found along the way: finish it, or put it to the user as a decision in the same report, and do not close the task while one is open.
 
 ### User reviewer (`in-progress → awaiting-review`)
 
-1. Draft **Outcomes & Retrospective**: what was delivered, what is deferred, the completed verification and its limits, and exactly what user-owned acceptance remains.
+1. Draft **Outcomes & Retrospective**: what was delivered, what the user chose to defer, the completed verification and its limits, and exactly what user-owned acceptance remains.
 2. Flip `status` to `awaiting-review` and bump `updated:`.
 3. Present the actual reviewable result and how to access it (a preview, rendered artifact, document, or relevant change), summarize the completed checks, and ask only for the unresolved judgment, observation, or reserved approval. If only the user can access the required environment, provide the prepared result and precise steps. A chat summary or `TASK.md` link alone is not a review handoff.
 4. Stop. Do not move the workspace, write to JOURNAL, or update Recently Done.
