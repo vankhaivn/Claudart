@@ -103,10 +103,15 @@ Use exactly one type:
 - `pivot`: direction changed and the old approach was abandoned.
 - `blocker-resolved`: an external blocker cleared.
 - `cancelled`: a task was abandoned (used by the Step 6b archive flow; Outcomes in the task file explain why).
+- `friction`: work stayed achievable but cost far more than the change it served (written by Step 5b).
 
 Example: `2026-04-28 | decision | Use JWT with refresh tokens in httpOnly cookie, not localStorage`
 
 If `.claudart/JOURNAL.md` does not exist, create it with the canonical header before appending. If there is nothing meaningful to journal, skip this step; never write empty entries.
+
+### Step 5b: Surface Workflow Friction
+
+Look back over this session for work that cost far more than the change it served: a procedure, access path or lookup that an earlier session also had to work out, a chain of manual steps the user drove one message at a time, or a long job the user had to ask about. Append at most two `friction` lines, each naming the work and its cost in tool calls, minutes or user messages. Search the journal's earlier `friction` lines for the same work with one bounded search. When it recurred, or one occurrence was clearly costly, propose in the report the smallest project change that would remove it: a script or command, a project skill, or a project guideline. Build nothing here; the user decides whether the proposal becomes a task. Skip this step when nothing qualifies.
 
 ### Step 6: Overwrite CONTEXT
 
@@ -157,11 +162,12 @@ The checkpoint-owned delta is verified in-scope session work that is still uncom
 
 ### Step 7: Report
 
-Output a 6-line summary:
+Output a 7-line summary:
 
 1. Lines in new `.claudart/CONTEXT.md`.
 2. Items kept, dropped, and added.
 3. JOURNAL entries appended, or `none`.
 4. Tasks synced: active=<n>, archived this run=<n>, stalled=<n>; specs synced: active=<n>, archived this run=<n>, stalled=<n>.
 5. Knowledge entries written/updated (list slugs, or `none`), candidates retained/review-needed, checker result, owner-profile entries added or updated (or `none`), and anything proposed for `$cda-learn`.
-6. Git persistence: the new commit SHA and summary when committed, otherwise `CHECKPOINT NOT PERSISTED IN GIT: commit required` plus the reason. Do not diagnose unrelated uncommitted work in this summary.
+6. Friction: the Step 5b proposal and the cost behind it, or `none`.
+7. Git persistence: the new commit SHA and summary when committed, otherwise `CHECKPOINT NOT PERSISTED IN GIT: commit required` plus the reason. Do not diagnose unrelated uncommitted work in this summary.

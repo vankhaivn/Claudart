@@ -1,7 +1,7 @@
 ---
 paths: ["**/*"]
 description: Evidence-driven code-health rules for correct, cohesive, maintainable changes without speculative abstraction or unnecessary churn.
-when_to_use: When implementing, fixing, refactoring, or reviewing code or code-adjacent artifacts; load relevant sections for the change and its verification.
+when_to_use: When implementing, fixing, refactoring, or reviewing code or code-adjacent artifacts, and before starting a job expected to run longer than about ten minutes; load relevant sections for the change and its verification.
 tags: [code-health, correctness, architecture, maintainability, testing]
 ---
 
@@ -67,7 +67,7 @@ Before adding a test, locate the existing check that owns the behavior and exten
 
 Give each shared rule (labels, formatting, retries, permissions, validation or refusal matrices) one owner test with its full matrix; each caller keeps at most one check that it applies the rule. When one behavior change forces edits across many test files, consolidate the duplicated rule instead of updating each copy. Tests do not encode repository history: task or issue ids, release or deployment numbers, milestone or phase labels, incident replays, documentation or prompt prose, or incidental version, key or table inventories. Keep a real compatibility contract in its dedicated contract fixture, replace incidental pins with behavioral invariants, and delete characterization or refactor proofs once the refactor lands, after moving any consequential behavior to its owner test.
 
-Assert observable behavior and stable contracts, not incidental call choreography. Mock genuine boundaries, not every internal collaborator; needing to mock large amounts of unrelated infrastructure is a design signal. A regression test fails when its claimed defect is present. Never weaken assertions, skip coverage, or replace expected results to accept broken behavior.
+Assert observable behavior and stable contracts, not incidental call choreography. A test that restates a value the product defines in one place, such as interface copy, labels or configuration defaults, duplicates it: take the value from that source, and assert exact text only when the text is itself the requirement, such as a validation message. Computed results such as amounts, dates and counts stay literal expected values. Mock genuine boundaries, not every internal collaborator; needing to mock large amounts of unrelated infrastructure is a design signal. A regression test fails when its claimed defect is present. Never weaken assertions, skip coverage, or replace expected results to accept broken behavior.
 
 Ground expected results in requirements, independently checked examples, invariants, or an appropriate reference. Current output, calling the behavior under test to compute its expected result, or copying its algorithm is not an independent correctness oracle. Characterization records existing behavior, not proof that it is correct. Coverage and test counts alone neither justify new cases nor establish correctness.
 
@@ -84,6 +84,10 @@ Keep failures diagnosable and preserve cancellation, timeout propagation, and re
 ## 11. Validate Within the Authorized Scope
 
 Use repository-native checks, starting with the narrowest meaningful verification and broadening with the change's blast radius. Inspect unfamiliar commands before running them; do not assume tests, generators, builds, or scripts are side-effect free. Honor review and planning locks and tool permissions. Avoid production systems and user data, and do not install dependencies or alter the environment without authorization.
+
+Verify the changed code with the checks that exercise it. Before the first run after a change to visible text, values or layout, update every test that depends on them, so failures do not surface one layer per run. After a failure, rerun only the failing tests until they pass, then run the selected checks once on the final tree. Run the full suite only when the change touches inputs many tests share, such as schema or migrations, shared fixtures, contracts, or build or dependency configuration, and at most once per tree. Closing a task, committing or deploying the change does not by itself widen the run. When a repository rule requires a wider run for every change, follow it and propose narrowing it.
+
+Before a check, build, benchmark, deploy, copy or other job expected to run longer than about ten minutes, or one that needs several external services, check every login, network path and permission it needs in one read-only pass and report all missing ones together. State the expected duration. Run the job so one command shows its progress (done of total, current phase, latest error): do not hide output behind `| tail` or buffering, and make any harness you write print that progress. Answer a status question from that one read. Keep the machine awake for the run when the host offers it, and report completion or failure as soon as the job ends, without waiting to be asked.
 
 Inspect the complete final diff and working-tree state, and run `git diff --check` when available. Look for unintended contract changes, unrelated churn, debugging leftovers, secrets, and accidental dependency or fixture changes.
 

@@ -877,9 +877,11 @@ try {
         );
         assert.match(text, /The parent owns Git-history integration/);
       }
+      const integrate = read(join(root, "INTEGRATE.md"));
+      assert.match(integrate, /Never push or merge\./);
       assert.match(
-        read(join(root, "INTEGRATE.md")),
-        /Do not commit, push, or merge\./,
+        integrate,
+        /commit only the approved integration paths as one local commit/,
       );
       for (const file of [
         ".claude/agents/clean-code-reviewer.md",
