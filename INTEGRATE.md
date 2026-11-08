@@ -174,7 +174,7 @@ Separate requested module changes from optional recommendations. For each recomm
 
 For each merge, identify what current upstream content will be introduced and what downstream content will be preserved or relocated. For each retirement, identify the replacement or current owner. Mark live-state files explicitly as preserved.
 
-Also state the validation profile: mandatory fast verification, any already-justified targeted semantic review, whether a full doctor trigger exists, and that tidy will not run as part of integration.
+Also state the validation profile: mandatory fast verification, any already-justified targeted semantic review, whether a full doctor trigger exists, and that tidy will not run as part of integration. Say that the verified writes will become one local commit, so the user can ask to review the diff first instead.
 
 Wait for explicit approval before writing. Approval for this plan does not pre-approve additional normalization discovered later.
 
@@ -192,7 +192,7 @@ Wait for explicit approval before writing. Approval for this plan does not pre-a
 - Set `.claudart/VERSION` to the upstream commit used (`git -C /tmp/claudart-src rev-parse HEAD`) for each layer fully reconciled to current upstream, keeping every other line. Leave a partially reconciled layer's line unchanged. List this write in the plan.
 - Do not touch `.env`, secrets, ignored private files, or unrelated project files.
 - If an unplanned conflict or required write appears, stop before that write and present an amended path-level plan.
-- Do not commit, push, or merge.
+- Do not commit during the writes; Step 4.4 commits after verification. Never push or merge.
 
 ## Step 4 — Validate and hand off
 
@@ -250,7 +250,7 @@ Never run `/cda-tidy` or `$cda-tidy` as part of integration. Integration preserv
 
 ### 4.4 Report the result
 
-Summarize the scenario, selected layers and modules, paths added/replaced/merged/relocated/retired/preserved/skipped/review-needed, verification commands and results, why doctor was or was not run, and any normalization still awaiting approval. Remind the user to review `git diff` before committing.
+Summarize the scenario, selected layers and modules, paths added/replaced/merged/relocated/retired/preserved/skipped/review-needed, verification commands and results, why doctor was or was not run, and any normalization still awaiting approval. When verification passes and the project is a Git repository, commit only the approved integration paths as one local commit in the repository's message convention, unless the repository's Git policy or the user's instructions forbid it or the user asked to review the diff first. Report the commit, or why the integration stays uncommitted.
 
 This protocol is idempotent: a later run derives a fresh delta from the then-current upstream and downstream state.
 
