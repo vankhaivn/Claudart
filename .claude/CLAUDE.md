@@ -34,7 +34,7 @@ See @.claude/rules/ai-behavior.md for universal behavior. Follow the owner worki
 
 Read these project-root paths only when their trigger applies. Conditional rules use command/reference scopes so reading startup indexes or metadata does not activate entire workflows:
 
-- `.claude/rules/code-health.md` when implementing or reviewing code or code-adjacent artifacts; use relevant sections and required verification.
+- `.claude/rules/code-health.md` when implementing or reviewing code or code-adjacent artifacts, and before starting a job expected to run longer than about ten minutes; use relevant sections and required verification.
 - `.claude/rules/git-workflow.md` before staging, committing, or creating/renaming branches, and whenever a workflow reaches a Git persistence boundary; it owns default local-commit authority, staging scope, branch hygiene, and commit identity.
 - `.claude/rules/task-management.md` when creating, executing, or resuming a persistent task.
 - `.claude/rules/agent-delegation.md` before spawning, resuming, or sending new work to a subagent, and when consuming worker results; whether to delegate is decided under `ai-behavior.md`. Use the current runtime's capabilities.

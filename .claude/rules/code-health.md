@@ -1,7 +1,7 @@
 ---
 paths: [".claude/agents/clean-code-reviewer.md"]
 description: Evidence-driven code-health rules for correct, cohesive, maintainable changes without speculative abstraction or unnecessary churn.
-when_to_use: When implementing, fixing, refactoring, or reviewing code or code-adjacent artifacts; load relevant sections for the change and its verification.
+when_to_use: When implementing, fixing, refactoring, or reviewing code or code-adjacent artifacts, and before starting a job expected to run longer than about ten minutes; load relevant sections for the change and its verification.
 tags: [code-health, correctness, architecture, maintainability, testing]
 ---
 
@@ -84,6 +84,8 @@ Keep failures diagnosable and preserve cancellation, timeout propagation, and re
 ## 11. Validate Within the Authorized Scope
 
 Use repository-native checks, starting with the narrowest meaningful verification and broadening with the change's blast radius. Inspect unfamiliar commands before running them; do not assume tests, generators, builds, or scripts are side-effect free. Honor review and planning locks and tool permissions. Avoid production systems and user data, and do not install dependencies or alter the environment without authorization.
+
+Before a check, build, benchmark, deploy, copy or other job expected to run longer than about ten minutes, or one that needs several external services, check every login, network path and permission it needs in one read-only pass and report all missing ones together. State the expected duration. Run the job so one command shows its progress (done of total, current phase, latest error): do not hide output behind `| tail` or buffering, and make any harness you write print that progress. Answer a status question from that one read. Keep the machine awake for the run when the host offers it, and report completion or failure as soon as the job ends, without waiting to be asked.
 
 Inspect the complete final diff and working-tree state, and run `git diff --check` when available. Look for unintended contract changes, unrelated churn, debugging leftovers, secrets, and accidental dependency or fixture changes.
 
