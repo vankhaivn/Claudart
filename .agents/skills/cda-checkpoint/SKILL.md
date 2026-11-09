@@ -152,9 +152,9 @@ Skip this step if `.claudart/specs/` does not exist.
 
 ### Step 6c: Route Durable Facts to Their Owners
 
-Skip this step if no candidate from this session, task closeout, or spec NOTES passes the capture gates in `.codex/guidelines/knowledge-management.md`, and do not run the checker when no knowledge changed. Candidates include facts a later session will need that so far live only in this session's task records, such as how to reach a system, which branch deploys, where an environment moved, a failure already seen and its cause, or an option the user rejected. Checkpoint is bulk maintenance, not the only knowledge write gate; a natural-language knowledge update mid-session follows that guideline directly.
+List the candidates from this session, task closeout and spec NOTES, including any a compaction summary names. Candidates include facts a later session will need that so far live only in this session's task records, such as how to reach a system, which branch deploys, where an environment moved, a failure already seen and its cause, or an option the user rejected. Skip this step only when the list is empty, and do not run the checker when no knowledge changed. Otherwise read `.codex/guidelines/knowledge-management.md` in full before judging any candidate against its capture gates, and give each one a verdict for the report: written to its owner, kept as a candidate with the reason, or rejected with the gate it failed. Checkpoint is bulk maintenance, not the only knowledge write gate; a natural-language knowledge update mid-session follows that guideline directly.
 
-For each eligible claim, read the knowledge guideline in full, patch the owner under `.codex/references/knowledge-maintenance.md`, and update its reachable route in the same change. Checkpoint does not take over project-document maintenance or require a docs audit. Never write secrets. Run `bash .codex/scripts/knowledge-check.sh --root .` after the final knowledge mutation and repair in-scope mechanical failures; report any remaining findings and do not claim the update healthy. These writes are autonomous; the Git diff is the review surface.
+For each eligible claim, patch the owner under `.codex/references/knowledge-maintenance.md` and update its reachable route in the same change. Checkpoint does not take over project-document maintenance or require a docs audit. Never write secrets. Run `bash .codex/scripts/knowledge-check.sh --root .` after the final knowledge mutation and repair in-scope mechanical failures; report any remaining findings and do not claim the update healthy. These writes are autonomous; the Git diff is the review surface.
 
 ### Step 6d: Persist Through the Shared Git Workflow
 
@@ -170,6 +170,6 @@ Output a 7-line summary:
 2. Items kept, dropped, and added; open items from this session: carried=<n>, resolved=<n>, dropped by the user=<n>.
 3. JOURNAL entries appended, or `none`.
 4. Tasks synced: active=<n>, archived this run=<n>, stalled=<n>; specs synced: active=<n>, archived this run=<n>, stalled=<n>.
-5. Knowledge entries written/updated (list slugs, or `none`), candidates retained/review-needed, checker result, each owner correction or preference found and where it is recorded (or `none`), and anything proposed for `$cda-learn` and still waiting on the user.
+5. Knowledge entries written/updated (list slugs, or `none`), the verdict on every other candidate, checker result, each owner correction or preference found and where it is recorded (or `none`), and anything proposed for `$cda-learn` and still waiting on the user.
 6. Friction: the Step 5b proposal and the cost behind it, or `none`.
 7. Git persistence: the new commit SHA and summary when committed, otherwise `CHECKPOINT NOT PERSISTED IN GIT: commit required` plus the reason. Do not diagnose unrelated uncommitted work in this summary.
