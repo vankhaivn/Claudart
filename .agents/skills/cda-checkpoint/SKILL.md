@@ -92,7 +92,7 @@ A micro-handoff lists at most three files. Count lines; if the draft exceeds 150
 
 ### Step 5: Append to JOURNAL
 
-For every item dropped in Step 2 because it was done, decided, pivoted, or resolved, append one line:
+For every item dropped in Step 2 because it was done, decided, pivoted, or resolved, append one line. Work that started and finished since the last checkpoint never was a CONTEXT item: find it in the Decision Log and Surprises entries this session's tasks gained since then, and journal each real completion, decision or pivot the same way:
 
 ```text
 YYYY-MM-DD | <type> | <one short summary, optional commit ref>
