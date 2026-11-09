@@ -20,6 +20,7 @@ Write a session checkpoint: a declarative snapshot of what is true now, not a lo
 - Read `.claudart/CONTEXT.md`; treat a missing file as empty.
 - Read the last ~30 lines of `.claudart/JOURNAL.md` to avoid duplicate entries.
 - Skim the recent conversation and `git log -10 --oneline` for what changed since the last checkpoint.
+- When this session's context has been compacted, the conversation in view is a summary that loses what the user said. Extract the user's own messages from the session transcript with a bounded command, including answers given through question prompts, each with its time and the number of tool calls that followed it; never read the whole file. The compaction summary names the transcript path; use that file even when the session continued in a newer one. When no transcript can be read, say so in the report.
 
 ### Step 2 — Triage every section
 
@@ -48,7 +49,7 @@ Add to `.claudart/CONTEXT.md` only what is true now:
 
 Then account for everything this session left waiting on someone: each pending item a compaction summary lists, including ones it calls optional; each command handed to the user to run; each decision put to the user and not yet answered; and anything left outside the repository, such as files on another host or a running process. Every one ends in CONTEXT, in the Current State of the task or the NOTES of the spec that owns it, in a JOURNAL line when it was resolved, or is dropped because the user said so. A task or spec pointer in CONTEXT carries an item only when that file states it.
 
-List each correction, standing preference and approval the user stated since the last checkpoint, from the user's own messages, and note where each is recorded. A standing one about working with the owner belongs in `.claudart/OWNER.md`, not CONTEXT; route it, and every other new item, as the Step 2 table routes existing ones.
+List each correction, standing preference and approval the user stated since the last checkpoint, from the user's own messages (the Step 1 extract after a compaction), and note where each is recorded. A standing one about working with the owner belongs in `.claudart/OWNER.md`, not CONTEXT; route it, and every other new item, as the Step 2 table routes existing ones.
 
 Task references, decisions, and blockers are one short sentence each. Append `<!-- since: YYYY-MM-DD -->` with today's date to every new bullet, and keep the original date on a kept bullet; `/cda-doctor` uses it to flag old decisions.
 
@@ -111,7 +112,7 @@ If `.claudart/JOURNAL.md` does not exist, create it with the canonical header be
 
 ### Step 5b — Surface workflow friction
 
-Look back over this session for work that cost far more than the change it served: a procedure, access path or lookup that an earlier session also had to work out, a chain of manual steps the user drove one message at a time, or a long job the user had to ask about. Append at most two `friction` lines, each naming the work and its cost in tool calls, minutes or user messages. Search the journal's earlier `friction` lines for the same work with one bounded search. When it recurred, or one occurrence was clearly costly, propose in the report the smallest project change that would remove it: a script or command, a project skill, or a project rule. Build nothing here; the user decides whether the proposal becomes a task. Skip this step when nothing qualifies.
+Look back over this session for work that cost far more than the change it served: a procedure, access path or lookup that an earlier session also had to work out, a chain of manual steps the user drove one message at a time, or a long job the user had to ask about. Append at most two `friction` lines, each naming the work and its cost in tool calls, minutes or user messages. After a compaction, take the cost from the Step 1 extract, not from memory. Search the journal's earlier `friction` lines for the same work with one bounded search. When it recurred, or one occurrence was clearly costly, propose in the report the smallest project change that would remove it: a script or command, a project skill, or a project rule. Build nothing here; the user decides whether the proposal becomes a task. Skip this step when nothing qualifies.
 
 ### Step 6 — Overwrite .claudart/CONTEXT.md
 
@@ -168,6 +169,6 @@ Output a 7-line summary:
 2. Items kept / dropped / added (counts); open items from this session: carried=<n>, resolved=<n>, dropped by the user=<n>
 3. JOURNAL entries appended (or "none")
 4. Tasks synced: active=<n>, archived this run=<n>, stalled=<n>; specs synced: active=<n>, archived this run=<n>, stalled=<n>
-5. Knowledge entries written/updated this run (list slugs, or "none") and the verdict on every other candidate; each owner correction or preference found and where it is recorded (or "none"); plus anything proposed for `/cda-learn` (recurring behavior → rules) and still waiting on the user
+5. Knowledge entries written/updated this run (list slugs, or "none") and the verdict on every other candidate; each owner correction or preference found and where it is recorded (or "none"); plus anything proposed for `/cda-learn` (recurring behavior → rules) and still waiting on the user; after a compaction with no readable transcript, say that corrections may be missing
 6. Friction: the Step 5b proposal and the cost behind it, or "none"
 7. Git persistence: the new commit SHA and summary when committed, otherwise `CHECKPOINT NOT PERSISTED IN GIT: commit required` plus the reason. Do not diagnose unrelated uncommitted work in this summary.

@@ -25,6 +25,8 @@ Before writing, inspect the shared handoff slot. Never silently overwrite an unc
 
 ### Step 1 — Chronological analysis pass
 
+When this session's context has been compacted, a summary has replaced the user's wording. First extract the user's own messages from the session transcript with a bounded command, including answers given through question prompts, and never read the whole file; the compaction summary names the transcript path. Take the user's requests, constraints and Rule 3 quotes from that extract. When no transcript can be read, say so in the report.
+
 Walk the conversation oldest → newest. For each phase identify:
 
 - the user's explicit requests and intents (mark which must be quoted under Rule 3)
