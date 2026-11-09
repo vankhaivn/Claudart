@@ -46,6 +46,8 @@ Add to `.claudart/CONTEXT.md` only what is true now:
 - Open questions and blockers still unresolved.
 - The single most useful thing the next session should do first.
 
+Then account for everything this session left waiting on someone: each pending item a compaction summary lists, including ones it calls optional; each command handed to the user to run; each decision put to the user and not yet answered; and anything left outside the repository, such as files on another host or a running process. Every one ends in CONTEXT, in the Current State of the task or the NOTES of the spec that owns it, in a JOURNAL line when it was resolved, or is dropped because the user said so. A task or spec pointer in CONTEXT carries an item only when that file states it.
+
 A standing owner correction, preference, or approval from this session belongs in `.claudart/OWNER.md`, not CONTEXT; route it, and every other new item, as the Step 2 table routes existing ones.
 
 Task references, decisions, and blockers are one short sentence each. Append `<!-- since: YYYY-MM-DD -->` with today's date to every new bullet, and keep the original date on a kept bullet; `/cda-doctor` uses it to flag old decisions.
@@ -163,7 +165,7 @@ The checkpoint-owned delta is verified in-scope session work that is still uncom
 Output a 7-line summary:
 
 1. Lines in new .claudart/CONTEXT.md
-2. Items kept / dropped / added (counts)
+2. Items kept / dropped / added (counts); open items from this session: carried=<n>, resolved=<n>, dropped by the user=<n>
 3. JOURNAL entries appended (or "none")
 4. Tasks synced: active=<n>, archived this run=<n>, stalled=<n>; specs synced: active=<n>, archived this run=<n>, stalled=<n>
 5. Knowledge entries written/updated this run (list slugs, or "none"); owner-profile entries added or updated (or "none"); plus anything proposed for `/cda-learn` (recurring behavior → rules)

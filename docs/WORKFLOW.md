@@ -18,7 +18,7 @@ It describes behavior, not every rule. The exact contracts the agent follows liv
 
 **Work.** Ask for what you need. The agent picks the right size of work (see below).
 
-**Checkpoint.** At a natural stopping point, `/cda-checkpoint` rewrites `CONTEXT.md`, updates the task and spec lists, moves old state into `JOURNAL.md`, and saves facts worth keeping as knowledge. It also notes work that cost far more than the change it served and, when that work repeats, proposes a script, skill or rule to remove the cost.
+**Checkpoint.** At a natural stopping point, `/cda-checkpoint` rewrites `CONTEXT.md`, updates the task and spec lists, moves old state into `JOURNAL.md`, and saves facts worth keeping as knowledge. It carries forward everything the session left open or waiting on you. It also notes work that cost far more than the change it served and, when that work repeats, proposes a script, skill or rule to remove the cost.
 
 **Handoff.** Only for a hard investigation that must continue in a fresh session. `/cda-handoff` writes the current hypothesis, evidence, dead ends, and the exact next step to `HANDOFF.md`. The next `/cda-start` reads it and deletes it. It is not a session summary.
 
