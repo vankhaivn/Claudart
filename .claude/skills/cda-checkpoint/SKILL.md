@@ -31,7 +31,7 @@ For each item currently in `.claudart/CONTEXT.md`, decide one of using current e
 | Done / resolved / merged                                                                               | Drop it from CONTEXT. Candidate for JOURNAL if it was a real decision, completion, or pivot. Pure tactical noise (e.g., "tried X, didn't work") is dropped silently.                                                                    |
 | Superseded by a newer state                                                                            | Drop the old, write the new                                                                                                                                                                                                             |
 | A standing owner preference or approval about working with the owner, stated or confirmed by the owner | Record it in `.claudart/OWNER.md` under `.claude/rules/ai-behavior.md` if it is missing, then drop it from CONTEXT; a correction about work an existing rule owns goes to that rule (next row); a one-time approval stays with its work |
-| A durable convention for a code area, workflow, or other area a rule owns                              | Propose `.claude/rules/` via `/cda-learn`, then drop it from CONTEXT                                                                                                                                                                    |
+| A durable convention for a code area, workflow, or other area a rule owns                              | Propose `.claude/rules/` via `/cda-learn`; keep it under Recent Decisions until a rule holds it or the user declines, then drop it from CONTEXT                                                                                         |
 | A fact that may pass the knowledge capture gates                                                       | Flag for Step 6c; it may be local in scope but must be descriptive, durable beyond this work, current, and evidenced                                                                                                                    |
 | Uncertain, conflicting, WIP, or proposed state                                                         | Keep it as a candidate in the owning task/spec/CONTEXT surface; do not promote it as canonical knowledge                                                                                                                                |
 
@@ -48,7 +48,7 @@ Add to `.claudart/CONTEXT.md` only what is true now:
 
 Then account for everything this session left waiting on someone: each pending item a compaction summary lists, including ones it calls optional; each command handed to the user to run; each decision put to the user and not yet answered; and anything left outside the repository, such as files on another host or a running process. Every one ends in CONTEXT, in the Current State of the task or the NOTES of the spec that owns it, in a JOURNAL line when it was resolved, or is dropped because the user said so. A task or spec pointer in CONTEXT carries an item only when that file states it.
 
-A standing owner correction, preference, or approval from this session belongs in `.claudart/OWNER.md`, not CONTEXT; route it, and every other new item, as the Step 2 table routes existing ones.
+List each correction, standing preference and approval the user stated since the last checkpoint, from the user's own messages, and note where each is recorded. A standing one about working with the owner belongs in `.claudart/OWNER.md`, not CONTEXT; route it, and every other new item, as the Step 2 table routes existing ones.
 
 Task references, decisions, and blockers are one short sentence each. Append `<!-- since: YYYY-MM-DD -->` with today's date to every new bullet, and keep the original date on a kept bullet; `/cda-doctor` uses it to flag old decisions.
 
@@ -168,6 +168,6 @@ Output a 7-line summary:
 2. Items kept / dropped / added (counts); open items from this session: carried=<n>, resolved=<n>, dropped by the user=<n>
 3. JOURNAL entries appended (or "none")
 4. Tasks synced: active=<n>, archived this run=<n>, stalled=<n>; specs synced: active=<n>, archived this run=<n>, stalled=<n>
-5. Knowledge entries written/updated this run (list slugs, or "none"); owner-profile entries added or updated (or "none"); plus anything proposed for `/cda-learn` (recurring behavior → rules)
+5. Knowledge entries written/updated this run (list slugs, or "none"); each owner correction or preference found and where it is recorded (or "none"); plus anything proposed for `/cda-learn` (recurring behavior → rules) and still waiting on the user
 6. Friction: the Step 5b proposal and the cost behind it, or "none"
 7. Git persistence: the new commit SHA and summary when committed, otherwise `CHECKPOINT NOT PERSISTED IN GIT: commit required` plus the reason. Do not diagnose unrelated uncommitted work in this summary.
