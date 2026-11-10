@@ -1,6 +1,8 @@
-# CLAUDART
+<p align="center"><img src="docs/assets/logo.svg" width="88" height="88" alt=""></p>
 
-[English](README.md) · [Hướng dẫn quy trình](docs/WORKFLOW_VI.md)
+<h1 align="center">CLAUDART</h1>
+
+<p align="center"><a href="README.md">English</a> · <a href="docs/WORKFLOW_VI.md">Hướng dẫn quy trình</a></p>
 
 CLAUDART cho Claude Code và Codex một bộ nhớ nằm ngay trong repository. Trạng thái hiện tại, kế hoạch, kiến thức dự án và chỉ dẫn cho agent đều là file Markdown, được quản lý phiên bản cùng mã nguồn. Phiên mới tiếp tục đúng chỗ phiên trước dừng lại.
 

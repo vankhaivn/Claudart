@@ -1,6 +1,8 @@
-# CLAUDART
+<p align="center"><img src="docs/assets/logo.svg" width="88" height="88" alt=""></p>
 
-[Tiếng Việt](README_VI.md) · [Workflow guide](docs/WORKFLOW.md)
+<h1 align="center">CLAUDART</h1>
+
+<p align="center"><a href="README_VI.md">Tiếng Việt</a> · <a href="docs/WORKFLOW.md">Workflow guide</a></p>
 
 CLAUDART gives Claude Code and Codex a memory that lives in your repository. Current state, plans, project knowledge, and agent instructions are plain Markdown files, versioned with your code. A new session picks up where the last one stopped.
 
