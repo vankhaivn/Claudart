@@ -42,6 +42,7 @@ Choose the class upfront; the classes are not a retry ladder. Before retrying a 
 A consult is one read-only question put to an execution profile above the parent ceilings. It runs only after the user approves it for the problem in hand: propose it when `.codex/guidelines/ai-behavior.md` gives a sign for it, and run it when the user asks for one.
 
 - **Ask:** in one question to the user, give the question the advisor would answer, the sign you observed, the model and reasoning effort, and that it is a single read-only consult. Name the lowest profile above the ceilings that fits the problem. An approval covers one consult, including clarifying follow-ups to the same advisor; a refusal settles that problem until new evidence appears.
+- **Independence:** spawn the advisor in a reduced-context mode with a self-contained prompt, never a full-history fork, and with read-only permissions. The brief holds the question, the user's constraints in their own words, paths to the code and records involved, and each attempt with its observed result. Leave out your explanation of the cause and the answer you prefer, and tell the advisor to read the sources itself instead of relying on the brief.
 
 ## Dispatch and reuse
 
