@@ -47,6 +47,8 @@ Judge cohesion by the policy, invariant, state lifecycle, and reasons to change 
 
 Extract when a boundary gives a present benefit: independently changing behavior, explicit dependencies, clearer state ownership, focused behavioral tests, or a much easier reading path. One caller is sufficient. Give the extracted unit only the inputs and capabilities it needs. Keep code together when its steps share an invariant or lifecycle and splitting would scatter the reasoning.
 
+Place a new file by its role, not by where similar work last landed. A directory that already mixes unrelated roles, or one made for temporary work (a spike, proof of concept or scratch area) that the product now depends on, is a review trigger: put the new file under a location named for its role when the layout allows it, and report the regroup of what is already there as a separate proposal instead of moving it in the same change.
+
 Do not enforce arbitrary limits on lines, parameters, methods, nesting, or dependencies. Honor project tooling, but treat metrics as prompts for investigation, not proof of quality. Do not game them with trivial forwarding helpers, arbitrary file splits, or mixins that keep the original coupling.
 
 ## 7. Require Concrete Benefits from Abstraction
