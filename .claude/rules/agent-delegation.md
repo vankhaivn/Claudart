@@ -35,6 +35,8 @@ A consult is one read-only question put to a model above the parent ceiling. It 
 
 - **Ask:** in one question to the user, give the question the advisor would answer, the sign you observed, the model, and that it is a single read-only consult. Name the lowest model above the ceiling that fits the problem. An approval covers one consult, including clarifying follow-ups to the same advisor; a refusal settles that problem until new evidence appears.
 - **Independence:** spawn the advisor with a fresh context, never a fork of the session, and with read-only permissions. The brief holds the question, the user's constraints in their own words, paths to the code and records involved, and each attempt with its observed result. Leave out your explanation of the cause and the answer you prefer, and tell the advisor to read the sources itself instead of relying on the brief.
+- **Verdict:** ask a closed question about the problem, not for improvements. The advisor answers first with one verdict: keep the current approach, make one change (the smallest that resolves the problem), or stop because the limit is real. Keeping and stopping are complete answers. A recommended change names the observed failure or measured cost it removes, stays inside the question, and is sized to the project as it is, not to a larger system it could become.
+- **After the consult:** the advisor edits nothing. Weigh its advice against the evidence and `.claude/rules/code-health.md` like any worker result, tell the user the verdict and where you depart from it, and continue at the session's model.
 
 ## Dispatch and reuse
 
