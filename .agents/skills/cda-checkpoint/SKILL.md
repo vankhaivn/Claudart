@@ -129,7 +129,7 @@ This step is independent of CONTEXT.md. Skip it if `.claudart/tasks/` does not e
 3. Archive each top-level task whose status is `done` or `cancelled` with the Shared archive flow in `.codex/guidelines/task-management.md`, under these conditions:
    - Require a valid `reviewer: user | agent` before archiving; report incomplete metadata without inventing acceptance ownership.
    - Confirm `Outcomes & Retrospective` is filled in `TASK.md`. If empty, report it; do not invent the outcome.
-   - Before archiving, inspect only `TASK.md` Memory Hints and Related Docs for knowledge candidates for Step 6c. Do not bulk-read supporting files or promote task/WIP/proposal state.
+   - The flow's knowledge step lists its candidates from `TASK.md` only and hands them to Step 6c, which judges them with the rest. Do not bulk-read supporting files or promote task/WIP/proposal state.
    - Append the flow's JOURNAL line only if the recent journal tail does not already contain it, with type `cancelled` for a cancellation.
    - Never archive `awaiting-review` tasks; that state requires `reviewer: user`. Report inconsistent reviewer/status metadata without requesting a completion signal. Checkpoint never changes task status, reviewer, or acceptance boxes.
 4. Rewrite `.claudart/tasks/index.md` per the `index.md` Format in `.codex/guidelines/task-management.md`, including its 100-line ceiling and trim ladder. Report any still-unarchived terminal workspace rather than linking it to a nonexistent archive. Missing `artifacts/` is normal; checkpoint never creates supporting files.

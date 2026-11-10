@@ -60,7 +60,7 @@ Mỗi task ghi rõ ai review kết quả: bạn (`user`) hay agent (`agent`).
 - **Agent** tự đóng task khi mọi tiêu chí đều kiểm tra khách quan được, ví dụ "request lỗi thì nút submit bấm lại được". Agent cũng tự review kết quả mà bạn không đánh giá cũng không dùng, ví dụ một tool chỉ agent chạy.
 - **Bạn** duyệt khi kết quả cần bạn đánh giá ("câu chữ này có tạo cảm giác yên tâm không?"), cần thiết bị hay tài khoản agent không truy cập được, hoặc khi bạn yêu cầu được duyệt cuối.
 
-Dù ai review, chỉ bạn mới được hoãn việc thuộc task. Việc trong phạm vi mà agent phát hiện ra thì agent làm nốt hoặc hỏi bạn trước khi đóng task.
+Dù ai review, chỉ bạn mới được hoãn việc thuộc task. Việc trong phạm vi mà agent phát hiện ra thì agent làm nốt hoặc hỏi bạn trước khi đóng task. Khi đóng task, agent lưu những sự thật trong task mà phiên sau còn cần thành knowledge và báo cho bạn nó đã lưu hay bỏ lại những gì.
 
 Khi bạn là người review, agent làm xong mọi thứ nó tự kiểm được, rồi dừng lại cho bạn xem kết quả thật và đúng một quyết định còn lại của bạn. Nói "ổn rồi" hoặc "đóng đi" để kết thúc, hoặc mô tả lỗi để mở lại task. Im lặng hay khen không làm task đóng.
 

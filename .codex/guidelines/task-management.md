@@ -281,7 +281,7 @@ After a valid transition to `done` or `cancelled`:
    ```
 4. Update `.claudart/tasks/index.md`: remove from Active, add to Recently Done with `done/<task-id>/TASK.md`. Update any live CONTEXT/HANDOFF pointer to the new path. Replace any path link from another task or spec into the moved workspace with its workspace id. Repair every knowledge `sources` entry that points into the moved workspace so it names the archived path; a path repair changes neither `updated` nor `last_verified`. When a repair was made, run the knowledge checker.
 5. If a recurring pattern emerged, propose `$cda-learn`.
-6. Promote only descriptive claims that pass the full knowledge gate; keep unresolved claims as candidates in the archive.
+6. List the facts in `TASK.md` Memory Hints, Decision Log, Surprises and Outcomes that a later session will need and no other current source holds, such as how to reach a system, a failure already seen and its cause, or an option the user rejected. Skip this step only when the list is empty. Otherwise read `.codex/guidelines/knowledge-management.md` before judging them against its capture gates, promote the descriptive claims that pass, and give each one's verdict when you report the closure: written to its owner, kept as a candidate in the archive with the reason, or rejected with the gate it failed.
 
 ## Resumption Across Sessions
 
