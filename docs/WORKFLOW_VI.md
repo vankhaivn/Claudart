@@ -60,7 +60,7 @@ Mỗi task ghi rõ ai review kết quả: bạn (`user`) hay agent (`agent`).
 - **Agent** tự đóng task khi mọi tiêu chí đều kiểm tra khách quan được, ví dụ "request lỗi thì nút submit bấm lại được". Agent cũng tự review kết quả mà bạn không đánh giá cũng không dùng, ví dụ một tool chỉ agent chạy.
 - **Bạn** duyệt khi kết quả cần bạn đánh giá ("câu chữ này có tạo cảm giác yên tâm không?"), cần thiết bị hay tài khoản agent không truy cập được, hoặc khi bạn yêu cầu được duyệt cuối.
 
-Dù ai review, chỉ bạn mới được hoãn việc thuộc task. Việc trong phạm vi mà agent phát hiện ra thì agent làm nốt hoặc hỏi bạn trước khi đóng task.
+Dù ai review, chỉ bạn mới được hoãn việc thuộc task. Việc trong phạm vi mà agent phát hiện ra thì agent làm nốt hoặc hỏi bạn trước khi đóng task. Khi đóng task, agent lưu những sự thật trong task mà phiên sau còn cần thành knowledge và báo cho bạn nó đã lưu hay bỏ lại những gì.
 
 Khi bạn là người review, agent làm xong mọi thứ nó tự kiểm được, rồi dừng lại cho bạn xem kết quả thật và đúng một quyết định còn lại của bạn. Nói "ổn rồi" hoặc "đóng đi" để kết thúc, hoặc mô tả lỗi để mở lại task. Im lặng hay khen không làm task đóng.
 
@@ -106,7 +106,7 @@ Khi mọi thứ xong, agent chạy các check nghiệm thu và dừng ở `await
 | Tài liệu dự án              | Hiện trạng, viết cho người đọc của nó       | Ghi chú cập nhật theo ngày, kết quả test, mã task |
 | `HANDOFF.md`                | Mạch suy luận cho phiên kế tiếp             | Thứ gì lâu dài                                    |
 
-**Hồ sơ owner.** Khi bạn sửa agent hoặc nêu một ưu tiên lâu dài ("luôn trả lời bằng tiếng Việt", "không bao giờ push khi chưa hỏi"), agent thêm một dòng có ngày vào `OWNER.md` và báo cho bạn. Một lần cho phép duy nhất không bao giờ bị ghi thành cho phép thường trực. Chỉ dẫn hiện tại của bạn luôn thắng file này.
+**Hồ sơ owner.** Khi bạn sửa agent hoặc nêu một ưu tiên lâu dài ("luôn trả lời bằng tiếng Việt", "không bao giờ push khi chưa hỏi"), agent thêm một dòng có ngày vào `OWNER.md` và báo cho bạn. Nếu bạn sửa cách làm việc ở một mảng đã có rule của dự án thì agent ghi thẳng vào rule đó, ngay trong lượt ấy. Một lần cho phép duy nhất không bao giờ bị ghi thành cho phép thường trực. Chỉ dẫn hiện tại của bạn luôn thắng file này.
 
 **Knowledge.** Một sự thật đáng đưa vào knowledge khi qua được câu hỏi:
 

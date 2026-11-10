@@ -60,7 +60,7 @@ Every task says who reviews the result: you (`user`) or the agent (`agent`).
 - **The agent** closes the task itself when every criterion can be checked objectively, for example "a failed request re-enables the submit button". It also reviews results you will neither judge nor use, such as a tool only the agent runs.
 - **You** sign off when the result needs your judgment ("does this copy feel reassuring?"), a device or account the agent cannot reach, or when you asked for final approval.
 
-Either way, only you defer work that belongs to the task. The agent finishes what it finds in scope, or asks you, before the task closes.
+Either way, only you defer work that belongs to the task. The agent finishes what it finds in scope, or asks you, before the task closes. On closing, it saves the facts from the task that a later session will need as knowledge and tells you what it saved or left out.
 
 When you are the reviewer, the agent finishes everything it can check, then stops and shows you the actual result and the one decision left for you. Say "looks good" or "close it" to finish, or describe the problem to reopen the task. Silence or praise does not close it.
 
@@ -106,7 +106,7 @@ When everything is done, the agent runs the acceptance checks and stops at `awai
 | Project docs              | The current state, written for their readers | Dated update notes, test results, task IDs |
 | `HANDOFF.md`              | Reasoning for the next session only          | Anything permanent                         |
 
-**Owner profile.** When you correct the agent or state a lasting preference ("always answer in Vietnamese", "never push without asking"), it adds one dated line to `OWNER.md` and tells you. A one-time approval is never recorded as a standing one. Your current instruction always wins over the file.
+**Owner profile.** When you correct the agent or state a lasting preference ("always answer in Vietnamese", "never push without asking"), it adds one dated line to `OWNER.md` and tells you. A correction about how to do the work in an area a project rule covers goes into that rule instead, in the same turn. A one-time approval is never recorded as a standing one. Your current instruction always wins over the file.
 
 **Knowledge.** A fact belongs in knowledge when it passes this test:
 
