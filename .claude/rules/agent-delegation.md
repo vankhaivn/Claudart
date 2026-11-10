@@ -29,13 +29,22 @@ The parent session's selected model is a hard ceiling for implicit delegation. T
 
 Choose the class upfront; the classes are not a retry ladder. Before retrying a wrong or partial result, distinguish missing context, unclear scope, or tooling failure from a capability limit. Allow at most one delegated retry per unit across agents and models, with a corrected prompt or changed hypothesis; changing the worker or model does not reset this budget. Evidence of a capability limit may justify skipping classes within the same ceiling. The parent may take over immediately and must take over after a failed retry, reporting blockers it cannot resolve.
 
+## Consult above the ceiling
+
+A consult is one read-only question put to a model above the parent ceiling. It runs only after the user approves it for the problem in hand: propose it when `.claude/rules/ai-behavior.md` gives a sign for it, and run it when the user asks for one.
+
+- **Ask:** in one question to the user, give the question the advisor would answer, the sign you observed, the model, and that it is a single read-only consult. Name the lowest model above the ceiling that fits the problem. An approval covers one consult, including clarifying follow-ups to the same advisor; a refusal settles that problem until new evidence appears.
+- **Independence:** spawn the advisor with a fresh context, never a fork of the session, and with read-only permissions. The brief holds the question, the user's constraints in their own words, paths to the code and records involved, and each attempt with its observed result. Leave out your explanation of the cause and the answer you prefer, and tell the advisor to read the sources itself instead of relying on the brief.
+- **Verdict:** ask a closed question about the problem, not for improvements. The advisor answers first with one verdict: keep the current approach, make one change (the smallest that resolves the problem), or stop because the limit is real. Keeping and stopping are complete answers. A recommended change names the observed failure or measured cost it removes, stays inside the question, and is sized to the project as it is, not to a larger system it could become.
+- **After the consult:** the advisor edits nothing. Weigh its advice against the evidence and `.claude/rules/code-health.md` like any worker result, tell the user the verdict and where you depart from it, and continue at the session's model.
+
 ## Dispatch and reuse
 
 Before dispatching an ordinary delegated unit, record its routing decision in the session: unit → difficulty class → selected model and reasoning effort where supported → reason, within the current parent ceilings. Recovery and knowledge says when it also goes to a task or LEDGER; no new planning file or user approval round-trip is required.
 
 - **Explicit selection:** pass the selected profile in the spawn arguments. Omitting them selects inheritance, which fits only when the parent's profile suits this unit. When profile information is missing or uncertain, work locally or use a known suitable profile within the ceilings.
 - **New work for an existing agent:** reassess its profile before a resume or follow-up changes the unit; existing context alone does not justify keeping a stronger profile. If the tool cannot change the profile, hand the unit to a suitable new delegate or handle it locally. Status checks, clarification and continuation of the unchanged unit reuse its decision.
-- **Observed profile:** when the runtime exposes the resolved profile, resolve a mismatch with the decision before sending further work, and stop a delegate whose profile exceeds the ceilings. When it is not exposed, do not claim the profile was verified.
+- **Observed profile:** when the runtime exposes the resolved profile, resolve a mismatch with the decision before sending further work, and stop a delegate whose profile exceeds the ceilings, unless the user approved that profile. When it is not exposed, do not claim the profile was verified.
 
 ## Decomposition and ownership
 
