@@ -106,7 +106,7 @@ When everything is done, the agent runs the acceptance checks and stops at `awai
 | Project docs              | The current state, written for their readers | Dated update notes, test results, task IDs |
 | `HANDOFF.md`              | Reasoning for the next session only          | Anything permanent                         |
 
-**Owner profile.** When you correct the agent or state a lasting preference ("always answer in Vietnamese", "never push without asking"), it adds one dated line to `OWNER.md` and tells you. A one-time approval is never recorded as a standing one. Your current instruction always wins over the file.
+**Owner profile.** When you correct the agent or state a lasting preference ("always answer in Vietnamese", "never push without asking"), it adds one dated line to `OWNER.md` and tells you. A correction about how to do the work in an area a project rule covers goes into that rule instead, in the same turn. A one-time approval is never recorded as a standing one. Your current instruction always wins over the file.
 
 **Knowledge.** A fact belongs in knowledge when it passes this test:
 

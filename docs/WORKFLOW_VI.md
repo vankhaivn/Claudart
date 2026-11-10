@@ -106,7 +106,7 @@ Khi mọi thứ xong, agent chạy các check nghiệm thu và dừng ở `await
 | Tài liệu dự án              | Hiện trạng, viết cho người đọc của nó       | Ghi chú cập nhật theo ngày, kết quả test, mã task |
 | `HANDOFF.md`                | Mạch suy luận cho phiên kế tiếp             | Thứ gì lâu dài                                    |
 
-**Hồ sơ owner.** Khi bạn sửa agent hoặc nêu một ưu tiên lâu dài ("luôn trả lời bằng tiếng Việt", "không bao giờ push khi chưa hỏi"), agent thêm một dòng có ngày vào `OWNER.md` và báo cho bạn. Một lần cho phép duy nhất không bao giờ bị ghi thành cho phép thường trực. Chỉ dẫn hiện tại của bạn luôn thắng file này.
+**Hồ sơ owner.** Khi bạn sửa agent hoặc nêu một ưu tiên lâu dài ("luôn trả lời bằng tiếng Việt", "không bao giờ push khi chưa hỏi"), agent thêm một dòng có ngày vào `OWNER.md` và báo cho bạn. Nếu bạn sửa cách làm việc ở một mảng đã có rule của dự án thì agent ghi thẳng vào rule đó, ngay trong lượt ấy. Một lần cho phép duy nhất không bao giờ bị ghi thành cho phép thường trực. Chỉ dẫn hiện tại của bạn luôn thắng file này.
 
 **Knowledge.** Một sự thật đáng đưa vào knowledge khi qua được câu hỏi:
 
