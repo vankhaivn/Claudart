@@ -49,4 +49,6 @@ A parent that could do the unit itself still delegates when one of these benefit
 
 Choose each delegate's model before spawning it: the lowest class in the routing table that can do the unit, recorded as unit → class → model → reason. The parent's model is a ceiling, not a default. When the parent reviews the result, the delegate needs to produce a dependable draft, not a final answer; the parent's judgment is applied in that review, not by giving the delegate the parent's model.
 
-When delegating, follow `.claude/rules/agent-delegation.md` for model routing, dispatch, worker prompts and integration.
+The ceiling holds for the session's own work too. When a stronger model exists and one of two signs appears, say so and propose one consult with it instead of pressing on: the same failure remains after two attempts built on different explanations, or a decision that is costly to reverse rests on options you cannot check cheaply. Size, duration or importance alone is not a sign. The consult runs only on the user's approval.
+
+When delegating, follow `.claude/rules/agent-delegation.md` for model routing, consults above the ceiling, dispatch, worker prompts and integration.

@@ -642,11 +642,18 @@ try {
         /the parent's judgment is applied in that review, not by giving the delegate the parent's model/,
       );
       criteria.push(section[1].trim());
+      assert.match(section[1], /propose one consult with it/);
+      const rule = read(join(root, delegation));
       assert(
-        read(join(root, delegation)).includes(
+        rule.includes(
           `Decide whether to delegate under the criteria in \`${behavior}\``,
         ),
         `Delegation rule does not defer to the criteria: ${delegation}`,
+      );
+      assert(
+        rule.includes("## Consult above the ceiling\n\n") &&
+          rule.includes(`propose it when \`${behavior}\` gives a sign for it`),
+        `Delegation rule does not define the consult: ${delegation}`,
       );
     }
     assert.equal(criteria[0], criteria[1]);
