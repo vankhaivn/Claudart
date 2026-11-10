@@ -18,7 +18,7 @@ Tài liệu mô tả cách hoạt động, không liệt kê mọi rule. Contrac
 
 **Làm việc.** Cứ nhờ việc bạn cần. Agent tự chọn quy mô phù hợp (xem bên dưới).
 
-**Checkpoint.** Tới điểm dừng tự nhiên, `/cda-checkpoint` viết lại `CONTEXT.md`, cập nhật danh sách task và spec, chuyển trạng thái cũ vào `JOURNAL.md` và lưu những sự thật đáng giữ thành knowledge. Nó cũng ghi lại việc tốn công hơn hẳn thay đổi mà việc đó phục vụ và, khi việc đó lặp lại, đề xuất một script, skill hoặc rule để bỏ chi phí đó.
+**Checkpoint.** Tới điểm dừng tự nhiên, `/cda-checkpoint` viết lại `CONTEXT.md`, cập nhật danh sách task và spec, chuyển trạng thái cũ vào `JOURNAL.md` và lưu những sự thật đáng giữ thành knowledge. Nó giữ lại mọi việc phiên còn để mở hoặc đang chờ bạn. Ở phiên dài đã bị compact, nó đọc lại chính lời bạn từ transcript của phiên, để điều bạn chỉ dặn một lần không bị sót. Nó cũng ghi lại việc tốn công hơn hẳn thay đổi mà việc đó phục vụ và, khi việc đó lặp lại, đề xuất một script, skill hoặc rule để bỏ chi phí đó.
 
 **Handoff.** Chỉ dùng cho một cuộc điều tra khó phải làm tiếp ở phiên mới. `/cda-handoff` ghi giả thuyết hiện tại, bằng chứng, các hướng đã thất bại và bước tiếp theo cụ thể vào `HANDOFF.md`. Lần `/cda-start` tiếp theo đọc rồi xóa nó. Đây không phải bản tóm tắt phiên.
 

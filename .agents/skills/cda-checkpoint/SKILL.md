@@ -22,6 +22,7 @@ Write a session checkpoint: a declarative snapshot of what is true now, not a lo
 - Read `.claudart/CONTEXT.md`; treat a missing file as empty.
 - Read the last ~30 lines of `.claudart/JOURNAL.md` to avoid duplicate entries.
 - Skim the recent conversation and `git log -10 --oneline` for what changed since the last checkpoint.
+- When this session's context has been compacted, the conversation in view is a summary that loses what the user said. If the runtime keeps a readable transcript of the whole session, extract the user's own messages from it with a bounded command, including answers given through question prompts, each with its time and the number of tool calls that followed it; never read the whole file. When no transcript can be read, say so in the report.
 
 ### Step 2: Triage Every CONTEXT Item
 
@@ -33,7 +34,7 @@ For each item currently in `.claudart/CONTEXT.md`, decide one of using current e
 | Done / resolved / merged                                                                                    | Drop it from CONTEXT. Candidate for JOURNAL if it was a real decision, completion, or pivot. Pure tactical noise is dropped silently.                                                                                                                  |
 | Superseded by newer state                                                                                   | Drop the old item and write the new current state.                                                                                                                                                                                                     |
 | A standing owner preference or approval about working with the owner, stated or confirmed by the owner      | Record it in `.claudart/OWNER.md` under `.codex/guidelines/ai-behavior.md` if it is missing, then drop it from CONTEXT; a correction about work an existing guideline owns goes to that guideline (next row); a one-time approval stays with its work. |
-| Broad recurring behavior for a code area, workflow, or other area a guideline owns, relevant to future work | Propose moving it into `.codex/guidelines/` via `$cda-learn`, then drop it from CONTEXT.                                                                                                                                                               |
+| Broad recurring behavior for a code area, workflow, or other area a guideline owns, relevant to future work | Propose moving it into `.codex/guidelines/` via `$cda-learn`; keep it under Recent Decisions until a guideline holds it or the user declines, then drop it from CONTEXT.                                                                               |
 | Descriptive, durable-beyond-current-work, current, and evidenced project fact (scope may be narrow)         | Flag for Step 6c, then drop it from CONTEXT after its owner or knowledge route is updated and the relevant validation passes.                                                                                                                          |
 | WIP, proposed future state, task/acceptance state, or an uncertain/conflicting observation                  | Keep it in the task/spec/CONTEXT candidate surface; never promote it as an active fact.                                                                                                                                                                |
 
@@ -48,7 +49,9 @@ Add to `.claudart/CONTEXT.md` only what is true now:
 - Open questions and blockers still unresolved.
 - The single most useful thing the next session should do first.
 
-A standing owner correction, preference, or approval from this session belongs in `.claudart/OWNER.md`, not CONTEXT; route it, and every other new item, as the Step 2 table routes existing ones.
+Then account for everything this session left waiting on someone: each pending item a compaction summary lists, including ones it calls optional; each command handed to the user to run; each decision put to the user and not yet answered; and anything left outside the repository, such as files on another host or a running process. Every one ends in CONTEXT, in the Current State of the task or the NOTES of the spec that owns it, in a JOURNAL line when it was resolved, or is dropped because the user said so. A task or spec pointer in CONTEXT carries an item only when that file states it.
+
+List each correction, standing preference and approval the user stated since the last checkpoint, from the user's own messages (the Step 1 extract after a compaction), and note where each is recorded. A standing one about working with the owner belongs in `.claudart/OWNER.md`, not CONTEXT; route it, and every other new item, as the Step 2 table routes existing ones.
 
 Task references, decisions, and blockers are one short sentence each. Append `<!-- since: YYYY-MM-DD -->` with today's date to every new bullet, and keep the original date on a kept bullet; `$cda-doctor` uses it to flag old decisions. Codex is not documented to strip HTML comments, so keep these comments short.
 
@@ -90,7 +93,7 @@ A micro-handoff lists at most three files. Count lines; if the draft exceeds 150
 
 ### Step 5: Append to JOURNAL
 
-For every item dropped in Step 2 because it was done, decided, pivoted, or resolved, append one line:
+For every item dropped in Step 2 because it was done, decided, pivoted, or resolved, append one line. Work that started and finished since the last checkpoint never was a CONTEXT item: find it in the Decision Log and Surprises entries this session's tasks gained since then, and journal each real completion, decision or pivot the same way:
 
 ```text
 YYYY-MM-DD | <type> | <one short summary, optional commit ref>
@@ -111,7 +114,7 @@ If `.claudart/JOURNAL.md` does not exist, create it with the canonical header be
 
 ### Step 5b: Surface Workflow Friction
 
-Look back over this session for work that cost far more than the change it served: a procedure, access path or lookup that an earlier session also had to work out, a chain of manual steps the user drove one message at a time, or a long job the user had to ask about. Append at most two `friction` lines, each naming the work and its cost in tool calls, minutes or user messages. Search the journal's earlier `friction` lines for the same work with one bounded search. When it recurred, or one occurrence was clearly costly, propose in the report the smallest project change that would remove it: a script or command, a project skill, or a project guideline. Build nothing here; the user decides whether the proposal becomes a task. Skip this step when nothing qualifies.
+Look back over this session for work that cost far more than the change it served: a procedure, access path or lookup that an earlier session also had to work out, a chain of manual steps the user drove one message at a time, or a long job the user had to ask about. Append at most two `friction` lines, each naming the work and its cost in tool calls, minutes or user messages. After a compaction, take the cost from the Step 1 extract, not from memory. Search the journal's earlier `friction` lines for the same work with one bounded search. When it recurred, or one occurrence was clearly costly, propose in the report the smallest project change that would remove it: a script or command, a project skill, or a project guideline. Build nothing here; the user decides whether the proposal becomes a task. Skip this step when nothing qualifies.
 
 ### Step 6: Overwrite CONTEXT
 
@@ -150,9 +153,9 @@ Skip this step if `.claudart/specs/` does not exist.
 
 ### Step 6c: Route Durable Facts to Their Owners
 
-Skip this step if no candidate from this session, task closeout, or spec NOTES passes the capture gates in `.codex/guidelines/knowledge-management.md`, and do not run the checker when no knowledge changed. Candidates include facts a later session will need that so far live only in this session's task records, such as how to reach a system, which branch deploys, where an environment moved, a failure already seen and its cause, or an option the user rejected. Checkpoint is bulk maintenance, not the only knowledge write gate; a natural-language knowledge update mid-session follows that guideline directly.
+List the candidates from this session, task closeout and spec NOTES, including any a compaction summary names. Candidates include facts a later session will need that so far live only in this session's task records, such as how to reach a system, which branch deploys, where an environment moved, a failure already seen and its cause, or an option the user rejected. Skip this step only when the list is empty, and do not run the checker when no knowledge changed. Otherwise read `.codex/guidelines/knowledge-management.md` in full before judging any candidate against its capture gates, and give each one a verdict for the report: written to its owner, kept as a candidate with the reason, or rejected with the gate it failed. Checkpoint is bulk maintenance, not the only knowledge write gate; a natural-language knowledge update mid-session follows that guideline directly.
 
-For each eligible claim, read the knowledge guideline in full, patch the owner under `.codex/references/knowledge-maintenance.md`, and update its reachable route in the same change. Checkpoint does not take over project-document maintenance or require a docs audit. Never write secrets. Run `bash .codex/scripts/knowledge-check.sh --root .` after the final knowledge mutation and repair in-scope mechanical failures; report any remaining findings and do not claim the update healthy. These writes are autonomous; the Git diff is the review surface.
+For each eligible claim, patch the owner under `.codex/references/knowledge-maintenance.md` and update its reachable route in the same change. Checkpoint does not take over project-document maintenance or require a docs audit. Never write secrets. Run `bash .codex/scripts/knowledge-check.sh --root .` after the final knowledge mutation and repair in-scope mechanical failures; report any remaining findings and do not claim the update healthy. These writes are autonomous; the Git diff is the review surface.
 
 ### Step 6d: Persist Through the Shared Git Workflow
 
@@ -165,9 +168,9 @@ The checkpoint-owned delta is verified in-scope session work that is still uncom
 Output a 7-line summary:
 
 1. Lines in new `.claudart/CONTEXT.md`.
-2. Items kept, dropped, and added.
+2. Items kept, dropped, and added; open items from this session: carried=<n>, resolved=<n>, dropped by the user=<n>.
 3. JOURNAL entries appended, or `none`.
 4. Tasks synced: active=<n>, archived this run=<n>, stalled=<n>; specs synced: active=<n>, archived this run=<n>, stalled=<n>.
-5. Knowledge entries written/updated (list slugs, or `none`), candidates retained/review-needed, checker result, owner-profile entries added or updated (or `none`), and anything proposed for `$cda-learn`.
+5. Knowledge entries written/updated (list slugs, or `none`), the verdict on every other candidate, checker result, each owner correction or preference found and where it is recorded (or `none`), and anything proposed for `$cda-learn` and still waiting on the user. After a compaction with no readable transcript, say that corrections may be missing.
 6. Friction: the Step 5b proposal and the cost behind it, or `none`.
 7. Git persistence: the new commit SHA and summary when committed, otherwise `CHECKPOINT NOT PERSISTED IN GIT: commit required` plus the reason. Do not diagnose unrelated uncommitted work in this summary.
