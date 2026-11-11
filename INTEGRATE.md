@@ -33,27 +33,25 @@ This file is a **protocol, not an installer**. Follow it top to bottom. It exist
    - **B — Merge into an existing workflow:** the project already has its own agents, commands, rules, memory, or work conventions.
    - **C — Upgrade an existing CLAUDART install:** recognizable CLAUDART files are already present.
 5. Read `.claudart/VERSION` when present. Each line names the upstream commit its layer was installed or last reconciled from; a missing line or `unknown` means that layer has no recorded base.
-6. Get current upstream into `/tmp/claudart-src`:
-
-   ```bash
-   rm -rf /tmp/claudart-src
-   ```
+6. Get current upstream into a new, empty directory that belongs to this run alone: the host's session scratch directory when it provides one, otherwise a directory made with `mktemp -d`. Integrations in other projects may run at the same time, so never use a fixed shared path. Below, `<src>` stands for that directory's literal absolute path; write the path itself in every command rather than a shell variable.
 
    For Scenario A, or the initial pass for Scenario B:
 
    ```bash
-   git clone --depth 1 --branch main https://github.com/vankhaivn/Claudart /tmp/claudart-src
+   git clone --depth 1 --branch main https://github.com/vankhaivn/Claudart <src>
    ```
 
    For Scenario C, or whenever a recorded base exists, clone full history. For Scenario B, deepen only when a real collision needs stale-vs-custom evidence:
 
    ```bash
-   git clone --branch main https://github.com/vankhaivn/Claudart /tmp/claudart-src
+   git clone --branch main https://github.com/vankhaivn/Claudart <src>
    # Or, after a shallow clone:
-   git -C /tmp/claudart-src fetch --unshallow
+   git -C <src> fetch --unshallow
    ```
 
-   If cloning is unavailable, fetch current raw files on demand from `https://raw.githubusercontent.com/vankhaivn/Claudart/main/<path>`. Without history, preserve ambiguous differences and show the exact uncertainty instead of guessing.
+   When the user names an upstream commit, clone full history and check it out with `git -C <src> checkout --detach <commit>`; stop if `git -C <src> merge-base --is-ancestor <commit> origin/main` fails. That commit is then the current upstream for every step below.
+
+   If cloning is unavailable, fetch current raw files on demand from `https://raw.githubusercontent.com/vankhaivn/Claudart/<main or the named commit>/<path>`. Without history, preserve ambiguous differences and show the exact uncertainty instead of guessing.
 
 7. Inspect the current `modules/` inventory and brief module descriptions. Recommend a module when the request or observed project gives it a concrete purpose; for example, existing discovery material or competing documentation owners can make Project Docs relevant. Respect an explicit core-only scope or module exclusion. This does not require a full docs audit or loading every module's detailed references.
 8. Enumerate the actual selected core-layer and proposed optional-module payload from current upstream. Read `install.sh` as a payload and relocation reference, plus the loaders and every file in the proposed dependency closure. README, workflow, and contributing docs are orientation only; read them only when a real ambiguity requires them.
@@ -133,11 +131,11 @@ Diff the actual installed state against current upstream; do not assume all loca
 - **Downstream-only** → preserve project-authored paths; for former template paths, propose an explicit relocation or retirement and identify the current owner.
 - **Live state** → preserve its body; reconcile only its current contract or routing through the workflow that owns it.
 
-When the layer has a recorded base, compare three versions of each template-owned path: the base (`git -C /tmp/claudart-src show <base>:<source-path>`), the local file, and current upstream. Map each installed path to its upstream source, for example root `CLAUDE.md` to `.claude/CLAUDE.md` and Project Docs files to `modules/project-docs/<path>`.
+When the layer has a recorded base, compare three versions of each template-owned path: the base (`git -C <src> show <base>:<source-path>`), the local file, and current upstream. Map each installed path to its upstream source, for example root `CLAUDE.md` to `.claude/CLAUDE.md` and Project Docs files to `modules/project-docs/<path>`.
 
 - Local equals base → stale; propose current upstream verbatim.
 - Local differs from base → only that difference is project content; carry it onto current upstream (for example with `git merge-file`) and show any conflict.
-- For every path upstream changed, cite the reason from `git -C /tmp/claudart-src log --format='%h %s%n%b' <base>..HEAD -- <source-path>` in the plan.
+- For every path upstream changed, cite the reason from `git -C <src> log --format='%h %s%n%b' <base>..HEAD -- <source-path>` in the plan.
 
 Without a recorded base, apply the stale-vs-custom test narrowly:
 
@@ -146,8 +144,8 @@ Without a recorded base, apply the stale-vs-custom test narrowly:
 3. Use history only for the relevant path or phrase, for example:
 
    ```bash
-   git -C /tmp/claudart-src log --all --follow -- <path>
-   git -C /tmp/claudart-src log -S'<distinctive local phrase>' --all -- <path>
+   git -C <src> log --all --follow -- <path>
+   git -C <src> log -S'<distinctive local phrase>' --all -- <path>
    ```
 
 4. If local content matches a past upstream state and contains no project-specific addition, it is stale.
@@ -189,7 +187,7 @@ Wait for explicit approval before writing. Approval for this plan does not pre-a
 - Never overwrite existing `OWNER.md`, `CONTEXT.md`, or `JOURNAL.md`; never import, overwrite, or create `HANDOFF.md`; never replace task workspaces or attachments, spec mission folders, knowledge topics, or maps with template content.
 - The one exception is a state file's header, the instructions before its first entry. When the header of `OWNER.md`, `CONTEXT.md`, or `JOURNAL.md` differs from the current seed and is not project-authored, list replacing only that header in the plan; every entry stays byte-identical.
 - Create only missing seeds, indexes, or placeholders that were listed and approved.
-- Set `.claudart/VERSION` to the upstream commit used (`git -C /tmp/claudart-src rev-parse HEAD`) for each layer fully reconciled to current upstream, keeping every other line. Leave a partially reconciled layer's line unchanged. List this write in the plan.
+- Set `.claudart/VERSION` to the upstream commit used (`git -C <src> rev-parse HEAD`) for each layer fully reconciled to current upstream, keeping every other line. A selected layer whose payload upstream did not change since its recorded base is fully reconciled too. Leave a partially reconciled layer's line unchanged. List this write in the plan.
 - Do not touch `.env`, secrets, ignored private files, or unrelated project files.
 - If an unplanned conflict or required write appears, stop before that write and present an amended path-level plan.
 - Do not commit during the writes; Step 4.4 commits after verification. Never push or merge.
@@ -198,7 +196,7 @@ Wait for explicit approval before writing. Approval for this plan does not pre-a
 
 ### 4.1 Mandatory fast verification — read-only
 
-Run bounded mechanical checks against the selected layers and changed dependency closure. Validation may use `/tmp`, but it must not mutate the project tree.
+Run bounded mechanical checks against the selected layers and changed dependency closure. Validation may write inside `<src>` or another directory this run created, but it must not mutate the project tree.
 
 1. Check scope and patch integrity:
 
@@ -217,10 +215,10 @@ Run bounded mechanical checks against the selected layers and changed dependency
 6. Run the current upstream read-only `doctor-check.sh` for each selected layer. This provides the mechanical structure, metadata, local-reference, and size baseline, and invokes the existing knowledge checker once. Do not run knowledge validation separately afterward. With the current interface:
 
    ```bash
-   bash /tmp/claudart-src/.claude/scripts/doctor-check.sh \
+   bash <src>/.claude/scripts/doctor-check.sh \
      --root "$PWD" --layer claude
 
-   bash /tmp/claudart-src/.codex/scripts/doctor-check.sh \
+   bash <src>/.codex/scripts/doctor-check.sh \
      --root "$PWD" --layer codex
    ```
 
@@ -256,8 +254,4 @@ This protocol is idempotent: a later run derives a fresh delta from the then-cur
 
 ## Cleanup
 
-Remove the temporary source after all comparisons and validation are complete:
-
-```bash
-rm -rf /tmp/claudart-src
-```
+After all comparisons and validation are complete, remove `<src>` and any other directory this run created, by their literal paths. Never remove a directory this run did not create.
