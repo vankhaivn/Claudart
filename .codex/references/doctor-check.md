@@ -10,7 +10,7 @@ bash .codex/scripts/doctor-check.sh --root . --layer codex
 bash .claude/scripts/doctor-check.sh --root . --layer claude
 
 # Validate another project using the trusted upstream copy.
-bash /tmp/claudart-src/.codex/scripts/doctor-check.sh --root /path/to/project --layer codex
+bash /path/to/claudart-src/.codex/scripts/doctor-check.sh --root /path/to/project --layer codex
 
 # CLAUDART source checkout: use the installable loader, not maintainer AGENTS.md.
 bash .codex/scripts/doctor-check.sh --root . --layer codex --layout source

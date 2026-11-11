@@ -739,6 +739,22 @@ try {
       /an approved header replacement changed nothing below that header/,
     );
   });
+  check("an upgrade run owns its source clone and can be pinned", () => {
+    const protocol = read(join(root, "INTEGRATE.md"));
+    assert.match(
+      protocol,
+      /a new, empty directory that belongs to this run alone/,
+    );
+    assert.match(protocol, /Never remove a directory this run did not create/);
+    assert.match(
+      protocol,
+      /When the user names an upstream commit, clone full history and check it out/,
+    );
+    assert.match(
+      protocol,
+      /A selected layer whose payload upstream did not change since its recorded base is fully reconciled too/,
+    );
+  });
   check("session start reports recent commits outside shared state", () => {
     for (const start of [
       ".claude/skills/cda-start/SKILL.md",
