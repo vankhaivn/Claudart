@@ -77,6 +77,8 @@ Sửa nhỏ và rõ ràng thì không cần lệnh nào, cứ nhờ thẳng. Xem
 | `.claudart/VERSION`    | Commit upstream của từng layer đã cài |
 | `.claude/`, `.codex/`  | Rule, skill và script của agent       |
 
+Để xem dashboard usage và chi phí Claude Code trên máy, xem [CLAUDART Insights](https://github.com/vankhaivn/claudart-insights).
+
 ## Đóng góp
 
 ```bash

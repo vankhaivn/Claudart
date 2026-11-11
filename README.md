@@ -77,6 +77,8 @@ Small, clear edits need no command at all; just ask. See the [workflow guide](do
 | `.claudart/VERSION`    | Upstream commit each layer came from    |
 | `.claude/`, `.codex/`  | Agent rules, skills, and scripts        |
 
+For a local dashboard of your Claude Code usage and cost, see [CLAUDART Insights](https://github.com/vankhaivn/claudart-insights).
+
 ## Contributing
 
 ```bash
