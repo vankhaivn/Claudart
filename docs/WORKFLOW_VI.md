@@ -112,7 +112,7 @@ Khi mọi thứ xong, agent chạy các check nghiệm thu và dừng ở `await
 
 > Nếu ngày mai task hiện tại bị hủy, điều này có còn đúng và còn hữu ích không?
 
-Nếu code, schema hay tài liệu dự án đã sở hữu sự thật đó, knowledge chỉ trỏ tới. Agent đọc knowledge theo bản đồ: `INDEX.md` gốc trước, rồi chỉ topic và đoạn liên quan. Đọc không bao giờ làm thay đổi nó.
+Nếu code, schema hay tài liệu dự án đã sở hữu sự thật đó, knowledge chỉ trỏ tới. Agent tra knowledge trước khi tìm hiểu bất cứ điều gì, dù trong code, trong lịch sử hay trên hệ thống đang chạy, để không phải tìm lại điều mà một phiên trước đã xác lập. Agent đọc theo bản đồ: `INDEX.md` gốc trước, rồi chỉ topic và đoạn liên quan. Đọc không bao giờ làm thay đổi nó.
 
 **Kiểm tra.** `/cda-doctor` chạy một check cấu trúc chỉ đọc, rồi xem xét ý nghĩa và tính nhất quán. Chỉ chạy checker knowledge:
 

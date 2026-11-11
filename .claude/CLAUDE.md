@@ -39,9 +39,9 @@ Read these project-root paths only when their trigger applies. Conditional rules
 - `.claude/rules/task-management.md` when creating, executing, or resuming a persistent task.
 - `.claude/rules/agent-delegation.md` before spawning, resuming, or sending new work to a subagent, and when consuming worker results; whether to delegate is decided under `ai-behavior.md`. Use the current runtime's capabilities.
 - `.claude/rules/spec-workflow.md` when authoring or executing a mission spec.
-- `.claude/rules/knowledge-management.md` when retrieving project knowledge, including before you diagnose a failure or propose a direction in an area `.claudart/knowledge/INDEX.md` routes; that check stays within the fixed retrieval budget and skips the wider repository search. Also read `.claude/references/knowledge-maintenance.md` before knowledge writes, audits, or refactors.
+- `.claude/rules/knowledge-management.md` when retrieving project knowledge. Also read `.claude/references/knowledge-maintenance.md` before knowledge writes, audits, or refactors.
 
-Project knowledge: `.claudart/knowledge/INDEX.md` is the root router surfaced by `/cda-start`; it and topic bodies are not auto-imported. Route entries on demand under the knowledge rule.
+Project knowledge: `.claudart/knowledge/INDEX.md` is the root router surfaced by `/cda-start`; it and topic bodies are not auto-imported. Knowledge holds what earlier sessions established that the code and the project's documents do not state, such as what lies outside the repository and how its parts fit together. Before you investigate how something works, where it is or why it is so, look it up there first: the router, then the map and the topic that match, under the knowledge rule's fixed budget and without its wider repository search. That holds whether you were about to search source, read history or inspect anything outside the repository, and also when the request names where to look. A keyword search that finds nothing does not show that nothing is recorded.
 When the optional Project Docs command is present, use it for project-document ownership and lifecycle work. Core tasks still follow the repository's existing documentation convention when it is absent.
 
 ## Agent Self-Evolution & Context Maintenance

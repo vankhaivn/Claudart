@@ -112,7 +112,7 @@ When everything is done, the agent runs the acceptance checks and stops at `awai
 
 > Would this still be true and useful if the current task were cancelled tomorrow?
 
-If the code, a schema, or a project doc already owns the fact, knowledge just links to it. The agent reads knowledge map-first: the root `INDEX.md`, then only the relevant topic and section. Reading never changes it.
+If the code, a schema, or a project doc already owns the fact, knowledge just links to it. The agent looks in knowledge before it investigates anything, whether in the code, in the history or on a running system, so it does not work out again what an earlier session already established. It reads map-first: the root `INDEX.md`, then only the relevant topic and section. Reading never changes it.
 
 **Checking it.** `/cda-doctor` runs a read-only structural check, then reviews meaning and consistency. To run just the knowledge checker:
 
