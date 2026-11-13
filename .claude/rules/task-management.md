@@ -271,7 +271,7 @@ A terminal task is closed. New scope, another review round, or a defect found af
 
 ### Shared archive flow
 
-After a valid transition to `done` or `cancelled`:
+After a valid transition to `done` or `cancelled`, run all six steps; the closure report carries step 6's verdict for each listed fact:
 
 1. Remove disposable artifacts under Artifact Discipline. Keep the evidence behind acceptance, and when unsure, keep the file and report it.
 2. Move the workspace to `.claudart/tasks/done/<task-id>/`, keeping its id and remaining contents. If the destination already exists (including a symlink), stop and report the collision; never overwrite, merge, or nest. Verify the move succeeded before updating references or journaling. Do not delete other artifacts or rewrite append-only history.
