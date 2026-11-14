@@ -59,6 +59,7 @@ All CLAUDART workflows use the same `cda-` name on both hosts: type `/cda-task` 
 | Save state at a stopping point     | `/cda-checkpoint`      | `$cda-checkpoint`      |
 | Pause a hard investigation mid-way | `/cda-handoff`         | `$cda-handoff`         |
 | Turn a repeated lesson into a rule | `/cda-learn`           | `$cda-learn`           |
+| Explain something as a visual      | `/cda-whiteboard`      | `$cda-whiteboard`      |
 | Check the installation             | `/cda-doctor`          | `$cda-doctor`          |
 | Clean up docs, knowledge and state | `/cda-tidy`            | `$cda-tidy`            |
 | Update CLAUDART from upstream      | `/cda-upgrade`         | `$cda-upgrade`         |

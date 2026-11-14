@@ -59,6 +59,7 @@ Các workflow CLAUDART dùng chung tên `cda-` trên cả hai công cụ: gọi 
 | Lưu trạng thái khi tới điểm dừng  | `/cda-checkpoint`      | `$cda-checkpoint`      |
 | Tạm dừng một cuộc điều tra khó    | `/cda-handoff`         | `$cda-handoff`         |
 | Biến bài học lặp lại thành rule   | `/cda-learn`           | `$cda-learn`           |
+| Giải thích một vấn đề bằng hình   | `/cda-whiteboard`      | `$cda-whiteboard`      |
 | Kiểm tra bản cài                  | `/cda-doctor`          | `$cda-doctor`          |
 | Dọn docs, knowledge và trạng thái | `/cda-tidy`            | `$cda-tidy`            |
 | Cập nhật CLAUDART từ upstream     | `/cda-upgrade`         | `$cda-upgrade`         |
