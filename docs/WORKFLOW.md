@@ -156,6 +156,7 @@ Installed with `--project-docs`. It adds `/cda-project-docs` (or `$cda-project-d
 | `/cda-checkpoint`      | `$cda-checkpoint`      | Save current state and durable facts         |
 | `/cda-handoff`         | `$cda-handoff`         | Pause a hard investigation for a new session |
 | `/cda-learn`           | `$cda-learn`           | Turn a repeated lesson into a rule           |
+| `/cda-whiteboard`      | `$cda-whiteboard`      | Explain something as a visual with notes     |
 | `/cda-doctor`          | `$cda-doctor`          | Health check                                 |
 | `/cda-tidy`            | `$cda-tidy`            | Clean docs, knowledge and state              |
 | `/cda-upgrade`         | `$cda-upgrade`         | Update CLAUDART from upstream                |

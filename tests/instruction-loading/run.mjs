@@ -164,6 +164,7 @@ try {
       "doctor",
       "tidy",
       "upgrade",
+      "whiteboard",
     ];
     const skills = actions.flatMap((action) => [
       [action, `.claude/skills/cda-${action}/SKILL.md`],

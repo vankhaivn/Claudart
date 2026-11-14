@@ -147,19 +147,20 @@ Cài bằng `--project-docs`. Module thêm `/cda-project-docs` (hoặc `$cda-pro
 
 ## 9. Lệnh
 
-| Claude Code            | Codex                  | Mục đích                                   |
-| ---------------------- | ---------------------- | ------------------------------------------ |
-| `/cda-start`           | `$cda-start`           | Định hướng phiên                           |
-| `/cda-task <task>`     | `$cda-task <task>`     | Tạo hoặc tiếp tục một task                 |
-| `/cda-spec <mission>`  | `$cda-spec <mission>`  | Tạo và duyệt spec                          |
-| `/cda-spec-run <slug>` | `$cda-spec-run <slug>` | Chạy spec đã duyệt tới bước review cuối    |
-| `/cda-checkpoint`      | `$cda-checkpoint`      | Lưu trạng thái hiện tại và sự thật lâu dài |
-| `/cda-handoff`         | `$cda-handoff`         | Tạm dừng cuộc điều tra khó cho phiên mới   |
-| `/cda-learn`           | `$cda-learn`           | Biến bài học lặp lại thành rule            |
-| `/cda-doctor`          | `$cda-doctor`          | Kiểm tra sức khỏe                          |
-| `/cda-tidy`            | `$cda-tidy`            | Dọn docs, knowledge và trạng thái          |
-| `/cda-upgrade`         | `$cda-upgrade`         | Cập nhật CLAUDART từ upstream              |
-| `/cda-project-docs`    | `$cda-project-docs`    | Quản lý tài liệu dự án (tùy chọn)          |
+| Claude Code            | Codex                  | Mục đích                                    |
+| ---------------------- | ---------------------- | ------------------------------------------- |
+| `/cda-start`           | `$cda-start`           | Định hướng phiên                            |
+| `/cda-task <task>`     | `$cda-task <task>`     | Tạo hoặc tiếp tục một task                  |
+| `/cda-spec <mission>`  | `$cda-spec <mission>`  | Tạo và duyệt spec                           |
+| `/cda-spec-run <slug>` | `$cda-spec-run <slug>` | Chạy spec đã duyệt tới bước review cuối     |
+| `/cda-checkpoint`      | `$cda-checkpoint`      | Lưu trạng thái hiện tại và sự thật lâu dài  |
+| `/cda-handoff`         | `$cda-handoff`         | Tạm dừng cuộc điều tra khó cho phiên mới    |
+| `/cda-learn`           | `$cda-learn`           | Biến bài học lặp lại thành rule             |
+| `/cda-whiteboard`      | `$cda-whiteboard`      | Giải thích một vấn đề bằng hình kèm ghi chú |
+| `/cda-doctor`          | `$cda-doctor`          | Kiểm tra sức khỏe                           |
+| `/cda-tidy`            | `$cda-tidy`            | Dọn docs, knowledge và trạng thái           |
+| `/cda-upgrade`         | `$cda-upgrade`         | Cập nhật CLAUDART từ upstream               |
+| `/cda-project-docs`    | `$cda-project-docs`    | Quản lý tài liệu dự án (tùy chọn)           |
 
 ## 10. Cấu trúc sau khi cài
 

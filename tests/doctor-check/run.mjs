@@ -93,6 +93,7 @@ function fixture(name, layer = "codex", layout = "installed") {
       "cda-spec",
       "cda-spec-run",
       "cda-upgrade",
+      "cda-whiteboard",
     ])
       write(
         join(dir, `.agents/skills/${name}/SKILL.md`),
@@ -122,6 +123,7 @@ function fixture(name, layer = "codex", layout = "installed") {
       "cda-spec-run",
       "cda-tidy",
       "cda-upgrade",
+      "cda-whiteboard",
     ])
       write(
         join(dir, `.claude/skills/${name}/SKILL.md`),
