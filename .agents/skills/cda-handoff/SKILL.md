@@ -27,7 +27,7 @@ Before writing, inspect the shared handoff slot. Never silently overwrite an unc
 
 ### Step 1 — Chronological analysis pass
 
-When this session's context has been compacted, a summary has replaced the user's wording. If the runtime keeps a readable transcript of the whole session, first extract the user's own messages from it with a bounded command, including answers given through question prompts, and never read the whole file. Take the user's requests, constraints and Rule 3 quotes from that extract. When no transcript can be read, say so in the report.
+When this session's context has been compacted, a summary has replaced the user's wording. If the runtime keeps a readable transcript of the whole session, first extract the user's own messages from it with a bounded command that keeps each message whole, including answers given through question prompts, messages with an attachment and messages sent while the agent was working, and never read the whole file. Take the user's requests, constraints and Rule 3 quotes from that extract. When no transcript can be read, say so in the report.
 
 When it was compacted more than once, the summary in view has replaced the earlier ones. If that transcript keeps the earlier compaction summaries, read every one with a bounded command and take the phases they cover from them. A summary points to a fact; confirm what the baton relies on before writing it.
 

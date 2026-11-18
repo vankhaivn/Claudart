@@ -22,7 +22,7 @@ Write a session checkpoint: a declarative snapshot of what is true now, not a lo
 - Read `.claudart/CONTEXT.md`; treat a missing file as empty.
 - Read the last ~30 lines of `.claudart/JOURNAL.md` to avoid duplicate entries.
 - Skim the recent conversation and `git log -10 --oneline` for what changed since the last checkpoint.
-- When this session's context has been compacted, the conversation in view is a summary that loses what the user said. If the runtime keeps a readable transcript of the whole session, extract the user's own messages from it with a bounded command, including answers given through question prompts, each with its time and the number of tool calls that followed it; never read the whole file. When no transcript can be read, say so in the report.
+- When this session's context has been compacted, the conversation in view is a summary that loses what the user said. If the runtime keeps a readable transcript of the whole session, extract the user's own messages from it with a bounded command, each with its time and the number of tool calls that followed it; never read the whole file. The bound is on which records the command reads, not on the user's text: keep every message whole, leaving out only pasted blocks, and include the ones a transcript stores apart from ordinary messages, such as answers given through question prompts, messages with an attachment and messages sent while the agent was working. When no transcript can be read, say so in the report.
 - When it was compacted more than once, the summary in view has replaced the earlier ones, and what they recorded can be missing from it. If that transcript keeps the earlier compaction summaries, read every one with a bounded command, and take what the session found out, decided and left open from all of them. A summary points to a fact; confirm it in the task records, the repository or the transcript before relying on it.
 
 ### Step 2: Triage Every CONTEXT Item
@@ -176,4 +176,4 @@ Output a 7-line summary:
 6. Friction: the Step 5b proposal and the cost behind it, or `none`.
 7. Git persistence: the new commit SHA and summary when committed, otherwise `CHECKPOINT NOT PERSISTED IN GIT: commit required` plus the reason. Do not diagnose unrelated uncommitted work in this summary.
 
-After a compaction, add one line on what this checkpoint could see: how many times the session compacted and which compaction summaries it read. With no readable transcript, say that corrections and earlier findings may be missing.
+After a compaction, add one line on what this checkpoint could see: how many times the session compacted, which compaction summaries it read, and how many of the user's messages the Step 1 extract read. With no readable transcript, say that corrections and earlier findings may be missing.
