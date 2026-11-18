@@ -99,7 +99,7 @@ tags: [1-5 lowercase kebab-case tags]
 
 ### Memory Hints
 
-<What the next session must not re-discover: non-obvious constraints, tools that matter, pitfalls already met, the delegation strategy when relevant, and knowledge candidates with their evidence gap. Fill it whenever planning found non-obvious context. Link owner preferences, standing approvals, project-wide baselines, and environment rules where they live instead of copying them.>
+<What the next session must not re-discover: non-obvious constraints, tools that matter, pitfalls already met, the delegation strategy when relevant, and knowledge candidates with their evidence gap. Fill it whenever planning or the work finds non-obvious context. Link owner preferences, standing approvals, project-wide baselines, and environment rules where they live instead of copying them.>
 
 ## Plan of Work
 
@@ -232,9 +232,10 @@ While `in-progress`, maintain `TASK.md` as you work; edits to it are part of the
 1. Rewrite **Current State** whenever the status, the next action, or what is waiting changes. Replace superseded wording; history lives in the Decision Log and Surprises, not in stacked status notes.
 2. Flip `- [ ]` → `- [x]` after completing each step, and bump `updated:` whenever the file is touched.
 3. Append to **Surprises & Discoveries** only when reality diverges from the plan (a moved file, a missing dependency, an existing helper, a check failure that changed the approach). Progress narration and routine check results do not belong there.
-4. Append to **Decision Log** when changing approach mid-flight, with rationale.
+4. Append to **Decision Log** when changing approach mid-flight, or when the user decides something later work must respect, with rationale.
 5. Record each check's **latest result** once, next to the step or acceptance criterion it proves: one short line with the command or observation and its outcome. Replace it when the check is rerun. Keep long output, logs, and rerun history out of `TASK.md`; retain them as an artifact only under Artifact Discipline.
 6. Do not delete or rewrite skipped or abandoned steps; strike them through with `~~text~~` and add a Surprises entry explaining why.
+7. When an investigation settles how something works or why something failed, add one line to **Memory Hints** then, marked as a knowledge candidate when the fact may outlast the task. A long session's context can be summarized before a checkpoint runs, and only what `TASK.md` holds is certain to reach it.
 
 Every Decision Log and Surprises entry carries the full `YYYY-MM-DD HH:MMZ` UTC time, read from the system clock when the entry is written (for example `date -u +'%Y-%m-%d %H:%MZ'`). Never estimate, backfill, or batch-apply a time; when no clock is readable, write the date only. Completed steps carry no time.
 
